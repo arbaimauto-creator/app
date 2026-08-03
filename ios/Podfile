@@ -1,0 +1,111 @@
+# Override Firebase SDK Version
+$FirebaseSDKVersion = '10.29.0'
+
+
+# ✅ 새로운 방식: node_require 함수 사용
+def node_require(script)
+  # Resolve script with node to allow for hoisting
+  require Pod::Executable.execute_command('node', ['-p',
+    "require.resolve(
+      '#{script}',
+      {paths: [process.argv[1]]},
+    )", __dir__]).strip
+end
+
+# ✅ React Native와 Permissions setup script 모두 require
+node_require('react-native/scripts/react_native_pods.rb')
+node_require('react-native-permissions/scripts/setup.rb')
+
+platform :ios, '16.0'
+prepare_react_native_project!
+
+linkage = ENV['USE_FRAMEWORKS']
+if linkage != nil
+  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
+  use_frameworks! :linkage => :static
+  $RNFirebaseAsStaticFramework = true
+end
+
+target 'greyd' do
+  # # Firebase pods (modular_headers 제거)
+  # pod 'GoogleUtilities'
+  # pod 'FBSDKCoreKit'
+  # pod 'FirebaseCore'
+	# ✅ Firebase 관련 pods에만 modular_headers 적용
+	pod 'GoogleUtilities', :modular_headers => true
+	pod 'FBSDKCoreKit', :modular_headers => true
+	pod 'FirebaseCore', :modular_headers => true
+	pod 'FirebaseCoreInternal', :modular_headers => true
+
+  # React Native Video
+  pod 'react-native-video', :path => '../node_modules/react-native-video/react-native-video.podspec'
+  $RNVideoUseGoogleIMA = true
+
+  # ✅ 새로운 권한 설정 방식: setup_permissions 사용
+  setup_permissions([
+    'AppTrackingTransparency',
+    'Camera',
+    'Microphone',
+    'Notifications',
+    'PhotoLibrary',
+    'PhotoLibraryAddOnly'
+  ])
+
+  # FFmpeg
+  pod 'ffmpeg-kit-ios-full-gpl', :podspec => './ffmpeg-kit-ios-full-gpl.podspec'
+  pod 'ffmpeg-kit-react-native', :subspecs => ['full-gpl'], :podspec => '../node_modules/ffmpeg-kit-react-native/ffmpeg-kit-react-native.podspec'
+
+  config = use_native_modules!
+  flags = get_default_flags()
+
+  use_react_native!(
+    :path => config[:reactNativePath],
+    :hermes_enabled => true,
+    :fabric_enabled => flags[:fabric_enabled],
+		:new_arch_enabled => flags[:new_arch_enabled],
+    :app_path => "#{Pod::Config.instance.installation_root}/.."
+  )
+
+  target 'greydTests' do
+    inherit! :complete
+  end
+
+  post_install do |installer|
+    react_native_post_install(
+      installer,
+      config[:reactNativePath],
+      :mac_catalyst_enabled => false
+    )
+
+    # iOS 13.4+ 설정
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.4'
+      end
+    end
+
+    # Bitcode strip
+    bitcode_strip_path = `xcrun --find bitcode_strip`.chop!
+
+    def strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
+      framework_path = File.join(Dir.pwd, framework_relative_path)
+      if File.exist?(framework_path)
+        command = "#{bitcode_strip_path} #{framework_path} -r -o #{framework_path}"
+        puts "Stripping bitcode: #{command}"
+        system(command)
+      end
+    end
+
+    framework_paths = [
+      "Pods/LogRocket/LogRocket.xcframework/ios-arm64/LogRocket.framework/LogRocket",
+      "Pods/hermes-engine/destroot/Library/Frameworks/macosx/hermes.framework/hermes",
+      "Pods/hermes-engine/destroot/Library/Frameworks/macosx/hermes.framework/Versions/Current/hermes",
+      "Pods/hermes-engine/destroot/Library/Frameworks/universal/hermes.xcframework/ios-arm64/hermes.framework/hermes",
+      "Pods/hermes-engine/destroot/Library/Frameworks/universal/hermes.xcframework/ios-arm64_x86_64-maccatalyst/hermes.framework/hermes"
+    ]
+
+    framework_paths.each do |framework_relative_path|
+      strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
+    end
+  end
+end

@@ -1,0 +1,107 @@
+import { StyleSheet } from 'react-native';
+import Constants from '../../../Components/Constants';
+import { moderateScale, verticalScale } from '../../../Components/utils/scailing';
+
+const styles = StyleSheet.create({
+  shadow: {
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 0,
+  },
+
+  iconSize: {
+    width: moderateScale(24),
+    height: moderateScale(24),
+    marginTop: moderateScale(0),
+  },
+  gradeIcon: {
+    width: moderateScale(36),
+    height: moderateScale(36),
+    marginTop: moderateScale(-9),
+  },
+  btnCircle: {
+    width: 60,
+    height: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+    paddingTop: 20,
+    shadowColor: '#000',
+    elevation: 1,
+    bottom: 10,
+  },
+  leftBorder1: {
+    width: 43,
+    height: moderateScale(20),
+    backgroundColor: Constants.COLOR_BACKGROUND_DARK,
+    borderRadius: 5,
+    // transform: [{ rotate: '-28deg' }],
+    transform: [{ rotate: '-30deg' }],
+    position: 'absolute',
+    left: -34,
+    // bottom: -18,
+    borderTopColor: 'rgba(50, 50, 50, 1)',
+    borderTopWidth: 2,
+  },
+  rightBorder1: {
+    width: 43,
+    height: moderateScale(20),
+    backgroundColor: Constants.COLOR_BACKGROUND_DARK,
+    borderRadius: 5,
+    // transform: [{ rotate: '-153deg' }],
+    transform: [{ rotate: '-150deg' }],
+    position: 'absolute',
+    right: -34,
+    // bottom: -18,
+    borderBottomColor: 'rgba(50, 50, 50, 1)',
+    borderBottomWidth: 2,
+  },
+  box: {
+    position: 'absolute',
+    top: -10,
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'red',
+  },
+  leftBorder2: {
+    width: 44,
+    height: verticalScale(2),
+    backgroundColor: 'transparent',
+    borderRadius: 5,
+    shadowColor: 'black',
+    shadowOffset: {
+      width: 0,
+      height: -10,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 10.0,
+    elevation: 3,
+    position: 'absolute',
+    top: -8,
+  },
+  rightBorder2: {
+    width: 44,
+    height: verticalScale(2),
+    backgroundColor: 'transparent',
+    borderRadius: 5,
+    shadowColor: 'black',
+    shadowOffset: {
+      width: 0,
+      height: -10,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 10.0,
+    elevation: 3,
+    position: 'absolute',
+    top: 25,
+  },
+});
+export default styles;

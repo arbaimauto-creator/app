@@ -1,0 +1,178 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+  <uses-permission android:name="android.permission.INTERNET"/>
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+  <uses-permission android:name="com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE" />
+  <uses-permission android:name="com.android.vending.CHECK_LICENSE" />
+  <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+  <uses-permission android:name="android.permission.CAMERA"/>
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+  <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+  <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+  <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+  <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
+  <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
+  <uses-permission android:name="android.permission.VIBRATE"/>
+
+  <queries>
+    <package android:name="com.nhnent.payapp"/>
+    <package android:name="com.lottemembers.android"/>
+    <package android:name="com.ssg.serviceapp.android.egiftcertificate"/>
+    <package android:name="com.inicis.kpay"/>
+    <package android:name="com.tmoney.tmpay"/>
+    <package android:name="com.nhn.android.search"/>
+    <package android:name="com.kbcard.cxh.appcard"/>
+    <package android:name="com.kbstar.liivbank"/>
+    <package android:name="com.kbstar.reboot"/>
+    <package android:name="com.kbstar.kbbank"/>
+    <package android:name="com.lcacApp"/>
+    <package android:name="com.shcard.smartpay"/>
+    <package android:name="com.shinhancard.smartshinhan"/>
+    <package android:name="com.hyundaicard.appcard"/>
+    <package android:name="com.wooricard.smartapp"/>
+    <package android:name="com.wooribank.smart.npib"/>
+    <package android:name="com.lumensoft.touchenappfree"/>
+    <package android:name="com.TouchEn.mVaccine.webs"/>
+    <package android:name="com.kftc.bankpay.android"/>
+    <package android:name="com.hanaskcard.paycla"/>
+    <package android:name="com.hanaskcard.rocomo.potal"/>
+    <package android:name="com.ahnlab.v3mobileplus"/>
+    <package android:name="com.lge.lgpay"/>
+    <package android:name="com.kakao.talk"/>
+    <package android:name="com.samsung.android.spay"/>
+    <package android:name="com.samsung.android.spaylite"/>
+    <package android:name="com.instagram.android"/>
+    <package android:name="kvp.jjy.MispAndroid320"/>
+    <package android:name="nh.smart.nhallonepay"/>
+    <package android:name="kr.co.samsungcard.mpocket"/>
+    <package android:name="kr.co.citibank.citimobile"/>
+
+    <intent>
+      <action android:name="android.intent.action.VIEW" />
+      <data android:scheme="http"/>
+    </intent>
+    <intent>
+      <action android:name="android.intent.action.VIEW" />
+      <data android:scheme="https"/>
+    </intent>
+    <intent>
+      <action android:name="android.intent.action.VIEW" />
+      <data android:scheme="geo" />
+    </intent>
+    <intent>
+      <action android:name="android.intent.action.VIEW" />
+      <data android:scheme="google.navigation" />
+    </intent>
+  </queries>
+
+  <!-- ✅ application 태그 수정 -->
+  <application
+    android:name=".MainApplication"
+    android:label="@string/app_name"
+    android:icon="@mipmap/ic_launcher"
+    android:roundIcon="@mipmap/ic_launcher_round"
+    android:allowBackup="true"
+    android:theme="@style/AppTheme"
+    android:largeHeap="true"
+    android:usesCleartextTraffic="true"
+    android:requestLegacyExternalStorage="true"
+    android:hardwareAccelerated="true"
+    android:enableOnBackInvokedCallback="true"
+    tools:ignore="GoogleAppIndexingWarning">
+
+		<!-- ✅ AdServices 설정 추가 -->
+    <property
+        android:name="android.adservices.AD_SERVICES_CONFIG"
+        android:resource="@xml/ad_services_config"
+        tools:replace="android:resource" />
+
+    <activity
+      android:name=".MainActivity"
+      android:exported="true"
+      android:label="@string/app_name"
+      android:screenOrientation="portrait"
+      android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode"
+      android:launchMode="singleTask"
+      android:windowSoftInputMode="adjustResize">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+        <action android:name="android.intent.action.DOWNLOAD_COMPLETE"/>
+        <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:scheme="greyd"/>
+      </intent-filter>
+      <intent-filter android:autoVerify="true">
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:scheme="https" android:host="greyd.page.link"/>
+      </intent-filter>
+    </activity>
+
+    <!-- ✅ DevSettingsActivity에 android:exported 추가 -->
+    <activity
+      android:name="com.facebook.react.devsupport.DevSettingsActivity"
+      android:exported="false"/>
+
+    <activity
+      android:name="com.facebook.FacebookActivity"
+      android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+      android:label="@string/app_name"
+      android:exported="false"/>
+
+    <activity
+      android:name="com.facebook.CustomTabActivity"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:scheme="@string/fb_login_protocol_scheme"/>
+      </intent-filter>
+    </activity>
+
+    <meta-data
+      android:name="com.dieam.reactnativepushnotification.notification_channel_name.rn-push-notification-channel-id-4-default-300"
+      android:value="NOTIFICATION CHANNEL NAME FOR SILENT CHANNEL"/>
+    <meta-data
+      android:name="com.dieam.reactnativepushnotification.notification_channel_description.rn-push-notification-channel-id-4-default-300"
+      android:value="NOTIFICATION CHANNEL DESCRIPTION FOR SILENT CHANNEL"/>
+    <meta-data
+      android:name="com.dieam.reactnativepushnotification.notification_foreground"
+      android:value="false"/>
+    <meta-data
+      android:name="com.dieam.reactnativepushnotification.channel_create_default"
+      android:value="true"/>
+    <meta-data
+      android:name="com.facebook.sdk.ApplicationId"
+      android:value="@string/facebook_app_id"/>
+
+    <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationActions"/>
+    <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationPublisher"/>
+
+    <provider
+      android:name="com.facebook.FacebookContentProvider"
+      android:authorities="com.facebook.app.FacebookContentProvider586421891929952"
+      android:exported="true"/>
+
+    <provider
+      android:name="androidx.core.content.FileProvider"
+      android:authorities="${applicationId}.provider"
+      android:grantUriPermissions="true"
+      android:exported="false">
+      <meta-data
+        android:name="android.support.FILE_PROVIDER_PATHS"
+        android:resource="@xml/filepaths_share"
+        tools:replace="android:resource"/>
+    </provider>
+
+    <meta-data
+      android:name="com.kakao.ad.tracker.7639567090592400586"
+      android:value="@string/kakao_ad_track_id" />
+  </application>
+</manifest>

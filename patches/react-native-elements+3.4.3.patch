@@ -1,0 +1,110 @@
+diff --git a/node_modules/react-native-elements/dist/searchbar/SearchBar-android.js b/node_modules/react-native-elements/dist/searchbar/SearchBar-android.js
+index fe25d36..08564e5 100644
+--- a/node_modules/react-native-elements/dist/searchbar/SearchBar-android.js
++++ b/node_modules/react-native-elements/dist/searchbar/SearchBar-android.js
+@@ -48,7 +48,7 @@ class SearchBar extends Component {
+             this.input.focus();
+         };
+         this.blur = () => {
+-            this.input.blur();
++            this.input?.blur();
+         };
+         this.clear = () => {
+             this.input.clear();
+@@ -75,17 +75,19 @@ class SearchBar extends Component {
+             this.setState({ isEmpty: text === '' });
+         };
+         this._keyboardDidHide = () => {
+-            this.cancel();
++            // this.cancel();
+         };
+         const { value = '' } = props;
+         this.state = {
+             hasFocus: false,
+             isEmpty: value ? value === '' : true,
+         };
+-        Keyboard.addListener('keyboardDidHide', this._keyboardDidHide);
++        // Keyboard.addListener('keyboardDidHide', this._keyboardDidHide);
++        this._keyboardDidHide = Keyboard.addListener('keyboardDidHide', this._keyboardDidHide);
+     }
+     componentWillUnmount() {
+-        Keyboard.removeListener('keyboardDidHide', this._keyboardDidHide);
++        // Keyboard.removeListener('keyboardDidHide', this._keyboardDidHide);
++        this._keyboardDidHide?.remove();
+     }
+     render() {
+         var _a;
+@@ -93,14 +95,14 @@ class SearchBar extends Component {
+         const { hasFocus, isEmpty } = this.state;
+         const { style: loadingStyle } = loadingProps, otherLoadingProps = __rest(loadingProps, ["style"]);
+         return (<View style={StyleSheet.flatten([
+-                {
+-                    backgroundColor: (_a = theme === null || theme === void 0 ? void 0 : theme.colors) === null || _a === void 0 ? void 0 : _a.white,
+-                    paddingTop: 8,
+-                    paddingBottom: 8,
+-                },
+-                containerStyle,
+-            ])}>
+-        <Input testID="searchInput" renderErrorMessage={false} {...attributes} onFocus={this.onFocus} onBlur={this.onBlur} onChangeText={this.onChangeText} ref={(input) => {
++            {
++                backgroundColor: (_a = theme === null || theme === void 0 ? void 0 : theme.colors) === null || _a === void 0 ? void 0 : _a.white,
++                paddingTop: 8,
++                paddingBottom: 8,
++            },
++            containerStyle,
++        ])}>
++            <Input testID="searchInput" renderErrorMessage={false} {...attributes} onFocus={this.onFocus} onBlur={this.onBlur} onChangeText={this.onChangeText} ref={(input) => {
+                 this.input = input;
+             }} containerStyle={{ paddingHorizontal: 0 }} inputStyle={StyleSheet.flatten([styles.input, inputStyle])} inputContainerStyle={StyleSheet.flatten([
+                 styles.inputContainer,
+@@ -108,17 +110,17 @@ class SearchBar extends Component {
+             ])} leftIcon={hasFocus
+                 ? renderNode(Icon, cancelIcon, Object.assign(Object.assign({}, defaultCancelIcon(theme)), { onPress: this.cancel }))
+                 : renderNode(Icon, searchIcon, defaultSearchIcon(theme))} leftIconContainerStyle={StyleSheet.flatten([
+-                styles.leftIconContainerStyle,
+-                leftIconContainerStyle,
+-            ])} rightIcon={<View style={{ flexDirection: 'row' }}>
+-              {showLoading && (<ActivityIndicator key="loading" style={StyleSheet.flatten([{ marginRight: 5 }, loadingStyle])} {...otherLoadingProps}/>)}
+-              {!isEmpty &&
+-                    renderNode(Icon, clearIcon, Object.assign(Object.assign({}, defaultClearIcon(theme)), { key: 'cancel', onPress: this.clear }))}
+-            </View>} rightIconContainerStyle={StyleSheet.flatten([
+-                styles.rightIconContainerStyle,
+-                rightIconContainerStyle,
+-            ])}/>
+-      </View>);
++                    styles.leftIconContainerStyle,
++                    leftIconContainerStyle,
++                ])} rightIcon={<View style={{ flexDirection: 'row' }}>
++                    {showLoading && (<ActivityIndicator key="loading" style={StyleSheet.flatten([{ marginRight: 5 }, loadingStyle])} {...otherLoadingProps} />)}
++                    {!isEmpty &&
++                        renderNode(Icon, clearIcon, Object.assign(Object.assign({}, defaultClearIcon(theme)), { key: 'cancel', onPress: this.clear }))}
++                </View>} rightIconContainerStyle={StyleSheet.flatten([
++                    styles.rightIconContainerStyle,
++                    rightIconContainerStyle,
++                ])} />
++        </View>);
+     }
+ }
+ SearchBar.defaultProps = {
+diff --git a/node_modules/react-native-elements/dist/searchbar/SearchBar-ios.js b/node_modules/react-native-elements/dist/searchbar/SearchBar-ios.js
+index 145206f..a110f84 100644
+--- a/node_modules/react-native-elements/dist/searchbar/SearchBar-ios.js
++++ b/node_modules/react-native-elements/dist/searchbar/SearchBar-ios.js
+@@ -19,7 +19,7 @@ const defaultSearchIcon = (theme) => {
+     return ({
+         type: 'ionicon',
+         size: 20,
+-        name: 'ios-search',
++        name: 'search',
+         color: (_c = (_b = (_a = theme === null || theme === void 0 ? void 0 : theme.colors) === null || _a === void 0 ? void 0 : _a.platform) === null || _b === void 0 ? void 0 : _b.ios) === null || _c === void 0 ? void 0 : _c.grey,
+     });
+ };
+@@ -27,7 +27,7 @@ const defaultClearIcon = (theme) => {
+     var _a, _b, _c;
+     return ({
+         type: 'ionicon',
+-        name: 'ios-close-circle',
++        name: 'close',
+         size: 20,
+         color: (_c = (_b = (_a = theme === null || theme === void 0 ? void 0 : theme.colors) === null || _a === void 0 ? void 0 : _a.platform) === null || _b === void 0 ? void 0 : _b.ios) === null || _c === void 0 ? void 0 : _c.grey,
+     });

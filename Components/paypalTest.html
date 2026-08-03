@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Add meta tags for mobile and IE -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>PayPal Checkout</title>
+</head>
+<body>
+    <div id="paypal-button-container"></div>
+    <!-- Include the PayPal JavaScript SDK -->
+    <script src="https://www.paypal.com/sdk/js?client-id=AcdXHgmLBMBDXEmMK8-rPh09iFHxZrAWsE99FgjwsslWSOLQ_sz1uWl-5GY-8FDkyv-s5B40z6i6bDYH&currency=USD"></script>
+    <script>
+        // Render the PayPal button into #paypal-button-container
+        paypal.Buttons({
+            // Set up the transaction
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: '1.00'
+                        }
+                    }]
+                });
+            },
+    
+            // Finalize the transaction
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(orderData) {
+                    window.ReactNativeWebView.postMessage(orderData)
+                });
+            }
+        }).render('#paypal-button-container');
+    </script>
+</body>
+</html>
+
+<!--
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title> PayPal Checkout Integration | Client Demo </title>
+</head>
+
+<body>
+    <div id="paypal-button-container"></div>
+
+    <script src="https://www.paypal.com/sdk/js?client-id=AcdXHgmLBMBDXEmMK8-rPh09iFHxZrAWsE99FgjwsslWSOLQ_sz1uWl-5GY-8FDkyv-s5B40z6i6bDYH&currency=USD"></script>
+
+    <script>
+      
+      const request = (url, method, params = {}, files = []) => {
+          return new Promise(async function(resolve, reject) {
+            /*
+              const requesterToken = await Preference.get('userAccessToken')
+              if (requesterToken) {
+                params.requesterToken = await Utils.SHA256(requesterToken)
+              }
+              const requesterId = await Preference.get('userId')
+              params.requesterId = requesterId
+            */
+              var fetchParams = {
+                method: method,
+                headers: {
+                  Accept: 'application/json',
+                  'Content-Type': 'application/json',
+                },
+              }
+      
+              fetchParams.body = JSON.stringify( params )
+              
+    //          console.log('APIprovider request:')
+    //          console.log(url)
+    //          console.log(fetchParams)
+              fetch(url, fetchParams).then((response) => {
+    //              console.log(response)
+                  response.json()
+                  .then((responseJson) => {
+    //                console.log('APIprovider result:', responseJson)
+                    if (!response.ok || responseJson.hasOwnProperty('result') && responseJson.result === 0) {
+                      reject(responseJson)
+                    }
+                    resolve(responseJson)
+                  })
+                  .catch((error) => {
+                      console.log(error)
+                      reject(error)
+                  });
+              })
+              .catch((error) => {
+                  console.log(error)
+                  reject(error)
+              });
+          })
+      }
+      
+      console.log('requesting')
+      //request("http://54.180.94.51:3340/orders/pay/paypal",
+      request("http://localhost:3340/orders/pay/paypal",
+              "POST", {message: "Hello"})
+              .then(result => {
+                console.log('response:', result)
+              })
+              
+        // Render the PayPal button into #paypal-button-container
+        paypal.Buttons({
+
+            // Set up the transaction
+            createOrder: function(data, actions) {
+              
+              
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: '1.00'
+                        }
+                    }]
+                });
+            },
+
+            // Finalize the transaction
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(orderData) {
+                    // Successful capture! For demo purposes:
+                    console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
+                    var transaction = orderData.purchase_units[0].payments.captures[0];
+                    alert('Transaction '+ transaction.status + ': ' + transaction.id + '\n\nSee console for all available details');
+                    
+                    //request("http://54.180.94.51:3340/orders/pay/paypal",
+                    request("http://localhost:3340/orders/pay/paypal",
+                            "POST",
+                            orderData)
+                    .then(result => {
+                      console.log('SERVER RESPONSE', result)
+                    })
+                    .catch(err => {
+                      console.log('SERVER REQUEST ERROR', err)
+                    })
+                });
+            }
+
+
+        }).render('#paypal-button-container');
+    </script>
+</body>
+
+</html>
+    
+-->

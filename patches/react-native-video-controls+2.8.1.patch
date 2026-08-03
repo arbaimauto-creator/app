@@ -1,0 +1,238 @@
+diff --git a/node_modules/react-native-video-controls/VideoPlayer.js b/node_modules/react-native-video-controls/VideoPlayer.js
+index 7d36b4b..510257f 100644
+--- a/node_modules/react-native-video-controls/VideoPlayer.js
++++ b/node_modules/react-native-video-controls/VideoPlayer.js
+@@ -106,7 +106,10 @@ export default class VideoPlayer extends Component {
+       toggleFullscreen: this._toggleFullscreen.bind(this),
+       togglePlayPause: this._togglePlayPause.bind(this),
+       toggleControls: this._toggleControls.bind(this),
++      showControls: this._showControls.bind(this),
+       toggleTimer: this._toggleTimer.bind(this),
++      changeSpeedRate: this._changeSpeedRate.bind(this),
++      changeMuteStatus: this._changeMuteStatus.bind(this),
+     };
+ 
+     /**
+@@ -294,7 +297,7 @@ export default class VideoPlayer extends Component {
+     if (this.player.tapActionTimeout) {
+       clearTimeout(this.player.tapActionTimeout);
+       this.player.tapActionTimeout = 0;
+-      this.methods.toggleFullscreen();
++      // this.methods.toggleFullscreen();
+       const state = this.state;
+       if (state.showControls) {
+         this.resetControlTimeout();
+@@ -313,6 +316,20 @@ export default class VideoPlayer extends Component {
+     }
+   }
+ 
++  /**
++   * Customized by Noah
++   * 2023-01-13 Fri
++   */
++  _showControls() {
++    let state = this.state;
++    state.showControls = true;
++    this.showControlAnimation();
++    this.events.onShowControls();
++
++    this.setState(state);
++  }
++
++
+   /**
+     | -------------------------------------------------------
+     | Methods
+@@ -700,6 +717,28 @@ export default class VideoPlayer extends Component {
+     return this.player.volumeWidth * this.state.volume;
+   }
+ 
++  /**
++   * Customized by Noah
++   * 2023-07-17 Mon
++   */
++  _changeSpeedRate(rate) {
++    let state = this.state;
++    state.rate = rate;
++
++    this.setState(state);
++  }
++
++   /**
++   * Change video mute status
++   *  Customized by Alex
++   */
++   _changeMuteStatus(isMuted) {
++    let state = this.state;
++    state.muted = isMuted;
++    
++    this.setState(state);
++  }
++
+   /**
+     | -------------------------------------------------------
+     | React Component functions
+@@ -819,6 +858,8 @@ export default class VideoPlayer extends Component {
+             }, 1);
+           }
+         }
++
++        this.props.setIsSeekBarMoved(true)
+       },
+ 
+       /**
+@@ -841,6 +882,8 @@ export default class VideoPlayer extends Component {
+           state.seeking = false;
+         }
+         this.setState(state);
++
++        this.props.setIsSeekBarMoved(false)
+       },
+     });
+   }
+@@ -1037,27 +1080,10 @@ export default class VideoPlayer extends Component {
+       : this.renderPlayPause();
+ 
+     return (
+-      <Animated.View
+-        style={[
+-          styles.controls.bottom,
+-          {
+-            opacity: this.animations.bottomControl.opacity,
+-            marginBottom: this.animations.bottomControl.marginBottom,
+-          },
+-        ]}>
+-        <ImageBackground
+-          source={require('./assets/img/bottom-vignette.png')}
+-          style={[styles.controls.column]}
+-          imageStyle={[styles.controls.vignette]}>
+-          {seekbarControl}
+-          <SafeAreaView
+-            style={[styles.controls.row, styles.controls.bottomControlGroup]}>
+-            {playPauseControl}
+-            {this.renderTitle()}
+-            {timerControl}
+-          </SafeAreaView>
+-        </ImageBackground>
+-      </Animated.View>
++      <View>
++        {seekbarControl}
++        {timerControl}
++      </View>
+     );
+   }
+ 
+@@ -1081,7 +1107,7 @@ export default class VideoPlayer extends Component {
+               styles.seekbar.fill,
+               {
+                 width: this.state.seekerFillWidth,
+-                backgroundColor: this.props.seekColor || '#FFF',
++                backgroundColor: this.props.seekColor || '#FFB731',
+               },
+             ]}
+             pointerEvents={'none'}
+@@ -1093,7 +1119,7 @@ export default class VideoPlayer extends Component {
+           <View
+             style={[
+               styles.seekbar.circle,
+-              {backgroundColor: this.props.seekColor || '#FFF'},
++              { backgroundColor: this.props.seekColor || 'white'},
+             ]}
+             pointerEvents={'none'}
+           />
+@@ -1199,7 +1225,7 @@ export default class VideoPlayer extends Component {
+       <TouchableWithoutFeedback
+         onPress={this.events.onScreenTouch}
+         style={[styles.player.container, this.styles.containerStyle]}>
+-        <View style={[styles.player.container, this.styles.containerStyle]}>
++        <View style={[styles.player.container, this.styles.containerStyle, { backgroundColor: '#F4F4F4', paddingBottom: 10 }]}>
+           <Video
+             {...this.props}
+             ref={videoPlayer => (this.player.ref = videoPlayer)}
+@@ -1214,7 +1240,7 @@ export default class VideoPlayer extends Component {
+             onLoad={this.events.onLoad}
+             onEnd={this.events.onEnd}
+             onSeek={this.events.onSeek}
+-            style={[styles.player.video, this.styles.videoStyle]}
++            style={[styles.player.video, this.styles.videoStyle, {marginBottom: 10}]}
+             source={this.props.source}
+           />
+           {this.renderError()}
+@@ -1360,13 +1386,20 @@ const styles = {
+       textAlign: 'center',
+     },
+     timer: {
+-      width: 80,
++      // width: 80,
++      right: 0,
++      // backgroundColor:'grey',
+     },
+     timerText: {
+       backgroundColor: 'transparent',
+       color: '#FFF',
+-      fontSize: 11,
++      fontSize: 14,
++      fontFamily: 'SUIT-Medium',
+       textAlign: 'right',
++      textShadowColor: 'rgba(0, 0, 0, .7)',
++      textShadowOffset: { width: 1, height: 1 },
++      textShadowRadius: 1,
++      marginBottom: 20,
+     },
+   }),
+   volume: StyleSheet.create({
+@@ -1400,20 +1433,20 @@ const styles = {
+   }),
+   seekbar: StyleSheet.create({
+     container: {
+-      alignSelf: 'stretch',
+-      height: 28,
+-      marginLeft: 20,
+-      marginRight: 20,
++      width: '100%',
++      height: 50,
++      bottom: -50,
++      position: 'absolute',
++      zIndex: 999,
+     },
+     track: {
+-      backgroundColor: '#333',
+-      height: 1,
++      backgroundColor: '#F4F4F4', //'#192BC2', //'rgba(255, 255, 255, 0.4)',
++      height: 10,
+       position: 'relative',
+-      top: 14,
+       width: '100%',
+     },
+     fill: {
+-      backgroundColor: '#FFF',
++      backgroundColor: 'black',
+       height: 1,
+       width: '100%',
+     },
+@@ -1422,14 +1455,20 @@ const styles = {
+       marginLeft: -7,
+       height: 28,
+       width: 28,
++      zIndex: 999,
+     },
+     circle: {
++      borderWidth: .5,
++      borderColor:'#3a3a3a',
+       borderRadius: 12,
+-      position: 'relative',
+-      top: 8,
+-      left: 8,
+-      height: 12,
+-      width: 12,
++      position: 'absolute',
++      // top: -6,
++      // left: 0,
++      // height: 12,
++      // width: 12,
++      top: -7,
++      width: 14,
++      height: 14,
+     },
+   }),
+ };

@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "939266442600",
+    "firebase_url": "https://greyd-8ff84.firebaseio.com",
+    "project_id": "greyd-8ff84",
+    "storage_bucket": "greyd-8ff84.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:939266442600:android:c35432b5f255bef2e442dd",
+        "android_client_info": {
+          "package_name": "com.arbaim.greyd"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "939266442600-h1lbg0b9mutc5smusg16mlcpvf890r7g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.arbaim.greyd",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "939266442600-r5ider39e86cfkv2icurtoi6ug24qqrp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.arbaim.greyd",
+            "certificate_hash": "2f49a4c5db89ee29fda209a1ec65a1e494077f81"
+          }
+        },
+        {
+          "client_id": "939266442600-pdr4lcc02halgtu05qnqdo68pksdqnmo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTC6g5wBPO1cur3S_awmkcaOzep1z2Tz8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "939266442600-pdr4lcc02halgtu05qnqdo68pksdqnmo.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "939266442600-5c5smmpmeoou9sd4gctbdu9d8qj8s7r4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.arbaim.greyd"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

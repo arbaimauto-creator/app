@@ -1,0 +1,15 @@
+/* 
+  InfoPlist.strings
+  greyd
+
+  Created by Noah on 2023/10/11.
+  
+*/
+NSCameraUsageDescription="You need to give an authority to access camera to upload your review contents";
+NSDocumentsFolderUsageDescription="You need to give an authority to access documents folder to add image/video output of uploading review or product contents";
+NSMicrophoneUsageDescription="You need to give an authority to access microphone";
+NSPhotoLibraryAddUsageDescription="You need to give an authority to access gallery to select image/video for uploading review or product contents";
+NSPhotoLibraryUsageDescription="You need to give an authority to access gallery to select image/video for uploading review or product contents";
+NSUserTrackingUsageDescription="This identifier will be used to deliver personalized reviews to you";
+NSLocationAlwaysAndWhenInUseUsageDescription="Requires the Geolocation permission (Always or while using the app)";
+NSLocationWhenInUseUsageDescription="Requires the Geolocation permission (always receives geolocation)";

@@ -1,0 +1,13 @@
+diff --git a/node_modules/react-native-inset-shadow/src/styles/index.js b/node_modules/react-native-inset-shadow/src/styles/index.js
+index 2a1049c..31ddd1a 100644
+--- a/node_modules/react-native-inset-shadow/src/styles/index.js
++++ b/node_modules/react-native-inset-shadow/src/styles/index.js
+@@ -11,7 +11,7 @@ export default StyleSheet.create({
+     alignSelf: 'center',
+   },
+   left: {
+-    width: 10,
++    width: 9,
+     height: '100%',
+     left: -10
+   },

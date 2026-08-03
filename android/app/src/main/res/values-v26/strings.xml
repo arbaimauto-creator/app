@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">greyd</string>
+    <string name="kakao_app_key">0ea49841c33af4cd5f5ea4bb0647e681</string>
+    <string name="facebook_app_id">586421891929952</string>
+    <string name="fb_login_protocol_scheme">fb586421891929952</string>
+    <string name="appCenterCrashes_whenToSendCrashes" moduleConfig="true" translatable="false">DO_NOT_ASK_JAVASCRIPT</string>
+    <string name="appCenterAnalytics_whenToEnableAnalytics" moduleConfig="true" translatable="false">ALWAYS_SEND</string>
+    <string name="kakao_ad_track_id" translatable="false">7639567090592400586</string>
+</resources>

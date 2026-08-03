@@ -1,0 +1,51 @@
+diff --git a/node_modules/react-native-country-picker-modal/lib/CountryFilter.js b/node_modules/react-native-country-picker-modal/lib/CountryFilter.js
+index 28b0dc4..8c8dde8 100644
+--- a/node_modules/react-native-country-picker-modal/lib/CountryFilter.js
++++ b/node_modules/react-native-country-picker-modal/lib/CountryFilter.js
+@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
+ });
+ export const CountryFilter = (props) => {
+     const { filterPlaceholderTextColor, fontFamily, fontSize, onBackgroundTextColor } = useTheme();
+-    return (React.createElement(TextInput, Object.assign({ testID: "text-input-country-filter", autoCorrect: false, placeholderTextColor: filterPlaceholderTextColor, style: [
++    return (React.createElement(TextInput, Object.assign({ testID: "text-input-country-filter", autoCorrect: false, placeholderTextColor: filterPlaceholderTextColor, color:onBackgroundTextColor, style: [
+             styles.input,
+             { fontFamily, fontSize, color: onBackgroundTextColor }
+         ] }, props)));
+diff --git a/node_modules/react-native-country-picker-modal/lib/CountryService.js b/node_modules/react-native-country-picker-modal/lib/CountryService.js
+index b559945..2d4e430 100644
+--- a/node_modules/react-native-country-picker-modal/lib/CountryService.js
++++ b/node_modules/react-native-country-picker-modal/lib/CountryService.js
+@@ -100,6 +100,7 @@ export const getCountriesAsync = async (flagType, translation = 'common', region
+             .filter(isSubregion(subregion))
+             .filter(isIncluded(countryCodes))
+             .filter(isExcluded(excludeCountries));
++            
+         return countries;
+     }
+     else {
+@@ -117,6 +118,14 @@ export const getCountriesAsync = async (flagType, translation = 'common', region
+             .filter(isIncluded(countryCodes))
+             .filter(isExcluded(excludeCountries))
+             .sort((country1, country2) => country1.name.localeCompare(country2.name));
++
++        const KR = countries.find(e => e.cca2 === 'KR')
++        const US = countries.find(e => e.cca2 === 'US')
++        countries.splice(countries.findIndex(e => e.cca2 === 'KR'), 1)
++        countries.splice(countries.findIndex(e => e.cca2 === 'US'), 1)
++        countries.unshift(US);
++        countries.unshift(KR);
++
+         return countries;
+     }
+ };
+@@ -148,8 +157,8 @@ export const search = (filter = '', data = [], options = DEFAULT_FUSE_OPTION) =>
+ const uniq = (arr) => Array.from(new Set(arr));
+ export const getLetters = (countries) => {
+     return uniq(countries
+-        .map((country) => country.name.substr(0, 1).toLocaleUpperCase())
+-        .sort((l1, l2) => l1.localeCompare(l2)));
++        .map((country) => country.name.substr(0, 1).toLocaleUpperCase()))
++        // .sort((l1, l2) => l1.localeCompare(l2)));
+ };
+ export const getCountryInfoAsync = async ({ countryCode, translation, }) => {
+     const countryName = await getCountryNameAsync(countryCode, translation || 'common');

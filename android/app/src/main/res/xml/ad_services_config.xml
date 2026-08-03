@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ad-services-config>
+    <!-- Facebook SDK AdServices Configuration -->
+    <attribution allowAllToAccess="true" />
+    <topics allowAllToAccess="true" />
+    <custom-audiences allowAllToAccess="true" />
+</ad-services-config>

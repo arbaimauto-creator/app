@@ -1,0 +1,239 @@
+apply plugin: "com.android.application"
+apply plugin: "com.facebook.react"
+
+project.ext.react = [
+    enableHermes: true,  // ✅ true로 설정되어 있어야 함
+]
+
+import com.android.build.OutputFile
+/**
+ * This is the configuration block to customize your React Native Android app.
+ * By default you don't need to apply any configuration, just uncomment the lines you need.
+ */
+react {
+    /* Folders */
+    //   The root of your project, i.e. where "package.json" lives. Default is '..'
+    // root = file("../")
+    //   The folder where the react-native NPM package is. Default is ../node_modules/react-native
+    // reactNativeDir = file("../node_modules/react-native")
+    //   The folder where the react-native Codegen package is. Default is ../node_modules/@react-native/codegen
+    // codegenDir = file("../node_modules/@react-native/codegen")
+    //   The cli.js file which is the React Native CLI entrypoint. Default is ../node_modules/react-native/cli.js
+    // cliFile = file("../node_modules/react-native/cli.js")
+
+    /* Variants */
+    //   The list of variants to that are debuggable. For those we're going to
+    //   skip the bundling of the JS bundle and the assets. By default is just 'debug'.
+    //   If you add flavors like lite, prod, etc. you'll have to list your debuggableVariants.
+    // debuggableVariants = ["liteDebug", "prodDebug"]
+
+    /* Bundling */
+    //   A list containing the node command and its flags. Default is just 'node'.
+    // nodeExecutableAndArgs = ["node"]
+    //
+    //   The command to run when bundling. By default is 'bundle'
+    // bundleCommand = "ram-bundle"
+    //
+    //   The path to the CLI configuration file. Default is empty.
+    // bundleConfig = file(../rn-cli.config.js)
+    //
+    //   The name of the generated asset file containing your JS bundle
+    // bundleAssetName = "MyApplication.android.bundle"
+    //
+    //   The entry file for bundle generation. Default is 'index.android.js' or 'index.js'
+    // entryFile = file("../js/MyApplication.android.js")
+    //
+    //   A list of extra flags to pass to the 'bundle' commands.
+    //   See https://github.com/react-native-community/cli/blob/main/docs/commands.md#bundle
+    // extraPackagerArgs = []
+
+    /* Hermes Commands */
+    //   The hermes compiler command to run. By default it is 'hermesc'
+    // hermesCommand = "$rootDir/my-custom-hermesc/bin/hermesc"
+    //
+    //   The list of flags to pass to the Hermes compiler. By default is "-O", "-output-source-map"
+    // hermesFlags = ["-O", "-output-source-map"]
+
+		// ✅ 이 라인 추가
+    autolinkLibrariesWithApp()
+}
+
+/**
+ * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
+ */
+def enableProguardInReleaseBuilds = false
+
+/**
+ * The preferred build flavor of JavaScriptCore (JSC)
+ *
+ * For example, to use the international variant, you can use:
+ * `def jscFlavor = 'org.webkit:android-jsc-intl:+'`
+ *
+ * The international variant includes ICU i18n library and necessary data
+ * allowing to use e.g. `Date.toLocaleString` and `String.localeCompare` that
+ * give correct results when using with locales other than en-US. Note that
+ * this variant is about 6MiB larger per architecture than default.
+ */
+def jscFlavor = 'org.webkit:android-jsc:+'
+
+apply from: new File(["node", "--print", "require.resolve('@sentry/react-native/package.json')"].execute().text.trim(), "../sentry.gradle")
+android {
+    ndkVersion rootProject.ext.ndkVersion
+
+    compileSdkVersion rootProject.ext.compileSdkVersion
+
+    namespace "com.arbaim.greyd"
+    defaultConfig {
+        applicationId "com.arbaim.greyd"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 242
+        versionName "1.92.28"
+        missingDimensionStrategy 'react-native-camera', 'general'
+        vectorDrawables.useSupportLibrary = true
+        multiDexEnabled true
+    }
+    splits {
+        abi {
+	    enable true
+            reset()
+            //enable enableSeparateBuildPerCPUArchitecture
+            include "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
+            // include "x86", "x86_64"
+            universalApk false  // If true, also generate a universal APK
+        }
+    }
+    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+        release {
+            storeFile file(MYAPP_RELEASE_STORE_FILE)
+            storePassword MYAPP_RELEASE_STORE_PASSWORD
+            keyAlias MYAPP_RELEASE_KEY_ALIAS
+            keyPassword MYAPP_RELEASE_KEY_PASSWORD
+        }
+    }
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+            // resValue "string", "CodePushDeploymentKey", '""'
+        }
+        releaseStaging {
+            // resValue "string", "CodePushDeploymentKey", '"QgSEUpBJx_5RiOiiRi9FrSBLLlAHCVcarsVXA"'
+            // Note: It's a good idea to provide matchingFallbacks for the new buildType you create to prevent build issues
+            // Add the following line if not already there
+            matchingFallbacks = ['release']
+        }
+        release {
+            // Caution! In production, you need to generate your own keystore file.
+            // see https://facebook.github.io/react-native/docs/signed-apk-android.
+            signingConfig signingConfigs.release
+            // minifyEnabled enableProguardInReleaseBuilds
+            minifyEnabled true
+	    shrinkResources true
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            matchingFallbacks = ['release']
+            // resValue "string", "CodePushDeploymentKey", '"_uQoLnhWDedCl0VNcFxYdXVE2gFZCgBf8LM1e"'
+        }
+    }
+
+    dexOptions {
+        javaMaxHeapSize "8g"
+    }
+
+    // applicationVariants are e.g. debug, release
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            // For each separate APK per architecture, set a unique version code as described here:
+            // https://developer.android.com/studio/build/configure-apk-splits.html
+            def versionCodes = ["armeabi-v7a": 1, "x86": 2, "arm64-v8a": 3, "x86_64": 4]
+            def abi = output.getFilter(OutputFile.ABI)
+            if (abi != null) {  // null for the universal-debug, universal-release variants
+                output.versionCodeOverride =
+                        versionCodes.get(abi) * 1048576 + defaultConfig.versionCode
+            }
+
+        }
+    }
+
+		lint {
+				disable 'InvalidWakeLockTag'
+		}
+}
+
+dependencies {
+    // The version of react-native is set by the React Native Gradle Plugin
+    implementation("com.facebook.react:react-android")
+
+    debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}")
+    debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {
+        exclude group:'com.squareup.okhttp3', module:'okhttp'
+    }
+
+    debugImplementation("com.facebook.flipper:flipper-fresco-plugin:${FLIPPER_VERSION}")
+
+    if (hermesEnabled.toBoolean()) {
+        implementation("com.facebook.react:hermes-android")
+    } else {
+        implementation jscFlavor
+    }
+
+    ////////////////////////////////////////////////////////
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    //noinspection GradleDynamicVersion
+    implementation "com.facebook.react:react-native:+"  // From node_modules
+
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
+
+    implementation "androidx.appcompat:appcompat:1.0.0"
+
+    // implementation platform('com.google.firebase:firebase-bom:28.4.0')
+    implementation 'com.google.firebase:firebase-analytics:17.3.0'
+    // implementation 'com.google.firebase:firebase-iid'
+
+    implementation platform('com.google.firebase:firebase-bom:31.0.0')
+
+    implementation 'com.google.firebase:firebase-functions'
+    implementation 'com.google.firebase:firebase-messaging'
+    implementation 'com.google.firebase:firebase-iid:21.1.0'
+
+
+    // implementation 'com.facebook.android:facebook-android-sdk:9'
+    implementation 'com.facebook.android:facebook-android-sdk:[8,9)'
+    // implementation 'com.facebook.android:facebook-android-sdk:latest.release'
+
+
+    implementation "com.kakao.sdk:v2-user:2.6.0" // 카카오 로그인
+
+    // implementation 'com.squareup.okhttp3:okhttp' // Added this to resolve app crash on Android 11
+    // implementation 'com.squareup.okhttp3:okhttp-bom:4.8.0'
+    // implementation 'com.squareup.okhttp3:logging-interceptor'
+		// OkHttp dependencies - 4.12.0 (stable) 사용
+		implementation(platform('com.squareup.okhttp3:okhttp-bom:4.12.0'))
+		implementation 'com.squareup.okhttp3:okhttp'
+		implementation 'com.squareup.okhttp3:okhttp-urlconnection'
+		implementation 'com.squareup.okhttp3:logging-interceptor'
+
+    // required :: Kakao SDK 사용을 위해 필수로 사용해야하는 의존성
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.32"
+    implementation "com.google.android.gms:play-services-ads-identifier:18.0.1"
+    implementation "com.android.installreferrer:installreferrer:2.2"
+    implementation "com.kakao.ad:tracker:0.3.10"
+    ////////////////////////////////////////////////////////
+    implementation 'org.jetbrains:annotations:16.0.2'
+
+		implementation 'com.facebook.fresco:fresco:' + rootProject.ext.frescoVersion
+    implementation 'com.facebook.fresco:imagepipeline-okhttp3:' + rootProject.ext.frescoVersion
+    implementation 'com.facebook.fresco:animated-gif:' + rootProject.ext.frescoVersion
+    implementation 'com.facebook.fresco:animated-webp:' + rootProject.ext.frescoVersion
+    implementation 'com.facebook.fresco:webpsupport:' + rootProject.ext.frescoVersion
+}
+
+// apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
+// apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
+
+apply plugin: 'com.google.gms.google-services'

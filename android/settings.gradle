@@ -1,0 +1,73 @@
+// pluginManagement {
+//     includeBuild("../node_modules/@react-native/gradle-plugin")
+// }
+// // plugins {
+// //     id("com.facebook.react.settings")
+// // }
+// extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+//     ex.autolinkLibrariesFromCommand()
+// }
+
+// rootProject.name = 'greyd'  // ✅ 프로젝트 이름
+// include ':app'
+// project(':app').projectDir = new File(rootProject.projectDir, 'app')
+
+// // rootProject.name = 'greyd'
+// // apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
+// include ':app'
+// includeBuild('../node_modules/@react-native/gradle-plugin')
+// // include ':app', ':react-native-code-push'
+// // project(':react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-code-push/android/app')
+// // rootProject.name = 'greyd'
+// // include ':react-native-channel-plugin'
+// // project(':react-native-channel-plugin').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-channel-plugin/android')
+// // include ':react-native-send-intent'
+// // project(':react-native-send-intent').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-send-intent/android')
+// include ':react-native-webview'
+// project(':react-native-webview').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-webview/android')
+// include ':react-native-simple-crypto'
+// project(':react-native-simple-crypto').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-simple-crypto/android')
+// include ':react-native-check-app-install'
+// project(':react-native-check-app-install').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-check-app-install/android')
+// include ':react-native-fs'
+// project(':react-native-fs').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-fs/android')
+// include ':react-native-splash-screen'
+// project(':react-native-splash-screen').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-splash-screen/android')
+// include ':react-native-push-notification'
+// project(':react-native-push-notification').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-push-notification/android')
+// // include ':react-native-ffmpeg'
+// // project(':react-native-ffmpeg').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-ffmpeg/android')
+// include ':react-native-video'
+// project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android')
+// include ':react-native-vector-icons'
+// project(':react-native-vector-icons').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-vector-icons/android')
+// include ':react-native-share'
+// project(':react-native-share').projectDir = new File(rootProject.projectDir,    '../node_modules/react-native-share/android')
+// // apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
+// //include ':app'
+
+pluginManagement {
+		includeBuild("../node_modules/@react-native/gradle-plugin")
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+plugins {
+    id("com.facebook.react.settings")
+}
+
+extensions.configure(com.facebook.react.ReactSettingsExtension){ ex ->
+    // npx 대신 로컬 CLI를 직접 호출 (Windows에서 npx가 rnc-cli를 못 찾는 문제 회피)
+    if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+        ex.autolinkLibrariesFromCommand(["cmd", "/c", "node_modules\\.bin\\rnc-cli.cmd", "config"])
+    } else {
+        ex.autolinkLibrariesFromCommand()
+    }
+}
+
+rootProject.name = 'greyd'
+include ':app'
+includeBuild('../node_modules/@react-native/gradle-plugin')

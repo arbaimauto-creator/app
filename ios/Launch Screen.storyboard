@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
+    <device id="retina6_7" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="EHf-IW-A2E">
+            <objects>
+                <viewController id="01J-lp-oVM" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
+                        <rect key="frame" x="0.0" y="0.0" width="428" height="926"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="9" id="obG-Y5-kRd">
+                                <rect key="frame" x="0.0" y="448" width="414" height="0.0"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" red="0.95686274509803915" green="0.95686274509803915" blue="0.95686274509803915" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" misplaced="YES" image="SplashImage" translatesAutoresizingMaskIntoConstraints="NO" id="jmy-nG-YCv">
+                                <rect key="frame" x="-50" y="44" width="528" height="848"/>
+                            </imageView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="Bcu-3y-fUS"/>
+                        <color key="backgroundColor" red="0.95686274509803915" green="0.95686274509803915" blue="0.95686274509803915" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="jmy-nG-YCv" firstAttribute="top" secondItem="Ze5-6b-2t3" secondAttribute="top" id="1dx-pu-MBV"/>
+                            <constraint firstAttribute="trailing" secondItem="jmy-nG-YCv" secondAttribute="trailing" id="70K-h4-PRg"/>
+                            <constraint firstItem="jmy-nG-YCv" firstAttribute="bottom" secondItem="Bcu-3y-fUS" secondAttribute="bottom" constant="-50" id="730-kT-tgP"/>
+                            <constraint firstItem="jmy-nG-YCv" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="7cv-g4-QEc"/>
+                            <constraint firstAttribute="bottom" secondItem="jmy-nG-YCv" secondAttribute="bottom" id="Idl-6s-67w"/>
+                            <constraint firstAttribute="trailing" secondItem="jmy-nG-YCv" secondAttribute="trailing" constant="-50" id="gi6-OM-Nth"/>
+                            <constraint firstItem="jmy-nG-YCv" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" constant="-50" id="hkh-zi-1TD"/>
+                            <constraint firstItem="jmy-nG-YCv" firstAttribute="top" secondItem="Bcu-3y-fUS" secondAttribute="top" constant="-50" id="rAb-Qm-cbe"/>
+                        </constraints>
+                    </view>
+                    <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="183.59375" y="367.96875"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="SplashImage" width="435.66665649414062" height="896"/>
+    </resources>
+</document>
