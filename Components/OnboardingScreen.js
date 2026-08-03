@@ -50,6 +50,18 @@ const data = [
   // },
 ];
 
+/*
+ * CDN 온보딩 1페이지 이미지에는 구버전 문구("Swipe left or right" / "좌우로")가 박혀 있다.
+ * 영상 탐색이 세로 스와이프로 바뀌었으므로, CDN 이미지가 교체되기 전까지
+ * 해당 문구 한 줄만 흰 패치로 덮고 새 문구를 그린다.
+ * 좌표는 원본 이미지(2588x4600) 픽셀 기준이며 화면 표시 배율로 환산해 쓴다.
+ */
+const GUIDE_IMG_W = 2588;
+const GUIDE_IMG_H = 4600;
+const SWIPE_PATCH = { left: 230, top: 320, width: 1500, height: 180, textLeft: 30, fontSize: 103 };
+const getSwipeGuideText = (language) =>
+  language === 'ko' ? '위아래로' : 'Swipe up or down';
+
 const getOnboardingImages = (language) => [
   {
     image: `https://d3ags90eq0etbz.cloudfront.net/app-banner/onboarding/${language}-initial-guide-01.png`,
@@ -78,8 +90,57 @@ export default class OnboardingScreen extends React.Component {
     this.state = {
       activeSlideIndex: 0,
       language: 'en',
+      slideSize: null,
     };
     this._carousel = null;
+  }
+
+  onSlideLayout = (e) => {
+    const { width, height } = e.nativeEvent.layout;
+    if (
+      !this.state.slideSize ||
+      this.state.slideSize.width !== width ||
+      this.state.slideSize.height !== height
+    ) {
+      this.setState({ slideSize: { width, height } });
+    }
+  };
+
+  // resizeMode 'contain'으로 표시되는 이미지의 실제 영역에 맞춰 패치 위치를 환산한다.
+  renderSwipeGuidePatch() {
+    const { slideSize } = this.state;
+    if (!slideSize) {
+      return null;
+    }
+
+    const scale = Math.min(slideSize.width / GUIDE_IMG_W, slideSize.height / GUIDE_IMG_H);
+    const offsetX = (slideSize.width - GUIDE_IMG_W * scale) / 2;
+    const offsetY = (slideSize.height - GUIDE_IMG_H * scale) / 2;
+
+    return (
+      <View
+        style={{
+          position: 'absolute',
+          left: offsetX + SWIPE_PATCH.left * scale,
+          top: offsetY + SWIPE_PATCH.top * scale,
+          width: SWIPE_PATCH.width * scale,
+          height: SWIPE_PATCH.height * scale,
+          backgroundColor: '#FFFFFF',
+          justifyContent: 'center',
+        }}
+      >
+        <Text
+          style={{
+            marginLeft: SWIPE_PATCH.textLeft * scale,
+            fontSize: SWIPE_PATCH.fontSize * scale,
+            fontFamily: Constants.CUSTOM_FONTS.PRETENDARD.Regular,
+            color: '#111111',
+          }}
+        >
+          {getSwipeGuideText(getLanguage())}
+        </Text>
+      </View>
+    );
   }
 
   componentDidMount() {
@@ -98,7 +159,7 @@ export default class OnboardingScreen extends React.Component {
 
   _renderSlide({ item, index }) {
     return (
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1 }} onLayout={index === 0 ? this.onSlideLayout : undefined}>
         {/* <Image source={item.image} style={styles.slideImage} resizeMode={'contain'} /> */}
         <View style={{ position: 'absolute', top: 20, right: 20, zIndex: 999 }}>
           <Button
@@ -109,6 +170,7 @@ export default class OnboardingScreen extends React.Component {
           />
         </View>
         <FastImage source={{ uri: item.image }} style={styles.slideImage} resizeMode={'contain'} />
+        {index === 0 && this.renderSwipeGuidePatch()}
       </View>
     );
   }
