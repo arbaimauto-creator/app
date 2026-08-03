@@ -160,7 +160,9 @@ export default class OnboardingScreen extends React.Component {
   _renderSlide({ item, index }) {
     return (
       <View style={{ flex: 1 }} onLayout={index === 0 ? this.onSlideLayout : undefined}>
-        {/* <Image source={item.image} style={styles.slideImage} resizeMode={'contain'} /> */}
+        <FastImage source={{ uri: item.image }} style={styles.slideImage} resizeMode={'contain'} />
+        {index === 0 && this.renderSwipeGuidePatch()}
+        {/* Android에서는 나중에 그려진 형제 뷰가 터치를 가로채므로 Skip을 마지막에 렌더링한다 */}
         <View style={{ position: 'absolute', top: 20, right: 20, zIndex: 999 }}>
           <Button
             title={Strings.SKIP}
@@ -169,8 +171,6 @@ export default class OnboardingScreen extends React.Component {
             onPress={this.onPressStartButton.bind(this)}
           />
         </View>
-        <FastImage source={{ uri: item.image }} style={styles.slideImage} resizeMode={'contain'} />
-        {index === 0 && this.renderSwipeGuidePatch()}
       </View>
     );
   }
