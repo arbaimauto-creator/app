@@ -31,10 +31,10 @@ const _renderIcon = (routeName, selectedTab) => {
         <FastImage style={styles.iconSize} source={require('../../../Resources/newIcon/4.2.png')} />
       );
     }
-  } else if (routeName === 'New') {
-    return (
-      <FastImage style={styles.gradeIcon} source={require('../../../Resources/newIcon/7.2.png')} />
-    );
+  } else if (routeName === 'Try') {
+    return <IconFeather name="gift" size={26} color={focused ? Constants.COLOR_MAIN : 'gray'} />;
+  } else if (routeName === 'Activity') {
+    return <IconFeather name="award" size={24} color={focused ? Constants.COLOR_MAIN : 'gray'} />;
   } else if (routeName === 'Profile') {
     if (focused) {
       return (
@@ -97,7 +97,7 @@ export const tabBarIcon = ({ focused, color, route }) => {
               : require('../../../Resources/img/iconRenewal/home.png')
           }
         />
-        <Text style={styles.iconName}>{Strings.BOTTOM_ICON_HOME}</Text>
+        <Text style={styles.iconName}>{Strings.DISCOVER_TAB}</Text>
       </View>
     );
   } else if (route.name === 'Reviews') {
@@ -114,28 +114,18 @@ export const tabBarIcon = ({ focused, color, route }) => {
         <Text style={styles.iconName}>{Strings.BOTTOM_ICON_VIEW_REVIEW}</Text>
       </View>
     );
-  } else if (route.name === 'B2B') {
+  } else if (route.name === 'Try') {
     return (
       <View style={{ width: 100, alignItems: 'center' }}>
-        <FastImage
-          style={styles.iconSize}
-          source={
-            focused
-              ? require('../../../Resources/img/iconRenewal/icBadgeStoreStarOn14_.png')
-              : require('../../../Resources/img/iconRenewal/icBadgeStoreStarOff14.png')
-          }
-        />
-        <Text style={styles.iconName}>{Strings.B2B}</Text>
+        <IconFeather name="gift" size={26} color={color} style={styles.shadow} />
+        <Text style={styles.iconName}>{Strings.TRY_TAB}</Text>
       </View>
     );
-  } else if (route.name === 'New') {
+  } else if (route.name === 'Activity') {
     return (
       <View style={{ width: 100, alignItems: 'center' }}>
-        <FastImage
-          style={styles.iconSize}
-          source={require('../../../Resources/img/iconRenewal/new.png')}
-        />
-        <Text style={styles.iconName}>{Strings.DO_REVIEW}</Text>
+        <IconFeather name="award" size={24} color={color} style={styles.shadow} />
+        <Text style={styles.iconName}>{Strings.ACTIVITY_TAB}</Text>
       </View>
     );
   } else if (route.name === 'Profile') {
@@ -163,7 +153,7 @@ export const tabBarIcon = ({ focused, color, route }) => {
               : require('../../../Resources/img/iconRenewal/shopping.png')
           }
         />
-        <Text style={styles.iconName}>{Strings.BOTTOM_ICON_SHOPPING}</Text>
+        <Text style={styles.iconName}>{Strings.PRODUCTS_TAB}</Text>
       </View>
     );
   }
@@ -180,15 +170,17 @@ export const tabBarLabel = ({ focused, color, route }) => {
   color = focused ? Constants.COLOR_MAIN : '#AEAEAE';
   let name = '';
   if (route.name === 'Home') {
-    name = Strings.HOME;
+    name = Strings.DISCOVER_TAB;
   } else if (route.name === 'Reviews') {
     name = Strings.REVIEWS;
   } else if (route.name === 'Profile') {
     name = Strings.PROFILE;
-  } else if (route.name === 'B2B') {
-    name = Strings.PROFILE;
   } else if (route.name === 'Store') {
-    name = Strings.STORE;
+    name = Strings.PRODUCTS_TAB;
+  } else if (route.name === 'Try') {
+    name = Strings.TRY_TAB;
+  } else if (route.name === 'Activity') {
+    name = Strings.ACTIVITY_TAB;
   }
   return (
     <Text

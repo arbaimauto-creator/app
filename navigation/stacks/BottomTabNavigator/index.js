@@ -7,19 +7,18 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { isIPhoneWithDynamicIsland } from 'react-native-safearea-height';
 import { isIPhone12, isIPhone12Max } from 'react-native-status-bar-height';
 import MyMaterialBottomTabNavigator from '../../../Components/MyMaterialBottomTabNavigator';
-import { capitalizeFirstLetter, isGuestUser, LogoutAlert } from '../../../Components/utils';
-import CameraNavigator from '../navigator/CameraNavigator';
+import { capitalizeFirstLetter } from '../../../Components/utils';
 import DiscoverNavigator from '../navigator/DiscoverNavigator';
 import HomeNavigator from '../navigator/HomeNavigator';
 import ProductsNavigator from '../navigator/ProductsNavigator';
 import UserPageNavigator from '../navigator/UserPageNavigator';
+import TryNavigator from '../navigator/TryNavigator';
+import ActivityNavigator from '../navigator/ActivityNavigator';
 import { tabBarIcon, tabBarLabel } from './renderTabBar';
 import { Platform } from 'react-native';
 import { StatusBar } from 'react-native';
 import Constants from '../../../Components/Constants';
 import { useSelector } from 'react-redux';
-import B2BNavigator from '../navigator/B2BNavigator';
-import { B2BPageScreen } from '../../../Components';
 
 function BottomTabNavigator({ route, navigation }) {
   const [loading, setLoading] = useState(true);
@@ -126,50 +125,40 @@ function BottomTabNavigator({ route, navigation }) {
         initialParams={initialParams}
       /> */}
       <Tab.Screen
-        name="B2B"
-        component={B2BNavigator}
-        listeners={() => ({
-          tabPress: (e) => {
-            FastImage.clearMemoryCache();
-
-            if (Platform.OS !== 'ios') {
-              StatusBar.setBackgroundColor(Constants.TIER_COLORS.GIVER);
-              StatusBar.setBarStyle('default', true);
-            }
-          },
-        })}
-        initialParams={initialParams}
-      />
-      <Tab.Screen
-        name="New"
-        component={CameraNavigator}
-        listeners={(props) => ({
-          tabPress: (e) => {
-            e.preventDefault();
-            FastImage.clearMemoryCache();
-
-            if (Platform.OS !== 'ios') {
-              StatusBar.setBackgroundColor(Constants.TIER_COLORS.GIVER);
-              StatusBar.setBarStyle('default', true);
-            }
-
-            if (isGuestUser(route.params.logonUserId)) {
-              return LogoutAlert(props);
-            }
-
-            props.navigation.navigate('AddingNewVideo', {});
-          },
-        })}
-        initialParams={initialParams}
-      />
-
-      <Tab.Screen
         name="Store"
         component={ProductsNavigator}
         listeners={() => ({
           tabPress: (e) => {
             FastImage.clearMemoryCache();
 
+            if (Platform.OS !== 'ios') {
+              StatusBar.setBackgroundColor(Constants.TIER_COLORS.GIVER);
+              StatusBar.setBarStyle('default', true);
+            }
+          },
+        })}
+        initialParams={initialParams}
+      />
+      <Tab.Screen
+        name="Try"
+        component={TryNavigator}
+        listeners={() => ({
+          tabPress: () => {
+            FastImage.clearMemoryCache();
+            if (Platform.OS !== 'ios') {
+              StatusBar.setBackgroundColor(Constants.TIER_COLORS.GIVER);
+              StatusBar.setBarStyle('default', true);
+            }
+          },
+        })}
+        initialParams={initialParams}
+      />
+      <Tab.Screen
+        name="Activity"
+        component={ActivityNavigator}
+        listeners={() => ({
+          tabPress: () => {
+            FastImage.clearMemoryCache();
             if (Platform.OS !== 'ios') {
               StatusBar.setBackgroundColor(Constants.TIER_COLORS.GIVER);
               StatusBar.setBarStyle('default', true);
