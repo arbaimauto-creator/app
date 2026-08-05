@@ -183,8 +183,8 @@ function ProductCard({ context }) {
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           {priceSource.discountRate > 0 ? (
-            <Text style={styles.productDiscount}>{`${Math.round(
-              priceSource.discountRate * 100,
+            <Text style={styles.productDiscount}>{`${utils.displayDiscountRate(
+              priceSource.discountRate,
             )}% `}</Text>
           ) : null}
           {price > 0 ? (

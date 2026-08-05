@@ -181,7 +181,7 @@ function ProductDescription({ product, logonUserId }) {
           ) : (product.discountPrice || discountPrice) > 0 ? (
             <View style={{ flexDirection: 'row' }}>
               <Text style={styles.linkedProductDiscountRate}>
-                {((product.discountRate || discountRate) * 100).toFixed(0)}%
+                {Utils.displayDiscountRate(product.discountRate || discountRate)}%
               </Text>
               <Text style={styles.linkedProductPrice}>
                 {Utils.displayPrice(product.discountPrice || discountPrice, global.state.region)}

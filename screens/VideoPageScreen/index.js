@@ -720,49 +720,8 @@ class VideoPageScreen extends React.PureComponent {
     }
   }
 
-  // menuShareToExport = function() {
-  //   console.log('menuShareToExport');
 
-  //   const url = Constants.CONTENTS_PAGE_ENDPOINT + 'videos/' + this.state.video.videoId;
-  //   const message = Strings.SHARE_REVIEW_MESSAGE;
-  //   const { description } = this.state.video;
-  //   const options = Platform.select({
-  //     ios: {
-  //       activityItemSources: [
-  //         {
-  //           placeholderItem: { type: 'url', content: url },
-  //           item: {
-  //             default: { type: 'url', content: url },
-  //           },
-  //           subject: {
-  //             default: description,
-  //           },
-  //           linkMetadata: { originalUrl: url, url, description },
-  //         },
-  //         {
-  //           placeholderItem: { type: 'text', content: message },
-  //           item: {
-  //             default: { type: 'text', content: message },
-  //             message: null, // Specify no text to share via Messages app.
-  //           },
-  //         },
-  //       ],
-  //     },
-  //     default: {
-  //       description,
-  //       subject: description,
-  //       message: `${message} ${url}`,
-  //     },
-  //   });
 
-  //   Share.open(options)
-  //     .then(res => {
-  //       console.log(res);
-  //     })
-  //     .catch(err => {
-  //       err && console.log(err);
-  //     });
-  // };
 
   menuShareToExport = function () {
     const { videoId, title, description, thumbnailUrl, titleByCountry, descriptionByCountry } =
@@ -818,48 +777,6 @@ class VideoPageScreen extends React.PureComponent {
     });
   };
 
-  // shareCommentsViaLink = function(id) {
-  //   APIprovider.getVideoCommentsDynamicLink(this.state.video.videoId).then(res => {
-  //     const url = res?.shortLink;
-  //     const message = Strings.SHARE_REVIEW_MESSAGE;
-  //     const { description } = this.state.video;
-  //     const options = Platform.select({
-  //       ios: {
-  //         activityItemSources: [
-  //           {
-  //             placeholderItem: { type: 'url', content: url },
-  //             item: {
-  //               default: { type: 'url', content: url },
-  //             },
-  //             subject: {
-  //               default: description,
-  //             },
-  //             linkMetadata: { originalUrl: url, url, description },
-  //           },
-  //           {
-  //             placeholderItem: { type: 'text', content: message },
-  //             item: {
-  //               default: { type: 'text', content: message },
-  //               message: null, // Specify no text to share via Messages app.
-  //             },
-  //           },
-  //         ],
-  //       },
-  //       default: {
-  //         description,
-  //         subject: description,
-  //         message: `${message} ${url}`,
-  //       },
-  //     });
-  //     Share.open(options)
-  //       .then(res => {
-  //         console.log(res);
-  //       })
-  //       .catch(err => {
-  //         err && console.log(err);
-  //       });
-  //   });
-  // };
 
   menuEditVideoClicked = function () {
     const { video } = this.state;

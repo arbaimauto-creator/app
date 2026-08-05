@@ -146,6 +146,12 @@ function convertUSDToKRW(value, KRWPerUSD = 1) {
   return (value / KRWPerUSD).toFixed(2);
 }
 
+// 할인율(0~1)을 "15" 형태의 표시용 정수 문자열로 통일.
+// 흩어져 있던 (rate*100).toFixed(0) 인라인 산식은 rate가 없으면 "NaN%"를 그렸다.
+function displayDiscountRate(rate) {
+  return String(Math.round((rate || 0) * 100));
+}
+
 function isImageFormat(filename) {
   const _fileExtension = filename.split('.').pop().toLowerCase();
 
@@ -1037,6 +1043,7 @@ export default {
   numberWithCommas,
   getFileNameWithDate,
   displayPrice,
+  displayDiscountRate,
   isImageFormat,
   isVideoFormat,
   getThumbnailImageFromVideo,

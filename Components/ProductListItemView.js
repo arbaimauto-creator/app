@@ -49,7 +49,7 @@ function ProductPrice({ product, doubleLines, KRWPerUSD }) {
     return (
       <View style={doubleLines ? styles.priceContainerDoubleRow : styles.priceContainerInRow}>
         <View style={styles.discountPriceContainer}>
-          <Text style={styles.discountRate}>-{(discountRate * 100).toFixed(0)}%</Text>
+          <Text style={styles.discountRate}>-{Utils.displayDiscountRate(discountRate)}%</Text>
           <Text style={styles.discountPrice}>
             {Utils.displayPrice(discountPrice, global.state.region, KRWPerUSD)}
           </Text>

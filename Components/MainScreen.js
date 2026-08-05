@@ -596,9 +596,11 @@ function MainScreen(props) {
                 marginBottom: -10,
                 paddingLeft: 20,
               }}
-              initialNumToRender={15}
-              maxToRenderPerBatch={15}
-              windowSize={15}
+              // 화면에 ~3개만 보이는 가로 리스트가 15개를 즉시 렌더하던 것을 축소
+              initialNumToRender={4}
+              maxToRenderPerBatch={4}
+              windowSize={5}
+              removeClippedSubviews={Platform.OS === 'android'}
             />
           </View>
         </View>

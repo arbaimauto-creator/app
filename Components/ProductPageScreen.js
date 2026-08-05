@@ -247,7 +247,7 @@ function Price({ context }) {
         ) : (
           <>
             <View style={styles.discountPriceContainer}>
-              <Text style={styles.discountRate}>-{(product.discountRate * 100).toFixed(0)}%</Text>
+              <Text style={styles.discountRate}>-{Utils.displayDiscountRate(product.discountRate)}%</Text>
               <Text style={styles.discountPrice}>
                 {Utils.displayPrice(
                   product.discountPrice,
@@ -1162,7 +1162,11 @@ function PurchasePopup({ context }) {
                   return;
                 }
 
-                if (context.state.buyNumber === product.availableNumberToSale) {
+                // === 비교는 품절(0)·미로딩(undefined) 시 상한이 뚫린다 (B2B 쪽 수정과 동기화)
+                if (
+                  product.availableNumberToSale !== -1 &&
+                  context.state.buyNumber >= (product.availableNumberToSale ?? 0)
+                ) {
                   Alert.alert(
                     Strings.MAX_AVAILABLE_PRODUCT_NUMBER,
                     Strings.CHECK_MAX_AVAILABLE_PRODUCT,
@@ -1613,8 +1617,9 @@ export default class ProductPageScreen extends React.Component {
     APIprovider.getProductDynamicLink(
       productId,
       title,
-      description.slice(0, 250),
-      attachmentList[0].url,
+      description?.slice(0, 250),
+      // 이미지 없는 상품 공유 시 크래시 방지 (B2B 쪽 수정과 동기화)
+      attachmentList?.[0]?.url,
     ).then((res) => {
       const url = res?.shortLink;
       const message = Strings.SHARE_PRODUCT_MESSAGE;

@@ -19,6 +19,17 @@ import { store } from '../../redux/store';
 import { setGuest } from '../../slices/user';
 // import { ChannelIO } from 'react-native-channel-plugin';
 
+// 탈퇴 계정 안내 Alert — 5개 로그인 경로에 동일 블록이 복붙돼 있던 것을 통합
+const showDeletedAccountAlert = (onConfirm = () => {}) => {
+  Alert.alert(Strings.SIGNIN_ALERT_CANCEL_MEMBERSHIP_TITLE, Strings.SIGNIN_ALERT_CANCEL_MEMBERSHIP_BODY, [
+    { text: Strings.OK, onPress: onConfirm },
+  ]);
+};
+
+// 게스트 로그인용 고정 인증 페이로드 — 두 함수에 1.5KB 리터럴이 복붙돼 있던 것을 상수화
+const GUEST_AUTH_DATA_JSON =
+  '{"idToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjhjMjdkYjRkMTNmNTRlNjU3ZDI2NWI0NTExMDA4MGI0ODhlYjQzOGEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiI5MzkyNjY0NDI2MDAtdWRrNTdrcGhuc2o4NzdpZm43Y2o0aTVhZ2QybTQ2MnAuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI5MzkyNjY0NDI2MDAtcGRyNGxjYzAyaGFsZ3R1MDVxbnFkbzY4cGtzZHFubW8uYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMDYyMDQ4NTMxNTgyMzU5OTE3NzciLCJlbWFpbCI6ImFyYmFpbS5ndWVzdEBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXRfaGFzaCI6IjMwNjJ0TkRQQUpqN0d0RzJjX0s5WnciLCJub25jZSI6IklvY0tGRzJjdU1DY2dWeXQzTFZIVU9CQ25sckp6RnNoQVI5cWJoaEtIdDAiLCJuYW1lIjoiZ3Vlc3QgYXJiYWltIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FFZEZUcDd4ZlFFbzZHV0Q1WnY2aFAzeXlOWGdYTmg1WFZSX1d5akFHRDJGPXM5Ni1jIiwiZ2l2ZW5fbmFtZSI6Imd1ZXN0IiwiZmFtaWx5X25hbWUiOiJhcmJhaW0iLCJsb2NhbGUiOiJrbyIsImlhdCI6MTY3MTUxOTE5OSwiZXhwIjoxNjcxNTIyNzk5fQ.Y1Oe8q7tePUX83hCFMq1W9n-znECsTe-vyOKmyZbeOPWw9OB7kt5pF_X-oyfZ4NSvMYdhPxqw0taibzvycbOU8sdKCEdzjUdUx58beK6k9MwNW8ae9pbST161ReuJ2GLU859dga9voXYlSEmVMWYvHbNZ8z1giMDr2T9dAmkjjKdJxUrh_8bQfRYgGfB4P0nXKzdGB87yOpOl-YVD_MWK5jC0qQD05XQbQm9DL0xDEDM5yK7Die8C-7rArMScusmhQAJcf-y2PZjTbU_nFhsiMxAstsHyr_nSGtamlonzSOcT8EUQsX08pOJo-AWxjVC-PGMR61xnPIztK0C18dFPA", "scopes": ["https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile", "openid"], "serverAuthCode": "4/0AWgavddzx2sfd8bxLEje6pN91f-pNi7i7r2IxgDR9vQKZyXiUSMhSWYyghWRmyJNXL2lXA", "user": {"email": "arbaim.guest@gmail.com", "familyName": "arbaim", "givenName": "guest", "id": "106204853158235991777", "name": "guest arbaim", "photo": "https://lh3.googleusercontent.com/a/AEdFTp7xfQEo6GWD5Zv6hP3yyNXgXNh5XVR_WyjAGD2F=s120"}}';
+
 const logCallback = (log, callback) => {
   console.log(log);
   callback;
@@ -65,16 +76,7 @@ export const appleLogin = async (props, setLoggingIn) => {
             email: authData.email,
           });
         } else if (result.isDeleted) {
-          Alert.alert(
-            Strings.SIGNIN_ALERT_CANCEL_MEMBERSHIP_TITLE,
-            Strings.SIGNIN_ALERT_CANCEL_MEMBERSHIP_BODY,
-            [
-              {
-                text: Strings.OK,
-                onPress: () => {},
-              },
-            ],
-          );
+          showDeletedAccountAlert(() => {});
         } else {
           APIprovider.setRequester(requesterToken, result._id);
           await Preference.set('userId', result._id);
@@ -156,18 +158,9 @@ export const kakaoLogin = (props, onSucces, setLoggingIn) => {
                   profilePicUrl: profile.profile_image_url,
                 });
               } else if (result.isDeleted) {
-                Alert.alert(
-                  Strings.SIGNIN_ALERT_CANCEL_MEMBERSHIP_TITLE,
-                  Strings.SIGNIN_ALERT_CANCEL_MEMBERSHIP_BODY,
-                  [
-                    {
-                      text: Strings.OK,
-                      onPress: () => {
+                showDeletedAccountAlert(() => {
                         KakaoLogout();
-                      },
-                    },
-                  ],
-                );
+                      });
               } else {
                 APIprovider.setRequester(authData.requesterToken, result._id);
                 await Preference.set('userId', result._id);
@@ -176,6 +169,11 @@ export const kakaoLogin = (props, onSucces, setLoggingIn) => {
                 await Preference.set('userIsSeller', result.sellerStatus.toString());
                 await Preference.set('userAccessToken', authData.requesterToken);
                 await Preference.set('userAuthType', 'kakao');
+                // 다른 로그인 경로와 달리 카카오만 약관 동의 상태 저장이 누락돼 있었음 (드리프트 동기화)
+                await Preference.set(
+                  'agreementToTermsOfService',
+                  result.agreementToTermsOfService?.toString() ?? 'false',
+                );
 
                 const currency = await APIprovider.getCurrencyRate('USD');
                 await Preference.set('KRW/USD', currency.currencyRate.toString());
@@ -242,16 +240,7 @@ export const facebookLogin = (props, setLoggingIn) => {
                   profilePicUrl: authData.profilePic,
                 });
               } else if (loginResult.isDeleted) {
-                Alert.alert(
-                  Strings.SIGNIN_ALERT_CANCEL_MEMBERSHIP_TITLE,
-                  Strings.SIGNIN_ALERT_CANCEL_MEMBERSHIP_BODY,
-                  [
-                    {
-                      text: Strings.OK,
-                      onPress: () => {},
-                    },
-                  ],
-                );
+                showDeletedAccountAlert(() => {});
               } else {
                 APIprovider.setRequester(requesterToken, loginResult._id);
                 await Preference.set('userId', loginResult._id);
@@ -341,18 +330,9 @@ export const googleLogin = async (props, setLoggingIn) => {
             profilePicUrl: authData.user.photo,
           });
         } else if (result.isDeleted) {
-          Alert.alert(
-            Strings.SIGNIN_ALERT_CANCEL_MEMBERSHIP_TITLE,
-            Strings.SIGNIN_ALERT_CANCEL_MEMBERSHIP_BODY,
-            [
-              {
-                text: Strings.OK,
-                onPress: () => {
+          showDeletedAccountAlert(() => {
                   GoogleSignin.signOut();
-                },
-              },
-            ],
-          );
+                });
         } else {
           APIprovider.setRequester(authData.requesterToken, result._id);
           await Preference.set('userId', result._id);
@@ -421,9 +401,7 @@ export const guestUser = async (props, setLoggingIn, isDynamicLink = false) => {
   try {
     setLoggingIn(true);
 
-    const authDataJSON =
-      '{"idToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjhjMjdkYjRkMTNmNTRlNjU3ZDI2NWI0NTExMDA4MGI0ODhlYjQzOGEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiI5MzkyNjY0NDI2MDAtdWRrNTdrcGhuc2o4NzdpZm43Y2o0aTVhZ2QybTQ2MnAuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI5MzkyNjY0NDI2MDAtcGRyNGxjYzAyaGFsZ3R1MDVxbnFkbzY4cGtzZHFubW8uYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMDYyMDQ4NTMxNTgyMzU5OTE3NzciLCJlbWFpbCI6ImFyYmFpbS5ndWVzdEBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXRfaGFzaCI6IjMwNjJ0TkRQQUpqN0d0RzJjX0s5WnciLCJub25jZSI6IklvY0tGRzJjdU1DY2dWeXQzTFZIVU9CQ25sckp6RnNoQVI5cWJoaEtIdDAiLCJuYW1lIjoiZ3Vlc3QgYXJiYWltIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FFZEZUcDd4ZlFFbzZHV0Q1WnY2aFAzeXlOWGdYTmg1WFZSX1d5akFHRDJGPXM5Ni1jIiwiZ2l2ZW5fbmFtZSI6Imd1ZXN0IiwiZmFtaWx5X25hbWUiOiJhcmJhaW0iLCJsb2NhbGUiOiJrbyIsImlhdCI6MTY3MTUxOTE5OSwiZXhwIjoxNjcxNTIyNzk5fQ.Y1Oe8q7tePUX83hCFMq1W9n-znECsTe-vyOKmyZbeOPWw9OB7kt5pF_X-oyfZ4NSvMYdhPxqw0taibzvycbOU8sdKCEdzjUdUx58beK6k9MwNW8ae9pbST161ReuJ2GLU859dga9voXYlSEmVMWYvHbNZ8z1giMDr2T9dAmkjjKdJxUrh_8bQfRYgGfB4P0nXKzdGB87yOpOl-YVD_MWK5jC0qQD05XQbQm9DL0xDEDM5yK7Die8C-7rArMScusmhQAJcf-y2PZjTbU_nFhsiMxAstsHyr_nSGtamlonzSOcT8EUQsX08pOJo-AWxjVC-PGMR61xnPIztK0C18dFPA", "scopes": ["https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile", "openid"], "serverAuthCode": "4/0AWgavddzx2sfd8bxLEje6pN91f-pNi7i7r2IxgDR9vQKZyXiUSMhSWYyghWRmyJNXL2lXA", "user": {"email": "arbaim.guest@gmail.com", "familyName": "arbaim", "givenName": "guest", "id": "106204853158235991777", "name": "guest arbaim", "photo": "https://lh3.googleusercontent.com/a/AEdFTp7xfQEo6GWD5Zv6hP3yyNXgXNh5XVR_WyjAGD2F=s120"}}';
-    const authData = JSON.parse(authDataJSON);
+    const authData = JSON.parse(GUEST_AUTH_DATA_JSON);
     // console.log('AUTH_data_PROVIDER', authData);
     APIprovider.login('google', authData)
       .then(async (result) => {
@@ -436,18 +414,9 @@ export const guestUser = async (props, setLoggingIn, isDynamicLink = false) => {
             profilePicUrl: authData.user.photo,
           });
         } else if (result.isDeleted) {
-          Alert.alert(
-            Strings.SIGNIN_ALERT_CANCEL_MEMBERSHIP_TITLE,
-            Strings.SIGNIN_ALERT_CANCEL_MEMBERSHIP_BODY,
-            [
-              {
-                text: Strings.OK,
-                onPress: () => {
+          showDeletedAccountAlert(() => {
                   GoogleSignin.signOut();
-                },
-              },
-            ],
-          );
+                });
         } else {
           APIprovider.setRequester(authData.idToken, result._id);
           await Preference.set('userId', result._id);
@@ -513,9 +482,7 @@ export const loginWithGuest = async () => {
     webClientId: '939266442600-pdr4lcc02halgtu05qnqdo68pksdqnmo.apps.googleusercontent.com',
   });
 
-  const authDataJSON =
-    '{"idToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjhjMjdkYjRkMTNmNTRlNjU3ZDI2NWI0NTExMDA4MGI0ODhlYjQzOGEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiI5MzkyNjY0NDI2MDAtdWRrNTdrcGhuc2o4NzdpZm43Y2o0aTVhZ2QybTQ2MnAuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI5MzkyNjY0NDI2MDAtcGRyNGxjYzAyaGFsZ3R1MDVxbnFkbzY4cGtzZHFubW8uYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMDYyMDQ4NTMxNTgyMzU5OTE3NzciLCJlbWFpbCI6ImFyYmFpbS5ndWVzdEBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXRfaGFzaCI6IjMwNjJ0TkRQQUpqN0d0RzJjX0s5WnciLCJub25jZSI6IklvY0tGRzJjdU1DY2dWeXQzTFZIVU9CQ25sckp6RnNoQVI5cWJoaEtIdDAiLCJuYW1lIjoiZ3Vlc3QgYXJiYWltIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FFZEZUcDd4ZlFFbzZHV0Q1WnY2aFAzeXlOWGdYTmg1WFZSX1d5akFHRDJGPXM5Ni1jIiwiZ2l2ZW5fbmFtZSI6Imd1ZXN0IiwiZmFtaWx5X25hbWUiOiJhcmJhaW0iLCJsb2NhbGUiOiJrbyIsImlhdCI6MTY3MTUxOTE5OSwiZXhwIjoxNjcxNTIyNzk5fQ.Y1Oe8q7tePUX83hCFMq1W9n-znECsTe-vyOKmyZbeOPWw9OB7kt5pF_X-oyfZ4NSvMYdhPxqw0taibzvycbOU8sdKCEdzjUdUx58beK6k9MwNW8ae9pbST161ReuJ2GLU859dga9voXYlSEmVMWYvHbNZ8z1giMDr2T9dAmkjjKdJxUrh_8bQfRYgGfB4P0nXKzdGB87yOpOl-YVD_MWK5jC0qQD05XQbQm9DL0xDEDM5yK7Die8C-7rArMScusmhQAJcf-y2PZjTbU_nFhsiMxAstsHyr_nSGtamlonzSOcT8EUQsX08pOJo-AWxjVC-PGMR61xnPIztK0C18dFPA", "scopes": ["https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile", "openid"], "serverAuthCode": "4/0AWgavddzx2sfd8bxLEje6pN91f-pNi7i7r2IxgDR9vQKZyXiUSMhSWYyghWRmyJNXL2lXA", "user": {"email": "arbaim.guest@gmail.com", "familyName": "arbaim", "givenName": "guest", "id": "106204853158235991777", "name": "guest arbaim", "photo": "https://lh3.googleusercontent.com/a/AEdFTp7xfQEo6GWD5Zv6hP3yyNXgXNh5XVR_WyjAGD2F=s120"}}';
-  const authData = JSON.parse(authDataJSON);
+  const authData = JSON.parse(GUEST_AUTH_DATA_JSON);
 
   const loginResult = await APIprovider.login('google', authData);
 
