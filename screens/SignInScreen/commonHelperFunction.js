@@ -35,6 +35,43 @@ const logCallback = (log, callback) => {
   callback;
 };
 
+// 5개 로그인 경로에 반복되던 성공 처리 공통부.
+// accessToken은 provider별 토큰 필드(apple=authorizationCode, kakao/google=requesterToken 등)를 호출부에서 넘긴다.
+const persistLoginSession = async (result, { authType, accessToken }) => {
+  APIprovider.setRequester(accessToken, result._id);
+  await Preference.set('userId', result._id);
+  await Preference.set('userName', result.name);
+  await Preference.set('userProfilePicUrl', result.profilePicUrl);
+  await Preference.set('userIsSeller', result.sellerStatus.toString());
+  await Preference.set('userAccessToken', accessToken);
+  await Preference.set('userAuthType', authType);
+  await Preference.set(
+    'agreementToTermsOfService',
+    result.agreementToTermsOfService?.toString() ?? 'false',
+  );
+  const currency = await APIprovider.getCurrencyRate('USD');
+  await Preference.set('KRW/USD', currency.currencyRate.toString());
+};
+
+const applyLogonUser = (
+  result,
+  { setLogonUserId, setLogonUserName, setLogonUserProfilePicUrl, setLogonUserIsSeller },
+) => {
+  setLogonUserId(result._id);
+  setLogonUserName(result.name);
+  setLogonUserProfilePicUrl(result.profilePicUrl);
+  setLogonUserIsSeller(result.sellerStatus.toString());
+};
+
+const resetToMain = (navigation) => {
+  navigation.dispatch(
+    CommonActions.reset({
+      index: 0,
+      routes: [{ name: 'MainBottom' }],
+    }),
+  );
+};
+
 // export const bootChannelIO = async (result) => {
 //   const hashResult = await APIprovider.getChannelIOMemberHash({
 //     memberId: result.memberId || result.name,
@@ -78,38 +115,19 @@ export const appleLogin = async (props, setLoggingIn) => {
         } else if (result.isDeleted) {
           showDeletedAccountAlert(() => {});
         } else {
-          APIprovider.setRequester(requesterToken, result._id);
-          await Preference.set('userId', result._id);
-          await Preference.set('userName', result.name);
-          await Preference.set('userProfilePicUrl', result.profilePicUrl);
-          // await Preference.set('userIsSeller', result.isSeller.toString());
-          await Preference.set('userIsSeller', result.sellerStatus.toString());
-          await Preference.set('userAccessToken', requesterToken);
-          await Preference.set('userAuthType', 'apple');
-
-          await Preference.set(
-            'agreementToTermsOfService',
-            result.agreementToTermsOfService.toString(),
-          );
-          const currency = await APIprovider.getCurrencyRate('USD');
-          await Preference.set('KRW/USD', currency.currencyRate.toString());
-
-          setLogonUserId(result._id);
-          setLogonUserName(result.name);
-          setLogonUserProfilePicUrl(result.profilePicUrl);
-          // setLogonUserIsSeller(result.isSeller.toString());
-          setLogonUserIsSeller(result.sellerStatus.toString());
+          await persistLoginSession(result, { authType: 'apple', accessToken: requesterToken });
+          applyLogonUser(result, {
+            setLogonUserId,
+            setLogonUserName,
+            setLogonUserProfilePicUrl,
+            setLogonUserIsSeller,
+          });
 
           if (!__DEV__) {
             // await bootChannelIO({ ...result, memberId: getUniqueIdSync() });
           }
 
-          navigation.dispatch(
-            CommonActions.reset({
-              index: 0,
-              routes: [{ name: 'MainBottom' }],
-            }),
-          );
+          resetToMain(navigation);
         }
         setLoggingIn(false);
       })
@@ -162,37 +180,22 @@ export const kakaoLogin = (props, onSucces, setLoggingIn) => {
                         KakaoLogout();
                       });
               } else {
-                APIprovider.setRequester(authData.requesterToken, result._id);
-                await Preference.set('userId', result._id);
-                await Preference.set('userName', result.name);
-                await Preference.set('userProfilePicUrl', result.profilePicUrl);
-                await Preference.set('userIsSeller', result.sellerStatus.toString());
-                await Preference.set('userAccessToken', authData.requesterToken);
-                await Preference.set('userAuthType', 'kakao');
-                // 다른 로그인 경로와 달리 카카오만 약관 동의 상태 저장이 누락돼 있었음 (드리프트 동기화)
-                await Preference.set(
-                  'agreementToTermsOfService',
-                  result.agreementToTermsOfService?.toString() ?? 'false',
-                );
-
-                const currency = await APIprovider.getCurrencyRate('USD');
-                await Preference.set('KRW/USD', currency.currencyRate.toString());
-
-                setLogonUserId(result._id);
-                setLogonUserName(result.name);
-                setLogonUserProfilePicUrl(result.profilePicUrl);
-                setLogonUserIsSeller(result.sellerStatus.toString());
+                await persistLoginSession(result, {
+                  authType: 'kakao',
+                  accessToken: authData.requesterToken,
+                });
+                applyLogonUser(result, {
+                  setLogonUserId,
+                  setLogonUserName,
+                  setLogonUserProfilePicUrl,
+                  setLogonUserIsSeller,
+                });
 
                 if (!__DEV__) {
                   // await bootChannelIO({ ...result, memberId: getUniqueIdSync() });
                 }
 
-                navigation.dispatch(
-                  CommonActions.reset({
-                    index: 0,
-                    routes: [{ name: 'MainBottom' }],
-                  }),
-                );
+                resetToMain(navigation);
               }
               setLoggingIn(false);
             })
@@ -242,38 +245,22 @@ export const facebookLogin = (props, setLoggingIn) => {
               } else if (loginResult.isDeleted) {
                 showDeletedAccountAlert(() => {});
               } else {
-                APIprovider.setRequester(requesterToken, loginResult._id);
-                await Preference.set('userId', loginResult._id);
-                await Preference.set('userName', loginResult.name);
-                await Preference.set('userProfilePicUrl', loginResult.profilePicUrl);
-                // await Preference.set('userIsSeller', loginResult.isSeller.toString());
-                await Preference.set('userIsSeller', loginResult.sellerStatus.toString());
-                await Preference.set('userAuthType', 'facebook');
-                await Preference.set('userAccessToken', requesterToken);
-
-                await Preference.set(
-                  'agreementToTermsOfService',
-                  loginResult.agreementToTermsOfService.toString(),
-                );
-                const currency = await APIprovider.getCurrencyRate('USD');
-                await Preference.set('KRW/USD', currency.currencyRate.toString());
-
-                setLogonUserId(loginResult._id);
-                setLogonUserName(loginResult.name);
-                setLogonUserProfilePicUrl(loginResult.profilePicUrl);
-                // setLogonUserIsSeller(loginResult.isSeller.toString());
-                setLogonUserIsSeller(loginResult.sellerStatus.toString());
+                await persistLoginSession(loginResult, {
+                  authType: 'facebook',
+                  accessToken: requesterToken,
+                });
+                applyLogonUser(loginResult, {
+                  setLogonUserId,
+                  setLogonUserName,
+                  setLogonUserProfilePicUrl,
+                  setLogonUserIsSeller,
+                });
 
                 if (!__DEV__) {
                   // await bootChannelIO({ ...result, memberId: getUniqueIdSync() });
                 }
 
-                navigation.dispatch(
-                  CommonActions.reset({
-                    index: 0,
-                    routes: [{ name: 'MainBottom' }],
-                  }),
-                );
+                resetToMain(navigation);
               }
               setLoggingIn(false);
             })
@@ -334,38 +321,22 @@ export const googleLogin = async (props, setLoggingIn) => {
                   GoogleSignin.signOut();
                 });
         } else {
-          APIprovider.setRequester(authData.requesterToken, result._id);
-          await Preference.set('userId', result._id);
-          await Preference.set('userName', result.name);
-          await Preference.set('userProfilePicUrl', result.profilePicUrl);
-          // await Preference.set('userIsSeller', result.isSeller.toString());
-          await Preference.set('userIsSeller', result.sellerStatus.toString());
-          await Preference.set('userAccessToken', authData.requesterToken);
-          await Preference.set('userAuthType', 'google');
-
-          await Preference.set(
-            'agreementToTermsOfService',
-            result.agreementToTermsOfService.toString(),
-          );
-          const currency = await APIprovider.getCurrencyRate('USD');
-          await Preference.set('KRW/USD', currency.currencyRate.toString());
-
-          setLogonUserId(result._id);
-          setLogonUserName(result.name);
-          setLogonUserProfilePicUrl(result.profilePicUrl);
-          // setLogonUserIsSeller(result.isSeller.toString());
-          setLogonUserIsSeller(result.sellerStatus.toString());
+          await persistLoginSession(result, {
+            authType: 'google',
+            accessToken: authData.requesterToken,
+          });
+          applyLogonUser(result, {
+            setLogonUserId,
+            setLogonUserName,
+            setLogonUserProfilePicUrl,
+            setLogonUserIsSeller,
+          });
 
           if (!__DEV__) {
             // await bootChannelIO({ ...result, memberId: getUniqueIdSync() });
           }
 
-          navigation.dispatch(
-            CommonActions.reset({
-              index: 0,
-              routes: [{ name: 'MainBottom' }],
-            }),
-          );
+          resetToMain(navigation);
         }
         setLoggingIn(false);
       })
@@ -418,37 +389,20 @@ export const guestUser = async (props, setLoggingIn, isDynamicLink = false) => {
                   GoogleSignin.signOut();
                 });
         } else {
-          APIprovider.setRequester(authData.idToken, result._id);
-          await Preference.set('userId', result._id);
-          await Preference.set('userName', result.name);
-          await Preference.set('userProfilePicUrl', result.profilePicUrl);
-          await Preference.set('userIsSeller', result.sellerStatus.toString());
-          await Preference.set('userAccessToken', authData.idToken);
-          await Preference.set('userAuthType', 'google');
-
-          await Preference.set(
-            'agreementToTermsOfService',
-            result.agreementToTermsOfService.toString(),
-          );
-          const currency = await APIprovider.getCurrencyRate('USD');
-          await Preference.set('KRW/USD', currency.currencyRate.toString());
-
-          setLogonUserId(result._id);
-          setLogonUserName(result.name);
-          setLogonUserProfilePicUrl(result.profilePicUrl);
-          setLogonUserIsSeller(result.sellerStatus.toString());
+          await persistLoginSession(result, { authType: 'google', accessToken: authData.idToken });
+          applyLogonUser(result, {
+            setLogonUserId,
+            setLogonUserName,
+            setLogonUserProfilePicUrl,
+            setLogonUserIsSeller,
+          });
 
           if (!__DEV__) {
             // await bootChannelIO({ name: getUniqueIdSync() });
           }
 
           if (!isDynamicLink) {
-            navigation.dispatch(
-              CommonActions.reset({
-                index: 0,
-                routes: [{ name: 'MainBottom' }],
-              }),
-            );
+            resetToMain(navigation);
           }
         }
         setLoggingIn(false);
