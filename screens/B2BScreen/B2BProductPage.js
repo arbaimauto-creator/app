@@ -30,7 +30,6 @@ import FastImage from 'react-native-fast-image';
 import { getBottomSpace, isIphoneX } from 'react-native-iphone-x-helper';
 import LinearGradient from 'react-native-linear-gradient';
 import Animated from 'react-native-reanimated';
-import Share from 'react-native-share';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import { FlatGrid } from 'react-native-super-grid';
 import IconFeather from 'react-native-vector-icons/Feather';
@@ -49,6 +48,7 @@ import VideoListItemView from '../../Components/VideoListItemView';
 import { CheckBox, ImageModal } from '../../Components/Views';
 import { PricePrivate } from '../../Components/Views/ProductItemVerticalView';
 import Utils, { LogoutAlert, getIPhoneHeaderMarginTop, isGuestUser } from '../../Components/utils';
+import { shareLink } from '../../Components/utils/share';
 import { Context } from '../../Contexts';
 import { setTotalRevenue, setTotalReward } from '../../slices/user';
 import UserProfilePicView from '../UserPageScreen/UserProfilePicView';
@@ -1511,42 +1511,8 @@ export default class ProductPageScreen extends React.Component {
     const url = Constants.CONTENTS_PAGE_ENDPOINT + 'products/' + this.state.product.productId;
     const message = Strings.SHARE_PRODUCT_MESSAGE;
     const { title } = this.state.product;
-    const options = Platform.select({
-      ios: {
-        activityItemSources: [
-          {
-            placeholderItem: { type: 'url', content: url },
-            item: {
-              default: { type: 'url', content: url },
-            },
-            subject: {
-              default: title,
-            },
-            linkMetadata: { originalUrl: url, url, title },
-          },
-          {
-            placeholderItem: { type: 'text', content: message },
-            item: {
-              default: { type: 'text', content: message },
-              message: null, // Specify no text to share via Messages app.
-            },
-          },
-        ],
-      },
-      default: {
-        title,
-        subject: title,
-        message: `${message} ${url}`,
-      },
-    });
 
-    Share.open(options)
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err) => {
-        err && console.log(err);
-      });
+    shareLink({ url, message, description: title });
   };
 
   productShareWithDynamicLink = function () {
@@ -1561,42 +1527,8 @@ export default class ProductPageScreen extends React.Component {
     ).then((res) => {
       const url = res?.shortLink;
       const message = Strings.SHARE_PRODUCT_MESSAGE;
-      const options = Platform.select({
-        ios: {
-          activityItemSources: [
-            {
-              placeholderItem: { type: 'url', content: url },
-              item: {
-                default: { type: 'url', content: url },
-              },
-              subject: {
-                default: description,
-              },
-              linkMetadata: { originalUrl: url, url, description },
-            },
-            {
-              placeholderItem: { type: 'text', content: message },
-              item: {
-                default: { type: 'text', content: message },
-                message: null, // Specify no text to share via Messages app.
-              },
-            },
-          ],
-        },
-        default: {
-          description,
-          subject: description,
-          message: `${message} ${url}`,
-        },
-      });
 
-      Share.open(options)
-        .then((res) => {
-          console.log(res);
-        })
-        .catch((err) => {
-          err && console.log(err);
-        });
+      shareLink({ url, message, description });
     }).catch((err) => {
       // 링크 생성 실패 시 unhandled rejection 방지
       console.log('getProductDynamicLink error', err);

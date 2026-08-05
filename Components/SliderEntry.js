@@ -18,11 +18,11 @@ import {
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import LinearGradient from 'react-native-linear-gradient';
-import Share from 'react-native-share';
 import Video from 'react-native-video';
 import { Context } from '../Contexts';
 import APIprovider from './APIprovider';
 import Constants from './Constants';
+import { shareLink } from './utils/share';
 import ReviewDescriptionSummary from './CustomComponents/ReviewDescriptionSummary';
 import SliderRightButtons from './CustomComponents/SliderRightButtons';
 import Strings from './Strings';
@@ -546,42 +546,8 @@ export default class SliderEntry extends PureComponent {
   shareToExport = function (videoId, description) {
     const url = Constants.CONTENTS_PAGE_ENDPOINT + 'videos/' + videoId;
     const message = Strings.SHARE_REVIEW_MESSAGE;
-    const options = Platform.select({
-      ios: {
-        activityItemSources: [
-          {
-            placeholderItem: { type: 'url', content: url },
-            item: {
-              default: { type: 'url', content: url },
-            },
-            subject: {
-              default: description,
-            },
-            linkMetadata: { originalUrl: url, url, description },
-          },
-          {
-            placeholderItem: { type: 'text', content: message },
-            item: {
-              default: { type: 'text', content: message },
-              message: null, // Specify no text to share via Messages app.
-            },
-          },
-        ],
-      },
-      default: {
-        description,
-        subject: description,
-        message: `${message} ${url}`,
-      },
-    });
 
-    Share.open(options)
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err) => {
-        err && console.log(err);
-      });
+    shareLink({ url, message, description });
   };
 
   render() {

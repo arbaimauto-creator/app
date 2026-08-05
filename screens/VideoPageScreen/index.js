@@ -24,7 +24,6 @@ import { Button, Text } from 'react-native-elements';
 import FastImage from '../../Components/utils/SafeFastImage.tsx';
 import { getBottomSpace, isIphoneX } from 'react-native-iphone-x-helper';
 import Animated from 'react-native-reanimated';
-import Share from 'react-native-share';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 import IconMaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { connect, useDispatch } from 'react-redux';
@@ -33,6 +32,7 @@ import Constants from '../../Components/Constants';
 import HelpBubble from '../../Components/CustomComponents/HelpBubble';
 import ReportModal from '../../Components/ReportModal';
 import SpeechBubbleView from '../../Components/SpeechBubbleView';
+import { shareLink } from '../../Components/utils/share';
 import Strings, { getLanguage } from '../../Components/Strings';
 import utils, { LogoutAlert, isGuestUser, videoWatchedFBPixel } from '../../Components/utils';
 import { CheckBox, LoadingView } from '../../Components/Views';
@@ -738,42 +738,8 @@ class VideoPageScreen extends React.PureComponent {
     ).then((res) => {
       const url = res?.shortLink;
       const message = Strings.SHARE_REVIEW_MESSAGE;
-      const options = Platform.select({
-        ios: {
-          activityItemSources: [
-            {
-              placeholderItem: { type: 'url', content: url },
-              item: {
-                default: { type: 'url', content: url },
-              },
-              subject: {
-                default: description,
-              },
-              linkMetadata: { originalUrl: url, url, description },
-            },
-            {
-              placeholderItem: { type: 'text', content: message },
-              item: {
-                default: { type: 'text', content: message },
-                message: null, // Specify no text to share via Messages app.
-              },
-            },
-          ],
-        },
-        default: {
-          description,
-          subject: description,
-          message: `${message} ${url}`,
-        },
-      });
 
-      Share.open(options)
-        .then((shareRes) => {
-          console.log(shareRes);
-        })
-        .catch((err) => {
-          err && console.log(err);
-        });
+      shareLink({ url, message, description });
     });
   };
 

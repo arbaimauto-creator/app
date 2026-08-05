@@ -11,7 +11,6 @@ import {
   View,
 } from 'react-native';
 import { useSoftInputState } from 'react-native-avoid-softinput';
-import Share from 'react-native-share';
 import IconAntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useDispatch, useSelector } from 'react-redux';
@@ -23,6 +22,7 @@ import APIprovider from '../../APIprovider';
 import Constants from '../../Constants';
 import Strings from '../../Strings';
 import { moderateScale } from '../../utils/scailing';
+import { shareLink } from '../../utils/share';
 import LoadingView from '../../Views/LoadingView';
 import ShowParticipants from './ShowParticipants';
 export default function QNAChat(props) {
@@ -177,42 +177,8 @@ export default function QNAChat(props) {
     APIprovider.getQnaDynamicLink(_id, host.name, hashtag, host.profilePicUrl).then((res) => {
       const url = res?.shortLink;
       const message = Strings.QNA_SHARE(host.name, hashtag);
-      const options = Platform.select({
-        ios: {
-          activityItemSources: [
-            {
-              placeholderItem: { type: 'url', content: url },
-              item: {
-                default: { type: 'url', content: url },
-              },
-              subject: {
-                default: hashtag,
-              },
-              linkMetadata: { originalUrl: url, url, hashtag },
-            },
-            {
-              placeholderItem: { type: 'text', content: message },
-              item: {
-                default: { type: 'text', content: message },
-                message: null, // Specify no text to share via Messages app.
-              },
-            },
-          ],
-        },
-        default: {
-          hashtag,
-          subject: hashtag,
-          message: `${message} ${url}`,
-        },
-      });
 
-      Share.open(options)
-        .then((res) => {
-          console.log(res);
-        })
-        .catch((err) => {
-          err && console.log(err);
-        });
+      shareLink({ url, message, description: hashtag });
     });
   };
 

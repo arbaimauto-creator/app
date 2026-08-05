@@ -14,11 +14,11 @@ import {
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import Share from 'react-native-share';
 import APIprovider from '../../APIprovider';
 import Constants from '../../Constants';
 import Strings from '../../Strings';
 import { moderateScale } from '../../utils/scailing';
+import { shareLink } from '../../utils/share';
 import HeaderLeftBackButton from '../headerBackButton/headerLeftBackButton';
 
 const width = Dimensions.get('window').width;
@@ -69,42 +69,8 @@ export default function NoticeDetail({ title = '' }) {
     APIprovider.getEventDynamicLink(null, eventTitle, description, shortImageUri).then((res) => {
       const url = res?.shortLink;
       const message = Strings.SHARE_EVENT_MESSAGE;
-      const options = Platform.select({
-        ios: {
-          activityItemSources: [
-            {
-              placeholderItem: { type: 'url', content: url },
-              item: {
-                default: { type: 'url', content: url },
-              },
-              subject: {
-                default: description,
-              },
-              linkMetadata: { originalUrl: url, url, description },
-            },
-            {
-              placeholderItem: { type: 'text', content: message },
-              item: {
-                default: { type: 'text', content: message },
-                message: null, // Specify no text to share via Messages app.
-              },
-            },
-          ],
-        },
-        default: {
-          description,
-          subject: description,
-          message: `${message} ${url}`,
-        },
-      });
 
-      Share.open(options)
-        .then((shareResult) => {
-          console.log(shareResult);
-        })
-        .catch((err) => {
-          err && console.log(err);
-        });
+      shareLink({ url, message, description });
     });
   };
 

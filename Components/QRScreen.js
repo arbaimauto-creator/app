@@ -5,12 +5,12 @@ import RNFS from 'react-native-fs';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import QRCode from 'react-native-qrcode-svg';
 import { getStatusBarHeight } from 'react-native-safearea-height';
-import Share from 'react-native-share';
 import APIprovider from './APIprovider';
 import Constants from './Constants';
 import HeaderLeftBackButton from './CustomComponents/headerBackButton/headerLeftBackButton';
 import Strings from './Strings';
 import { moderateScale } from './utils/scailing';
+import { shareLink } from './utils/share';
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 
 let toastRef;
@@ -49,42 +49,8 @@ export default function QRScreen(props) {
     // APIprovider.getUserProfileDynamicLink(id, title, description, thumbnailUrl).then((res) => {
     const url = QRResult?.shortLink;
     const message = title;
-    const options = Platform.select({
-      ios: {
-        activityItemSources: [
-          {
-            placeholderItem: { type: 'url', content: url },
-            item: {
-              default: { type: 'url', content: url },
-            },
-            subject: {
-              default: description,
-            },
-            linkMetadata: { originalUrl: url, url, description },
-          },
-          {
-            placeholderItem: { type: 'text', content: message },
-            item: {
-              default: { type: 'text', content: message },
-              message: null, // Specify no text to share via Messages app.
-            },
-          },
-        ],
-      },
-      default: {
-        description,
-        subject: description,
-        message: `${message} ${url}`,
-      },
-    });
 
-    Share.open(options)
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err) => {
-        err && console.log(err);
-      });
+    shareLink({ url, message, description });
     // });
   };
 
@@ -101,42 +67,8 @@ export default function QRScreen(props) {
     // ).then((res) => {
     const url = QRResult?.shortLink;
     const message = Strings.SHARE_PRODUCT_MESSAGE;
-    const options = Platform.select({
-      ios: {
-        activityItemSources: [
-          {
-            placeholderItem: { type: 'url', content: url },
-            item: {
-              default: { type: 'url', content: url },
-            },
-            subject: {
-              default: description,
-            },
-            linkMetadata: { originalUrl: url, url, description },
-          },
-          {
-            placeholderItem: { type: 'text', content: message },
-            item: {
-              default: { type: 'text', content: message },
-              message: null, // Specify no text to share via Messages app.
-            },
-          },
-        ],
-      },
-      default: {
-        description,
-        subject: description,
-        message: `${message} ${url}`,
-      },
-    });
 
-    Share.open(options)
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err) => {
-        err && console.log(err);
-      });
+    shareLink({ url, message, description });
     // });
   };
 

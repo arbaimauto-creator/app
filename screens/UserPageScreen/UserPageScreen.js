@@ -25,7 +25,6 @@ import FastImage from 'react-native-fast-image';
 import { isIphoneX } from 'react-native-iphone-x-helper';
 import { ActivityIndicator } from 'react-native-paper';
 import { Shadow } from 'react-native-shadow-2';
-import Share from 'react-native-share';
 import { FlatGrid } from 'react-native-super-grid';
 import { ClipPath, Defs, Path, Svg, Image as SvgImage, Text as SvgText } from 'react-native-svg';
 import IconAntDesign from 'react-native-vector-icons/AntDesign';
@@ -46,6 +45,7 @@ import UploadingVideoListItemView from '../../Components/UploadingVideoListItemV
 import VideoListItemView from '../../Components/VideoListItemView';
 import Utils, { changeCurrency, isGuestUser, menuLogout } from '../../Components/utils';
 import { horizontalScale, moderateScale, verticalScale } from '../../Components/utils/scailing';
+import { shareLink } from '../../Components/utils/share';
 import { Context } from '../../Contexts';
 import { UPLOADING_VIDEO, USER } from '../../Contexts/actionTypes';
 import { setUser } from '../../slices/user';
@@ -2890,42 +2890,8 @@ class UserPageScreen extends React.Component {
         if (result.success) {
           const url = result?.shortLink;
           const message = name;
-          const options = Platform.select({
-            ios: {
-              activityItemSources: [
-                {
-                  placeholderItem: { type: 'url', content: url },
-                  item: {
-                    default: { type: 'url', content: url },
-                  },
-                  subject: {
-                    default: introduction,
-                  },
-                  linkMetadata: { originalUrl: url, url, introduction },
-                },
-                {
-                  placeholderItem: { type: 'text', content: message },
-                  item: {
-                    default: { type: 'text', content: message },
-                    message: null, // Specify no text to share via Messages app.
-                  },
-                },
-              ],
-            },
-            default: {
-              introduction,
-              subject: introduction,
-              message: `${message} ${url}`,
-            },
-          });
 
-          Share.open(options)
-            .then((res) => {
-              console.log(res);
-            })
-            .catch((err) => {
-              err && console.log(err);
-            });
+          shareLink({ url, message, description: introduction });
         }
       },
     },
