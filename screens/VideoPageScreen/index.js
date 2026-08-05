@@ -336,9 +336,18 @@ class VideoPageScreen extends React.PureComponent {
     });
     Preference.get('isGradeBubbleGuided').then((value) => {
       if (value === null) {
-        setTimeout(() => {
+        this.gradeBubbleShowTimer = setTimeout(() => {
           if (this._isMounted) {
             this.setState({ isShowingGradeBubbleGuide: true });
+            // 앱 전체에서 딱 한 번만 노출 — 보여준 즉시 플래그 저장
+            Preference.set('isGradeBubbleGuided', 'true');
+            // 5초 뒤 자동 사라짐 (기존에는 탭 전까지 계속 떠 있었음)
+            this.gradeBubbleHideTimer = setTimeout(() => {
+              if (this._isMounted) {
+                LayoutAnimation.easeInEaseOut();
+                this.setState({ isShowingGradeBubbleGuide: false });
+              }
+            }, 5000);
           }
         }, 7000);
       }
@@ -403,6 +412,12 @@ class VideoPageScreen extends React.PureComponent {
     }
     if (this.animationTimer) {
       clearInterval(this.animationTimer);
+    }
+    if (this.gradeBubbleShowTimer) {
+      clearTimeout(this.gradeBubbleShowTimer);
+    }
+    if (this.gradeBubbleHideTimer) {
+      clearTimeout(this.gradeBubbleHideTimer);
     }
   }
 
