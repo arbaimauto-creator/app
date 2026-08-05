@@ -86,6 +86,23 @@
 
 **검증:** 수정 파일 36개 Babel 파싱 OK, 레포 린트 에러 0, 에뮬레이터 크래시 버퍼 0
 
+## 중복 정리 + 성능 패스 (5차 세션, 2026-08-05)
+
+**성능** (`baa3ea9`): metro `inlineRequires` 활성화(모듈 lazy 로드), 릴리즈 번들 console 제거(babel env), 메인 가로 리스트 렌더 15→4개 축소. dev 모드 기준 앱 JS 시작 140s→38s (측정 조건 상이하나 대폭 개선).
+
+**중복 정리 1차** (`baa3ea9`): 드리프트 버그 동기화(ProductPageScreen 공유 크래시·재고 상한, 카카오 약관 저장), `displayDiscountRate` 유틸(8곳 치환, NaN% 통일), 게스트 JWT 리터럴 2벌→상수, 탈퇴 Alert 5벌→헬퍼, 죽은 파일 삭제(EventPageModal 2종, 주석 공유 블록 80줄).
+
+**중복 정리 2차** (`b60d369`): `Components/utils/share.js` `shareLink` 헬퍼 신설 — 11곳 복붙 공유 블록 치환 (9파일).
+
+**보류 (위험 중간~높음, 별도 계획 필요):**
+- ProductPageScreen ↔ B2BProductPage: **~91~96% 동일한 2,800줄 포크** — 공용 화면 통합 필요 (드리프트 버그의 근원)
+- MakeOrderScreen ↔ GlobalMakeOrderScreen: ~87~92% 동일 — 결제 경로라 신중 통합
+- Components/notice/VideoGuide.js: VideoPageScreen의 1,134줄 구버전 포크 (실사용 라우트)
+- 소셜 로그인 성공 처리 5회 반복 (persistSession 추출), PurchasePopup 3벌, AppState 훅화
+- App.js 데드 코드 + **App.tsx에 ThemeProvider theme 미전달** (실사용 경로에서 커스텀 테마 미적용 — 확인 필요)
+- 게스트 JWT가 소스에 노출 (만료된 값이지만 서버 발급 방식으로 교체 권장)
+- Metro 메모리 불안정 지속 (16GB 힙에서도 간헐 OOM) — 의존성 다이어트 필요 (appcenter-analytics/crashes는 JS 미사용)
+
 ## 남은 관찰 사항 (수정 안 함 — 기존 동작 유지)
 
 1. **PurchasePopup**: `linkedProduct.productId`가 문자열(비populate)일 때 `product.options` 접근 시 크래시 가능. 기존 코드와 동일 조건이라 그대로 둠. 서버가 구매 가능 상품은 항상 populate해서 내려주는 전제.
