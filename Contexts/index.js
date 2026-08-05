@@ -13,6 +13,14 @@ const initialState = {
 // create context
 const Context = createContext({});
 
+// 대상 항목만 교체하는 불변 업데이트 (기존 코드는 원본을 mutate + 항목을 맨 뒤로 밀어 순서가 튀었음)
+const updateUploadingVideo = (state, id, patch) => ({
+  ...state,
+  uploadingVideos: state.uploadingVideos.map((item) =>
+    item.id === id ? { ...item, ...patch } : item,
+  ),
+});
+
 // create reducer
 const reducer = (state = initialState, action) => {
   const video = state.uploadingVideos.find((item) => item.id === action.id);
@@ -37,48 +45,32 @@ const reducer = (state = initialState, action) => {
       if (!video) {
         return state;
       }
-      video.state = Codes.UPLOADING_VIDEO_STATE.UPLOADING;
-      return {
-        ...state,
-        uploadingVideos: [...state.uploadingVideos.filter((item) => action.id !== item.id), video],
-      };
+      return updateUploadingVideo(state, action.id, {
+        state: Codes.UPLOADING_VIDEO_STATE.UPLOADING,
+      });
     case UPLOADING_VIDEO.UPLOAD_PROGRESS:
       if (!video) {
         return state;
       }
-      video.progess = action.value;
-      return {
-        ...state,
-        uploadingVideos: [...state.uploadingVideos.filter((item) => action.id !== item.id), video],
-      };
+      return updateUploadingVideo(state, action.id, { progress: action.value });
     case UPLOADING_VIDEO.UPLOAD_COMPLETE:
       if (!video) {
         return state;
       }
-      video.state = Codes.UPLOADING_VIDEO_STATE.UPLOADED;
-      return {
-        ...state,
-        uploadingVideos: [...state.uploadingVideos.filter((item) => action.id !== item.id), video],
-      };
+      return updateUploadingVideo(state, action.id, {
+        state: Codes.UPLOADING_VIDEO_STATE.UPLOADED,
+      });
     case UPLOADING_VIDEO.UPLOAD_ERROR:
       if (!video) {
         return state;
       }
-      video.state = Codes.UPLOADING_VIDEO_STATE.ERROR;
-      return {
-        ...state,
-        uploadingVideos: [...state.uploadingVideos.filter((item) => action.id !== item.id), video],
-      };
+      return updateUploadingVideo(state, action.id, { state: Codes.UPLOADING_VIDEO_STATE.ERROR });
     case UPLOADING_VIDEO.STOP:
       if (!video || !video.videoProcessingId) {
         return state;
       }
       Utils.stopVideoProcessing(video.videoProcessingId);
-      video.state = Codes.UPLOADING_VIDEO_STATE.STOPPED;
-      return {
-        ...state,
-        uploadingVideos: [...state.uploadingVideos.filter((item) => action.id !== item.id), video],
-      };
+      return updateUploadingVideo(state, action.id, { state: Codes.UPLOADING_VIDEO_STATE.STOPPED });
     case REGION.SET:
       const { value } = action;
       if (value !== 'kr' && value !== 'us') {

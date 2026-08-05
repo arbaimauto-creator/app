@@ -163,9 +163,10 @@ const reviewSlice = createSlice({
       state.reviewMain = payload;
     },
     setRisingUsers(state, { payload }) {
-      state.risingUser.data = payload.userList;
+      // initialState의 실제 키는 hotReviewer — 잘못된 경로(risingUser)로 쓰면 크래시
+      state[Constants.VIDEO_LIST_HOT_REVIEWER].data = payload.userList;
       if (payload.entireCount) {
-        state.risingUser.count = payload.entireCount;
+        state[Constants.VIDEO_LIST_HOT_REVIEWER].count = payload.entireCount;
       }
     },
     setRecents(state, { payload }) {
@@ -187,9 +188,10 @@ const reviewSlice = createSlice({
       }
     },
     setWorsts(state, { payload }) {
-      state.worst.data = payload.videoList;
+      // initialState의 실제 키는 worstProduct
+      state[Constants.VIDEO_LIST_WORSTPRODUCT].data = payload.videoList;
       if (payload.entireCount) {
-        state.worst.count = payload.entireCount;
+        state[Constants.VIDEO_LIST_WORSTPRODUCT].count = payload.entireCount;
       }
     },
     setTrendings(state, { payload }) {
@@ -222,8 +224,8 @@ const reviewSlice = createSlice({
         };
       })
       .addCase(fetchReviews.fulfilled.type, (state, { payload: { listType, reviews } }) => {
-        // console.log(listType);
-        fetchReviewsFulfilledFunctions[listType](state, reviews);
+        // 맵에 없는 listType이면 리듀서 안에서 TypeError가 나므로 폴백 가드
+        fetchReviewsFulfilledFunctions[listType]?.(state, reviews);
       })
       .addCase(fetchReviews.rejected.type, (state, action) => {
         console.error('fetchReviews.rejected', action);
@@ -248,7 +250,7 @@ const reviewSlice = createSlice({
         },
       )
       .addCase(fetchMoreReviews.fulfilled.type, (state, { payload: { listType, reviews } }) => {
-        fetchMoreReviewsFulfilledFunctions[listType](state, reviews);
+        fetchMoreReviewsFulfilledFunctions[listType]?.(state, reviews);
       })
       .addCase(fetchMoreUsers.fulfilled.type, (state, { payload: { reviews } }) => {
         state[Constants.VIDEO_LIST_HOT_REVIEWER].data = [
@@ -317,4 +319,5 @@ export const {
   setReviewCategories,
   setCurrentReviewCateogry,
   setReviewMain,
+  setScoreEvents,
 } = reviewSlice.actions;

@@ -230,9 +230,11 @@ const productSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchStoreMain.pending.type, (state, action) => {
+        // data 키를 날리면 로딩 중 접근하는 화면/fetchMore 핸들러가 크래시 — 기존 data 보존
         state.productMain = {
           loading: true,
           error: null,
+          data: state.productMain?.data,
         };
       })
       .addCase(
@@ -262,6 +264,7 @@ const productSlice = createSlice({
         state.productMain = {
           loading: false,
           error: 'error',
+          data: state.productMain?.data,
         };
       })
       .addCase(fetchProducts.fulfilled, (state, { payload }) => {
@@ -301,10 +304,11 @@ const productSlice = createSlice({
         console.error('fetchProducts.rejected', action);
       })
       .addCase(fetchMoreStoreMain.fulfilled, (state, { payload }) => {
-        fetchMoreStoreMainFulfilledFunctions[payload.type](state, payload);
+        // 맵에 없는 type이면 TypeError — 폴백 가드
+        fetchMoreStoreMainFulfilledFunctions[payload.type]?.(state, payload);
       })
       .addCase(fetchMoreProducts.fulfilled, (state, { payload }) => {
-        fetchMoreProductsFulfilledFunctions[payload.type](state, payload);
+        fetchMoreProductsFulfilledFunctions[payload.type]?.(state, payload);
       });
   },
 });

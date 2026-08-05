@@ -47,7 +47,7 @@ export default function VideoRenderDetails({ context, useIsFocused }) {
           </View>
         </View>
 
-        {linkedProduct._id ? null : (
+        {linkedProduct?._id ? null : (
           <LinkedProduct context={context} linkedProduct={linkedProduct} />
         )}
 
@@ -80,7 +80,7 @@ export default function VideoRenderDetails({ context, useIsFocused }) {
             {video.relayedVideoCount > 0 && <RelayReviews context={context} />}
             {context.props.route.params.isFocused &&
             useIsFocused &&
-            video.linkedProduct.productId !== undefined ? (
+            video.linkedProduct?.productId !== undefined ? (
               <LinkedProductReviews context={context} />
             ) : (
               <View />

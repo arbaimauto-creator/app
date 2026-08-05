@@ -49,13 +49,15 @@ function getFileNameWithDate() {
 }
 
 function isNumeric(v) {
-  if (['string'].some((t) => t === typeof v)) {
-    return false;
+  // 기존 구현은 모든 문자열을 false 처리해 서버가 "12000"처럼 문자열 숫자를 주면
+  // numberWithCommas가 '-'를 표시했다.
+  if (typeof v === 'number') {
+    return Number.isFinite(v);
   }
-  if (typeof v === 'string' && v.indexOf(' ') < 0) {
-    return false;
+  if (typeof v === 'string') {
+    return v.trim() !== '' && !isNaN(v) && Number.isFinite(Number.parseFloat(v));
   }
-  return !isNaN(v) && Number.isFinite(Number.parseFloat(v));
+  return false;
 }
 
 function stringShorten(str, length) {
@@ -636,8 +638,12 @@ function checkTextFormat({ type, value }) {
   let regPhone = /^01([0|1|6|7|8|9])-?([0-9]{3,4})-?([0-9]{4})$/;
   switch (type) {
     case 'id':
+      // value가 없거나 빈 문자열이면 길이 검사를 통과해버리던 버그 수정
+      if (!value) {
+        return { code: 'fail', msg: 'Exceed specified length' };
+      }
       value = value.toLowerCase();
-      if ((value && value.length < 3) || value.length > 16) {
+      if (value.length < 3 || value.length > 16) {
         return { code: 'fail', msg: 'Exceed specified length' };
       }
       if (!regId.test(value)) {
@@ -684,6 +690,10 @@ function compareVersion(verA, verB) {
 
     if (a > b) {
       compareResult = true;
+      break;
+    }
+    if (a < b) {
+      // 상위 자리에서 이미 작으면 더 볼 필요 없음 — 없으면 1.0.5 > 1.2.0 오판정
       break;
     }
   }
@@ -809,8 +819,8 @@ export function isGuestUser(logonUserId) {
 
 export const menuLogout = async function (props) {
   console.log('menuLogout 발동!');
-  console.log(props.route.params.videoId);
-  console.log(props.route.params.productId);
+  console.log(props.route?.params?.videoId);
+  console.log(props.route?.params?.productId);
 
   if (!props.route.path) {
     if (props.route?.params?.videoId) {

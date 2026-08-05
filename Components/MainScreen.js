@@ -725,7 +725,11 @@ function MainScreen(props) {
             .then((result) => {
               if (result && !result.success) {
                 console.error('result && !result.success logout', result.message);
-                logout();
+                return logout();
+              }
+              // result가 null이면 아래 접근에서 크래시하던 버그 가드
+              if (!result) {
+                return;
               }
 
               if (result.notificationIsReadCnt > 0) {
@@ -738,11 +742,13 @@ function MainScreen(props) {
                 index = ++index % recommendedTypeList.length;
                 Preference.set('RecommendedListTypeIndex', index.toString());
 
-                // recommendedKeyword = recommendedTypeList[index].keyword;
-                setRecommendedKeyword(recommendedTypeList[index].keyword);
+                // setState 직후 recommendedKeyword를 읽으면 이전 렌더 값(stale)이라
+                // 방금 선택한 키워드를 지역 변수로 직접 사용한다.
+                const newKeyword = recommendedTypeList[index].keyword;
+                setRecommendedKeyword(newKeyword);
 
-                Preference.set('currentListType', recommendedKeyword);
-                setCurrentListType(recommendedKeyword);
+                Preference.set('currentListType', newKeyword);
+                setCurrentListType(newKeyword);
 
                 // recommendedSortType = recommendedTypeList[index].sortType;
                 setRecommendedSortType(recommendedTypeList[index].sortType);
@@ -1000,11 +1006,12 @@ function MainScreen(props) {
                     index = ++index % recommendedTypeList.length;
                     Preference.set('RecommendedListTypeIndex', index.toString());
 
-                    // recommendedKeyword = recommendedTypeList[index].keyword;
-                    setRecommendedKeyword(recommendedTypeList[index].keyword);
+                    // stale state 대신 방금 선택한 키워드를 직접 사용
+                    const newKeyword = recommendedTypeList[index].keyword;
+                    setRecommendedKeyword(newKeyword);
 
-                    Preference.set('currentListType', recommendedKeyword);
-                    setCurrentListType(recommendedKeyword);
+                    Preference.set('currentListType', newKeyword);
+                    setCurrentListType(newKeyword);
 
                     // recommendedSortType = recommendedTypeList[index].sortType;
                     setRecommendedSortType(recommendedTypeList[index].sortType);

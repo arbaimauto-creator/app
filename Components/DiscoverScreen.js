@@ -1317,9 +1317,10 @@ function NewDiscoverScreen(props) {
 
   async function fetchData() {
     const response = await APIprovider.getGlobalGroupBuyings();
-    console.log('response', response.globalGroupBuyings.length);
+    // success 확인 전에 필드 접근하면 실패 응답에서 크래시
+    console.log('response', response?.globalGroupBuyings?.length);
 
-    if (response.success) {
+    if (response?.success) {
       setGlobalGroupBuyingCount(response.globalGroupBuyings.length);
       if (response.globalGroupBuyings.length < 1) {
         const ckIndex = reviewIndex.findIndex(

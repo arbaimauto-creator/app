@@ -10,7 +10,6 @@ import {
   setCurrentPushedNotification,
   setCurrentPushedQnaId,
   setInitialNotification,
-  setIsCurrentPushedQnaList,
 } from '../../slices/notification';
 import { capitalizeFirstLetter } from '../utils';
 import * as Sentry from '@sentry/react-native';
@@ -224,13 +223,17 @@ const configure = async (onNotification) => {
     }
 
     if (!remoteMessage.data?.messageCode) {
+      // data-only(사일런트) 메시지면 notification이 없을 수 있다 — 널 가드
+      if (!remoteMessage.notification) {
+        return;
+      }
       PushNotification.localNotification({
         channelId: Codes.NOTIFICATION_CHENNEL_ID,
         autoCancel: true,
         title: remoteMessage.notification.title,
         message: remoteMessage.notification.body,
         data: {
-          type: remoteMessage.data.type,
+          type: remoteMessage.data?.type,
         },
         vibrate: true,
         vibration: 300,

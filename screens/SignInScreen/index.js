@@ -133,19 +133,19 @@ class SignInScreen extends React.Component {
 
     Preference.get('userId').then(async (value) => {
       if (value) {
-        Preference.get('userName').then((userName) => {
-          if (userName && (userName === 'greyd.guest' || userName === 'Guest')) {
-            return menuLogout(this.props);
-          } else {
-            this.props.changeGuestStatus(false);
-          }
-        });
+        // userName 확인을 await하지 않으면 게스트 로그아웃(NotSignedIn 리셋)과
+        // 아래 MainBottom 리셋이 경쟁해 비결정적으로 동작한다.
+        const userName = await Preference.get('userName');
+        if (userName && (userName === 'greyd.guest' || userName === 'Guest')) {
+          return menuLogout(this.props);
+        }
+        this.props.changeGuestStatus(false);
 
         console.log('SignInScreen() - You signed up');
         // this.props.navigation.navigate('MainBottom');
         this.props.navigation.dispatch(
           CommonActions.reset({
-            index: 1,
+            index: 0,
             routes: [{ name: 'MainBottom' }],
           }),
         );

@@ -64,14 +64,14 @@ const ProductsTabScene = (
         showsVerticalScrollIndicator={false}
         itemDimension={Constants.PRODUCT_VERTICAL_LIST_ITEM_VIEW_THUMBNAIL_HEIGHT + 14}
         data={productList}
-        renderItem={({ item, idx }) => (
+        renderItem={({ item, index }) => (
           <ProductListItemView
-            key={item._id + idx}
+            key={item._id + index}
             navigation={props.navigation}
             data={item}
             onItemRemoved={() => {
-              productList.slice(idx, 1);
-              setProductList(productList);
+              // 기존 코드는 (1) idx 미존재 (2) slice 비파괴 (3) 동일 참조 setState — 삭제가 동작 안 했음
+              setProductList((prev) => prev.filter((p) => p._id !== item._id));
             }}
             style={{
               height: Constants.PRODUCT_VERTICAL_LIST_ITEM_VIEW_THUMBNAIL_HEIGHT + 14,

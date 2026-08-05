@@ -36,9 +36,13 @@ export default function RewardUse({ context, KRWPerUSD }) {
   };
 
   const convertPrice = (price) => {
-    return context?.context?.state?.region === 'us'
-      ? utils.convertUSDToKRW(price, KRWPerUSD)
-      : price;
+    // convertUSDToKRW는 toFixed 문자열을 반환 — 숫자로 강제하지 않으면
+    // "9" >= "80.00" 같은 사전식 문자열 비교가 되어 검증이 우회된다
+    return Number(
+      context?.context?.state?.region === 'us'
+        ? utils.convertUSDToKRW(price, KRWPerUSD)
+        : price,
+    );
   };
 
   useEffect(() => {
@@ -104,7 +108,7 @@ export default function RewardUse({ context, KRWPerUSD }) {
 
     console.log('reward', finalPrice, minimumUseReward, reward);
 
-    if (reward >= finalPrice) {
+    if (+reward >= finalPrice) {
       handleChangeReward(finalPrice.toString());
       return context.setState({
         // rewardUse: convertKRWUSD(+finalPrice),
@@ -112,10 +116,16 @@ export default function RewardUse({ context, KRWPerUSD }) {
       });
     }
 
-    if (finalPrice > minimumUseReward && reward < minimumUseReward) {
-      return context.setState({
-        rewardUse: convertKRWUSD(+minimumUseReward),
-      });
+    if (finalPrice > minimumUseReward && +reward < minimumUseReward) {
+      // 최소 사용액 미만 입력을 "최소액 적용"으로 바꿔치기하면 입력액보다 많은
+      // 리워드가 차감된다 — 적용을 거부한다
+      Alert.alert(
+        Strings.WITHDRAWAL_INPUT_ERROR_TITLE,
+        Strings.WITHDRAWAL_INPUT_ERROR_CONTENT,
+        [{ text: Strings.OK }],
+        { cancelable: true },
+      );
+      return context.setState({ rewardUse: 0 });
     }
 
     handleChangeReward(reward);
@@ -137,7 +147,8 @@ export default function RewardUse({ context, KRWPerUSD }) {
       handleChangeReward(reward.toString());
       return context.setState({
         certifiedReviewerRewardUse: convertKRWUSD(+certifiedReviewerReward),
-        rewardUse: +originalReward - certifiedReviewerReward,
+        // 두 값 모두 동일 단위로 환산 — 합계가 전체 보유 리워드와 일치하도록
+        rewardUse: convertKRWUSD(+originalReward) - convertKRWUSD(+certifiedReviewerReward),
       });
     }
 
@@ -150,7 +161,12 @@ export default function RewardUse({ context, KRWPerUSD }) {
     } else if (certifiedReviewerReward < productPrice) {
       return context.setState({
         certifiedReviewerRewardUse: convertKRWUSD(+certifiedReviewerReward),
-        rewardUse: context.state.price - context.state.promotionDiscount,
+        // 기존 코드는 전액을 rewardUse에 다시 넣어 인증리뷰어 리워드가 이중 차감
+        // (합계 > 상품가 → 음수 결제)됐다 — 인증리뷰어 사용분을 제외한 잔액만 차감
+        rewardUse:
+          context.state.price -
+          context.state.promotionDiscount -
+          convertKRWUSD(+certifiedReviewerReward),
       });
     }
   };

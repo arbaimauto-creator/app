@@ -347,7 +347,8 @@ class AddingNewVideoScreen extends Component {
       });
     }
 
-    AppState.addEventListener('change', this._handleAppStateChange);
+    // subscription을 저장해 언마운트 시 해제 (미해제 시 언마운트 후 setState 발생)
+    this._appStateSubscription = AppState.addEventListener('change', this._handleAppStateChange);
     BackHandler.addEventListener('hardwareBackPress', this._handleBackButton);
     this.isBackHandlerEnable = true;
 
@@ -409,9 +410,10 @@ class AddingNewVideoScreen extends Component {
       const { hideActivityIndicatorOnCameraScreen } = this.props.route.params;
       hideActivityIndicatorOnCameraScreen();
     }
-    // AppState.removeEventListener('change', this._handleAppStateChange);
+    this._appStateSubscription?.remove();
     BackHandler.removeEventListener('hardwareBackPress', this._handleBackButton);
     clearInterval(this.videoInfoSavingTimerId);
+    this._isUnmounted = true;
   }
 
   getVideoInfoByState = () => {
@@ -541,6 +543,9 @@ class AddingNewVideoScreen extends Component {
   };
 
   _handleAppStateChange = (nextAppState) => {
+    if (this._isUnmounted) {
+      return;
+    }
     if (nextAppState === 'active') {
       this.setState({ isBlurred: false });
     } else {
@@ -1137,7 +1142,9 @@ class AddingNewVideoScreen extends Component {
                 onPress: () => {
                   this.setState({ isShowingUploadToGcsProgressModal: false });
                 },
-                disabled: this.state.uploadToGcsProgress === (0 || 1),
+                // (0 || 1)은 항상 1 — 진행률 0(시작 전)에도 닫기가 눌리던 버그 수정
+                disabled:
+                  this.state.uploadToGcsProgress === 0 || this.state.uploadToGcsProgress === 1,
               },
             ]}
             onCancel={() => {

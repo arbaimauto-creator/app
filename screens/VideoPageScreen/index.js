@@ -365,11 +365,12 @@ class VideoPageScreen extends React.PureComponent {
     }, 1000); // Video가 충분히 로드되길 기다림
 
     let animationCount = 0;
-    const animationTimer = setInterval(() => {
+    // 인스턴스에 저장해 언마운트 시 정리 (3초 내 이탈 시 타이머가 살아남던 누수 수정)
+    this.animationTimer = setInterval(() => {
       this.handleRatingButtonAnimationRef?.bounce(1200);
       animationCount++;
       if (animationCount === 3) {
-        clearInterval(animationTimer);
+        clearInterval(this.animationTimer);
       }
     }, 3000);
   }
@@ -399,6 +400,9 @@ class VideoPageScreen extends React.PureComponent {
 
     if (this.initialVideoInfoTimer) {
       clearTimeout(this.initialVideoInfoTimer);
+    }
+    if (this.animationTimer) {
+      clearInterval(this.animationTimer);
     }
   }
 
@@ -444,7 +448,8 @@ class VideoPageScreen extends React.PureComponent {
 
   backAction = () => {
     const navigationState = this.props.navigation.getState().routes;
-    const previousRouteName = navigationState[navigationState.length - 2].name;
+    // 딥링크로 직접 진입하면 이전 라우트가 없을 수 있다
+    const previousRouteName = navigationState[navigationState.length - 2]?.name;
 
     if (Platform.OS !== 'ios') {
       setStatusColor(previousRouteName);
@@ -1268,7 +1273,7 @@ class VideoPageScreen extends React.PureComponent {
           video: {
             ...this.state.video,
             commentCount:
-              this.state.video.commentCount - 1 - this.state.video.commentList[i].childCount ?? 0,
+              this.state.video.commentCount - 1 - (this.state.video.commentList[i].childCount ?? 0),
             commentList: [
               ...this.state.video.commentList.slice(0, i),
               ...this.state.video.commentList.slice(i + 1, this.state.video.commentList.length),
@@ -1362,16 +1367,20 @@ class VideoPageScreen extends React.PureComponent {
   }
 
   onRelayedVideoListEndReached() {
+    // 실제 데이터가 담기는 필드는 relayedVideoList — 기존 코드는 항상 빈
+    // videoListOfRelatedVideo를 읽어 [-1].createdAt에서 크래시했다.
+    const relayedList = this.state.video.relayedVideoList;
+    if (!relayedList || relayedList.length === 0) {
+      return;
+    }
     this.setState({ relayedVideoListIsRefreshing: true });
-    const offset =
-      this.state.video.videoListOfRelatedVideo[this.state.video.videoListOfRelatedVideo.length - 1]
-        .createdAt;
+    const offset = relayedList[relayedList.length - 1].createdAt;
     const limit = 10;
     APIprovider.getRelayingVideoList(
       this.state.video.videoId,
       undefined,
       offset,
-      this.state.video.videoListOfRelatedVideo.length,
+      relayedList.length,
       limit,
     )
       .then((data) => {
@@ -1449,6 +1458,9 @@ class VideoPageScreen extends React.PureComponent {
   }
 
   onVideoRatingListEndReached() {
+    if (!this.state.ratingList || this.state.ratingList.length === 0) {
+      return;
+    }
     this.setState({ isLoadingRatingList: true });
     const offset = this.state.ratingList[this.state.ratingList.length - 1].createdAt;
     APIprovider.getVideoG6RatingList(this.state.video.videoId, offset)

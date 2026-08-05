@@ -52,8 +52,9 @@ export const appleLogin = async (props, setLoggingIn) => {
       requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
     });
     // user is authenticated
-    authData.requesterToken = requesterToken;
+    // (선언 전 접근 TDZ 버그 수정 — 애플 로그인이 조용히 실패하던 원인)
     const requesterToken = authData.authorizationCode;
+    authData.requesterToken = requesterToken;
     setLoggingIn(true);
     APIprovider.login('apple', authData)
       .then(async (result) => {
@@ -103,7 +104,7 @@ export const appleLogin = async (props, setLoggingIn) => {
 
           navigation.dispatch(
             CommonActions.reset({
-              index: 1,
+              index: 0,
               routes: [{ name: 'MainBottom' }],
             }),
           );
@@ -190,7 +191,7 @@ export const kakaoLogin = (props, onSucces, setLoggingIn) => {
 
                 navigation.dispatch(
                   CommonActions.reset({
-                    index: 1,
+                    index: 0,
                     routes: [{ name: 'MainBottom' }],
                   }),
                 );
@@ -280,7 +281,7 @@ export const facebookLogin = (props, setLoggingIn) => {
 
                 navigation.dispatch(
                   CommonActions.reset({
-                    index: 1,
+                    index: 0,
                     routes: [{ name: 'MainBottom' }],
                   }),
                 );
@@ -381,7 +382,7 @@ export const googleLogin = async (props, setLoggingIn) => {
 
           navigation.dispatch(
             CommonActions.reset({
-              index: 1,
+              index: 0,
               routes: [{ name: 'MainBottom' }],
             }),
           );
@@ -475,7 +476,7 @@ export const guestUser = async (props, setLoggingIn, isDynamicLink = false) => {
           if (!isDynamicLink) {
             navigation.dispatch(
               CommonActions.reset({
-                index: 1,
+                index: 0,
                 routes: [{ name: 'MainBottom' }],
               }),
             );

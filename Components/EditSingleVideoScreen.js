@@ -79,7 +79,8 @@ export default class EditSingleVideoScreen extends React.Component {
   }
 
   componentDidMount() {
-    AppState.addEventListener('change', this._handleAppStateChange);
+    // subscription을 저장해 언마운트 시 해제 (미해제 시 화면 재진입마다 리스너 누적)
+    this._appStateSubscription = AppState.addEventListener('change', this._handleAppStateChange);
 
     // this.setState({ paused: false });
     if (this.props.route.params.hasOwnProperty('hideActivityIndicatorPreviousScreen')) {
@@ -93,7 +94,7 @@ export default class EditSingleVideoScreen extends React.Component {
       const { hideActivityIndicatorPreviousScreen } = this.props.route.params;
       hideActivityIndicatorPreviousScreen();
     }
-    // AppState.removeEventListener('change', this._handleAppStateChange);
+    this._appStateSubscription?.remove();
   }
 
   _handleAppStateChange = (nextAppState) => {

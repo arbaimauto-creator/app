@@ -57,8 +57,8 @@ export default function QNAChat(props) {
   }, [isSoftInputShown, softInputHeight]);
 
   useEffect(() => {
-    // console.log('currentPushedNotification', currentPushedNotification, props.route.params.qnaId);
-    if (props.route.params.qnaId !== currentPushedNotification) {
+    // currentPushedNotification은 {type, qnaId} 객체 — 문자열 id와 직접 비교하면 항상 다름
+    if (props.route.params.qnaId !== currentPushedNotification?.qnaId) {
       refreshByPushNotification(props.route.params.qnaId);
     } else {
       refreshByPushNotification(currentPushedNotification?.qnaId);

@@ -53,7 +53,11 @@ export default function CoverImages({ context }) {
                 launchImageLibrary({
                   mediaType: 'photo',
                 }).then((res) => {
-                  const image = res.assets[0];
+                  // 사용자가 선택을 취소하면 assets가 없다
+                  const image = res?.assets?.[0];
+                  if (!image) {
+                    return;
+                  }
                   Utils.compressImage(image.uri).then((imagePath) => {
                     context.setState({
                       thumbnailUri: imagePath,
@@ -128,7 +132,11 @@ export default function CoverImages({ context }) {
                   mediaType: 'photo',
                   selectionLimit: Constants.MAX_NUMBER_PRODUCT_DESCRIPTION_IMAGE,
                 }).then((res) => {
-                  const images = res.assets;
+                  // 취소 시 assets 없음
+                  const images = res?.assets;
+                  if (!images || images.length === 0) {
+                    return;
+                  }
                   for (let i = 0; i < images.length; i++) {
                     if (context.state.isEdit) {
                       images[i].change = Constants.ATTACHMENT_CHANGE_ADDED;

@@ -835,9 +835,11 @@ function ProfileInfo({ context, user }) {
   );
 }
 
-function GuestProfileInfo({ context, onPress }) {
+function GuestProfileInfo({ context, onPress, navigation }) {
   const tierName = Utils.getTierNameByClass(0);
   const tierColor = Utils.getTierColorByTierName(tierName);
+  // 호출부가 {...props}만 전달해 context가 없다 — navigation prop으로 폴백 (티어 탭 크래시 방지)
+  const nav = context?.props?.navigation || navigation;
 
   return (
     <View style={{ flex: 1, backgroundColor: Constants.COLOR_BACKGROUND_DARK }}>
@@ -1010,7 +1012,7 @@ function GuestProfileInfo({ context, onPress }) {
                     <TouchableOpacity
                       style={{ marginHorizontal: 8 }}
                       onPress={() =>
-                        context.props.navigation.navigate('TierGuide', {
+                        nav?.navigate('TierGuide', {
                           category: Strings.GREYD_GUIDE_TIER_DESCRIPTION,
                         })
                       }
@@ -1040,7 +1042,7 @@ function GuestProfileInfo({ context, onPress }) {
             context={{
               isMyUserPage: () => false,
               props: {
-                navigation: null,
+                navigation: nav || null,
                 currencyRate: 0,
               },
               state: {
@@ -1504,7 +1506,7 @@ function UserHistoryView({ context, scrollRef }) {
             );
           }
         }}
-        keyExtractor={(item) => (item.videoId ? item.videoId : item.productId)}
+        keyExtractor={(item) => item.videoId || item.productId || item.id}
         onRefresh={() => {}}
         refreshing={context.state.isRefreshing}
         onEndReached={({ distanceFromEnd }) => {
@@ -2999,12 +3001,9 @@ class UserPageScreen extends React.Component {
         this.props.dispatchUser(data);
       }
 
-      this.setState({
-        user: {
-          ...data,
-          userUploadVideo: data.userUploadVideo.videoList,
-          userUploadProduct: data.userUploadProduct.productList,
-          g6RatingScoreGraph: [
+      // setState 직후 this.state를 읽으면 이전 값(stale)이라, 그래프 데이터를
+      // 지역 변수로 만들어 두 setState 모두에 동일한 최신 값을 사용한다.
+      const newG6RatingScoreGraph = [
             getLanguage() === 'ko'
               ? {
                   표현력: data.g6RatingScore.authentic,
@@ -3022,8 +3021,15 @@ class UserPageScreen extends React.Component {
                   Aesthetic: data.g6RatingScore.aesthetic,
                   Creative: data.g6RatingScore.creative,
                 },
-            this.state.user.g6RatingScoreGraph[1],
-          ],
+        this.state.user.g6RatingScoreGraph[1],
+      ];
+
+      this.setState({
+        user: {
+          ...data,
+          userUploadVideo: data.userUploadVideo.videoList,
+          userUploadProduct: data.userUploadProduct.productList,
+          g6RatingScoreGraph: newG6RatingScoreGraph,
         },
         isRefreshing: false,
         isUserRefreshing: false,
@@ -3035,8 +3041,8 @@ class UserPageScreen extends React.Component {
       });
 
       this.setState({
-        data: this.processData(this.state.user.g6RatingScoreGraph),
-        maxima: this.getMaxima(this.state.user.g6RatingScoreGraph),
+        data: this.processData(newG6RatingScoreGraph),
+        maxima: this.getMaxima(newG6RatingScoreGraph),
       });
     }
   }

@@ -244,7 +244,9 @@ function Price({ context }) {
         ) : (
           <>
             <View style={styles.discountPriceContainer}>
-              <Text style={styles.discountRate}>-{(product.discountRate * 100).toFixed(0)}%</Text>
+              <Text style={styles.discountRate}>
+                -{Math.round((product.discountRate || 0) * 100)}%
+              </Text>
               <Text style={styles.discountPrice}>
                 {Utils.displayPrice(
                   product.discountPrice,
@@ -1164,7 +1166,11 @@ function PurchasePopup({ context }) {
                   return;
                 }
 
-                if (context.state.buyNumber === product.availableNumberToSale) {
+                // === 비교는 품절(0)·미로딩(undefined) 시 상한이 뚫린다
+                if (
+                  product.availableNumberToSale !== -1 &&
+                  context.state.buyNumber >= (product.availableNumberToSale ?? 0)
+                ) {
                   Alert.alert(
                     Strings.MAX_AVAILABLE_PRODUCT_NUMBER,
                     Strings.CHECK_MAX_AVAILABLE_PRODUCT,
@@ -1549,8 +1555,9 @@ export default class ProductPageScreen extends React.Component {
     APIprovider.getProductDynamicLink(
       productId,
       title,
-      description.slice(0, 250),
-      attachmentList[0].url,
+      description?.slice(0, 250),
+      // 이미지 없는 상품 공유 시 undefined.url 크래시 방지
+      attachmentList?.[0]?.url,
     ).then((res) => {
       const url = res?.shortLink;
       const message = Strings.SHARE_PRODUCT_MESSAGE;
@@ -1590,6 +1597,9 @@ export default class ProductPageScreen extends React.Component {
         .catch((err) => {
           err && console.log(err);
         });
+    }).catch((err) => {
+      // 링크 생성 실패 시 unhandled rejection 방지
+      console.log('getProductDynamicLink error', err);
     });
   };
 

@@ -438,7 +438,7 @@ export default class VideoPageScreen extends React.PureComponent {
           video: {
             ...this.state.video,
             commentCount:
-              this.state.video.commentCount - 1 - this.state.video.commentList[i].childCount ?? 0,
+              this.state.video.commentCount - 1 - (this.state.video.commentList[i].childCount ?? 0),
             commentList: [
               ...this.state.video.commentList.slice(0, i),
               ...this.state.video.commentList.slice(i + 1, this.state.video.commentList.length),

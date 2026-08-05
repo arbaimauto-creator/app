@@ -30,7 +30,7 @@ export default function PaymentMethods({ context }) {
         </View>
         <View style={styles.checkbox}>
           <CheckBox
-            key={'checkoption_naver_pay_credit_card'}
+            key={'checkoption_kakao_pay_credit_card'}
             onChanged={(value) => {
               context.setState({
                 kovanPayGroup: Constants.KOVAN_PAY_GROUP.KAKAO_PAY,
@@ -86,7 +86,7 @@ export default function PaymentMethods({ context }) {
         </View>
         <View style={styles.checkbox}>
           <CheckBox
-            key={'checkoption_kakao_pay_money'}
+            key={'checkoption_naver_pay_simple_pay'}
             onChanged={(value) => {
               context.setState({
                 kovanPayGroup: Constants.KOVAN_PAY_GROUP.NAVER_PAY,

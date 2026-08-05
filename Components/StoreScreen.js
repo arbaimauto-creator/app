@@ -887,12 +887,10 @@ function NewStoreScreen(props) {
         !productMain.data[Constants.PRODUCT_LIST_PROMOTION_EVENT].length
       ) {
         setRoutes(routes.filter((route) => route.key !== Constants.PRODUCT_LIST_PROMOTION_EVENT));
-        // setStoreIndex(
-        //   storeIndex.filter((idx) => idx !== Strings.STORE_SCREEN_CATEGORIES.REFUND_EVENT),
-        // );
-        storeIndex.splice(
-          storeIndexOrigin.findIndex((idx) => idx === Strings.STORE_SCREEN_CATEGORIES.REFUND_EVENT),
-          1,
+        // splice는 (a) findIndex -1이면 마지막 원소를 지우고 (b) 재진입마다 배열이
+        // 계속 줄어드는 문제가 있어 원본에서 filter로 다시 계산한다
+        storeIndex = storeIndexOrigin.filter(
+          (idx) => idx !== Strings.STORE_SCREEN_CATEGORIES.REFUND_EVENT,
         );
       } else if (
         !productMain.data[Constants.PRODUCT_LIST_GOOGLE_PROMOTION_EVENT] ||
@@ -901,11 +899,8 @@ function NewStoreScreen(props) {
         setRoutes(
           routes.filter((route) => route.key !== Constants.PRODUCT_LIST_GOOGLE_PROMOTION_EVENT),
         );
-        storeIndex.splice(
-          storeIndexOrigin.findIndex(
-            (idx) => idx === Strings.STORE_SCREEN_CATEGORIES.GOOGLE_PROMOTION_EVENT,
-          ),
-          1,
+        storeIndex = storeIndexOrigin.filter(
+          (idx) => idx !== Strings.STORE_SCREEN_CATEGORIES.GOOGLE_PROMOTION_EVENT,
         );
       } else {
         setRoutes(getStoreRoutesOrigin(props, setIndex));

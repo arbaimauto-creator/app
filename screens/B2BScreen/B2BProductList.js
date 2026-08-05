@@ -43,7 +43,7 @@ function B2BPrice({ product, style }) {
     return (
       <View style={styles.priceContainer}>
         <View style={styles.discountPriceContainer}>
-          <Text style={styles.discountRate}>-{(product.discountRate * 100).toFixed(0)}%</Text>
+          <Text style={styles.discountRate}>-{Math.round((product.discountRate || 0) * 100)}%</Text>
           <Text style={styles.discountPrice}>
             {Utils.displayPrice(product.discountPrice, global.state.region, KRWPerUSD)}
             <Text style={styles.originalPrice}>

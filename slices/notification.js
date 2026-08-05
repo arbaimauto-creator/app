@@ -19,10 +19,12 @@ const initialState = {
   currentPushedQnaId: '',
 };
 
-export const fetchUser = createAsyncThunk('user/getUser', getUser);
+// typePrefix가 user 슬라이스의 fetchUser('user/getUser')와 겹치면
+// 한쪽 thunk가 다른 슬라이스의 extraReducers를 오발화시킨다 — 고유 prefix 사용
+export const fetchUser = createAsyncThunk('notification/getUser', getUser);
 
 const notificationSlice = createSlice({
-  name: 'user',
+  name: 'notification',
   initialState,
   reducers: {
     setInitialNotification(state, { payload: { notification } }) {

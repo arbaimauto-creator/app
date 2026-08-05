@@ -48,15 +48,18 @@ function BottomTabNavigator({ route, navigation }) {
     messaging()
       .getInitialNotification()
       .then((remoteMessage) => {
-        if (remoteMessage) {
+        // data 없는(notification-only) 푸시로 실행되면 type이 없다 — 널 가드 없으면
+        // 예외로 setLoading(false)가 안 불려 앱이 빈 화면에 영구 정지한다.
+        if (remoteMessage?.data?.type) {
           console.log(
             'Notification caused app to open from quit state:',
             remoteMessage.notification,
           );
           setInitialRoute(capitalizeFirstLetter(remoteMessage.data.type)); // e.g. "Settings"
         }
-        setLoading(false);
-      });
+      })
+      .catch((err) => console.log('getInitialNotification error', err))
+      .finally(() => setLoading(false));
   }, [navigation]);
 
   if (loading) {

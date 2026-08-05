@@ -50,6 +50,42 @@
 
 **검증:** 레포 전체 `eslint --quiet` 통과(에러 0), 수정 파일 19개 Babel 파싱 통과, 에뮬레이터 리로드 후 크래시 버퍼 0건, 홈 피드/비디오 페이지 정상 렌더링 확인
 
+## 전수 버그 헌팅 (4차 세션, 2026-08-05) — 4개 영역 병렬 정밀 탐색 후 36개 파일 수정
+
+**로그인/네비게이션 (치명)**
+- 애플 로그인 TDZ(선언 전 접근)로 로그인 전면 불능 → 수정 (`commonHelperFunction.js`)
+- 소셜 로그인 성공 시 `reset({index:1, routes:[1개]})` 인덱스 범위 초과 6곳 → index:0
+- 게스트 로그아웃 vs MainBottom 리셋 레이스 → await로 직렬화 (`SignInScreen/index.js`)
+- notification-only 푸시로 실행 시 빈 화면 영구 정지 → 널 가드 + finally (`BottomTabNavigator`)
+- data-only 푸시 수신 크래시 → notification 가드 (`pushNotifications.js`)
+- https 형식 다이나믹 링크에서 `undefined.startsWith` 크래시 → 경로 추출 헬퍼 (`linking.js`)
+
+**결제/커머스 (금전)**
+- 인증리뷰어 리워드 이중 차감(합계>상품가→음수 결제) → 잔액만 차감 (`RewardUse.js`)
+- 최소사용액 미만 입력 시 더 큰 금액(500) 차감 → 거부로 변경
+- US 리전 문자열 금액 비교("9">="80.00")로 무료 주문 가능 → Number 강제
+- 할인코드 금액에 수량 미반영 → 수량 곱 반영 (`PromotionCode.js`)
+- 가격 로딩 전 제출 시 0원 결제 경로 + 주문 버튼 연타 중복 주문 → 가드/플래그 (`MakeOrderScreen.js`)
+- 해외배송비 `20 * undefined = NaN` → state/상수 폴백
+- 재고 `===` 비교로 품절 상품 무한 수량 증가 → `>=` + -1(무제한) 예외 (`B2BProductPage.js`)
+- 프로모션 코드 API의 userId에 객체 전달 → `_id` 문자열로 통일
+
+**Redux/Context**
+- user 슬라이스가 없는 경로(state.reviews)에 쓰고 로딩 영구 true → user 경로로 수정
+- notification 슬라이스 name/thunk prefix가 user와 충돌 → 고유화
+- review 슬라이스 잘못된 키(risingUser/worst) → 실제 키(hotReviewer/worstProduct)
+- product 슬라이스 pending/rejected가 data 삭제 → 보존; 핸들러 맵 폴백 가드 4곳
+- Context 업로드 리듀서 원본 변이+순서 튐 → map 기반 불변 업데이트, `progess` 오타 정정
+
+**크래시/리소스 누수**
+- `isNumeric`이 모든 문자열 false → 가격 "-" 표시 버그 수정; `compareVersion` 버전 오판정 수정
+- AppState 리스너 영구 누수 3곳(SliderEntry/EditSingleVideo/AddingNewVideo) → subscription 해제
+- Pay/PayPaypal: Linking 리스너 미해제·this 미바인딩·인자 타입 오류·생성자 async 레이스 → 정리
+- 이미지 선택 취소 크래시(CoverImages), 릴레이/별점 리스트 빈 배열 크래시, `??` 우선순위 NaN 2곳
+- ReviewComments useCallback 선언 순서(TDZ), 좋아요/북마크 실패 시 상태 오토글, 게스트 마이페이지 티어 탭 크래시 등
+
+**검증:** 수정 파일 36개 Babel 파싱 OK, 레포 린트 에러 0, 에뮬레이터 크래시 버퍼 0
+
 ## 남은 관찰 사항 (수정 안 함 — 기존 동작 유지)
 
 1. **PurchasePopup**: `linkedProduct.productId`가 문자열(비populate)일 때 `product.options` 접근 시 크래시 가능. 기존 코드와 동일 조건이라 그대로 둠. 서버가 구매 가능 상품은 항상 populate해서 내려주는 전제.

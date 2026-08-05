@@ -55,22 +55,21 @@ const userSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(fetchUser.pending.type, (state, action) => {
-      state.reviews = {
-        loading: true,
-        error: null,
-        data: null,
-      };
-    })
+    // 기존 코드는 존재하지 않는 state.reviews에 쓰고 fulfilled에서 저장을 안 해
+    // user.loading이 영원히 true로 남았음 — user 경로에 올바르게 반영한다.
+    builder
+      .addCase(fetchUser.pending.type, (state) => {
+        state.user.loading = true;
+        state.user.error = null;
+      })
       .addCase(fetchUser.fulfilled.type, (state, { payload }) => {
-        console.log(payload);
+        state.user.loading = false;
+        state.user.data = payload ?? state.user.data;
       })
       .addCase(fetchUser.rejected.type, (state, action) => {
         console.error('fetchUser.rejected', action);
-        state.reviews = {
-          loading: false,
-          error: 'user fetch error',
-        };
+        state.user.loading = false;
+        state.user.error = 'user fetch error';
       });
   }
 });

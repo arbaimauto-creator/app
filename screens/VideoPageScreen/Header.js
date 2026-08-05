@@ -27,7 +27,8 @@ function Header({ context }) {
 
   useEffect(() => {
     const navigationState = navigation.getState().routes;
-    setPreviousRouteName(navigationState[navigationState.length - 2].name);
+    // 딥링크로 직접 진입하면 이전 라우트가 없어 undefined.name 크래시
+    setPreviousRouteName(navigationState[navigationState.length - 2]?.name ?? '');
   }, [navigation]);
 
   return (

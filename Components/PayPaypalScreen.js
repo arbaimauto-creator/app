@@ -61,8 +61,6 @@ export default class PayPaypalScreen extends React.Component {
       price: 0,
       currency: '',
     };
-
-    Linking.addEventListener('url', this.linkingCallback);
   }
 
   async checkOrder() {
@@ -73,6 +71,8 @@ export default class PayPaypalScreen extends React.Component {
   }
 
   componentDidMount() {
+    this._linkingSubscription = Linking.addEventListener('url', this.linkingCallback);
+
     const { navigation } = this.props;
     navigation.setOptions({
       title: Strings.MAKE_ORDER,
@@ -94,12 +94,17 @@ export default class PayPaypalScreen extends React.Component {
     });
   }
 
-  linkingCallback(data) {
-    console.log('linkingCallback', data);
-    if (data.includes('payOrderFinished')) {
+  componentWillUnmount() {
+    this._linkingSubscription?.remove();
+  }
+
+  // url 이벤트 인자는 { url } 객체 — 화살표 함수로 this 바인딩 보장
+  linkingCallback = ({ url }) => {
+    console.log('linkingCallback', url);
+    if (url?.includes('payOrderFinished')) {
       //this.onSucceedToPay()
     }
-  }
+  };
 
   onFailedToPay() {
     Alert.alert(Strings.FAILED_TO_PAY);

@@ -28,11 +28,17 @@ export default function PromotionCode({ context, cartItems }) {
     let messages = [];
 
     for (const cartItem of cartItems) {
-      const check = await APIprovider.checkAvailablePromotionCode({
-        promotionCode: code,
-        userId: cartItem.buyer._id,
-        productId: cartItem.product._id,
-      });
+      let check;
+      try {
+        check = await APIprovider.checkAvailablePromotionCode({
+          promotionCode: code,
+          userId: cartItem.buyer._id,
+          productId: cartItem.product._id,
+        });
+      } catch (err) {
+        messages.push(err?.errorMsg || Strings.RETRY_GUIDELINES);
+        continue;
+      }
 
       if (check && check.success) {
         cartItem.discountAmount = Math.round(
@@ -41,18 +47,31 @@ export default function PromotionCode({ context, cartItems }) {
 
         discountInfo.push({
           percentage: check.discountCode.percentage,
-          discountAmount: Math.round((cartItem.price * check.discountCode.percentage) / 100),
+          // 수량(number)을 곱하지 않으면 화면 표시·차감액이 수량배만큼 적게 계산된다
+          discountAmount: Math.round(
+            (cartItem.price * cartItem.number * check.discountCode.percentage) / 100,
+          ),
           productTitle: cartItem.product.title,
           discountCode: check.discountCode._id,
           code: check.discountCode.code,
         });
 
         setAppliedDiscountCodeId(check.discountCode._id);
-        setUserId(cartItem.buyer);
+        // 사용/취소 API는 문자열 id를 기대 — 객체 전체를 넣으면 서버 기록이 조용히 실패한다
+        setUserId(cartItem.buyer._id);
         context.setState({ rewardAvailable: check.discountCode.rewardAvailable });
       } else {
-        messages.push(check.message);
+        // check가 null(네트워크 오류 등)일 수 있다
+        messages.push(check?.message || Strings.RETRY_GUIDELINES);
       }
+    }
+
+    // 카트가 비었거나 모든 항목이 실패한 경우 아래 discountInfo[0] 접근 방지
+    if (!discountInfo.length) {
+      if (messages.length) {
+        Alert.alert(messages[0]);
+      }
+      return;
     }
 
     if (context.state.isUseReward && context.state.rewardUse && discountInfo.length) {
@@ -70,7 +89,7 @@ export default function PromotionCode({ context, cartItems }) {
               // eslint-disable-next-line react-hooks/rules-of-hooks
               await APIprovider.usePromotionCode({
                 promotionCode: discountInfo[0].discountCode,
-                userId: cartItems[0].buyer,
+                userId: cartItems[0].buyer._id,
               });
 
               setDiscounted(discountInfo);
@@ -91,15 +110,10 @@ export default function PromotionCode({ context, cartItems }) {
         },
       );
     } else {
-      if (!discountInfo.length && messages.length) {
-        Alert.alert(messages[0]);
-        return;
-      }
-
       // eslint-disable-next-line react-hooks/rules-of-hooks
       await APIprovider.usePromotionCode({
         promotionCode: discountInfo[0].discountCode,
-        userId: cartItems[0].buyer,
+        userId: cartItems[0].buyer._id,
       });
 
       setDiscounted(discountInfo);
@@ -163,7 +177,9 @@ export default function PromotionCode({ context, cartItems }) {
             />
             <TouchableOpacity
               onPress={() => {
-                checkPromotionCodeAndApply();
+                checkPromotionCodeAndApply().catch((err) =>
+                  console.log('checkPromotionCodeAndApply error', err),
+                );
               }}
               disabled={!code}
               style={{

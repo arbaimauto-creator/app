@@ -137,6 +137,18 @@ class MakeOrderScreen extends React.Component {
   onPressSubmitButton() {
     const { cartItems, productId, KRWPerUSD } = this.props.route.params;
 
+    // 가격 정보 로딩 전(finalPrice=0)에 제출하면 "결제액 0원" 경로로 무료 주문이
+    // 생성될 수 있고, 응답 대기 중 연타하면 중복 주문이 생성된다.
+    if (!this.state.finalPrice || this.state.finalPrice <= 0) {
+      Alert.alert(Strings.MAKE_ORDER, Strings.RETRY_GUIDELINES, [{ text: Strings.OK }], {
+        cancelable: true,
+      });
+      return false;
+    }
+    if (this._isSubmittingOrder) {
+      return false;
+    }
+
     const validation = (condition, message) => {
       if (!condition) {
         Alert.alert(Strings.MAKE_ORDER, message, [{ text: Strings.OK }], {
@@ -206,32 +218,39 @@ class MakeOrderScreen extends React.Component {
       promotionDiscount,
     };
 
+    this._isSubmittingOrder = true;
     APIprovider.newOrder(params)
       .then((order) => {
+        this._isSubmittingOrder = false;
         if (finalPrice - rewardUse - promotionDiscount - certifiedReviewerRewardUse === 0) {
           APIprovider.payWithReward({
             orderId: order.orderId,
             rewardUse,
             certifiedReviewerRewardUse,
-          }).then((res) => {
-            console.log('payWithReward', res);
+          })
+            .then((res) => {
+              console.log('payWithReward', res);
 
-            if (
-              this.props.route.params?.fetchData &&
-              typeof this.props.route.params?.fetchData === 'function'
-            ) {
-              this.props.route.params?.fetchData();
-            }
+              if (
+                this.props.route.params?.fetchData &&
+                typeof this.props.route.params?.fetchData === 'function'
+              ) {
+                this.props.route.params?.fetchData();
+              }
 
-            if (res.success) {
-              Alert.alert(Strings.SUCCEED_TO_PAY);
-              // return this.props.navigation.dispatch(StackActions.pop(1));
-              return this.props.navigation.replace('MyOrderList');
-            }
+              if (res?.success) {
+                Alert.alert(Strings.SUCCEED_TO_PAY);
+                // return this.props.navigation.dispatch(StackActions.pop(1));
+                return this.props.navigation.replace('MyOrderList');
+              }
 
-            Alert.alert(Strings.FAILED_TO_GET_PAYMENT_INFO);
-            return this.props.navigation.dispatch(StackActions.pop(1));
-          });
+              Alert.alert(Strings.FAILED_TO_GET_PAYMENT_INFO);
+              return this.props.navigation.dispatch(StackActions.pop(1));
+            })
+            .catch((err) => {
+              console.log('payWithReward error', err);
+              Alert.alert(Strings.FAILED_TO_GET_PAYMENT_INFO, err?.errorMsg || '');
+            });
           return;
         }
 
@@ -261,7 +280,11 @@ class MakeOrderScreen extends React.Component {
             onSucceedToPay: this.props.route.params.onSucceedToPay,
             order: {
               ...order,
-              shipmentCost: 20 * this.props?.route?.params?.KRWPerUSD, //this.state.shipmentCostUS,
+              shipmentCost:
+                20 *
+                (this.state.KRWPerUSD ||
+                  this.props?.route?.params?.KRWPerUSD ||
+                  Constants.KRW_PER_USD), //this.state.shipmentCostUS,
               fetchData: () => this.props.route.params?.fetchData(),
               totalPrice: finalPrice - rewardUse - promotionDiscount - certifiedReviewerRewardUse,
               rewardUse: rewardUse,
@@ -271,6 +294,7 @@ class MakeOrderScreen extends React.Component {
         }
       })
       .catch((err) => {
+        this._isSubmittingOrder = false;
         console.log('FAILED_TO_MAKE_ORDER', err);
         Alert.alert(
           Strings.FAILED_TO_MAKE_ORDER,
@@ -290,7 +314,10 @@ class MakeOrderScreen extends React.Component {
   render() {
     const { navigation } = this.props;
     const { cartItems, totalPrice, shipmentCost, shipmentCostUS } = this.props.route.params;
-    const KRWPerUSD = this.props?.route?.params?.KRWPerUSD;
+    // route.params가 없으면 20 * undefined = NaN으로 총액 전체가 NaN이 된다 —
+    // API로 갱신된 state 값 → 파라미터 → 상수 순으로 폴백
+    const KRWPerUSD =
+      this.state.KRWPerUSD || this.props?.route?.params?.KRWPerUSD || Constants.KRW_PER_USD;
     return (
       <SafeAreaView style={{ flex: 1 }}>
         <KeyboardAvoidingView

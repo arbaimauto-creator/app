@@ -72,13 +72,8 @@ export default function VideoLikeButton({ context, size = 26, center }) {
                 [{ text: Strings.OK }],
                 { cancelable: true },
               );
-              context.setState({
-                video: {
-                  ...review,
-                  isLiked: !review.isLiked,
-                },
-              });
-
+              // 낙관적 업데이트를 하지 않았으므로 실패 시 상태를 토글하면
+              // 오히려 "실패했는데 좋아요가 켜지는" 버그가 된다 — 상태 유지
               context.setState({ isLikeLoading: false });
             });
         }}

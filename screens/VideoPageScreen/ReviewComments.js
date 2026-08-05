@@ -64,6 +64,63 @@ function ReviewComments({ context }) {
     }
   }, [context, video.videoId, context.state.video.commentCount]);
 
+  // 참조하는 콜백들(onRecommentDeleteRequested/loadRecommentList)보다 먼저 선언해야 한다.
+  // 뒤에 두면 deps 배열 평가 시점에 TDZ(선언 전 접근)가 된다.
+  const getRecommentListOfVideoCallback = useCallback(
+    (newList, _comment) => {
+      for (let i = 0; i < context.state.video.commentList.length; i++) {
+        if (context.state.video.commentList[i].commentId === _comment.commentId) {
+          let prevState = Object.assign({}, context.state);
+          if (!prevState.video.commentList[i].childComments) {
+            prevState.video.commentList[i].childComments = newList;
+          } else {
+            prevState.video.commentList[i].childComments.push(...newList);
+          }
+          context.setState(prevState);
+          break;
+        }
+      }
+    },
+    [context],
+  );
+
+  const deleteVideoRecommentCallback = useCallback(
+    (result) => {
+      for (let i = 0; i < context.state.video.commentList.length; i++) {
+        for (let j = 0; j < context.state.video.commentList[i].childComments?.length; j++) {
+          if (context.state.video.commentList[i].childComments[j]._id === result.commentId) {
+            context.setState({
+              video: {
+                ...context.state.video,
+                commentCount: context.state.video.commentCount - 1,
+                commentList: [
+                  ...context.state.video.commentList.slice(0, i),
+                  {
+                    ...context.state.video.commentList[i],
+                    childCount: context.state.video.commentList[i].childCount - 1,
+                    childComments: [
+                      ...context.state.video.commentList[i].childComments.slice(0, j),
+                      ...context.state.video.commentList[i].childComments.slice(
+                        j + 1,
+                        context.state.video.commentList[i].childComments.length,
+                      ),
+                    ],
+                  },
+                  ...context.state.video.commentList.slice(
+                    i + 1,
+                    context.state.video.commentList.length,
+                  ),
+                ],
+              },
+            });
+            return;
+          }
+        }
+      }
+    },
+    [context],
+  );
+
   const onRecommentDeleteRequested = useCallback(
     (commentId) => {
       APIprovider.deleteVideoComment(context.state.video.videoId, commentId)
@@ -128,61 +185,6 @@ function ReviewComments({ context }) {
       }
     },
     [context.state, getRecommentListOfVideoCallback, isRecommentLoading],
-  );
-
-  const getRecommentListOfVideoCallback = useCallback(
-    (newList, _comment) => {
-      for (let i = 0; i < context.state.video.commentList.length; i++) {
-        if (context.state.video.commentList[i].commentId === _comment.commentId) {
-          let prevState = Object.assign({}, context.state);
-          if (!prevState.video.commentList[i].childComments) {
-            prevState.video.commentList[i].childComments = newList;
-          } else {
-            prevState.video.commentList[i].childComments.push(...newList);
-          }
-          context.setState(prevState);
-          break;
-        }
-      }
-    },
-    [context],
-  );
-
-  const deleteVideoRecommentCallback = useCallback(
-    (result) => {
-      for (let i = 0; i < context.state.video.commentList.length; i++) {
-        for (let j = 0; j < context.state.video.commentList[i].childComments?.length; j++) {
-          if (context.state.video.commentList[i].childComments[j]._id === result.commentId) {
-            context.setState({
-              video: {
-                ...context.state.video,
-                commentCount: context.state.video.commentCount - 1,
-                commentList: [
-                  ...context.state.video.commentList.slice(0, i),
-                  {
-                    ...context.state.video.commentList[i],
-                    childCount: context.state.video.commentList[i].childCount - 1,
-                    childComments: [
-                      ...context.state.video.commentList[i].childComments.slice(0, j),
-                      ...context.state.video.commentList[i].childComments.slice(
-                        j + 1,
-                        context.state.video.commentList[i].childComments.length,
-                      ),
-                    ],
-                  },
-                  ...context.state.video.commentList.slice(
-                    i + 1,
-                    context.state.video.commentList.length,
-                  ),
-                ],
-              },
-            });
-            return;
-          }
-        }
-      }
-    },
-    [context],
   );
 
   const addRecommentCallback = useCallback(

@@ -46,8 +46,6 @@ export default class PayScreen extends React.Component {
   constructor(props) {
     super(props);
 
-    this.requestPay();
-
     this.state = {
       url: 'https://epay.kovanpay.com/mobilepage/common/mainFrame.pay',
       // url: 'https://dev-epay.kovanpay.com/mobilepage/common/mainFrame.pay',
@@ -56,15 +54,14 @@ export default class PayScreen extends React.Component {
       bodyData: null,
     };
     this.html = '';
-
-    Linking.addEventListener('url', this.linkingCallback);
   }
 
-  linkingCallback(data) {
-    if (data.includes('payOrderFinished')) {
+  // url 이벤트 인자는 문자열이 아니라 { url } 객체 — 화살표 함수로 this 바인딩도 보장
+  linkingCallback = ({ url }) => {
+    if (url?.includes('payOrderFinished')) {
       //this.onSucceedToPay()
     }
-  }
+  };
 
   onFailedToPay() {
     //    Alert.alert(Strings.FAILED_TO_PAY)
@@ -74,6 +71,10 @@ export default class PayScreen extends React.Component {
   componentDidMount() {
     // this.props.route.params?.fetchData();
     // this.props.navigation.dispatch(StackActions.pop(2));
+
+    // 생성자에서 호출하면 마운트 전 setState로 bodyData가 유실될 수 있음
+    this.requestPay();
+    this._linkingSubscription = Linking.addEventListener('url', this.linkingCallback);
 
     const { navigation } = this.props;
     navigation.setOptions({
@@ -101,6 +102,10 @@ export default class PayScreen extends React.Component {
         }
       });
     });
+  }
+
+  componentWillUnmount() {
+    this._linkingSubscription?.remove();
   }
 
   async checkOrder() {

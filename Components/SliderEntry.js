@@ -471,7 +471,8 @@ export default class SliderEntry extends PureComponent {
 
   async componentDidMount() {
     this._isMounted = true;
-    AppState.addEventListener('change', this._handleAppStateChange);
+    // RN 0.65+: removeEventListener가 없으므로 subscription을 저장해 언마운트 시 해제
+    this._appStateSubscription = AppState.addEventListener('change', this._handleAppStateChange);
     // if (AppState.currentState.match(/inactive|background/)) {
     //   this.setState({ isBlurred: true });
     // }
@@ -518,7 +519,7 @@ export default class SliderEntry extends PureComponent {
 
   componentWillUnmount() {
     this._isMounted = false;
-    // AppState.removeEventListener('change', this._handleAppStateChange);
+    this._appStateSubscription?.remove();
     // 리스너 등록 전에 언마운트되면 undefined일 수 있다
     this._unsubscribeFocusEvent?.();
     this._unsubscribeUnfocusEvent?.();

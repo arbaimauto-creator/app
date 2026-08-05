@@ -32,6 +32,19 @@ const config = {
   },
 };
 
+// 다이나믹 링크 url이 greyd:// 스킴이 아니라 https://greyd.app/... 형태로 오는 경우가 일반적이라
+// 두 형태 모두에서 경로를 추출한다. 추출 실패 시 null (기존 코드는 undefined.startsWith로 크래시했음)
+const extractDeepLinkPath = (url) => {
+  if (!url) {
+    return null;
+  }
+  if (url.includes('greyd://')) {
+    return url.split('greyd://')[1];
+  }
+  const match = url.match(/^https?:\/\/greyd\.app\/(.+)$/);
+  return match ? match[1] : null;
+};
+
 const linking = {
   prefixes: ['https://greyd.app', 'greyd://'],
   config,
@@ -43,7 +56,10 @@ const linking = {
     console.log('deeplink getInitialURL', url, dynamicLink);
 
     if (dynamicLink) {
-      const dynamicLinkParams = dynamicLink.url.split('greyd://')[1];
+      const dynamicLinkParams = extractDeepLinkPath(dynamicLink.url);
+      if (!dynamicLinkParams) {
+        return url || 'mylinker://home';
+      }
 
       /* 다이나믹 링크를 통해 들어왔을대 로그인 되도록 로직추가 */
       const {
@@ -108,7 +124,10 @@ const linking = {
 
       // const url = 'greyd://' + pathArray.join('/');
 
-      const dynamicLinkParams = dynamicLink.url.split('greyd://')[1];
+      const dynamicLinkParams = extractDeepLinkPath(dynamicLink.url);
+      if (!dynamicLinkParams) {
+        return;
+      }
 
       const url = 'greyd://' + dynamicLinkParams;
 

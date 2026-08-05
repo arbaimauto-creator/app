@@ -62,12 +62,7 @@ function BookmarkButton({ context, size = 26, center }) {
                 [{ text: Strings.OK }],
                 { cancelable: true },
               );
-              context.setState({
-                video: {
-                  ...review,
-                  isBookmarked: !review.isBookmarked,
-                },
-              });
+              // 실패 시 상태를 토글하면 실패했는데 북마크가 켜짐 — 상태 유지
             });
         }}
       />
