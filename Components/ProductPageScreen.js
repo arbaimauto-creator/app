@@ -69,18 +69,22 @@ const MODE = {
   SELECT_TO_LINK: 'select_to_link',
 };
 
+// B2B 상품 페이지(B2BProductPage)는 이 화면의 변형이다.
+// 과거에는 2,786줄짜리 포크로 존재했고, 지금은 isB2B prop 분기로 흡수했다.
+const isB2B = (context) => context?.props?.isB2B === true;
+
 function Header({ context }) {
+  const backIcon = (
+    <FastImage
+      style={styles.headerButton}
+      source={require('../Resources/img/icCommonNaviPrev22W.png')}
+    />
+  );
   return (
     <View style={styles.headerBarContainer}>
       <ActionButton
-        renderItem={
-          <View>
-          <FastImage
-            style={styles.headerButton}
-            source={require('../Resources/img/icCommonNaviPrev22W.png')}
-          />
-          </View>
-        }
+        // B2B는 아이콘을 View로 감싸지 않는다 (포크 시절 레이아웃 유지)
+        renderItem={isB2B(context) ? backIcon : <View>{backIcon}</View>}
         onPress={() => {
           context.props.navigation.pop();
         }}
@@ -522,6 +526,52 @@ function ExchangeReturn({ context }) {
   );
 }
 
+function AskQuestionButton({ context, product }) {
+  const onPress = () => {
+    if (isGuestUser(context.props.route.params.logonUserId)) {
+      return LogoutAlert(context.props);
+    }
+    context.setState({ isShowingCommentInput: true });
+    context.commentInput.focus();
+  };
+
+  const content = (
+    <>
+      <FastImage
+        style={styles.userProfilePic}
+        source={{ uri: context.state.logonUserProfilePicUrl }}
+      />
+      <Text
+        style={{
+          flex: 1,
+          marginRight: 4,
+          color: Constants.TIER_COLORS.ARTISAN,
+          fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
+        }}
+      >
+        {product.seller.userId === APIprovider.requesterId
+          ? Strings.REPLAY
+          : Strings.ASK_A_QUESTION}
+      </Text>
+    </>
+  );
+
+  // B2B는 iOS에서 TouchableOpacity를 쓴다 (포크 시절 동작 유지)
+  if (isB2B(context) && Platform.OS !== 'android') {
+    return (
+      <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={styles.addCommentButtonContainer}>
+        {content}
+      </TouchableOpacity>
+    );
+  }
+
+  return (
+    <TouchableWithoutFeedback onPress={onPress}>
+      <View style={styles.addCommentButtonContainer}>{content}</View>
+    </TouchableWithoutFeedback>
+  );
+}
+
 function Comments({ context }) {
   const { product } = context.state;
   return (
@@ -539,34 +589,7 @@ function Comments({ context }) {
         </View>
       </TouchableNativeFeedback>
 
-      <TouchableWithoutFeedback
-        onPress={() => {
-          if (isGuestUser(context.props.route.params.logonUserId)) {
-            return LogoutAlert(context.props);
-          }
-          context.setState({ isShowingCommentInput: true });
-          context.commentInput.focus();
-        }}
-      >
-        <View style={styles.addCommentButtonContainer}>
-          <FastImage
-            style={styles.userProfilePic}
-            source={{ uri: context.state.logonUserProfilePicUrl }}
-          />
-          <Text
-            style={{
-              flex: 1,
-              marginRight: 4,
-              color: Constants.TIER_COLORS.ARTISAN,
-              fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-            }}
-          >
-            {product.seller.userId === APIprovider.requesterId
-              ? Strings.REPLAY
-              : Strings.ASK_A_QUESTION}
-          </Text>
-        </View>
-      </TouchableWithoutFeedback>
+      <AskQuestionButton context={context} product={product} />
 
       {context.state.isCommentExpanded && (
         <View style={styles.commentContainer}>
@@ -851,8 +874,41 @@ function QuestionToSellerButton({ context }) {
   );
 }
 
+// B2B는 즉시 구매 대신 문의 화면(B2BProductInquiry)으로 보낸다.
+function B2BInquiryButton({ context }) {
+  const { product } = context.state;
+  return (
+    <View style={styles.bottomButtonGroupContainerB2B}>
+      <Button
+        containerStyle={{ width: '100%', borderRadius: 14 }}
+        buttonStyle={{
+          backgroundColor: Constants.COLOR_POINT_BLUE,
+          height: 45,
+        }}
+        titleStyle={{
+          color: Constants.COLOR_BACKGROUND_DARK,
+          fontSize: 18,
+          fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
+        }}
+        title="B2B Inquiry"
+        onPress={() => {
+          if (isGuestUser(context.props.route.params.logonUserId)) {
+            return LogoutAlert(context.props);
+          }
+          context.props.navigation.navigate('B2BProductInquiry', { product });
+        }}
+      />
+    </View>
+  );
+}
+
 function PurchaseButton({ context }) {
   const { product } = context.state;
+
+  if (isB2B(context)) {
+    return <B2BInquiryButton context={context} />;
+  }
+
   return (
     <Button
       containerStyle={styles.bottomButtonGroupButton}
@@ -1584,14 +1640,19 @@ export default class ProductPageScreen extends React.Component {
       productId,
       title,
       description?.slice(0, 250),
-      // 이미지 없는 상품 공유 시 크래시 방지 (B2B 쪽 수정과 동기화)
+      // 이미지 없는 상품 공유 시 undefined.url 크래시 방지
       attachmentList?.[0]?.url,
-    ).then((res) => {
-      const url = res?.shortLink;
-      const message = Strings.SHARE_PRODUCT_MESSAGE;
+    )
+      .then((res) => {
+        const url = res?.shortLink;
+        const message = Strings.SHARE_PRODUCT_MESSAGE;
 
-      shareLink({ url, message, description });
-    });
+        shareLink({ url, message, description });
+      })
+      .catch((err) => {
+        // 링크 생성 실패 시 unhandled rejection 방지
+        console.log('getProductDynamicLink error', err);
+      });
   };
 
   menuReportClicked = function () {
@@ -1746,11 +1807,16 @@ export default class ProductPageScreen extends React.Component {
       this.setState({ buyButtonPhrase: Strings.TRUST_REVIEWER_AND_BUY });
     }
 
-    BackHandler.addEventListener('hardwareBackPress', this.backAction);
+    // B2B는 구매 팝업이 없어 뒤로가기 가로채기가 필요 없다
+    if (!this.props.isB2B) {
+      BackHandler.addEventListener('hardwareBackPress', this.backAction);
+    }
   }
 
   componentWillUnmount() {
-    BackHandler.removeEventListener('hardwareBackPress', this.backAction);
+    if (!this.props.isB2B) {
+      BackHandler.removeEventListener('hardwareBackPress', this.backAction);
+    }
   }
 
   backAction = () => {
@@ -2333,12 +2399,19 @@ export default class ProductPageScreen extends React.Component {
           {this.props.route.params.mode === MODE.SELECT_TO_LINK ? (
             <SelectToLinkButton context={this} />
           ) : (
-            <View style={styles.bottomButtonGroupContainer}>
+            <View
+              style={
+                this.props.isB2B
+                  ? styles.bottomButtonGroupContainerB2B
+                  : styles.bottomButtonGroupContainer
+              }
+            >
               {/* <ReviewButton context={this} /> */}
               <PurchaseButton context={this} />
             </View>
           )}
-          <PurchasePopup context={this} />
+          {/* B2B는 구매 팝업 없이 문의 화면으로만 이동한다 */}
+          {!this.props.isB2B && <PurchasePopup context={this} />}
           <CommentModal context={this} />
           <ReportModal
             visible={this.state.isInvalidContents}
@@ -2609,6 +2682,12 @@ const styles = StyleSheet.create({
     marginTop: 6,
     marginBottom: Platform.OS === 'ios' ? 30 : 12,
     marginHorizontal: 20,
+  },
+  // B2B 포크가 쓰던 여백 값 (동작 보존)
+  bottomButtonGroupContainerB2B: {
+    marginTop: 6,
+    marginBottom: Platform.OS === 'ios' ? 17 : 8,
+    marginHorizontal: 10,
   },
   bottomButtonGroupButton: {
     marginVertical: 4,
