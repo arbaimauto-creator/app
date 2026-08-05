@@ -33,6 +33,8 @@ class MakeOrderScreen extends React.Component {
       lowestOrderPriceForFreeDeliveryUS,
       shippingRegion,
       KRWPerUSD,
+      // 해외(global) 주문에서만 전달되는 공동구매 할인액. 국내 주문에서는 undefined → 0.
+      globalGroupBuyingDiscountAmount,
     } = this.props.route.params;
 
     this.state = {
@@ -74,6 +76,7 @@ class MakeOrderScreen extends React.Component {
       kovanPayMethod: Constants.KOVAN_PAY_METHOD.CREDIT_CARD,
       certifiedReviewerRewardUse: 0,
       rewardAvailable: true,
+      globalGroupBuyingDiscountAmount: globalGroupBuyingDiscountAmount || 0,
     };
 
     // props.navigation.setOptions({
@@ -136,6 +139,7 @@ class MakeOrderScreen extends React.Component {
 
   onPressSubmitButton() {
     const { cartItems, productId, KRWPerUSD } = this.props.route.params;
+    const isGlobal = !!this.props.isGlobal;
 
     // 가격 정보 로딩 전(finalPrice=0)에 제출하면 "결제액 0원" 경로로 무료 주문이
     // 생성될 수 있고, 응답 대기 중 연타하면 중복 주문이 생성된다.
@@ -198,6 +202,7 @@ class MakeOrderScreen extends React.Component {
       finalPrice,
       kovanPayGroup,
       kovanPayMethod,
+      globalGroupBuyingDiscountAmount,
     } = this.state;
 
     const params = {
@@ -262,14 +267,28 @@ class MakeOrderScreen extends React.Component {
               title: cartItems[0].product.title,
               otherCount: cartItems.length - 1,
             }),
-            buyItemcd: cartItems[0].product.productId.substring(0, 9),
-            buyerid: order.buyer.userId.substring(0, 19),
-            buyernm,
-            buyerEmail,
-            orderno: order.orderId.substring(0, 19),
-            productId,
+            // 해외 주문 경로는 널 안전 접근을 쓰고 buyernm/buyerEmail/productId를 넘기지 않는다.
+            ...(isGlobal
+              ? {
+                  buyItemcd: cartItems[0]?.product?.productId?.substring(0, 9),
+                  buyerid: order?.buyer?.userId?.substring(0, 19),
+                  orderno: order?.orderId?.substring(0, 19) || '',
+                }
+              : {
+                  buyItemcd: cartItems[0].product.productId.substring(0, 9),
+                  buyerid: order.buyer.userId.substring(0, 19),
+                  buyernm,
+                  buyerEmail,
+                  orderno: order.orderId.substring(0, 19),
+                  productId,
+                }),
             fetchData: () => this.props.route.params?.fetchData(),
-            buyReqamt: finalPrice - rewardUse - promotionDiscount - certifiedReviewerRewardUse,
+            buyReqamt:
+              finalPrice -
+              rewardUse -
+              promotionDiscount -
+              certifiedReviewerRewardUse -
+              globalGroupBuyingDiscountAmount,
             rewardUse: rewardUse,
             certifiedReviewerRewardUse: certifiedReviewerRewardUse,
             kovanPayGroup,
@@ -286,7 +305,12 @@ class MakeOrderScreen extends React.Component {
                   this.props?.route?.params?.KRWPerUSD ||
                   Constants.KRW_PER_USD), //this.state.shipmentCostUS,
               fetchData: () => this.props.route.params?.fetchData(),
-              totalPrice: finalPrice - rewardUse - promotionDiscount - certifiedReviewerRewardUse,
+              totalPrice:
+                finalPrice -
+                rewardUse -
+                promotionDiscount -
+                certifiedReviewerRewardUse -
+                globalGroupBuyingDiscountAmount,
               rewardUse: rewardUse,
               certifiedReviewerRewardUse: certifiedReviewerRewardUse,
             },
@@ -663,6 +687,21 @@ class MakeOrderScreen extends React.Component {
               </View>
             ) : null}
 
+            {/* 글로벌 공구 할인 (해외 주문에서만 값이 들어온다) */}
+            {this.state.globalGroupBuyingDiscountAmount ? (
+              <View style={{ ...styles.amountItemContainer, paddingVertical: 4 }}>
+                <Text style={styles.amountTitle}>{'글로벌 공구 할인'}</Text>
+                <Text style={styles.amount}>
+                  -{' '}
+                  {Utils.displayPrice(
+                    this.state.globalGroupBuyingDiscountAmount,
+                    this?.context?.state?.region,
+                    KRWPerUSD,
+                  )}
+                </Text>
+              </View>
+            ) : null}
+
             <View style={{ ...styles.amountItemContainer, paddingVertical: 4 }}>
               <Text style={styles.amountTitle}>{Strings.TOTAL_PRICE}</Text>
               <Text style={styles.amount}>
@@ -670,7 +709,8 @@ class MakeOrderScreen extends React.Component {
                   this.state.finalPrice -
                     this.state.rewardUse -
                     this.state.promotionDiscount -
-                    this.state.certifiedReviewerRewardUse,
+                    this.state.certifiedReviewerRewardUse -
+                    this.state.globalGroupBuyingDiscountAmount,
                   this?.context?.state?.region,
                   KRWPerUSD,
                 )}
@@ -690,7 +730,8 @@ class MakeOrderScreen extends React.Component {
                 this.state.finalPrice -
                   this.state.rewardUse -
                   this.state.promotionDiscount -
-                  this.state.certifiedReviewerRewardUse,
+                  this.state.certifiedReviewerRewardUse -
+                  this.state.globalGroupBuyingDiscountAmount,
                 this?.context?.state?.region,
                 KRWPerUSD,
               ),
