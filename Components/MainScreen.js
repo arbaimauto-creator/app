@@ -1,4 +1,4 @@
-import { CommonActions, useIsFocused, useScrollToTop } from '@react-navigation/native';
+import { CommonActions, useScrollToTop } from '@react-navigation/native';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import {
   Dimensions,
@@ -45,7 +45,7 @@ import MainBottomSheet from './Views/MainBottomSheet';
 import { pushNotifications } from './services';
 import { LogoutAlert, getIPhoneHeaderMarginTop, isGuestUser, pageRoutingFunctions } from './utils';
 import { getDeviceHeight } from './utils/scailing';
-import ToggleTextButton from './CustomComponents/ToggleTextButton';
+
 import LinearGradient from 'react-native-linear-gradient';
 import DiscoverScreenWrapper from './DiscoverScreen';
 import EventModalCarousel from './CustomComponents/EventBanner/EventModalCarousel';
@@ -907,8 +907,7 @@ function MainScreen(props) {
             source={require('../Resources/img/newIcon/greyd-logo-new.png')}
           />
 
-          <ToggleTextButton screenType={screenType} setScreenType={setScreenType} />
-
+          {/* Review/ALL 토글 제거 — 검증 리뷰 단일 피드 (Greyd 2.0). screenType은 0 고정 */}
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <ActionButton
               renderItem={

@@ -1530,6 +1530,8 @@ export default {
   CURATED_K_PRODUCT: 'Curated K-Product',
   MUST_SELECT_OPTION: '필수 옵션을 선택해야합니다.',
   TRY_TAB: '체험',
+  PLAYBACK_SPEED: '재생 속도',
+  TOGGLE_MUTE: '소리 켜기/끄기',
   ACTIVITY_TAB: '활동',
   DISCOVER_TAB: '발견',
   PRODUCTS_TAB: '제품',

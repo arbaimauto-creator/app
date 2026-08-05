@@ -113,7 +113,6 @@ import { Animated, Image, View } from 'react-native';
 import { ScrollView as GestureHandlerScrollView } from 'react-native-gesture-handler';
 import LinearGradient from 'react-native-linear-gradient';
 import Header from './Header';
-import HeaderRight from './HeaderRight';
 import VideoOverlay from './VideoOverlay';
 import { styles } from '.';
 import RenderSlide from './RenderSlide';
@@ -190,13 +189,7 @@ export default function RenderVideoPlayer({ context }) {
         />
       </View>
 
-      <HeaderRight
-        context={context}
-        changeSpeedRate={(speedRate) => context.videoPlayer?.methods?.changeSpeedRate(speedRate)}
-        changeMuteStatus={(muteStatus) =>
-          context.videoPlayer?.methods?.changeMuteStatus(muteStatus)
-        }
-      />
+      {/* HeaderRight(Relay·배속·음소거)는 ⋯ 메뉴로 이동 — 화면당 핵심 액션 3개 원칙 */}
     </View>
   );
 }

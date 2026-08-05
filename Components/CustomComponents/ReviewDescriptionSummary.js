@@ -83,7 +83,8 @@ export default function ReviewDescriptionSummary({ description, isMain, review }
 
   return (
     <View>
-      <Text style={styles.mainDescriptionText} numberOfLines={3}>
+      {/* 홈 피드 오버레이 다이어트: 설명 3줄 → 1줄 */}
+      <Text style={styles.mainDescriptionText} numberOfLines={1}>
         {description}
       </Text>
     </View>

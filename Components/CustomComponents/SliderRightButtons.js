@@ -1,10 +1,8 @@
 import React from 'react';
 import { SafeAreaView, View } from 'react-native';
 import SoundOnOff from './SoundOnOff';
-import TrustAndBuy from './TrustAndBuy';
 
 export default function SliderRightButtons({ context }) {
-  const video = context.props.data;
 
   return (
     <SafeAreaView
@@ -14,11 +12,7 @@ export default function SliderRightButtons({ context }) {
       }}
     >
       <View style={{ top: 119 }}>
-        {video.linkedProduct?.productId ? (
-          <View style={{ marginBottom: 20 }}>
-            <TrustAndBuy product={video.linkedProduct?.productId} videoId={video.videoid} />
-          </View>
-        ) : null}
+        {/* Trust and Buy 플로팅 배지 제거 — 화면 소음 축소 (구매는 영상 상세의 상품 카드로) */}
         <SoundOnOff
           isMuted={context.state.isMuted}
           setMuted={(value) => {

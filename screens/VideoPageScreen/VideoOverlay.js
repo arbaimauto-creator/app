@@ -57,22 +57,6 @@ function ActionRail({ context }) {
     LayoutAnimation.easeInEaseOut();
   };
 
-  const onPressBookmark = () => {
-    if (guardGuest()) {
-      return;
-    }
-    APIprovider.bookmarkVideo(review.videoId, !review.isBookmarked)
-      .then(() => {
-        context.setState({
-          video: { ...review, isBookmarked: !review.isBookmarked },
-        });
-      })
-      .catch((err) => {
-        Alert.alert(Strings.FAILED_TO_BOOKMARK ?? '', err.errorMsg ? err.errorMsg : '', [
-          { text: Strings.OK },
-        ]);
-      });
-  };
 
   const onPressComment = () => {
     if (guardGuest()) {
@@ -128,17 +112,7 @@ function ActionRail({ context }) {
         <IconMaterialIcons name="chat-bubble" size={30} color="#fff" style={styles.railShadow} />
       </RailButton>
 
-      <RailButton onPress={onPressBookmark}>
-        <FastImage
-          style={styles.railIconImage}
-          source={
-            review.isBookmarked
-              ? require('../../Resources/img/iconRenewal/white-bookmark-on.png')
-              : require('../../Resources/img/iconRenewal/white-bookmark-off.png')
-          }
-        />
-      </RailButton>
-
+      {/* 북마크는 ⋯ 메뉴로 이동 — 레일은 핵심 5개(아바타·좋아요·별점·댓글·공유)만 */}
       <RailButton onPress={() => context.menuShareToExport()}>
         <FastImage
           style={styles.railIconImage}
@@ -214,9 +188,7 @@ function ProductCard({ context }) {
 
 function VideoOverlay({ context }) {
   const review = context.state.video;
-  const navigation = useNavigation();
   const title = (review.titleByCountry || review.title || '').trim();
-  const hashTags = Array.isArray(review.hashTags) ? [...new Set(review.hashTags)] : [];
 
   return (
     <View style={styles.overlayContainer} pointerEvents="box-none">
@@ -260,19 +232,7 @@ function VideoOverlay({ context }) {
           </Text>
         ) : null}
 
-        {hashTags.length > 0 ? (
-          <View style={styles.hashTagRow}>
-            {hashTags.slice(0, 4).map((tag, idx) => (
-              <Text
-                key={`${tag}-${idx}`}
-                style={styles.hashTag}
-                onPress={() => navigation.push('Search', { hashTag: tag, isHashtagSearch: true })}
-              >
-                {`#${tag}`}
-              </Text>
-            ))}
-          </View>
-        ) : null}
+        {/* 해시태그 줄 제거 — 상세(리뷰)에서 확인 가능. 오버레이는 3줄 이내 유지 */}
 
         <ProductCard context={context} />
 

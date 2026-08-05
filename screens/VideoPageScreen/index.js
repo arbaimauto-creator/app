@@ -816,13 +816,36 @@ class VideoPageScreen extends React.PureComponent {
     });
   };
 
+  // 우측 레일에서 ⋯ 메뉴로 이동한 보조 액션들 (화면당 핵심 액션 3개 원칙)
+  menuSecondaryActions = [
+    {
+      key: 'bookmark_video',
+      name: Strings.BOOKMARKS,
+      icon: <IconMaterialIcons name="bookmark-border" color={'#000'} size={20} />,
+      onClicked: this.menuToggleBookmark.bind(this),
+    },
+    {
+      key: 'relay_video',
+      name: Strings.RELAY,
+      icon: <IconMaterialIcons name="repeat" color={'#000'} size={20} />,
+      onClicked: this.onAddRelayButtonPressed.bind(this),
+    },
+    {
+      key: 'playback_speed',
+      name: Strings.PLAYBACK_SPEED,
+      icon: <IconMaterialIcons name="speed" color={'#000'} size={20} />,
+      onClicked: this.menuCycleSpeed.bind(this),
+    },
+    {
+      key: 'toggle_mute',
+      name: Strings.TOGGLE_MUTE,
+      icon: <IconMaterialIcons name="volume-off" color={'#000'} size={20} />,
+      onClicked: this.menuToggleMute.bind(this),
+    },
+  ];
+
   menuUploader = [
-    // {
-    //   key: 'share_video',
-    //   name: Strings.SHARE,
-    //   icon: <IconMaterialCommunityIcons size={20} name={'share'} color={'#000'} />,
-    //   onClicked: this.menuShareToExport.bind(this),
-    // },
+    ...this.menuSecondaryActions,
     {
       key: 'edit_video',
       name: Strings.EDIT_REVIEW,
@@ -838,12 +861,7 @@ class VideoPageScreen extends React.PureComponent {
   ];
 
   menuVisitor = [
-    // {
-    //   key: 'share_video',
-    //   name: Strings.SHARE,
-    //   icon: <IconMaterialCommunityIcons size={20} name={'share'} color={'#000'} />,
-    //   onClicked: this.menuShareToExport.bind(this),
-    // },
+    ...this.menuSecondaryActions,
     {
       key: 'report_video',
       name: Strings.REPORT,
@@ -854,6 +872,35 @@ class VideoPageScreen extends React.PureComponent {
 
   isMyVideo() {
     return this.state.video.author.userId === this.props.route.params.logonUserId;
+  }
+
+  // ⋯ 메뉴로 이동한 보조 액션 핸들러들
+  menuToggleBookmark() {
+    if (isGuestUser(this.props.route.params.logonUserId)) {
+      return LogoutAlert(this.props);
+    }
+    const review = this.state.video;
+    APIprovider.bookmarkVideo(review.videoId, !review.isBookmarked)
+      .then(() => {
+        this.setState({ video: { ...review, isBookmarked: !review.isBookmarked } });
+      })
+      .catch((err) => {
+        Alert.alert(Strings.FAILED_TO_BOOKMARK, err.errorMsg ? err.errorMsg : '', [
+          { text: Strings.OK },
+        ]);
+      });
+  }
+
+  menuCycleSpeed() {
+    const next = { 1: 1.25, 1.25: 1.5, 1.5: 2, 2: 1 }[this.state.speed] || 1;
+    this.setState({ speed: next });
+    this.videoPlayer?.methods?.changeSpeedRate(next);
+  }
+
+  menuToggleMute() {
+    const next = !this.state.isMuted;
+    this.setState({ isMuted: next });
+    this.videoPlayer?.methods?.changeMuteStatus(next);
   }
 
   onError = (e) => {

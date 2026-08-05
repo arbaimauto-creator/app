@@ -822,15 +822,14 @@ const renderScene = SceneMap({
   [Constants.PRODUCT_LIST_MANY_REVIEWS]: CategoryProducts,
 });
 
+// 탭 5개 → 3개 (Home/NEW/Best) — Promotions·Popular 콘텐츠는 Home 섹션에 이미 존재
 const storeIndexOrigin = [
   '',
   // Strings.STORE_SCREEN_CATEGORIES.GOOGLE_PROMOTION_EVENT,
   // 240608 대표님 요청 100% 환불 주석처리
   // Strings.STORE_SCREEN_CATEGORIES.REFUND_EVENT,
   Strings.STORE_SCREEN_CATEGORIES.NEW,
-  Strings.PROMOTIONS,
   Strings.BEST_SELLING_PRODUCTS,
-  Strings.MANY_REVIEWS_PRODUCTS,
 ];
 
 let storeIndex = [...storeIndexOrigin];
@@ -854,19 +853,10 @@ const getStoreRoutesOrigin = (props, setIndex) => [
   //   props,
   // },
   { key: Constants.PRODUCT_LIST_NEW, title: Strings.STORE_SCREEN_CATEGORIES.NEW, props },
-  {
-    key: Constants.PRODUCT_LIST_SPECIAL_PRICE,
-    title: Strings.STORE_SCREEN_CATEGORIES.SPECIAL_PRICE,
-    props,
-  },
+  // 탭 축소: SPECIAL_PRICE(Promotions)·MANY_REVIEWS(Popular) 탭 제거 — Home 섹션에서 접근
   {
     key: Constants.PRODUCT_LIST_BEST_SELLING,
     title: Strings.STORE_SCREEN_CATEGORIES.BEST_SELLING,
-    props,
-  },
-  {
-    key: Constants.PRODUCT_LIST_MANY_REVIEWS,
-    title: Strings.STORE_SCREEN_CATEGORIES.MANY_REVIEWS,
     props,
   },
 ];

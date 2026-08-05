@@ -590,35 +590,7 @@ export default class SliderEntry extends PureComponent {
         ) : (
           <View style={{ flex: 1 }}>
             <View style={styles.videoContainer}>{this.videoThumbnail}</View>
-            <Animated.Text
-              style={{
-                position: 'absolute',
-                fontFamily: Constants.CUSTOM_FONTS.PRETENDARD.Medium,
-                left: viewportWidth / 3.5,
-                top: itemHeight * 0.47,
-                color: Constants.COLOR_BACKGROUND_DARK,
-                padding: 2,
-                opacity: this.state.fadeAnim,
-              }}
-            >
-              {Strings.TOUCH_THE_SCREEN_TO_SEE_MORE_OF_THE_VIDEO}
-            </Animated.Text>
-
-            <Animated.Text
-              style={{
-                position: 'absolute',
-                fontFamily: Constants.CUSTOM_FONTS.PRETENDARD.Medium,
-                fontSize: 16,
-                left: viewportWidth / 4.5,
-                top: itemHeight * 0.47 + 50,
-                color: Constants.COLOR_BACKGROUND_DARK,
-                padding: 2,
-                opacity: this.state.fadeAnim,
-              }}
-            >
-              {'Swipe up to see more videos'}
-            </Animated.Text>
-
+            {/* "Touch the screen…"/"Swipe up…" 안내 텍스트 제거 — 온보딩에서 이미 설명, 매 영상 반복은 소음 */}
             <LinearGradient
               colors={[
                 'rgba(58, 58, 58, 0.6)',

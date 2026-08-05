@@ -1593,6 +1593,8 @@ export default {
   CURATED_K_PRODUCT: 'Curated K-Product',
   MUST_SELECT_OPTION: 'You need to select an option before proceeding',
   TRY_TAB: 'Try',
+  PLAYBACK_SPEED: 'Playback Speed',
+  TOGGLE_MUTE: 'Sound On/Off',
   ACTIVITY_TAB: 'Activity',
   DISCOVER_TAB: 'Discover',
   PRODUCTS_TAB: 'Products',
