@@ -103,6 +103,18 @@
 - 게스트 JWT가 소스에 노출 (만료된 값이지만 서버 발급 방식으로 교체 권장)
 - Metro 메모리 불안정 지속 (16GB 힙에서도 간헐 OOM) — 의존성 다이어트 필요 (appcenter-analytics/crashes는 JS 미사용)
 
+## 대형 중복 통합 (6차 세션) — 보류 5건 전부 처리, 순감소 약 -4,500줄
+
+- App.js 데드 코드 삭제 (`189599b`) — theme은 회귀(흰 배경 clear 버튼) 때문에 의도적 미적용 결정
+- 로그인 성공 처리 5경로 공통화 (`9d31286`) — persistLoginSession/applyLogonUser/resetToMain
+- VideoGuide 1,134줄 → 113줄 (`e089da5`) — 정적 재생기만 남기고 죽은 코드 제거
+- **B2BProductPage 2,786줄 → 9줄 래퍼** (`a4801d3`) — ProductPageScreen isB2B 분기 8곳으로 흡수
+- **GlobalMakeOrderScreen 751줄 → 7줄 래퍼** (`8411f2a`) — isGlobal 분기, 국내 수정(중복제출 방지 등)이 글로벌에도 적용됨
+- jest transformIgnorePatterns 표준화 (`6101ded`) — App 테스트 3개는 원 설정에서도 깨져 있던 기존 문제(A/B 확인)
+
+**에뮬레이터 런타임 검증 완료**: 게스트 로그인(공통화 경로) → 새 5탭(Discover/Products/Try/Activity/My Page) → Try 캠페인 목록/상세/신청 → Activity 미션 "승인 대기" 반영 → 스토어 로드. 크래시 0.
+**미검증(로그인 계정 필요)**: 통합 ProductPage/MakeOrder 실화면 — 게스트는 상품 상세가 정책상 차단됨. 실계정 로그인 후 상품 상세·주문·B2B 화면 스모크 필수. 결제는 실기기+PG 테스트 필요.
+
 ## 남은 관찰 사항 (수정 안 함 — 기존 동작 유지)
 
 1. **PurchasePopup**: `linkedProduct.productId`가 문자열(비populate)일 때 `product.options` 접근 시 크래시 가능. 기존 코드와 동일 조건이라 그대로 둠. 서버가 구매 가능 상품은 항상 populate해서 내려주는 전제.
