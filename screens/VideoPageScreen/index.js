@@ -483,6 +483,13 @@ class VideoPageScreen extends React.PureComponent {
       }
       return true;
     }
+
+    // 컨테이너 ref의 goBack이 무시되는 경우가 있어(페이저 다중 인스턴스 환경)
+    // 헤더 뒤로가기와 동일하게 화면 레벨 navigation으로 직접 pop한다.
+    if (this.props.navigation.canGoBack()) {
+      this.props.navigation.goBack();
+      return true;
+    }
     return false;
   };
 
