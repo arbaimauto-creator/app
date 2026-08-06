@@ -78,7 +78,7 @@
     android:usesCleartextTraffic="true"
     android:requestLegacyExternalStorage="true"
     android:hardwareAccelerated="true"
-    android:enableOnBackInvokedCallback="true"
+    android:enableOnBackInvokedCallback="false"
     tools:ignore="GoogleAppIndexingWarning">
 
 		<!-- ✅ AdServices 설정 추가 -->

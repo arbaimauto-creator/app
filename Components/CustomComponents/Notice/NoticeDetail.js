@@ -90,7 +90,15 @@ export default function NoticeDetail({ title = '' }) {
           onPress={() => {
             const { page, params: pageParams } = params.navigationParams;
 
-            navigation.navigate(page, pageParams);
+            // 서버가 내려준 페이지명 검증 + B2B 하위 스크린은 nested navigate
+            if (!Constants.PAGE_SCREEN_NAMES.includes(page)) {
+              return;
+            }
+            if (Constants.B2B_SCREEN_NAMES.includes(page)) {
+              navigation.navigate('B2B', { screen: page, params: pageParams });
+            } else {
+              navigation.navigate(page, pageParams);
+            }
           }}
         >
           <View

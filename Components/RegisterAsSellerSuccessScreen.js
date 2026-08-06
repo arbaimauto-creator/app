@@ -1,4 +1,4 @@
-import { CommonActions, StackActions } from '@react-navigation/native';
+import { StackActions } from '@react-navigation/native';
 import React from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableNativeFeedback, View } from 'react-native';
 import Strings from './Strings';
@@ -24,12 +24,6 @@ export default class RegisterAsSellerSuccessScreen extends React.Component {
         <TouchableNativeFeedback
           onPress={() => {
             this.props.navigation.dispatch(StackActions.popToTop());
-            this.props.navigation.dispatch(
-              CommonActions.reset({
-                index: 0,
-                routes: [{ name: 'Store' }],
-              }),
-            );
             this.props.navigation.navigate('MyStore');
             // this.props.navigation.navigate('Profile');
           }}

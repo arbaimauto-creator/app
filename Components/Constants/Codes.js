@@ -333,7 +333,6 @@ const PAGE_SCREEN_NAMES = [
   'Cart',
   'BookmarkList',
   'RewardList',
-  'NotificationTest',
   'MyStore',
   'RegisterAsSeller',
   'QRCode',
@@ -341,6 +340,9 @@ const PAGE_SCREEN_NAMES = [
   'QNAChat',
   'G6UserChart',
 ];
+
+// B2B 네비게이터(B2B) 하위 스크린 — 밖에서 이동할 땐 nested navigate('B2B', {screen, params}) 필요
+const B2B_SCREEN_NAMES = ['B2BPage', 'B2BProductList', 'B2BProductPage', 'B2BProductInquiry'];
 
 const HELP_BUBBLE_PAGE_KEY = {
   MAIN: 'main',
@@ -388,6 +390,7 @@ export default {
   KOVAN_PAY_GROUP,
   KOVAN_PAY_METHOD,
   PAGE_SCREEN_NAMES,
+  B2B_SCREEN_NAMES,
   HELP_BUBBLE_PAGE_KEY,
   REGION_TO_LANGUAGE,
 };

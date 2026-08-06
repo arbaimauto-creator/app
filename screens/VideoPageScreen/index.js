@@ -922,16 +922,17 @@ class VideoPageScreen extends React.PureComponent {
     console.log('videoPageScreen onError()', e);
     Sentry.captureException(e);
 
-    // RNRestart.Restart();
-    // RNExitApp.exitApp();
-    if (Platform.OS === 'android') {
-      BackHandler.exitApp();
-    } else {
-      // iOS: 앱 종료 대신 경고 또는 홈 화면으로 이동
-      // Alert.alert('앱 종료', 'iOS에서는 홈 버튼을 눌러 앱을 종료해주세요.', [{ text: '확인' }]);
-      const { AppUtilsModule } = NativeModules;
-      AppUtilsModule.minimizeApp();
-    }
+    // 재생 실패 시 앱 종료 대신 안내 후 이전 화면으로 복귀
+    Alert.alert(Strings.FAILED_TO_LOAD_REVIEW, '', [
+      {
+        text: Strings.OK,
+        onPress: () => {
+          if (this.props.navigation.canGoBack()) {
+            this.props.navigation.goBack();
+          }
+        },
+      },
+    ]);
   };
 
   onBuffer = (_data) => {

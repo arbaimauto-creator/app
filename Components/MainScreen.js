@@ -674,7 +674,15 @@ function MainScreen(props) {
       const data = notification.data;
 
       if (data.isTouchEvent && Constants.PAGE_SCREEN_NAMES.includes(data.navigationParams?.page)) {
-        props.navigation.navigate(data.navigationParams.page, data.navigationParams?.params);
+        if (Constants.B2B_SCREEN_NAMES.includes(data.navigationParams.page)) {
+          // B2B 하위 스크린은 중첩 네비게이터라 nested navigate가 필요
+          props.navigation.navigate('B2B', {
+            screen: data.navigationParams.page,
+            params: data.navigationParams?.params,
+          });
+        } else {
+          props.navigation.navigate(data.navigationParams.page, data.navigationParams?.params);
+        }
       }
 
       if (data.type === 'default') {
