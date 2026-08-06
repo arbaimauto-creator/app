@@ -2389,10 +2389,12 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Constants.COLOR_BACKGROUND_DARK,
   },
+  // 틱톡 스타일 우측 액션 레일의 grade 버튼 옆에 표시
   ratingGuideBubbleContainer: {
     position: 'absolute',
-    bottom: 130,
-    right: 330,
+    bottom: 300,
+    right: 95,
+    maxWidth: 230,
   },
 });
 
