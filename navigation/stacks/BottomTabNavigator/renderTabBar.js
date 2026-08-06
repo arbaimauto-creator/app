@@ -97,7 +97,7 @@ export const tabBarIcon = ({ focused, color, route }) => {
               : require('../../../Resources/img/iconRenewal/home.png')
           }
         />
-        <Text style={styles.iconName}>{Strings.DISCOVER_TAB}</Text>
+        <Text style={styles.iconName}>{Strings.HOME}</Text>
       </View>
     );
   } else if (route.name === 'Reviews') {
@@ -170,7 +170,7 @@ export const tabBarLabel = ({ focused, color, route }) => {
   color = focused ? Constants.COLOR_MAIN : '#AEAEAE';
   let name = '';
   if (route.name === 'Home') {
-    name = Strings.DISCOVER_TAB;
+    name = Strings.HOME;
   } else if (route.name === 'Reviews') {
     name = Strings.REVIEWS;
   } else if (route.name === 'Profile') {
