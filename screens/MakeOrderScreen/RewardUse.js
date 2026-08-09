@@ -102,21 +102,28 @@ export default function RewardUse({ context, KRWPerUSD }) {
     setReward(value);
   };
 
-  const handlePressApplyReward = () => {
-    const finalPrice = convertPrice(context.state.price - context.state.promotionDiscount);
-    const minimumUseReward = convertPrice(500);
+  // 단위 규칙:
+  // - context.state.price / promotionDiscount / rewardUse / certifiedReviewerRewardUse: KRW 숫자
+  // - reward(입력)와 finalPrice/productPrice(비교용): 지역 표시 통화 (kr=KRW, us=USD)
+  // - certifiedReviewerReward / originalReward (API): KRW
+  // 인증리뷰어 리워드를 우선 차감하고 잔액을 일반 리워드로 차감한다.
+  const splitRewardUseKRW = (amountKRW) => {
+    const clamped = Math.max(0, amountKRW);
+    const certifiedUse = Math.min(certifiedReviewerReward, clamped);
+    return { certifiedReviewerRewardUse: certifiedUse, rewardUse: clamped - certifiedUse };
+  };
 
-    console.log('reward', finalPrice, minimumUseReward, reward);
+  const handlePressApplyReward = () => {
+    const finalPriceKRW = context.state.price - context.state.promotionDiscount;
+    const finalPrice = convertPrice(finalPriceKRW);
+    const minimumUseReward = convertPrice(500);
 
     if (+reward >= finalPrice) {
       handleChangeReward(finalPrice.toString());
-      return context.setState({
-        // rewardUse: convertKRWUSD(+finalPrice),
-        rewardUse: context.state.price - context.state.promotionDiscount,
-      });
+      return context.setState(splitRewardUseKRW(finalPriceKRW));
     }
 
-    if (finalPrice > minimumUseReward && +reward < minimumUseReward) {
+    if (finalPrice >= minimumUseReward && +reward < minimumUseReward) {
       // 최소 사용액 미만 입력을 "최소액 적용"으로 바꿔치기하면 입력액보다 많은
       // 리워드가 차감된다 — 적용을 거부한다
       Alert.alert(
@@ -125,50 +132,26 @@ export default function RewardUse({ context, KRWPerUSD }) {
         [{ text: Strings.OK }],
         { cancelable: true },
       );
-      return context.setState({ rewardUse: 0 });
+      return context.setState({ rewardUse: 0, certifiedReviewerRewardUse: 0 });
     }
 
     handleChangeReward(reward);
-    if (certifiedReviewerReward > reward) {
-      return context.setState({ certifiedReviewerRewardUse: reward, rewardUse: 0 });
-    } else if (certifiedReviewerReward < reward) {
-      return context.setState({
-        certifiedReviewerRewardUse: convertKRWUSD(+certifiedReviewerReward),
-        rewardUse: convertKRWUSD(reward - certifiedReviewerReward),
-      });
-    }
+    // 표시 통화 입력을 KRW로 환산해 같은 단위로 분배한다
+    return context.setState(splitRewardUseKRW(convertKRWUSD(+reward)));
   };
 
   const handlePressApplyAllReward = () => {
-    const productPrice = convertPrice(context.state.price - context.state.promotionDiscount);
-    const reward = convertPrice(originalReward);
+    const finalPriceKRW = context.state.price - context.state.promotionDiscount;
+    const productPrice = convertPrice(finalPriceKRW);
+    const rewardDisplay = convertPrice(originalReward);
 
-    if (reward <= productPrice) {
-      handleChangeReward(reward.toString());
-      return context.setState({
-        certifiedReviewerRewardUse: convertKRWUSD(+certifiedReviewerReward),
-        // 두 값 모두 동일 단위로 환산 — 합계가 전체 보유 리워드와 일치하도록
-        rewardUse: convertKRWUSD(+originalReward) - convertKRWUSD(+certifiedReviewerReward),
-      });
+    if (originalReward <= finalPriceKRW) {
+      handleChangeReward(rewardDisplay.toString());
+      return context.setState(splitRewardUseKRW(originalReward));
     }
 
     handleChangeReward(productPrice.toString());
-    if (certifiedReviewerReward > productPrice) {
-      return context.setState({
-        certifiedReviewerRewardUse: convertKRWUSD(+productPrice),
-        rewardUse: 0,
-      });
-    } else if (certifiedReviewerReward < productPrice) {
-      return context.setState({
-        certifiedReviewerRewardUse: convertKRWUSD(+certifiedReviewerReward),
-        // 기존 코드는 전액을 rewardUse에 다시 넣어 인증리뷰어 리워드가 이중 차감
-        // (합계 > 상품가 → 음수 결제)됐다 — 인증리뷰어 사용분을 제외한 잔액만 차감
-        rewardUse:
-          context.state.price -
-          context.state.promotionDiscount -
-          convertKRWUSD(+certifiedReviewerReward),
-      });
-    }
+    return context.setState(splitRewardUseKRW(finalPriceKRW));
   };
 
   return (

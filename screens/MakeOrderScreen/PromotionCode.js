@@ -41,16 +41,15 @@ export default function PromotionCode({ context, cartItems }) {
       }
 
       if (check && check.success) {
+        // cartItem.price는 이미 수량이 반영된 라인 합계다 (Cart 합산·주문 총액과 동일 규약).
+        // number를 다시 곱하면 할인이 수량배로 커져 결제액이 0/음수까지 내려간다.
         cartItem.discountAmount = Math.round(
-          (cartItem.price * cartItem.number * check.discountCode.percentage) / 100,
+          (cartItem.price * check.discountCode.percentage) / 100,
         );
 
         discountInfo.push({
           percentage: check.discountCode.percentage,
-          // 수량(number)을 곱하지 않으면 화면 표시·차감액이 수량배만큼 적게 계산된다
-          discountAmount: Math.round(
-            (cartItem.price * cartItem.number * check.discountCode.percentage) / 100,
-          ),
+          discountAmount: Math.round((cartItem.price * check.discountCode.percentage) / 100),
           productTitle: cartItem.product.title,
           discountCode: check.discountCode._id,
           code: check.discountCode.code,

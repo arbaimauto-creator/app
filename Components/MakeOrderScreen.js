@@ -132,9 +132,20 @@ class MakeOrderScreen extends React.Component {
       receiverName,
       receiverPhone,
       address,
-      finalPrice:
-        this.state.price + (this.state.shipmentCostKR ?? this.props.route.params.shipmentCost),
+      // 장바구니에서 넘어온 배송 리전을 존중한다 (기존엔 무조건 국내 배송비였음)
+      finalPrice: this.state.price + this.getShipmentCostForRegion(this.state.shippingRegion),
     });
+  }
+
+  // 리전별 배송비 단일 산정처: 판매자 설정(무료배송 임계 반영된 state 값) 우선,
+  // 해외는 값이 없을 때만 기존 $20 폴백을 유지한다.
+  getShipmentCostForRegion(region) {
+    const KRWPerUSD =
+      this.state.KRWPerUSD || this.props?.route?.params?.KRWPerUSD || Constants.KRW_PER_USD;
+    if (region === Constants.COUNTRY.US) {
+      return this.state.shipmentCostUS ?? 20 * KRWPerUSD;
+    }
+    return this.state.shipmentCostKR ?? this.props.route.params.shipmentCost;
   }
 
   onPressSubmitButton() {
@@ -311,11 +322,7 @@ class MakeOrderScreen extends React.Component {
             onSucceedToPay: this.props.route.params.onSucceedToPay,
             order: {
               ...order,
-              shipmentCost:
-                20 *
-                (this.state.KRWPerUSD ||
-                  this.props?.route?.params?.KRWPerUSD ||
-                  Constants.KRW_PER_USD), //this.state.shipmentCostUS,
+              shipmentCost: this.getShipmentCostForRegion(Constants.COUNTRY.US),
               fetchData: () => this.props.route.params?.fetchData(),
               totalPrice:
                 finalPrice -
@@ -591,7 +598,7 @@ class MakeOrderScreen extends React.Component {
                         shippingRegion: Constants.COUNTRY.KOREA,
                         finalPrice:
                           this.state.price +
-                          (this.state.shipmentCostKR ?? this.props.route.params.shipmentCost),
+                          this.getShipmentCostForRegion(Constants.COUNTRY.KOREA),
                       });
                     }}
                     value={this.state.shippingRegion === Constants.COUNTRY.KOREA}
@@ -606,7 +613,8 @@ class MakeOrderScreen extends React.Component {
                       onChanged={(value) => {
                         this.setState({
                           shippingRegion: Constants.COUNTRY.US,
-                          finalPrice: this.state.price + 20 * KRWPerUSD,
+                          finalPrice:
+                            this.state.price + this.getShipmentCostForRegion(Constants.COUNTRY.US),
                         });
                       }}
                       value={this.state.shippingRegion === Constants.COUNTRY.US}
@@ -622,10 +630,7 @@ class MakeOrderScreen extends React.Component {
               <Text style={styles.amount}>
                 +
                 {Utils.displayPrice(
-                  this.state.shippingRegion === Constants.COUNTRY.KOREA
-                    ? this.state.shipmentCostKR ?? this.props.route.params.shipmentCost
-                    : // : this.state.shipmentCostUS,
-                      20 * KRWPerUSD,
+                  this.getShipmentCostForRegion(this.state.shippingRegion),
                   this?.context?.state?.region,
                   KRWPerUSD,
                 )}

@@ -178,7 +178,8 @@ function CartItemBySeller({
     lowestOrderPriceForFreeDeliveryUS > 0 && priceToPay >= lowestOrderPriceForFreeDeliveryUS
       ? 0
       : overseaShipmentCost;
-  const KRWPerUSD = context?.props?.route?.params?.KRWPerUSD;
+  const KRWPerUSD =
+    context?.state?.KRWPerUSD || context?.props?.route?.params?.KRWPerUSD || Constants.KRW_PER_USD;
 
   return (
     <View key={key} style={styles.cartSellerContainer}>
@@ -302,6 +303,7 @@ function CartItemBySeller({
                 lowestOrderPriceForFreeDeliveryKR,
                 lowestOrderPriceForFreeDeliveryUS,
                 shippingRegion: context.state.shippingRegion,
+                KRWPerUSD,
 
                 onSucceedToPay: (paidItems) => {
                   onCartPaid(paidItems);
@@ -402,6 +404,7 @@ export default class MyOrderListScreen extends Component {
       cart: {},
       cartItemList: [],
       shippingRegion: Constants.COUNTRY.KOREA,
+      KRWPerUSD: this.props?.route?.params?.KRWPerUSD || Constants.KRW_PER_USD,
     };
     this.isRefreshing = false;
   }
@@ -417,6 +420,14 @@ export default class MyOrderListScreen extends Component {
         fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
       },
       headerLeft: () => HeaderLeftBackButton({ navigation }),
+    });
+
+    // Cart 라우트에는 KRWPerUSD 파라미터가 없어 해외 표시가 환율 1로 계산되던 문제 —
+    // 최신 환율을 직접 조회한다
+    APIprovider.getCurrencyRate().then((result) => {
+      if (result?.success && result.currencyRate) {
+        this.setState({ KRWPerUSD: result.currencyRate });
+      }
     });
 
     this.loadData();

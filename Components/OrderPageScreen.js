@@ -178,7 +178,11 @@ function Payment({ order, KRWPerUSD }) {
         <Text style={styles.infoItemTitle}>{Strings.TOTAL_PRICE}</Text>
         <Text style={styles.infoItemValue}>
           {Utils.displayPrice(
-            order.totalPrice - order.rewardUse - order.promotionDiscount,
+            // 미사용 항목은 undefined로 와서 NaN이 전파되던 문제 — 0 폴백 + 인증리뷰어 사용분 반영
+            order.totalPrice -
+              (order.rewardUse || 0) -
+              (order.promotionDiscount || 0) -
+              (order.certifiedReviewerRewardUse || 0),
             global?.state?.region,
             KRWPerUSD,
           )}

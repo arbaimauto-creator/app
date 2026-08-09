@@ -801,7 +801,9 @@ export function processData(data) {
 
 export function changeCurrency({ current, currencyRate }) {
   if (getLanguage() === 'en') {
-    return +(current / currencyRate).toFixed(2);
+    // 환율 로딩 전(초기값 0/undefined)에는 Infinity/NaN이 되므로 상수로 폴백
+    const rate = currencyRate || Constants.KRW_PER_USD;
+    return +(current / rate).toFixed(2);
   }
 
   return +current;
@@ -897,11 +899,12 @@ export const getIPhoneHeaderMarginTop = () => {
 
 export const getKRWPerUSD = async () => {
   try {
-    return await Preference.get('KRW/USD').then((value) => {
-      return value;
-    });
+    // Preference는 문자열을 반환하고 최초 실행 시엔 값이 없다 — 숫자+상수 폴백 보장
+    const value = await Preference.get('KRW/USD');
+    return Number(value) || Constants.KRW_PER_USD;
   } catch (error) {
     console.log(error);
+    return Constants.KRW_PER_USD;
   }
 };
 
