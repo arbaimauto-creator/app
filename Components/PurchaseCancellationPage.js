@@ -143,9 +143,8 @@ export default class PurchaseCancellationPage extends PureComponent {
         {
           text: Strings.PURCHASE_CANCELLATION_SUBMIT,
           onPress: () => {
-            this.props.route.params?.getOrderList();
-
-            // 구매 취소 api
+            // 취소 API 완료 후에만 목록을 갱신한다 (취소 전 조회와의 race로 stale 목록 방지)
+            this.setState({ isSubmitting: true });
             APIprovider.actionOrder(
               this.props.route.params.orderId,
               Constants.ORDER_STATUS_CODE.BUYER_CANCEL_REQUEST,
@@ -154,6 +153,16 @@ export default class PurchaseCancellationPage extends PureComponent {
               undefined,
             )
               .then((result) => {
+                this.setState({ isSubmitting: false });
+                if (APIprovider.isFailure(result)) {
+                  Alert.alert(
+                    Strings.PURCHASE_CANCELLATION_FAIL_TITLE,
+                    Strings.PURCHASE_CANCELLATION_FAIL_BODY,
+                    [{ text: Strings.OK }],
+                    { cancelable: true },
+                  );
+                  return;
+                }
                 Alert.alert(
                   Strings.PURCHASE_CANCELLATION_SUCCESS_TITLE,
                   Strings.PURCHASE_CANCELLATION_SUCCESS_BODY,
@@ -169,14 +178,13 @@ export default class PurchaseCancellationPage extends PureComponent {
                 this.props.route.params?.getOrderList();
               })
               .catch((err) => {
-                if (err.errorCode === 0) {
-                  Alert.alert(
-                    Strings.PURCHASE_CANCELLATION_FAIL_TITLE,
-                    Strings.PURCHASE_CANCELLATION_FAIL_BODY,
-                    [{ text: Strings.OK }],
-                    { cancelable: true },
-                  );
-                }
+                this.setState({ isSubmitting: false });
+                Alert.alert(
+                  Strings.PURCHASE_CANCELLATION_FAIL_TITLE,
+                  Strings.PURCHASE_CANCELLATION_FAIL_BODY,
+                  [{ text: Strings.OK }],
+                  { cancelable: true },
+                );
               });
           },
         },

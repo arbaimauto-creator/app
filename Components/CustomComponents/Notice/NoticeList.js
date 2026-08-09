@@ -32,10 +32,11 @@ export default function NoticeList() {
   useEffect(() => {
     if (!params || !params.eventBanner) {
       APIprovider.getEvents().then((res) => {
-        if (res.success) {
+        if (res?.success) {
           setEventBanner(res.eventBanner);
-          setLoading(false);
         }
+        // 실패 시에도 로딩을 해제해 빈 목록이라도 보이게 한다
+        setLoading(false);
       });
     } else {
       setEventBanner(params.eventBanner);

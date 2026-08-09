@@ -13,6 +13,11 @@ export const API_ROOT_URL = 'https://api.greyd.app';
 
 export const version = 20231030;
 export default class APIprovider {
+  // request()는 실패 시에도 reject하지 않고 Error 객체 또는 {result:0} 바디를 resolve한다.
+  // 호출부에서 성공 가정 전에 반드시 이 헬퍼로 판정할 것.
+  static isFailure = (res) =>
+    res instanceof Error || res == null || (typeof res === 'object' && res.result === 0);
+
   static requesterId;
   static requesterToken;
   static request = async (url, method, params = {}, files = []) => {

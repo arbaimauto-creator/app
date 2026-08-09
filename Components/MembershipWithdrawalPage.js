@@ -152,12 +152,14 @@ export default class MembershipWithdrawalPage extends PureComponent {
         {
           text: Strings.CANCEL_MEMBERSHIP_CHECK_ALERT_SUBMIT_BUTTON,
           onPress: () => {
+            this.setState({ isSubmitting: true });
             APIprovider.cancelMembership(
               this.props.route.params.logonUserId,
               this.state.description,
             )
               .then((result) => {
-                if (result.success === true) {
+                this.setState({ isSubmitting: false });
+                if (result?.success === true) {
                   Alert.alert(
                     Strings.CANCEL_MEMBERSHIP_SUCCESS_TITLE,
                     Strings.CANCEL_MEMBERSHIP_SUCCESS_BODY,
@@ -165,13 +167,12 @@ export default class MembershipWithdrawalPage extends PureComponent {
                       {
                         text: Strings.OK,
                         onPress: () => {
-                          const authType = Preference.get('userAuthType').then(() => {
+                          // authType은 비동기로 읽어야 한다 (기존엔 Promise와 문자열을 비교해 항상 미실행)
+                          Preference.get('userAuthType').then((authType) => {
                             if (authType === 'kakao') {
                               KakaoLogout();
-                            } else if (authType === 'facebook') {
                             } else if (authType === 'google') {
                               GoogleSignin.signOut();
-                            } else if (authType === 'apple') {
                             }
                           });
                           APIprovider.clearRequester();
@@ -220,6 +221,7 @@ export default class MembershipWithdrawalPage extends PureComponent {
               })
               .catch((err) => {
                 console.log(err);
+                this.setState({ isSubmitting: false });
                 Alert.alert(
                   Strings.CANCEL_MEMBERSHIP_FAIL_TITLE,
                   Strings.CANCEL_MEMBERSHIP_FAIL_BODY,

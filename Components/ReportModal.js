@@ -12,13 +12,16 @@ const ReportModal = ({ visible, contentInfo, onCancel }) => {
   let title;
   let contents;
   const handleAction = (code) => {
-    // api 호출 및 토스트
+    // 신고 결과를 확인한 뒤에만 완료 토스트를 띄운다
     APIprovider.reportContent(contentInfo.type, contentInfo.id, contentInfo.wrapperId, code).then(
       (res) => {
-        console.log('reportContent result : ', res);
+        if (APIprovider.isFailure(res)) {
+          toastRef.current?.show(Strings.FAILED_TO_LOAD_DATA);
+          return;
+        }
+        toastRef.current?.show(Strings.REPORT_COMPLETE);
       },
     );
-    toastRef.current.show(Strings.REPORT_COMPLETE);
     onCancel();
   };
   const reviewContents = [

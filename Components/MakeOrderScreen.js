@@ -227,7 +227,19 @@ class MakeOrderScreen extends React.Component {
     APIprovider.newOrder(params)
       .then((order) => {
         this._isSubmittingOrder = false;
-        if (finalPrice - rewardUse - promotionDiscount - certifiedReviewerRewardUse === 0) {
+        // APIprovider는 실패도 resolve하므로 성공 가정 전에 판정한다
+        if (APIprovider.isFailure(order) || !order.orderId) {
+          Alert.alert(Strings.FAILED_TO_MAKE_ORDER, order?.errorMsg || '');
+          return;
+        }
+        if (
+          finalPrice -
+            rewardUse -
+            promotionDiscount -
+            certifiedReviewerRewardUse -
+            globalGroupBuyingDiscountAmount <=
+          0
+        ) {
           APIprovider.payWithReward({
             orderId: order.orderId,
             rewardUse,

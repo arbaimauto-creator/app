@@ -135,6 +135,7 @@ export default class OrderRejectionPage extends PureComponent {
         {
           text: Strings.ORDER_REJECTION_SUBMIT,
           onPress: () => {
+            this.setState({ isSubmitting: true });
             APIprovider.actionOrder(
               this.props.route.params.orderId,
               Constants.ORDER_STATUS_CODE.SELLER_CANCEL_REQUEST,
@@ -143,6 +144,17 @@ export default class OrderRejectionPage extends PureComponent {
               this.state.description,
             )
               .then((result) => {
+                this.setState({ isSubmitting: false });
+                // 실패 응답도 resolve되므로 성공 알럿 전에 판정
+                if (APIprovider.isFailure(result)) {
+                  Alert.alert(
+                    Strings.ORDER_REJECTION_FAIL_TITLE,
+                    Strings.ORDER_REJECTION_FAIL_BODY,
+                    [{ text: Strings.OK }],
+                    { cancelable: true },
+                  );
+                  return;
+                }
                 Alert.alert(
                   Strings.ORDER_REJECTION_SUCCESS_TITLE,
                   Strings.ORDER_REJECTION_SUCCESS_BODY,
@@ -157,14 +169,13 @@ export default class OrderRejectionPage extends PureComponent {
                 );
               })
               .catch((err) => {
-                if (err.errorCode === 0) {
-                  Alert.alert(
-                    Strings.ORDER_REJECTION_FAIL_TITLE,
-                    Strings.ORDER_REJECTION_FAIL_BODY,
-                    [{ text: Strings.OK }],
-                    { cancelable: true },
-                  );
-                }
+                this.setState({ isSubmitting: false });
+                Alert.alert(
+                  Strings.ORDER_REJECTION_FAIL_TITLE,
+                  Strings.ORDER_REJECTION_FAIL_BODY,
+                  [{ text: Strings.OK }],
+                  { cancelable: true },
+                );
               });
           },
         },

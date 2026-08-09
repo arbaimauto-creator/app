@@ -1051,6 +1051,11 @@ function PurchasePopup({ context }) {
       Constants.CART_FROM.BUY,
     )
       .then((result) => {
+        // Error 객체도 truthy이므로 명시적으로 실패 판정
+        if (APIprovider.isFailure(result)) {
+          Alert.alert(Strings.FAILED_TO_MAKE_ORDER, result?.errorMsg || '');
+          return;
+        }
         if (result) {
           context.setState({ isShowPurchaseUI: false });
           result.product = context.state.product;

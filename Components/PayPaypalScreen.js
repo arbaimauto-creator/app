@@ -26,7 +26,8 @@ function HeaderRight({ navigation, checkOrder }) {
       onPress={async () => {
         const orderResult = await checkOrder();
 
-        if (orderResult !== Constants.ORDER_STATUS_CODE.NOT_ACCEPTED) {
+        // 국내 결제(PayScreen)와 동일하게 주문 객체의 statusCode로 판정한다
+        if (orderResult?.statusCode !== Constants.ORDER_STATUS_CODE.NOT_ACCEPTED) {
           Alert.alert('주문이 완료되지 않았습니다.');
           return;
         }

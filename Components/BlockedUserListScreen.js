@@ -15,15 +15,25 @@ function BlockedUserListScreen(props) {
 
   const getBlockedUserList = async () => {
     const userList = await APIprovider.getBlockedUserList();
-    setBlockedUserList(userList);
+    if (Array.isArray(userList)) {
+      setBlockedUserList(userList);
+    }
   };
 
   const onListEndReached = async () => {
+    if (blockedUserList.length === 0) {
+      return;
+    }
     const offset = blockedUserList[blockedUserList.length - 1].createdAt;
     setRefreshing(true);
-    const additionalBlockedUserList = await APIprovider.getBlockedUserList(offset);
-    setBlockedUserList([...blockedUserList, ...additionalBlockedUserList]);
-    setRefreshing(false);
+    try {
+      const additionalBlockedUserList = await APIprovider.getBlockedUserList(offset);
+      if (Array.isArray(additionalBlockedUserList)) {
+        setBlockedUserList([...blockedUserList, ...additionalBlockedUserList]);
+      }
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   // props.navigation.setOptions({

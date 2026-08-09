@@ -121,6 +121,23 @@ export default class SignUpScreen extends React.Component {
 
     APIprovider.signUp(profile)
       .then(async (result) => {
+        // 실패도 resolve되므로 세션 기록 전에 판정 (실패 시 유령 로그인 방지)
+        if (APIprovider.isFailure(result) || !result._id) {
+          if (result?.errorCode === 2) {
+            Alert.alert(Strings.EXIST_ID, Strings.TRY_OTHER_ID, [{ text: Strings.OK }], {
+              cancelable: true,
+            });
+          } else {
+            Alert.alert(
+              Strings.FAILED_TO_EDIT_PROFILE,
+              result?.errorMsg || result?.message || '',
+              [{ text: Strings.OK }],
+              { cancelable: true },
+            );
+          }
+          this.setState({ isSubmitting: false });
+          return;
+        }
         await Preference.set('userId', result._id);
         Preference.set('userName', result.name);
         // Preference.set('userIsSeller', 'false');

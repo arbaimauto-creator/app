@@ -20,26 +20,28 @@ function NotificationListScreen(props) {
 
   const getNotification = useCallback(async () => {
     const notiList = await APIprovider.getNotificationList(props.route.params.logonUserId);
-
-    // const noti214 = notificationList.find((n) => n.notificationCode === 214);
-    // console.log('noti214', noti214);
-
-    setNotificationList(notiList);
+    if (Array.isArray(notiList)) {
+      setNotificationList(notiList);
+    }
   }, [props.route.params.logonUserId]);
 
   const onListEndReached = async () => {
+    if (notificationList.length === 0) {
+      return;
+    }
     const offset = notificationList[notificationList.length - 1].createdAt;
     setRefreshing(true);
-    const additionalNotificationList = await APIprovider.getNotificationList(
-      props.route.params.logonUserId,
-      offset,
-    );
-    // const additionalNotificationList = await APIprovider.getNotificationList(
-    //   props.route.params.logonUserId,
-    //   offset,
-    // );
-    setNotificationList([...notificationList, ...additionalNotificationList]);
-    setRefreshing(false);
+    try {
+      const additionalNotificationList = await APIprovider.getNotificationList(
+        props.route.params.logonUserId,
+        offset,
+      );
+      if (Array.isArray(additionalNotificationList)) {
+        setNotificationList([...notificationList, ...additionalNotificationList]);
+      }
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   // props.navigation.setOptions({

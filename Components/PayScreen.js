@@ -89,11 +89,20 @@ export default class PayScreen extends React.Component {
     });
 
     Preference.get('userId').then((userId) => {
-      const { order, buyReqamt, rewardUse } = this.props.route.params;
+      const { order, buyReqamt, rewardUse, certifiedReviewerRewardUse } = this.props.route.params;
       APIprovider.getOrder(order.orderId, userId, null).then((res) => {
-        const { totalPrice, promotionDiscount } = res;
+        if (APIprovider.isFailure(res)) {
+          return; // 검증 자체가 불가하면 결제 화면을 막지 않는다 (서버 결제 검증이 최종 방어선)
+        }
+        const { totalPrice, promotionDiscount, globalGroupBuyingDiscountAmount } = res;
 
-        const orderPrice = totalPrice - promotionDiscount - rewardUse;
+        // 주문 생성부(MakeOrderScreen)의 결제액 산식과 동일해야 한다
+        const orderPrice =
+          totalPrice -
+          (promotionDiscount || 0) -
+          (rewardUse || 0) -
+          (certifiedReviewerRewardUse || 0) -
+          (globalGroupBuyingDiscountAmount || 0);
 
         if (orderPrice !== buyReqamt) {
           console.log('오류가 발생하였습니다, 주문금액과 결제금액이 일치하지 않습니다.');

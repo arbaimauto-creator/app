@@ -2913,10 +2913,14 @@ class UserPageScreen extends React.Component {
     )
       // .then(this.getUserDetailsCallback.bind(this))
       .then((res) => {
-        if (!(res instanceof Error)) {
+        if (!APIprovider.isFailure(res)) {
           this.getUserDetailsCallback(res);
         } else {
-          menuLogout(this.props);
+          // 일시적 네트워크 오류로 강제 로그아웃하지 않는다 — 안내 후 새로고침 상태만 해제
+          this.setState({ isRefreshing: false, isUserRefreshing: false });
+          Alert.alert(Strings.FAILED_TO_LOAD_DATA, res?.errorMsg || '', [{ text: Strings.OK }], {
+            cancelable: true,
+          });
         }
       })
       .catch((err) => {

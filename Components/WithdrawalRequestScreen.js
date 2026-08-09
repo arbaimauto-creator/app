@@ -584,15 +584,20 @@ export default class WithdrawalRequestScreen extends React.Component {
     })
       .then((result) => {
         this.hideActivityIndicator();
+        // 실패도 resolve되므로 성공 처리 전에 판정 — 실패를 조용히 성공으로 표시하지 않는다
+        if (APIprovider.isFailure(result) || !result.withdrawalRequest) {
+          Alert.alert('', result?.errorMsg || Strings.WITHDRAWAL_REQUEST_FAILED_MESSAGE);
+          return;
+        }
         if (this.props.route.params.onAddedNewRequest) {
           this.props.route.params.onAddedNewRequest(result.withdrawalRequest);
         }
         this.props.navigation.pop();
       })
       .catch((err) => {
+        this.hideActivityIndicator();
         console.log('requestWithdrawal failed', err);
         Alert.alert('', Strings.WITHDRAWAL_REQUEST_FAILED_MESSAGE);
-        this.props.navigation.pop();
       });
   }
 

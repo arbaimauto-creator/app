@@ -515,6 +515,8 @@ export default class RegisterAsSellerApplicationScreen extends React.Component {
         }
       })
       .catch((err) => {
+        // 실패 시에도 로딩 오버레이를 해제해야 화면 조작이 가능하다
+        this.hideActivityIndicator();
         Alert.alert(
           Strings.FAILED_TO_REGISTER,
           err.errorMsg ? err.errorMsg : '',
