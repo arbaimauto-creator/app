@@ -814,6 +814,12 @@ export function isGuestUser(logonUserId) {
     user: { isGuest },
   } = store.getState();
 
+  // 게스트 로그인 경로가 세팅하는 redux 플래그도 판정에 사용한다 —
+  // 하드코딩 계정 ID가 서버에서 바뀌어도 가드가 무력화되지 않도록 이중 방어
+  if (isGuest === true) {
+    return true;
+  }
+
   if (
     logonUserId === '640a908e092ea7d56d4a41d5' ||
     logonUserId === '63a126963389e30449162c3b' ||
@@ -866,10 +872,11 @@ export const menuLogout = async function (props) {
 
   Preference.set('previousPage', props.route.path);
 
-  props?.route?.params?.setLogonUserId(null);
-  props?.route?.params?.setLogonUserName('');
-  props?.route?.params?.setLogonUserProfilePicUrl('');
-  props?.route?.params?.setLogonUserIsSeller('false');
+  // setter가 없는 라우트(캠페인 상세 등)에서 호출돼도 크래시하지 않도록 ?.() 사용
+  props?.route?.params?.setLogonUserId?.(null);
+  props?.route?.params?.setLogonUserName?.('');
+  props?.route?.params?.setLogonUserProfilePicUrl?.('');
+  props?.route?.params?.setLogonUserIsSeller?.('false');
   props?.navigation.navigate('NotSignedIn');
   props?.navigation.dispatch(
     CommonActions.reset({
@@ -1080,4 +1087,6 @@ export default {
   displayPriceNumber,
   convertKRWUSD,
   convertUSDToKRW,
+  isGuestUser,
+  LogoutAlert,
 };

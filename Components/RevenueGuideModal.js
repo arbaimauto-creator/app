@@ -3,6 +3,8 @@ import { StyleSheet, View, Text } from 'react-native';
 import Constants from './Constants';
 import { CommonButtonModal } from './Views/CommonButtonModal';
 import Strings from './Strings';
+import Preference from 'react-native-default-preference';
+import { isGuestUser, LogoutAlert } from './utils';
 
 const REVENUE_GUIDE_TITLE_1 = Strings.REVENUE_GUIDE_TITLE_1;
 const REVENUE_GUIDE_TITLE_2 = Strings.REVENUE_GUIDE_TITLE_2;
@@ -22,7 +24,13 @@ const RevenueGuideModal = ({ navigation, visible, onCancel }) => {
       buttonArray={[
         {
           title: Strings.GO_TO_POST_REVIEW,
-          onPress: () => {
+          onPress: async () => {
+            // 게스트는 업로드 화면 대신 로그인 유도
+            const userId = await Preference.get('userId');
+            if (isGuestUser(userId)) {
+              onCancel();
+              return LogoutAlert({ navigation, route: {} });
+            }
             navigation.navigate('AddingNewVideo', {});
             onCancel();
           },

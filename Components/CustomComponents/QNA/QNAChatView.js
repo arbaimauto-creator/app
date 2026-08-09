@@ -23,6 +23,7 @@ import Constants from '../../Constants';
 import Strings from '../../Strings';
 import { moderateScale } from '../../utils/scailing';
 import { shareLink } from '../../utils/share';
+import { isGuestUser, LogoutAlert } from '../../utils';
 import LoadingView from '../../Views/LoadingView';
 import ShowParticipants from './ShowParticipants';
 export default function QNAChat(props) {
@@ -102,6 +103,10 @@ export default function QNAChat(props) {
   }, []);
 
   const handlePressRemoveChat = () => {
+    // 게스트 공용 계정으로는 삭제 불가 (게스트끼리 상호 삭제 방지)
+    if (isGuestUser(APIprovider.requesterId)) {
+      return LogoutAlert({ navigation: props.navigation, route: {} });
+    }
     Alert.alert(
       Strings.QNA_HASHTAG_DELETE_TITLE,
       Strings.QNA_HASHTAG_DELETE_MESSAGE,
@@ -163,6 +168,10 @@ export default function QNAChat(props) {
   };
 
   const addQuestionHashtag = async (message, tagUser) => {
+    // 게스트는 채팅을 남길 수 없다
+    if (isGuestUser(APIprovider.requesterId)) {
+      return LogoutAlert({ navigation: props.navigation, route: {} });
+    }
     await APIprovider.addQNAChat(hastagSelectedID, message, tagUser);
     const result = await APIprovider.getQnaChatlist(hastagSelectedID);
 

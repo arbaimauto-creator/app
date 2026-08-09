@@ -832,7 +832,10 @@ class VideoPageScreen extends React.PureComponent {
   };
 
   menuReportClicked = function () {
-    console.log('menuReportClicked is called');
+    // 같은 메뉴의 북마크/릴레이와 동일하게 게스트는 로그인 유도
+    if (isGuestUser(this.props.route.params.logonUserId)) {
+      return LogoutAlert(this.props);
+    }
     this.setState({
       isInvalidContents: true,
     });

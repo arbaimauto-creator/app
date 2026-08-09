@@ -39,10 +39,12 @@ const logCallback = (log, callback) => {
 // accessToken은 provider별 토큰 필드(apple=authorizationCode, kakao/google=requesterToken 등)를 호출부에서 넘긴다.
 const persistLoginSession = async (result, { authType, accessToken }) => {
   APIprovider.setRequester(accessToken, result._id);
+  // 정식 로그인 성공 시 게스트 플래그를 반드시 해제한다 (isGuestUser 판정에 사용됨)
+  store.dispatch(setGuest({ isGuest: false }));
   await Preference.set('userId', result._id);
   await Preference.set('userName', result.name);
   await Preference.set('userProfilePicUrl', result.profilePicUrl);
-  await Preference.set('userIsSeller', result.sellerStatus.toString());
+  await Preference.set('userIsSeller', result.sellerStatus?.toString() ?? '');
   await Preference.set('userAccessToken', accessToken);
   await Preference.set('userAuthType', authType);
   await Preference.set(
@@ -50,7 +52,10 @@ const persistLoginSession = async (result, { authType, accessToken }) => {
     result.agreementToTermsOfService?.toString() ?? 'false',
   );
   const currency = await APIprovider.getCurrencyRate('USD');
-  await Preference.set('KRW/USD', currency.currencyRate.toString());
+  // 환율 조회 실패가 로그인 실패로 이어지지 않도록 방어 (기존: currencyRate.toString() TypeError)
+  if (currency?.currencyRate) {
+    await Preference.set('KRW/USD', currency.currencyRate.toString());
+  }
 };
 
 const applyLogonUser = (

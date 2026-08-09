@@ -68,6 +68,13 @@ const ChatHeadView = ({ item, navigation }) => {
 
 export const ChatBuble = ({ item, right, user, navigation, setQuestionArray }) => {
   const handlePressDeleteChat = () => {
+    // 게스트 공용 계정 명의의 삭제 차단 (게스트끼리 서로의 메시지 삭제 방지)
+    if (utils.isGuestUser(APIprovider.requesterId)) {
+      Alert.alert(Strings.GUEST_USER_ALERT_TITLE, Strings.GUEST_USER_ALERT_CONTENT, [
+        { text: Strings.OK },
+      ]);
+      return;
+    }
     Alert.alert(
       Strings.QNA_CHAT_DELETE_TITLE,
       Strings.QNA_CHAT_DELETE_MESSAGE,

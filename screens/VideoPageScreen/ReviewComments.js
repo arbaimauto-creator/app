@@ -283,7 +283,9 @@ function ReviewComments({ context }) {
       </TouchableNativeFeedback>
       <TouchableWithoutFeedback
         onPress={() => {
-          if (isGuestUser(context.state.myUserId)) {
+          // myUserId는 비동기 로드 전 null이라 정상 유저에게도 로그인 알럿이 떴다 —
+          // 같은 화면의 다른 가드와 동일하게 route.params 기준으로 판정
+          if (isGuestUser(context.props.route.params.logonUserId)) {
             return LogoutAlert(context.props);
           }
           context.setState({ isShowingCommentInput: true });
@@ -335,7 +337,7 @@ function ReviewComments({ context }) {
                     }
                   }}
                   onClickRecomment={() => {
-                    if (isGuestUser(context.state.myUserId)) {
+                    if (isGuestUser(context.props.route.params.logonUserId)) {
                       return LogoutAlert(context.props);
                     }
                     setRecommentPosition(index);

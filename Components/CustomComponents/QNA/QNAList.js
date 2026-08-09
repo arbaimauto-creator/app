@@ -8,6 +8,7 @@ import { setQnaList } from '../../../slices/notification';
 import APIprovider from '../../APIprovider';
 import Constants from '../../Constants';
 import Strings from '../../Strings';
+import { isGuestUser, LogoutAlert } from '../../utils';
 
 export default function QNAList({ context, scrollRef, navigation }) {
   const [buttonTitle, setButtonTitle] = useState(Strings.QNA_FIND);
@@ -130,6 +131,11 @@ export default function QNAList({ context, scrollRef, navigation }) {
 
   const handlePressAddQna = async () => {
     const { user } = context.state;
+
+    // 게스트는 QnA 해시태그를 생성할 수 없다 (게스트 공용 계정 명의 생성 방지)
+    if (isGuestUser(user?._id)) {
+      return LogoutAlert({ navigation, route: {} });
+    }
 
     Alert.alert(
       Strings.QNA_NOT_FOUND,

@@ -6,6 +6,7 @@ import Preference from 'react-native-default-preference';
 import Constants from '../../Components/Constants';
 import Strings from '../../Components/Strings';
 import { applyToCampaign, selectMyApplications } from '../../slices/campaign';
+import { isGuestUser, LogoutAlert } from '../../Components/utils';
 
 export default function CampaignDetail({ route, navigation }) {
   const { campaign } = route.params;
@@ -13,10 +14,35 @@ export default function CampaignDetail({ route, navigation }) {
   const applications = useSelector(selectMyApplications);
   const applied = applications[campaign.id] != null;
 
-  const onApply = async () => {
+  // 게스트는 신청/업로드 불가 — 로그인 유도 (다른 업로드 진입점과 동일 정책)
+  const guardGuest = async () => {
     const userId = await Preference.get('userId');
-    dispatch(applyToCampaign({ campaignId: campaign.id, userId }));
+    if (isGuestUser(userId)) {
+      LogoutAlert({ route, navigation });
+      return true;
+    }
+    return false;
+  };
+
+  const onApply = async () => {
+    if (await guardGuest()) {
+      return;
+    }
+    const userId = await Preference.get('userId');
+    const action = await dispatch(applyToCampaign({ campaignId: campaign.id, userId }));
+    // thunk 실패 시 완료 알럿을 띄우지 않는다
+    if (action?.error) {
+      Alert.alert(Strings.RETRY_GUIDELINES);
+      return;
+    }
     Alert.alert(Strings.CAMPAIGN_APPLIED);
+  };
+
+  const onUpload = async () => {
+    if (await guardGuest()) {
+      return;
+    }
+    navigation.navigate('AddingNewVideo', {});
   };
 
   return (
@@ -34,10 +60,7 @@ export default function CampaignDetail({ route, navigation }) {
       </ScrollView>
       <View style={styles.footer}>
         {applied ? (
-          <TouchableOpacity
-            style={[styles.cta, styles.ctaSecondary]}
-            onPress={() => navigation.navigate('AddingNewVideo', {})}
-          >
+          <TouchableOpacity style={[styles.cta, styles.ctaSecondary]} onPress={onUpload}>
             <Text style={styles.ctaText}>{Strings.UPLOAD_REVIEW_CTA}</Text>
           </TouchableOpacity>
         ) : (
