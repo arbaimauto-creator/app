@@ -1934,4 +1934,15 @@ export default {
   REWARD_GUIDE_SECTION_4_BODY: (n) => `다른 사람의 리뷰 영상에 댓글을 달면 ${n}R 지급됩니다.`,
   REWARD_GUIDE_EXPIRY:
     '적립식 리워드는 지급일로부터 6개월 후 소멸됩니다. \n\n단, 이벤트로 적립된 리워드는 1개월 후 소멸됩니다.',
+  // 홈 큐레이션 디스커버리 (시안 8, D23 v2.6)
+  HOME_TODO: (n, summary) => `오늘 할 일 ${n} · ${summary}`,
+  HOME_TODO_ADDRESS: '주소 입력',
+  HOME_TODO_RECEIVE: '수령 확인',
+  HOME_TODO_UPLOAD: (d) => `업로드 D-${d}`,
+  HOME_HERO_SPOTS: (n) => `Open · 이번 주 ${n}자리`,
+  HOME_APPLY_OPEN_NOW: '지금 신청 가능',
+  HOME_SEE_ALL: '전체',
+  HOME_TRENDING: '지금 뜨는 리뷰',
+  HOME_GO_FEED: '피드로 보기',
+  HOME_CATEGORY_ALL: '전체',
 };

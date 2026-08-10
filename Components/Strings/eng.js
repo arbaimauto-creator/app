@@ -2013,4 +2013,15 @@ export default {
   REWARD_GUIDE_SECTION_4_BODY: (n) => `Receive ${n}R when you comment on someone else's review.`,
   REWARD_GUIDE_EXPIRY:
     'Earned rewards expire 6 months after they are granted. \n\nRewards earned from events expire after 1 month.',
+  // 홈 큐레이션 디스커버리 (시안 8, D23 v2.6)
+  HOME_TODO: (n, summary) => `To-do ${n} · ${summary}`,
+  HOME_TODO_ADDRESS: 'Enter address',
+  HOME_TODO_RECEIVE: 'Confirm delivery',
+  HOME_TODO_UPLOAD: (d) => `Upload D-${d}`,
+  HOME_HERO_SPOTS: (n) => `Open · ${n} spots this week`,
+  HOME_APPLY_OPEN_NOW: 'Open now',
+  HOME_SEE_ALL: 'All',
+  HOME_TRENDING: 'Trending reviews',
+  HOME_GO_FEED: 'Watch feed',
+  HOME_CATEGORY_ALL: 'All',
 };
