@@ -1851,6 +1851,8 @@ export default {
   APPLYDONE_TRACK: (name) => `${name} track`,
   APPLYDONE_NOW: 'Now',
   APPLYDONE_APPROVAL_NOTE: "Avg 2 days — we'll ask for your address once approved",
+  APPLYDONE_HERO_CONFIRMED: 'You’re confirmed!',
+  APPLYDONE_AUTO_CONFIRM_NOTE: 'Auto-confirmed — please share your shipping address',
   APPLYDONE_SHIP_NOTE: 'Ships from Seoul in 3–5 days · tracking included',
   APPLYDONE_LIMIT_PRE: 'Concurrent limit: ',
   APPLYDONE_LIMIT_COUNT: (n) => `${n}`,

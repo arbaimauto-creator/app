@@ -46,6 +46,22 @@ const extractDeepLinkPath = (url) => {
   return match ? match[1] : null;
 };
 
+// 딥링크 경로 화이트리스트 (보안 감사 M2) — config에 정의된 라우트 프리픽스만 수용.
+// 커스텀 스킴(greyd://)은 타 앱이 임의 발신 가능하므로 미등록 경로는 버린다.
+const ALLOWED_LINK_PREFIXES = [
+  'products/',
+  'videos/',
+  'users/',
+  'orders',
+  'myorders',
+  'notifications',
+  'mypage/',
+  'qnas/',
+  'events',
+];
+const isAllowedLinkPath = (path) =>
+  typeof path === 'string' && ALLOWED_LINK_PREFIXES.some((prefix) => path.startsWith(prefix));
+
 const linking = {
   prefixes: ['https://greyd.app', 'greyd://'],
   config,
@@ -58,8 +74,8 @@ const linking = {
 
     if (dynamicLink) {
       const dynamicLinkParams = extractDeepLinkPath(dynamicLink.url);
-      if (!dynamicLinkParams) {
-        return url || 'mylinker://home';
+      if (!dynamicLinkParams || !isAllowedLinkPath(dynamicLinkParams)) {
+        return 'mylinker://home';
       }
 
       /* 다이나믹 링크를 통해 들어왔을대 로그인 되도록 로직추가 */
@@ -102,7 +118,9 @@ const linking = {
     }
 
     if (url) {
-      return url;
+      // 직접 스킴 진입도 동일 화이트리스트 적용
+      const path = extractDeepLinkPath(url);
+      return path && isAllowedLinkPath(path) ? url : 'mylinker://home';
     }
     // If it was not opened by a deep link, go to the home screen
     return 'mylinker://home';
@@ -126,7 +144,7 @@ const linking = {
       // const url = 'greyd://' + pathArray.join('/');
 
       const dynamicLinkParams = extractDeepLinkPath(dynamicLink.url);
-      if (!dynamicLinkParams) {
+      if (!dynamicLinkParams || !isAllowedLinkPath(dynamicLinkParams)) {
         return;
       }
 

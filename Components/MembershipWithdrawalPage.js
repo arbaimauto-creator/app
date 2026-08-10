@@ -21,6 +21,7 @@ import FastImage from 'react-native-fast-image';
 import { KeyboardAwareScrollView as KeyboardAvoidingView } from 'react-native-keyboard-aware-scroll-view';
 import { getStatusBarHeight } from 'react-native-safearea-height';
 import APIprovider from './APIprovider';
+import { clearGreydLocalData } from '../api/localReset';
 import Constants from './Constants';
 import HeaderLeftBackButton from './CustomComponents/headerBackButton/headerLeftBackButton';
 import Strings from './Strings';
@@ -190,6 +191,7 @@ export default class MembershipWithdrawalPage extends PureComponent {
                           Preference.set('makeOrderReceiverName', null);
                           Preference.set('makeOrderReceiverPhone', null);
                           Preference.set('makeOrderAddress', null);
+                          clearGreydLocalData();
                           this.props.route.params.setLogonUserId(null);
                           this.props.route.params.setLogonUserName('');
                           this.props.route.params.setLogonUserProfilePicUrl('');

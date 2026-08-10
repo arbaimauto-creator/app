@@ -196,7 +196,7 @@ flowchart LR
     end
 
     subgraph VERCEL["⚙️ greyd-ops (Vercel — 이미 배포돼 있음)"]
-        MOBILE["/api/mobile/* 🆕<br/>auth · campaigns · apply<br/>seedings · received · upload · feedback"]
+        MOBILE["/api/mobile/* 🆕<br/>auth · campaigns · apply · offers<br/>seedings · received · upload · feedback"]
         ENGINE["lib/engine/transitions<br/>상태머신 엔진 (기존)"]
         TOKEN["MagicLink 토큰 시스템 (기존)<br/>+ purpose: APP 🆕"]
         MSG["메시지 엔진 40종 (기존)"]
@@ -252,10 +252,10 @@ sequenceDiagram
 
     C->>API: POST /apply { campaignId, 서약, 어필 }
     API->>DB: Match 생성 — ACCEPTED · surface:'app' (자동 ← 구 브리지①)
-    alt applyMode = open
-        API->>DB: 잔여 수량 차감 · 자동 승인 → CONFIRMED
-    else applyMode = curated
-        DB->>OP: 신청 승인 큐에 노출 → 운영/브랜드 승인
+    alt open + 기준 충족 (D24 확정: Strike 0 + G60↑ 또는 첫 건)
+        API->>DB: 잔여 수량 차감 · 즉시 자동 확정 → CONFIRMED
+    else open + 기준 미달 또는 curated
+        DB->>OP: 신청 승인 큐에 노출 → 운영/브랜드 승인 (폴백)
     end
     C->>API: POST /address (48h 내)
     OP->>DB: 운송장 입력 → SHIPPED
@@ -267,6 +267,40 @@ sequenceDiagram
     C->>API: GET /feedback → 피드백 카드 + 포인트 + G-스코어
     Note over C,B: 루프 완료가 사람 손 없이 DB에 실시간 집계 —<br/>북극성 지표가 운영 대시보드에서 자동 산출
 ```
+
+## 9-2. 시딩 유입 이원화 — 신청형 + 제안형 (I11 · D25)
+
+앱은 신청형만이 아니다. ops의 기존 방식(조건 부합 인플루언서에게 먼저 제안)이 앱 유저에게는 **앱 제안 카드**로 전달된다.
+
+```mermaid
+flowchart TD
+    subgraph INBOUND["① 신청형 (인바운드 — 앱 신규)"]
+        A1["크리에이터가 Try 탭에서 발견"] --> A2["신청 (서약+어필)"]
+        A2 --> A3{"Open + 기준 충족?<br/>(D24: Strike 0 + G60↑ 또는 첫 건)"}
+        A3 -- 예 --> A4["즉시 자동 확정"]
+        A3 -- 아니오 --> A5["승인 큐 → 운영/브랜드 판단"]
+    end
+
+    subgraph OUTBOUND["② 제안형 (아웃바운드 — ops 기존 방식의 앱 채널)"]
+        B1["ops 매칭 엔진<br/>골든 레코드 11,850명 · 매칭 스코어"] --> B2{"대상이 앱 유저?<br/>(greydAppId 보유)"}
+        B2 -- 아니오 --> B3["배치 초대 메일 (기존 그대로)<br/>+ 앱 초대 코드 동봉 → 앱 전환"]
+        B2 -- 예 --> B4["앱 제안 카드 🆕<br/>푸시 + '브랜드가 먼저 제안했어요'<br/>응답 시한 D-3"]
+        B4 -- 수락 --> B5["applied 스킵 → approved 즉시<br/>주소 입력 직행"]
+        B4 -- "거절/만료" --> B6["G-스코어·Strike 무영향<br/>거절 사유 1탭(선택) → 매칭 학습"]
+    end
+
+    A4 --> C["동일한 검증 루프<br/>배송 → 리뷰 → 브랜드 평가"]
+    A5 --> C
+    B5 --> C
+    B3 -.다음 캠페인부터.-> A1
+
+    style INBOUND fill:#E4F3E9,stroke:#1F8A4C
+    style OUTBOUND fill:#E3EDF7,stroke:#2B5E8E
+    style B4 fill:#FCE9E2,stroke:#E53400
+    style C fill:#FFF3D9,stroke:#8A5D00
+```
+
+> 제안형 규칙: 동시 한도 초과 유저에게는 제안 노출 자체를 보류(ops 후보 선정 필터). 매칭 조건은 ops가 정본, 앱은 표시만. Phase 1은 수동 브리지(운영이 주간 반영), 실연동 시 `GET/POST /api/mobile/offers`.
 
 ## 10. 롤아웃 3단 증분 + 폴백 — 언제든 mock으로 복귀 가능
 
@@ -289,11 +323,11 @@ flowchart TD
 
 ---
 
-## 결정 대기 4건 (양측 합의 필요)
+## 결정 대기 (양측 합의 필요) — 1번은 확정됨
 
-| # | 쟁점 | 제안 |
+| # | 쟁점 | 상태 |
 |---|---|---|
-| 1 | 시딩 Open 자동 승인 vs 브랜드 승인보드 충돌 | 캠페인 개설 시 브랜드가 "선착순 자동 승인" 사전 위임 |
+| 1 | ~~시딩 Open 자동 승인 vs 브랜드 승인보드~~ | ✅ **확정 (2026-08-10 · D24)** — Strike 0 + (G60↑ 또는 첫 건) 충족 시 자동 확정, 미충족 시 승인 큐 폴백. 브랜드는 개설 시 사전 위임 |
 | 2 | G-스코어를 ops 매칭 스코어 입력으로 쓸지 | 2단계 논의 |
 | 3 | 배치 초대 메일 + 앱 초대 코드 동봉(성장 루프) 시작 시점 | Phase 1 후반, 첫 루프 완료 사례 확보 후 |
 | 4 | greydAppId 매핑 UI 위치 | ops 초대 코드 관리 화면에 통합 |

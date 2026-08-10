@@ -1776,6 +1776,8 @@ export default {
   APPLYDONE_TRACK: (name) => `${name} 트랙`,
   APPLYDONE_NOW: '지금',
   APPLYDONE_APPROVAL_NOTE: '평균 2일 — 승인되면 주소를 물어볼게요',
+  APPLYDONE_HERO_CONFIRMED: '신청이 바로 확정됐어요!',
+  APPLYDONE_AUTO_CONFIRM_NOTE: '기준 충족으로 자동 확정 — 주소를 알려주세요',
   APPLYDONE_SHIP_NOTE: '서울 출고 3–5일 · 운송장 제공',
   APPLYDONE_LIMIT_PRE: '동시 진행 한도 ',
   APPLYDONE_LIMIT_COUNT: (n) => `${n}건`,

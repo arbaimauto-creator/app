@@ -19,7 +19,7 @@ import { applyToCampaign, selectMyApplications } from '../../slices/campaign';
 import { isGuestUser, LogoutAlert } from '../../Components/utils';
 import { getCreatorProfile } from '../../api/creators';
 import { getSeedings, upsertSeeding, setSeedingStatus, SEEDING_STATUS } from '../../api/seedings';
-import { personalizedPoints, concurrentLimit } from './points';
+import { personalizedPoints, concurrentLimit, canAutoConfirm } from './points';
 import { logEvent } from '../../api/common/analytics';
 
 const { COLORS, RADIUS, TYPE } = T;
@@ -100,11 +100,17 @@ export default function CampaignDetail({ route, navigation }) {
     // 시딩 인스턴스 생성 (상태머신 시작점)
     await upsertSeeding(campaign.id, { pledgeChecked: true, appealText: appeal.trim() });
     await setSeedingStatus(campaign.id, SEEDING_STATUS.APPLIED);
+    // D24: Open 캠페인은 기준 충족 시 자동 확정 (서버 연동 시 ops가 동일 기준으로 판정)
+    const autoConfirmed = !isCurated && canAutoConfirm(profile);
+    if (autoConfirmed) {
+      await setSeedingStatus(campaign.id, SEEDING_STATUS.APPROVED);
+    }
     // 이벤트 맵: 신청 퍼널 완성점 — appeal은 길이만 (PII 금지)
     logEvent('apply_submit', {
       campaign_id: campaign.id,
       apply_mode: campaign.applyMode,
       appeal_len: appeal.trim().length,
+      auto_confirmed: autoConfirmed,
     });
     // 신청 완료 전용 화면(시안)으로 이동 — 신청 후 활성 시딩 수 = 기존 카운트 + 1
     navigation.navigate('ApplyDone', {
@@ -112,6 +118,7 @@ export default function CampaignDetail({ route, navigation }) {
       applyMode: campaign.applyMode,
       usedCount: activeCount + 1,
       limit,
+      autoConfirmed,
     });
   };
 

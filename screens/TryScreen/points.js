@@ -31,6 +31,16 @@ export const G_DELTA = {
   STRIKE: -10,
 };
 
+// Open 자동 확정 기준 (D24): Strike 0 + (G60 이상 또는 이력 0회 첫 건 — 콜드스타트 허용).
+// 잔여 수량·국가·동시 한도는 신청 가능 조건에서 이미 보장됨. 미충족 시 승인 큐 폴백.
+export function canAutoConfirm(profile) {
+  const { gScore = 50, strikes = 0, completedCount = 0 } = profile || {};
+  if (strikes > 0) {
+    return false;
+  }
+  return gScore >= CURATED_MIN_G || completedCount === 0;
+}
+
 // 동시 진행 한도 (v2 §4-1)
 export function concurrentLimit(gScore, completedCount) {
   if (completedCount === 0) {

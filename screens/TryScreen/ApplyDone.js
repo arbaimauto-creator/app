@@ -8,7 +8,7 @@ import Strings from '../../Components/Strings';
 const { COLORS, FONT, TYPE } = T;
 
 export default function ApplyDone({ navigation, route }) {
-  const { campaignTitle, applyMode, usedCount, limit } = route.params || {};
+  const { campaignTitle, applyMode, usedCount, limit, autoConfirmed } = route.params || {};
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -24,21 +24,29 @@ export default function ApplyDone({ navigation, route }) {
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.hero}>
           <Text style={styles.emoji}>🙌</Text>
-          <Text style={styles.title}>{Strings.APPLYDONE_HERO}</Text>
+          <Text style={styles.title}>
+            {autoConfirmed ? Strings.APPLYDONE_HERO_CONFIRMED : Strings.APPLYDONE_HERO}
+          </Text>
           <Text style={styles.sub}>
             {campaignTitle} · {Strings.APPLYDONE_TRACK(applyMode === 'curated' ? 'Curated' : 'Open')}
           </Text>
         </View>
 
         <Card>
-          <View style={styles.timelineRow}>
-            <StatusPill status="applied" label={Strings.CAMPAIGN_STATUS_APPLIED} />
-            <Text style={styles.xs}>{Strings.APPLYDONE_NOW}</Text>
-          </View>
-          <View style={styles.divider} />
+          {!autoConfirmed ? (
+            <>
+              <View style={styles.timelineRow}>
+                <StatusPill status="applied" label={Strings.CAMPAIGN_STATUS_APPLIED} />
+                <Text style={styles.xs}>{Strings.APPLYDONE_NOW}</Text>
+              </View>
+              <View style={styles.divider} />
+            </>
+          ) : null}
           <View style={styles.timelineRow}>
             <StatusPill status="approved" label={Strings.CAMPAIGN_STATUS_APPROVED} />
-            <Text style={styles.xs}>{Strings.APPLYDONE_APPROVAL_NOTE}</Text>
+            <Text style={styles.xs}>
+              {autoConfirmed ? Strings.APPLYDONE_AUTO_CONFIRM_NOTE : Strings.APPLYDONE_APPROVAL_NOTE}
+            </Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.timelineRow}>

@@ -5,6 +5,7 @@ import { Alert, Image, Linking, Platform } from 'react-native';
 import BackgroundTimer from 'react-native-background-timer';
 import { checkVersion } from 'react-native-check-version';
 import Preference from 'react-native-default-preference';
+import { clearGreydLocalData } from '../../api/localReset';
 import deviceInfoModule from 'react-native-device-info';
 // FFmpegKit imports - 변경된 부분
 import { FFmpegKit, FFmpegKitConfig, FFprobeKit, ReturnCode } from 'ffmpeg-kit-react-native';
@@ -869,6 +870,8 @@ export const menuLogout = async function (props) {
   Preference.set('makeOrderReceiverPhone', null);
   Preference.set('makeOrderAddress', null);
   Preference.set('agreementToTermsOfService', null);
+  // 기기 잔존 PII(주소·전화·프로필·시딩) 클리어 — 공용 기기 대비 (보안 감사 H7)
+  clearGreydLocalData();
 
   Preference.set('previousPage', props.route.path);
 

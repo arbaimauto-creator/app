@@ -28,9 +28,6 @@ export default class APIprovider {
       params.requesterId = this.requesterId;
     }
 
-    console.log('requesterToken', this.requesterToken);
-    console.log('requesterId', this.requesterId);
-
     let fetchParams = {
       method: method,
       headers: {
