@@ -1992,6 +1992,8 @@ export default {
   KEYPAD_RESHUFFLE: 'Shuffle',
   CHECK_PROMOTION_PERIOD: 'Please check the promotion start and end dates.',
   SHARE_SHORT: 'Share',
+  // Home feed loading/empty state
+  MAIN_FEED_LOADING: 'Loading reviews…',
   // i18n batch B2 — reward guide & reward history
   REMARK: 'Note',
   REWARD_GUIDE_INTRO_TITLE: 'How to earn rewards',

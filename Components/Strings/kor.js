@@ -1914,6 +1914,8 @@ export default {
   KEYPAD_RESHUFFLE: '재배열',
   CHECK_PROMOTION_PERIOD: '프로모션 시작일과 종료일을 확인해주세요 ',
   SHARE_SHORT: '공유',
+  // 홈 피드 로딩·빈 상태
+  MAIN_FEED_LOADING: '리뷰 불러오는 중…',
   // i18n 배치 B2 — 리워드 가이드·리워드 내역
   REMARK: '비고',
   REWARD_GUIDE_INTRO_TITLE: '리워드 적립 방법',

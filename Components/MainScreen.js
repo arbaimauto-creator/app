@@ -1,6 +1,7 @@
 import { CommonActions, useScrollToTop } from '@react-navigation/native';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   Dimensions,
   Image,
   NativeModules,
@@ -12,6 +13,7 @@ import {
   TouchableNativeFeedback,
   View,
 } from 'react-native';
+import T from './Constants/DesignTokens';
 import Preference from 'react-native-default-preference';
 import FEATURES from './Constants/Features';
 import DeviceCountry from 'react-native-device-country';
@@ -1008,6 +1010,15 @@ function MainScreen(props) {
             maxToRenderPerBatch={2}
             removeClippedSubviews={Platform.OS === 'android'}
             keyExtractor={(item) => item?._id}
+            ListEmptyComponent={
+              <View style={styles.feedEmpty}>
+                <Text style={styles.feedEmptyLogo}>
+                  greyd<Text style={{ color: T.COLORS.AMBER }}>.</Text>
+                </Text>
+                <ActivityIndicator size="small" color={T.COLORS.AMBER} />
+                <Text style={styles.feedEmptyText}>{Strings.MAIN_FEED_LOADING}</Text>
+              </View>
+            }
             onViewableItemsChanged={onViewableItemsChangedRef.current}
             viewabilityConfig={viewabilityConfigRef.current}
             getItemLayout={
@@ -1207,6 +1218,22 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     backgroundColor: Constants.COLOR_BACKGROUND_DARK,
+  },
+  feedEmpty: {
+    height: Dimensions.get('window').height * 0.7,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+  },
+  feedEmptyLogo: {
+    fontFamily: T.FONT.Black,
+    fontSize: 28,
+    color: T.COLORS.INK,
+  },
+  feedEmptyText: {
+    fontFamily: T.FONT.Regular,
+    fontSize: 12.5,
+    color: T.COLORS.GREY,
   },
   logo: {
     width: 86,
