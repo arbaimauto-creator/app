@@ -3,6 +3,7 @@
 작성: 프로덕트 총괄 PM · 기준일 2026-08-10
 입력: planner_A(크리에이터 여정) · planner_B(브랜드·데이터) · planner_C(시장·차별화) + v1 승인 대기 설계
 전제: greyd 2.0 = K-Product 검증 플랫폼. 모든 설계는 "검증 루프(수령→리뷰→브랜드 평가 수신)가 닫히는가"를 축으로 한다.
+전제 2 (v2.4): **greyd-ops가 비즈니스 상태의 SSOT다.** 이 앱은 ops SEEDING 트랙의 크리에이터 표면이며, 본 문서의 용어·스키마·상태는 `2026-08-10-app-ops-integration.md`(I1~I10)와 정합을 유지한다. 충돌 시 ops가 정본.
 
 ---
 
@@ -79,11 +80,15 @@ received ─(D+16 미업로드)→ no_show (Strike 부여)
 | `cancelled` | 무페널티 종결 | **신규** |
 | `no_show` | 먹튀 확정 종결 (B의 이행 데이터 축) | **신규** |
 
+**ops 매핑(v2.4, I3)**: 이 enum은 앱 표면의 상태이며, 정본은 ops `Match`/`Shipment`다 — applied↔ACCEPTED · approved↔CONFIRMED · shipped↔Shipment.SHIPPED · received↔DELIVERED+수령확인 · reviewing↔POSTED(+greyd_uploaded) · done↔Seeding DONE · cancelled/no_show↔DROPPED(사유 구분). 앱 인바운드 신청은 ops에 Match를 ACCEPTED로 생성한다(섭외 생략). 전체 표는 정합 문서 I3.
+
 ---
 
 ## 4. 정책 카드 (최종 수치 확정본)
 
-### 4-1. 캠페인 2-트랙
+### 4-1. 신청 유형 2종 (applyMode — I1 정합)
+
+용어 정정(v2.4): "트랙"은 ops의 캠페인 상품 유형(PARTNERS/SEEDING/VISIT)을 가리키는 예약어다. 앱 체험 탭에 노출되는 것은 **ops SEEDING 트랙 캠페인**뿐이며, 아래 Open/Curated는 트랙이 아니라 SEEDING 캠페인의 **신청 유형(`campaign.applyMode`)**이다.
 
 | | **Open** | **Curated** |
 |---|---|---|
@@ -144,7 +149,7 @@ UI: 프로필 진행바 `G57 → 다음 해제 G60 (Curated 신청)` + 변동 �
 |---|---|---|---|
 | `influencer` | 새 캠페인 확인 / D-day 관리 / 브랜드 평가 확인 | **홈(피드) · 체험 · 활동 · 마이** (현행 4탭) | 홈 피드 |
 | `brand` | 캠페인 진행 상황·발견 확인, 평가 | **대시보드 · 리뷰 평가 · 마이** (3탭 교체) | 대시보드 (요약 카드 4장) |
-| 운영자(ARBAIM) | 캠페인 개설·배송·검수 | 1단계 앱 화면 없음 — mock 데이터 직접 수정 + 수동 운영 (명시적 스코프 밖) | — |
+| 운영자(ARBAIM) | 캠페인 개설·배송·검수 | 앱 화면 없음 — **greyd-ops 콘솔이 운영 표면**(v2.4·I9). 앱 인바운드 신청 큐·초대 코드 관리 2건은 ops 콘솔 요구사항으로 이관 | ops 콘솔 |
 
 구현: 게이트에서 저장한 `inviteRole`로 `BottomTabNavigator`의 탭 배열 분기. 라우트명은 신규 등록(BrandDashboard/BrandReview)하되 기존 라우트는 유지(전역 navigate 참조 안전 원칙).
 
@@ -189,6 +194,7 @@ UI: 프로필 진행바 `G57 → 다음 해제 G60 (Curated 신청)` + 변동 �
 ## 6. 데이터 스키마 최종안 (api/campaigns.js 패턴 확장)
 
 원칙(B 채택): 리포트 역산 / 파생값 미저장 / SNS 지표는 `metrics_source:'manual'` + `captured_at` 필수.
+원칙 추가(v2.4·I10): **필드명은 greyd-ops Prisma 스키마와 일치**시켜 2단계 연동 시 리네이밍이 없게 한다. 앱 creator는 ops `Influencer.greydAppId`로 매핑되고(운영 수동 대장), seeding에는 `surface:'app'` 개념이 전제된다(ops Match의 표면 구분).
 1단계 파일 구성: 기존 `api/campaigns.js` 패턴대로 `api/creators.js`, `api/seedings.js`, `api/reviews.js`, `api/evaluations.js` mock 모듈 추가.
 
 ### campaign (기존 확장)
@@ -196,7 +202,8 @@ UI: 프로필 진행바 `G57 → 다음 해제 G60 (Curated 신청)` + 변동 �
 | 필드 | 타입 | 수집 |
 |---|---|---|
 | id, brand_id, product_name, category | string | mock |
-| track | 'open'\|'curated' **(신규)** | mock |
+| track | 'SEEDING' 고정 (ops Track 예약어 — v2.4·I1) | mock |
+| applyMode | 'open'\|'curated' **(신규 — 구 track 개칭)** | mock |
 | tier | 'fgi'\|'gongu' | mock |
 | target_countries[] / seeding_quota_per_country | string[] / object | mock |
 | period { apply_until, upload_days:14 } | object | mock |
@@ -299,14 +306,14 @@ About 화면에 ARBAIM 사업자 정보·주소·이메일 명기 `[1단계]` ·
 | 2 | 초대 게이트 | 변경(v1) | mock 검증·role 분기 유지 + 국가 선택 1스텝 추가 |
 | 3 | 탭 5→4 + Buy 제거 | 유지(v1) | 변경 없음 |
 | 4 | 온보딩 4장 + 프로필 폼 | 신규 | §7-1 카피, SNS 핸들·팔로워 밴드·카테고리·인구통계/피부타입 3문항 → creator mock 저장 |
-| 5 | Try 탭 고도화 | 변경 | Open/Curated 배지, Curated 잠금 UI(G60), 차등 포인트 개인화 표시, 선착순 카운트(mock), 신청 시트 서약 체크박스+어필 문구 |
+| 5 | Try 탭 고도화 | 변경 | applyMode(Open/Curated) 배지, Curated 잠금 UI(G60), 차등 포인트 개인화 표시, 선착순 카운트(mock), 신청 시트 서약 체크박스+어필 문구 |
 | 6 | 상태머신 확장 + Activity 카드 | 변경 | enum 8종(§3-2), 수령 확인 버튼, D-day 카운트다운·뱃지, 무료 연장 1회 |
 | 7 | 주소 입력 모달 | 신규 | approved 진입 시 노출, 48h 데드라인 문구, 로컬 저장·재사용 |
 | 8 | 보상·완주 연출 | 신규 | done 포인트 애니메이션, 브랜드 피드백 카드(mock), G-스코어 변동 표시+진행바, 카테고리 추천 2개(로컬 필터), Q4 현금화 예고 배너 |
 | 9 | Strike·리마인더 | 신규 | Strike 경고 카드(본인만), 로컬 노티 시퀀스(D+7/D-3/D-1/마감/유예), 동시 진행 한도 체크 |
 | 10 | 브랜드 평가 개편 | 변경(v1) | v1 4항목×5점 → 트리아지 스와이프 + 조건부 루브릭(4항목+market_signal) + rebook Y/N + skip 사유 + 진행률 게이지 |
 | 11 | 브랜드 대시보드 개편 | 변경(v1) | v1 국가 바차트 → 요약 카드 4장 + **위클리 발견 카드**(텍스트) + 국가 스코어보드 테이블 + 2차 CTA + 리포트 다운로드 배너 |
-| 12 | mock 데이터 계층 확장 | 변경 | §6 스키마대로 api/creators·seedings·reviews·evaluations.js 추가, campaigns.js 필드 확장 |
+| 12 | mock 데이터 계층 확장 | 변경 | §6 스키마대로 api/creators·seedings·reviews·evaluations.js 추가, campaigns.js 필드 확장. **필드명 ops Prisma 정합 필수(I10) — track='SEEDING' 고정·applyMode·surface** |
 | 13 | 신뢰·추천 소품 | 신규 | About 사업자 정보, 운송장 표시, 브랜드 열람 타임스탬프, 추천 코드 3장 표시+공유 시트 |
 | 14 | **역할별 탭 분기 (D9)** | 신규 | inviteRole로 BottomTabNavigator 탭 배열 분기 — brand는 [대시보드·리뷰 평가·마이] 3탭, 첫 화면 = 대시보드. influencer는 현행 4탭 |
 

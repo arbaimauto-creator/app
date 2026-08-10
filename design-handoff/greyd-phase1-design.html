@@ -151,7 +151,7 @@ footer{margin-top:64px;border-top:1px solid var(--line);padding-top:16px;font-si
 <header class="hero">
   <div class="eyebrow">greyd 2.0 · Phase 1 · 화면 설계 v2 기반</div>
   <h1>세 사용자, 하나의 <span class="g">검증 루프</span> —<br>인플루언서 · 브랜드 · ARBAIM 운영</h1>
-  <p class="def">"greyd — The invite-only panel where Korean brands actually read your review." 크리에이터가 수령→리뷰하고, 브랜드가 평가하고, ARBAIM이 그 사이 모든 이행을 굴린다. 세 퍼널이 맞물려야 루프가 닫힌다. 근거: <b>2026-08-10-greyd-phase1-v2-design.md</b></p>
+  <p class="def">"greyd — The invite-only panel where Korean brands actually read your review." 크리에이터가 수령→리뷰하고, 브랜드가 평가하고, ARBAIM이 그 사이 모든 이행을 굴린다. 세 퍼널이 맞물려야 루프가 닫힌다. 근거: <b>2026-08-10-greyd-phase1-v2-design.md</b> · 운영 정합: <b>app-ops-integration (I1~I10)</b> — 앱의 체험 = ops SEEDING 트랙, 비즈니스 상태의 정본은 greyd-ops</p>
   <div class="meta">
     <span>북극성 <b>루프 완료율 70%</b></span>
     <span>3개월 <b>완료 300건 · 브랜드 5곳</b></span>
@@ -176,7 +176,7 @@ footer{margin-top:64px;border-top:1px solid var(--line);padding-top:16px;font-si
     <tr><td>6 온보딩 4장 (첫 행동)</td><td>"이번 주 12자리 남음" + 시작 CTA</td><td class="ok">목업 ↓</td></tr>
     <tr><td>7 프로필 폼</td><td>핸들·팔로워 밴드·카테고리·3문항</td><td class="ok">목업 ↓</td></tr>
     <tr><td>8 홈 (피드)</td><td>세로 스와이프 리뷰 피드 — 기존 유지</td><td class="ok">목업 ↓</td></tr>
-    <tr><td>9 체험 (Try)</td><td>Open/Curated 2-트랙 + 잠금 + 개인화 P</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>9 체험 (Try)</td><td>신청 유형 2종(Open/Curated·applyMode) + 잠금 + 개인화 P</td><td class="ok">목업 ↓</td></tr>
     <tr><td>10 캠페인 상세 + 신청 시트</td><td>서약 체크박스 · 어필 · 선착순</td><td class="ok">목업 ↓</td></tr>
     <tr><td>11 신청 완료</td><td>applied 확인 · 승인 타임라인 안내</td><td class="ok">목업 ↓</td></tr>
     <tr><td>12 주소 입력 모달</td><td>48h 데드라인 · 로컬 저장</td><td class="ok">목업 ↓</td></tr>
@@ -465,7 +465,7 @@ footer{margin-top:64px;border-top:1px solid var(--line);padding-top:16px;font-si
   </section>
 
   <section>
-    <div class="sec-head"><h3>신청 — Try 2-트랙 · 신청 시트 · 주소</h3><span class="ref">여정 ④⑤ · 작업 #5 #7</span></div>
+    <div class="sec-head"><h3>신청 — Try(applyMode 2종) · 신청 시트 · 주소</h3><span class="ref">여정 ④⑤ · 작업 #5 #7</span></div>
     <p class="sec-note">Open은 문턱을 없애 첫 참여를 만들고, Curated는 잠금을 숨기지 않고 보여줘 G-스코어를 올릴 이유를 만든다. 포인트는 "지금 등급 기준 얼마, 다음 등급이면 얼마"로 개인화.</p>
     <div class="rail">
 
@@ -504,7 +504,7 @@ footer{margin-top:64px;border-top:1px solid var(--line);padding-top:16px;font-si
         <div class="tabs"><div><i></i>홈</div><div class="on"><i></i>체험</div><div><i></i>활동</div><div><i></i>마이</div></div>
         <div class="home-bar"></div>
       </div>
-      <div class="cap"><h4>9 · Try 목록 — 2-트랙</h4><p><span class="tag">#5</span>Open 초록 배지+선착순 카운트, Curated는 잠가서 보여준다. 등급 배수 개인화 + 다음 해제 진행바. 동시 진행 한도: 이력 0회 1건 / G50~79 2건 / G80+ 3건.</p></div></div>
+      <div class="cap"><h4>9 · Try 목록 — 신청 유형 2종</h4><p><span class="tag">#5</span>Open 초록 배지+선착순 카운트, Curated는 잠가서 보여준다. 등급 배수 개인화 + 다음 해제 진행바. 동시 진행 한도: 이력 0회 1건 / G50~79 2건 / G80+ 3건.</p></div></div>
 
       <div class="shot"><div class="phone">
         <div class="sb"><span>9:41</span><span>●●●</span></div>
@@ -985,23 +985,23 @@ footer{margin-top:64px;border-top:1px solid var(--line);padding-top:16px;font-si
 
 <!-- ══════════════ PART 3 ARBAIM 운영 ══════════════ -->
 <div class="part">
-  <div class="part-head"><span class="role">FUNNEL 3</span><h2>ARBAIM 운영 콘솔</h2><span class="who">운영자·애널리스트 · 웹 (데스크톱)</span></div>
+  <div class="part-head"><span class="role">FUNNEL 3</span><h2>ARBAIM 운영 — greyd-ops 콘솔 요구사항</h2><span class="who">실체는 별도 저장소 greyd-ops(Next.js 콘솔·14마디 SSOT). 아래 6화면은 독립 구현이 아니라 ops 콘솔에 반영할 요구사항 명세다 (정합 문서 I9)</span></div>
   <div class="flow">
     <span>① 캠페인 개설</span><i>→</i><span>② 신청 승인 (Curated 수동)</span><i>→</i><span>③ 발송·운송장 입력</span><i>→</i><span class="hot">④ 이행 추적 · Strike 집행</span><i>→</i><span>⑤ 지표 수동 입력 · 위클리 카드</span><i>→</i><span>⑥ 코드 발급 · 리포트</span>
   </div>
   <table class="inv">
     <tr><th>화면 (6)</th><th>내용</th><th>상태</th></tr>
-    <tr><td>1 운영 대시보드</td><td>북극성·가드레일 지표 모니터</td><td class="ok">목업 ↓</td></tr>
-    <tr><td>2 캠페인 개설 폼</td><td>트랙 비율 · Base P · 필수 언급 · 국가 쿼터</td><td class="ok">목업 ↓</td></tr>
-    <tr><td>3 캠페인 · 승인 큐</td><td>Open 자동 / Curated 수동 심사</td><td class="ok">목업 ↓</td></tr>
-    <tr><td>4 이행 추적 보드</td><td>상태 8종 · 운송장 · Strike 집행</td><td class="ok">목업 ↓</td></tr>
-    <tr><td>5 검수 · 지표 · 리포트</td><td>메트릭 수동 입력 · 위클리 카드 · PDF</td><td class="ok">목업 ↓</td></tr>
-    <tr><td>6 초대 코드 관리</td><td>발급 · 사용률 추적 · 역할 지정</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>1 운영 대시보드</td><td>북극성·가드레일 지표 모니터</td><td class="ok">ops 신규 요구 ↓</td></tr>
+    <tr><td>2 캠페인 개설 폼</td><td>applyMode · Base P · 필수 언급 · 국가 쿼터</td><td class="comp">ops 기존 + 필드 추가 ↓</td></tr>
+    <tr><td>3 앱 신청 승인 큐</td><td>인바운드 신청 — Open 자동 / Curated 수동 (I2)</td><td class="ok">ops 신규 요구 ↓</td></tr>
+    <tr><td>4 이행 추적 보드</td><td>ops Match 상태 · 운송장 · Strike 집행</td><td class="comp">ops 기존 + 앱 매핑 컬럼 ↓</td></tr>
+    <tr><td>5 검수 · 지표 · 리포트</td><td>메트릭 수동 입력 · 위클리 카드 · PDF</td><td class="comp">ops 기존 + 평가 참조 뷰 ↓</td></tr>
+    <tr><td>6 초대 코드 관리</td><td>발급 · greydAppId 매핑 · 사용률 (I4)</td><td class="ok">ops 신규 요구 ↓</td></tr>
   </table>
 
   <section>
     <div class="sec-head"><h3>수동 운영을 화면으로</h3><span class="ref">§8 비고 — "운영자 수동 + 앱은 UI 완성"</span></div>
-    <p class="sec-note">기획서상 1단계 운영은 "mock 데이터 직접 수정 + 수동"이며 앱 화면은 명시적 스코프 밖이다. 아래 콘솔은 그 수동 작업의 <b>운영 프로세스 명세</b>다 — 1단계는 스프레드시트/데이터 편집으로 수행하고, 물량이 늘면 이 화면대로 2단계 운영툴을 만든다.</p>
+    <p class="sec-note">운영 표면은 <b>greyd-ops 콘솔이 정본</b>이다(정합 결정 I9). 화면 2·4·5는 ops에 이미 존재(캠페인 워크스페이스·시딩 퍼널·검수) — 앱 관점의 요구 필드(applyMode·G60 조건·Base P·앱 상태 매핑 컬럼)를 추가하면 된다. 화면 1(지표 위젯)·3(앱 인바운드 신청 큐)·6(초대 코드·greydAppId 대장)은 <b>ops에 없는 신규 요구</b>다.</p>
     <div class="rail">
 
       <div class="shot wide"><div class="desk">
