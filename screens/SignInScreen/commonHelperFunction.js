@@ -13,6 +13,7 @@ import { getModel, getSystemName, getSystemVersion, getUniqueId } from 'react-na
 import { AccessToken, LoginManager } from 'react-native-fbsdk-next';
 import APIprovider from '../../Components/APIprovider';
 import Constants from '../../Components/Constants';
+import FEATURES from '../../Components/Constants/Features';
 import Strings, { getLanguage } from '../../Components/Strings';
 import { pushNotifications } from '../../Components/services';
 import { store } from '../../redux/store';
@@ -68,7 +69,20 @@ const applyLogonUser = (
   setLogonUserIsSeller(result.sellerStatus.toString());
 };
 
-const resetToMain = (navigation) => {
+const resetToMain = async (navigation) => {
+  // Greyd 1단계(v2 §3-②): 초대 역할이 없으면 메인 대신 게이트로 — 기존 계정도 1회 통과
+  if (FEATURES.INVITE_GATE) {
+    const inviteRole = await Preference.get('inviteRole');
+    if (!inviteRole) {
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'InviteGate' }],
+        }),
+      );
+      return;
+    }
+  }
   navigation.dispatch(
     CommonActions.reset({
       index: 0,

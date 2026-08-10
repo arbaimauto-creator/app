@@ -22,6 +22,7 @@ import {
 } from './commonHelperFunction';
 import LoginButtons, { GuestLoginButton } from './LoginButton';
 import styles from './styles';
+import FEATURES from '../../Components/Constants/Features';
 // import { ChannelIO } from 'react-native-channel-plugin';
 import APIprovider from '../../Components/APIprovider';
 import { pushNotifications } from '../../Components/services';
@@ -242,14 +243,16 @@ class SignInScreen extends React.Component {
                 />
               </View>
 
-              {/* <Text style={styles.signinText}>{Strings.GUEST_LOGIN}</Text> */}
-              <View style={styles.guestButtonsContainer}>
-                <GuestLoginButton
-                  onPress={() =>
-                    guestUser(this.props, (value) => this.setState({ isLoggingIn: value }))
-                  }
-                />
-              </View>
+              {/* Greyd 1단계: 클로즈드 앱 — 게스트 입장은 INVITE_GATE가 켜지면 숨긴다 */}
+              {!FEATURES.INVITE_GATE && (
+                <View style={styles.guestButtonsContainer}>
+                  <GuestLoginButton
+                    onPress={() =>
+                      guestUser(this.props, (value) => this.setState({ isLoggingIn: value }))
+                    }
+                  />
+                </View>
+              )}
             </View>
           ) : (
             <View style={styles.checkingUpdateContainer}>

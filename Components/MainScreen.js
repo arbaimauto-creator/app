@@ -13,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import Preference from 'react-native-default-preference';
+import FEATURES from './Constants/Features';
 import DeviceCountry from 'react-native-device-country';
 import { getUniqueIdSync } from 'react-native-device-info';
 import FastImage from 'react-native-fast-image';
@@ -661,6 +662,19 @@ function MainScreen(props) {
 
   useEffect(() => {
     SplashScreen.hide();
+
+    // Greyd 1단계(v2 §3-②): 기존 로그인 계정도 초대 역할이 없으면 게이트로 소급 적용
+    if (FEATURES.INVITE_GATE) {
+      Promise.all([Preference.get('userId'), Preference.get('inviteRole')]).then(
+        ([uid, inviteRole]) => {
+          if (uid && !inviteRole) {
+            props.navigation.dispatch(
+              CommonActions.reset({ index: 0, routes: [{ name: 'InviteGate' }] }),
+            );
+          }
+        },
+      );
+    }
 
     if (initialNotification) {
       if (initialNotification.type === 'qna') {

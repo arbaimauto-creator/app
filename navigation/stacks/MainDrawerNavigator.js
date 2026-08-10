@@ -69,6 +69,8 @@ import NoticeDetail from '../../Components/CustomComponents/Notice/NoticeDetail'
 import RatingList from '../../screens/VideoPageScreen/RatingList';
 import MustReadDetail from '../../screens/AddingNewVideoScreen/MustReadDetail';
 import GlobalMakeOrderScreen from '../../Components/GlobalMakeOrderScreen';
+import InviteGateScreen from '../../screens/InviteGateScreen';
+import CreatorOnboarding from '../../screens/InviteGateScreen/CreatorOnboarding';
 
 const Stack = createStackNavigator();
 
@@ -220,6 +222,17 @@ function MainDrawerNavigator({ route, navigation }) {
         options={({ route, navigation }) => ({
           headerShown: false,
         })}
+      />
+      {/* Greyd 1단계: 초대 코드 게이트 + 크리에이터 온보딩 (v2 §3) */}
+      <Stack.Screen
+        name="InviteGate"
+        component={InviteGateScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="CreatorOnboarding"
+        component={CreatorOnboarding}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="VideoPage"
