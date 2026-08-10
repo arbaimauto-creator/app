@@ -20,6 +20,7 @@ import {
   googleLogin,
   guestUser,
   kakaoLogin,
+  resetToMain,
 } from './commonHelperFunction';
 import LoginButtons, { GuestLoginButton } from './LoginButton';
 import styles from './styles';
@@ -144,13 +145,8 @@ class SignInScreen extends React.Component {
         this.props.changeGuestStatus(false);
 
         console.log('SignInScreen() - You signed up');
-        // this.props.navigation.navigate('MainBottom');
-        this.props.navigation.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [{ name: 'MainBottom' }],
-          }),
-        );
+        // D28: 기로그인 부팅도 게이트/온보딩 미완 분기를 태운다 (로그인 성공과 동일 경로)
+        await resetToMain(this.props.navigation);
       }
 
       if (!__DEV__) {

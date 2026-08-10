@@ -89,9 +89,9 @@ export default function InviteGateScreen({ navigation }) {
     await Preference.set('creatorCountry', country);
     resetAnalyticsContext(); // role·country 확정 — 공통 파라미터 갱신
     logEvent('gate_code_submit', { result: 'ok' });
-    navigation.dispatch(
-      CommonActions.reset({ index: 0, routes: [{ name: 'CreatorOnboarding' }] }),
-    );
+    // D28: 게이트 직후 로그인 — 계정에 게이트 통과가 묶여야 기기 변경·재설치 복구가 된다.
+    // 로그인 성공 시 resetToMain이 온보딩 미완이면 CreatorOnboarding으로 보낸다.
+    navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'NotSignedIn' }] }));
   };
 
   return (

@@ -69,8 +69,9 @@ const applyLogonUser = (
   setLogonUserIsSeller(result.sellerStatus.toString());
 };
 
-const resetToMain = async (navigation) => {
-  // Greyd 1단계(v2 §3-②): 초대 역할이 없으면 메인 대신 게이트로 — 기존 계정도 1회 통과
+// D28: 게이트 → 로그인 → 온보딩 → 메인 순서의 분기점.
+// 로그인 성공(또는 기로그인 부팅) 시: 게이트 미통과면 게이트로, 온보딩 미완이면 온보딩으로.
+export const resetToMain = async (navigation) => {
   if (FEATURES.INVITE_GATE) {
     const inviteRole = await Preference.get('inviteRole');
     if (!inviteRole) {
@@ -78,6 +79,23 @@ const resetToMain = async (navigation) => {
         CommonActions.reset({
           index: 0,
           routes: [{ name: 'InviteGate' }],
+        }),
+      );
+      return;
+    }
+    // 크리에이터 온보딩(프로필 폼) 미완 — 계정은 연결됐으니 프로필만 받으면 메인
+    const rawProfile = await Preference.get('creatorProfileV2');
+    let onboarded = false;
+    try {
+      onboarded = !!(rawProfile && JSON.parse(rawProfile)?.onboardedAt);
+    } catch (e) {
+      onboarded = false;
+    }
+    if (inviteRole === 'influencer' && !onboarded) {
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'CreatorOnboarding' }],
         }),
       );
       return;
