@@ -20,6 +20,7 @@ import { Context } from '../Contexts';
 import UserProfilePicView from '../screens/UserPageScreen/UserProfilePicView';
 import VideoHashTag from '../screens/VideoPageScreen/VideoHashTag';
 import Constants from './Constants';
+import FEATURES from './Constants/Features';
 import ReviewDescriptionSummary from './CustomComponents/ReviewDescriptionSummary';
 import Strings from './Strings';
 import Utils, { getKRWPerUSD, isGuestUser } from './utils';
@@ -321,6 +322,10 @@ export default class VideoListItemView extends PureComponent {
   }
 
   renderProductThumbnail() {
+    // 기능 다이어트 (COMMERCE off): 리뷰 카드의 제품 링크/구매 진입점 숨김
+    if (!FEATURES.COMMERCE) {
+      return null;
+    }
     if (
       !this.props.noProduct &&
       this.props.data.linkedProduct &&

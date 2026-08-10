@@ -48,17 +48,8 @@ const extractDeepLinkPath = (url) => {
 
 // 딥링크 경로 화이트리스트 (보안 감사 M2) — config에 정의된 라우트 프리픽스만 수용.
 // 커스텀 스킴(greyd://)은 타 앱이 임의 발신 가능하므로 미등록 경로는 버린다.
-const ALLOWED_LINK_PREFIXES = [
-  'products/',
-  'videos/',
-  'users/',
-  'orders',
-  'myorders',
-  'notifications',
-  'mypage/',
-  'qnas/',
-  'events',
-];
+// 기능 다이어트: 커머스 경로(products/orders/myorders)는 COMMERCE 플래그 복원 시 함께 되살린다
+const ALLOWED_LINK_PREFIXES = ['videos/', 'users/', 'notifications', 'mypage/', 'qnas/', 'events'];
 const isAllowedLinkPath = (path) =>
   typeof path === 'string' && ALLOWED_LINK_PREFIXES.some((prefix) => path.startsWith(prefix));
 

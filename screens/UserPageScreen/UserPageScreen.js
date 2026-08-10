@@ -33,6 +33,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { VictoryArea, VictoryChart, VictoryGroup, VictoryPolarAxis } from 'victory-native';
 import APIprovider from '../../Components/APIprovider';
 import Constants from '../../Components/Constants';
+import FEATURES from '../../Components/Constants/Features';
 import Codes from '../../Components/Constants/Codes';
 import QNAList from '../../Components/CustomComponents/QNA/QNAList';
 import ModalMenuButton from '../../Components/ModalMenuButton';
@@ -2060,6 +2061,9 @@ function ProfileButtons({ context, user, isGuest }) {
             </View>
           </TouchableNativeFeedback>
         </View>
+        {/* 기능 다이어트 (COMMERCE off): 장바구니·주문 내역 진입점 숨김 */}
+        {FEATURES.COMMERCE ? (
+        <>
         <View style={{ overflow: 'hidden', width: '25%' }}>
           <TouchableNativeFeedback
             onPress={() => {
@@ -2123,6 +2127,8 @@ function ProfileButtons({ context, user, isGuest }) {
             </View>
           </TouchableNativeFeedback>
         </View>
+        </>
+        ) : null}
         <View style={{ overflow: 'hidden', width: '25%' }}>
           {context.isMyUserPage() || isGuest ? (
             <RewardDetail context={context} />
