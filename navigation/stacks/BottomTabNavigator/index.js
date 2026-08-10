@@ -18,12 +18,18 @@ import { tabBarIcon, tabBarLabel } from './renderTabBar';
 import { Platform } from 'react-native';
 import { StatusBar } from 'react-native';
 import Constants from '../../../Components/Constants';
+import FEATURES from '../../../Components/Constants/Features';
 import { useSelector } from 'react-redux';
+import Preference from 'react-native-default-preference';
+import BrandDashboard from '../../../screens/BrandScreen/BrandDashboard';
+import BrandReview from '../../../screens/BrandScreen/BrandReview';
 
 function BottomTabNavigator({ route, navigation }) {
   const [loading, setLoading] = useState(true);
   const [initialRoute, setInitialRoute] = useState('Home');
   const [logonUserIsSeller, setLogonUserIsSeller] = useState(route.params.logonUserIsSeller);
+  // v2.1 D9: 역할별 탭 셸 — brand는 [대시보드·리뷰 평가·마이] 3탭
+  const [inviteRole, setInviteRole] = useState(null);
   const insets = useSafeAreaInsets();
 
   const Stack = createStackNavigator();
@@ -44,6 +50,8 @@ function BottomTabNavigator({ route, navigation }) {
       setInitialBottomTabRouteName: setInitialRoute,
     });
 
+    Preference.get('inviteRole').then((role) => setInviteRole(role || 'influencer'));
+
     messaging()
       .getInitialNotification()
       .then((remoteMessage) => {
@@ -61,7 +69,7 @@ function BottomTabNavigator({ route, navigation }) {
       .finally(() => setLoading(false));
   }, [navigation]);
 
-  if (loading) {
+  if (loading || inviteRole == null) {
     return null;
   }
 
@@ -70,6 +78,25 @@ function BottomTabNavigator({ route, navigation }) {
     initialRoute,
     // setInitialBottomTabRouteName: setInitialRoute,
   };
+
+  // 브랜드 셸: 대시보드가 곧 홈. 피드/체험/활동 탭은 브랜드에게 소음이므로 없다.
+  if (inviteRole === 'brand') {
+    return (
+      <Tab.Navigator
+        screenOptions={({ navigation: nav, route: tabRoute }) => ({
+          tabBarIcon: ({ focused, color }) => tabBarIcon({ focused, color, route: tabRoute }),
+          tabBarLabel: ({ focused, color }) => tabBarLabel({ focused, color, route: tabRoute }),
+        })}
+        shifting={false}
+        labeled={false}
+        barStyle={{ backgroundColor: '#F4F4F4', elevation: 20 }}
+      >
+        <Tab.Screen name="BrandDashboard" component={BrandDashboard} initialParams={initialParams} />
+        <Tab.Screen name="BrandReview" component={BrandReview} initialParams={initialParams} />
+        <Tab.Screen name="Profile" component={UserPageNavigator} initialParams={initialParams} />
+      </Tab.Navigator>
+    );
+  }
 
   return (
     <Tab.Navigator
@@ -124,21 +151,24 @@ function BottomTabNavigator({ route, navigation }) {
         })}
         initialParams={initialParams}
       /> */}
-      <Tab.Screen
-        name="Store"
-        component={ProductsNavigator}
-        listeners={() => ({
-          tabPress: (e) => {
-            FastImage.clearMemoryCache();
+      {/* 커머스 숨김(v2 §D5): 라우트는 유지하되 COMMERCE 플래그가 꺼지면 탭에서 제외 */}
+      {FEATURES.COMMERCE ? (
+        <Tab.Screen
+          name="Store"
+          component={ProductsNavigator}
+          listeners={() => ({
+            tabPress: (e) => {
+              FastImage.clearMemoryCache();
 
-            if (Platform.OS !== 'ios') {
-              StatusBar.setBackgroundColor(Constants.TIER_COLORS.GIVER);
-              StatusBar.setBarStyle('default', true);
-            }
-          },
-        })}
-        initialParams={initialParams}
-      />
+              if (Platform.OS !== 'ios') {
+                StatusBar.setBackgroundColor(Constants.TIER_COLORS.GIVER);
+                StatusBar.setBarStyle('default', true);
+              }
+            },
+          })}
+          initialParams={initialParams}
+        />
+      ) : null}
       <Tab.Screen
         name="Try"
         component={TryNavigator}

@@ -3,11 +3,13 @@ import {
   Alert,
   FlatList,
   SafeAreaView,
+  Share,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import FEATURES from '../../Components/Constants/Features';
 import { useFocusEffect } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import Constants from '../../Components/Constants';
@@ -249,6 +251,27 @@ export default function ActivityScreen({ navigation }) {
         </View>
       </View>
 
+      {/* v2 §7-4 (D6): 첫 검증 루프 완료 시 추천 코드 3장 */}
+      {FEATURES.REFERRAL && (profile?.completedCount ?? 0) >= 1 ? (
+        <View style={styles.referralCard}>
+          <Text style={styles.referralTitle}>{Strings.REFERRAL_TITLE}</Text>
+          <View style={styles.referralCodes}>
+            {['CREW26', 'CREW27', 'CREW28'].map((code) => (
+              <TouchableOpacity
+                key={code}
+                style={styles.referralCode}
+                onPress={() =>
+                  Share.share({ message: Strings.REFERRAL_SHARE_MESSAGE(code) }).catch(() => {})
+                }
+              >
+                <Text style={styles.referralCodeText}>{code}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          <Text style={styles.referralNote}>{Strings.REFERRAL_NOTE}</Text>
+        </View>
+      ) : null}
+
       <Text style={styles.section}>{Strings.MY_MISSIONS}</Text>
       <FlatList
         data={missions}
@@ -341,4 +364,28 @@ const styles = StyleSheet.create({
   feedbackText: { fontSize: 12.5, color: '#5c574d', marginTop: 4, lineHeight: 18 },
   strikeWarn: { marginTop: 10, fontSize: 12.5, color: '#d33', lineHeight: 18 },
   empty: { textAlign: 'center', marginTop: 40, color: Constants.TIER_COLORS.STRIVER },
+  referralCard: {
+    marginHorizontal: 16,
+    marginBottom: 14,
+    backgroundColor: '#26231d',
+    borderRadius: 12,
+    padding: 14,
+  },
+  referralTitle: { fontSize: 13.5, fontWeight: '800', color: Constants.COLOR_MAIN },
+  referralCodes: { flexDirection: 'row', marginTop: 10, gap: 8 },
+  referralCode: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: Constants.COLOR_MAIN,
+    borderRadius: 8,
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  referralCodeText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#f4f1ea',
+    letterSpacing: 2,
+  },
+  referralNote: { fontSize: 11, color: '#a39d90', marginTop: 8 },
 });

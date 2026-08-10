@@ -115,6 +115,20 @@ export const tabBarIcon = ({ focused, color, route }) => {
         <Text style={styles.iconName}>{Strings.BOTTOM_ICON_VIEW_REVIEW}</Text>
       </View>
     );
+  } else if (route.name === 'BrandDashboard') {
+    return (
+      <View style={{ width: 100, alignItems: 'center' }}>
+        <IconFeather name="bar-chart-2" size={24} color={color} style={styles.shadow} />
+        <Text style={styles.iconName}>{Strings.BRAND_TAB_DASH}</Text>
+      </View>
+    );
+  } else if (route.name === 'BrandReview') {
+    return (
+      <View style={{ width: 100, alignItems: 'center' }}>
+        <IconFeather name="check-square" size={24} color={color} style={styles.shadow} />
+        <Text style={styles.iconName}>{Strings.BRAND_TAB_REVIEW}</Text>
+      </View>
+    );
   } else if (route.name === 'Try') {
     return (
       <View style={{ width: 100, alignItems: 'center' }}>
@@ -182,6 +196,10 @@ export const tabBarLabel = ({ focused, color, route }) => {
     name = Strings.TRY_TAB;
   } else if (route.name === 'Activity') {
     name = Strings.ACTIVITY_TAB;
+  } else if (route.name === 'BrandDashboard') {
+    name = Strings.BRAND_TAB_DASH;
+  } else if (route.name === 'BrandReview') {
+    name = Strings.BRAND_TAB_REVIEW;
   }
   return (
     <Text
