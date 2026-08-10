@@ -85,7 +85,8 @@ const renderTabBar = ({ routeName, selectedTab, navigate }) => {
 export const tabBarIcon = ({ focused, color, route }) => {
   let iconName;
   let size = 22;
-  color = focused ? 'white' : 'lightgray';
+  // 탭바 배경(#F4F4F4)에서 white/lightgray는 보이지 않는다 — 다른 탭의 on/off 톤과 통일
+  color = focused ? Constants.COLOR_MAIN : 'gray';
   if (route.name === 'Home') {
     return (
       <View style={{ width: 100, alignItems: 'center' }}>

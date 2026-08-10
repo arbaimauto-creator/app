@@ -1543,4 +1543,11 @@ export default {
   MY_MISSIONS: '내 리뷰 미션',
   UPLOAD_REVIEW_CTA: '리뷰 영상 올리기',
   NO_CAMPAIGNS: '모집 중인 캠페인이 없습니다',
+  CAMPAIGN_STATUS_APPLIED: '승인 대기',
+  CAMPAIGN_STATUS_APPROVED: '배송 준비',
+  CAMPAIGN_STATUS_SHIPPED: '배송 중',
+  CAMPAIGN_STATUS_REVIEWING: '리뷰 작성',
+  CAMPAIGN_STATUS_DONE: '완료',
+  // 한글 문장은 1_1~1_3으로 완결 — eng와 세그먼트 수를 맞추기 위한 빈 값 (미정의 시 'undefined' 노출)
+  TUTORIAL_REVIEW_BODY_1_4: '',
 };

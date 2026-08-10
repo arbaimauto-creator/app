@@ -1,22 +1,32 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Constants from '../../Components/Constants';
 import Strings from '../../Components/Strings';
-import { selectCampaigns, selectMyApplications } from '../../slices/campaign';
+import { fetchCampaigns, selectCampaigns, selectMyApplications } from '../../slices/campaign';
 
 const STATUS_LABEL = {
-  applied: '승인 대기',
-  approved: '배송 준비',
-  shipped: '배송 중',
-  reviewing: '리뷰 작성',
-  done: '완료',
+  applied: Strings.CAMPAIGN_STATUS_APPLIED,
+  approved: Strings.CAMPAIGN_STATUS_APPROVED,
+  shipped: Strings.CAMPAIGN_STATUS_SHIPPED,
+  reviewing: Strings.CAMPAIGN_STATUS_REVIEWING,
+  done: Strings.CAMPAIGN_STATUS_DONE,
 };
 
 export default function ActivityScreen() {
+  const dispatch = useDispatch();
   const campaigns = useSelector(selectCampaigns);
   const applications = useSelector(selectMyApplications);
   const totalReward = useSelector((s) => s.user.totalReward);
+
+  // Try 탭을 거치지 않고 진입해도 미션 목록이 비지 않도록 직접 조회한다
+  useEffect(() => {
+    if (campaigns.length === 0) {
+      dispatch(fetchCampaigns());
+    }
+    // 최초 진입 시 1회
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const missions = campaigns
     .filter((c) => applications[c.id] != null)

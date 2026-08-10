@@ -128,3 +128,73 @@
 - 변경 파일 10개 전부 Babel 파싱 통과
 - 에뮬레이터에서 RedBox 없이 리로드 확인
 - 틱톡 스타일 UI 렌더링 스크린샷 검증 완료 (액션 레일, 하단 오버레이, 상품 카드 20% 표기)
+
+---
+
+## 2026-08-06 멀티에이전트 버그 헌트 (5개 영역 병렬 스윕)
+
+### 영역 1 — 비동기/에러 처리 (근본 원인: APIprovider.request가 실패를 reject하지 않고 Error 객체를 resolve; ~306개 .then() 중 instanceof Error 체크 4곳뿐)
+- [CRIT] MakeOrderScreen.js:227-279 주문 생성 실패 시 Error 객체로 .buyer 접근 → TypeError / 무료주문 orderId undefined
+- [CRIT] RegisterAsSellerApplicationScreen.js:501-524 실패 시 인디케이터 미해제 → 영구 로딩
+- [CRIT] NotificationScreen.js:30-43 / BlockedUserListScreen.js:21-27 리스트 끝 스크롤+네트워크 실패 → not iterable + 스피너 고착
+- [CRIT] NoticeList.js:34-39 실패 시 setLoading(false) 미도달 → 공지 영구 로딩
+- [CRIT] SignUpScreen/index.js:122-147 가입 실패에도 로컬 세션 기록 + 메인 진입(유령 로그인); 중복ID 분기 도달 불가
+- [CRIT] UserPageScreen.js:2915-2921 일시적 네트워크 오류 → 강제 로그아웃
+- [IMP] ProductPageScreen.js:1053-1066 Error truthy 통과 → Error를 cartItems로 MakeOrder에 전달
+- [IMP] MembershipWithdrawalPage.js:168-176 await 누락 → 소셜 세션 로그아웃 안 되고 탈퇴
+- [IMP] OrderRejectionPage.js:145 / PurchaseCancellationPage.js:157 실패해도 성공 알럿+pop
+- [IMP] PurchaseCancellationPage.js:146,169 취소 전/후 getOrderList 이중 호출 race → stale 목록
+- [IMP] MembershipWithdrawal/OrderRejection/PurchaseCancellation isSubmitting 가드가 set되지 않음 → 연타 중복 요청
+- [IMP] VideoPageScreenWrapper.js:148-208 onListEndReached 재진입 가드 없음 + stale closure append
+- [IMP] WithdrawalRequestScreen.js:572-596 실패를 성공 취급, ReportModal.js 신고 실패도 성공 토스트
+- [IMP] QNAChatView.js:69-99 로딩 플래그를 setTimeout(500)으로 해제 + Error를 state에 주입 가능
+- 권장: APIprovider reject 전환 또는 공통 unwrap() 헬퍼 + try/finally 로딩 플래그
+
+### 영역 2 — 라이프사이클/누수
+- [CRIT] VideoPageScreen/index.js:288 AppState 리스너 구독 미보관+해제 주석처리 → 진입마다 누적
+- [CRIT] VideoPageScreen/index.js:278-336 모든 리스너가 Preference.get().then() 안에서 등록 → 빠른 이탈 시 언마운트 후 등록되어 영구 잔존 (BackHandler 누적 — 뒤로가기 삼킴의 근본 원인)
+- [IMP] MainScreen.js:672 푸시 핸들러 전역 등록 미해제 → 로그아웃 후 죽은 navigation 참조
+- [IMP] ProductListItemView/VideoListItemView touchTimeout 미해제 (componentWillUnmount 부재)
+- [IMP] SliderEntry.js:482-486 중첩 setTimeout에 _isMounted 가드 미적용
+- [IMP] VideoPageScreen/index.js:402-404 setState no-op 덮어쓰기 안티패턴(경고 은폐)
+- [MIN] 40여 클래스 componentDidMount 비동기 setState 무가드 (SignInScreen/SliderEntry가 올바른 참조 구현)
+
+### 영역 3 — 돈/커머스
+- [CRIT] MakeOrderScreen/RewardUse.js:136,149,163 KRW 리워드에 환율 재적용 → US 리전 결제액 음수 폭주
+- [CRIT] RewardUse.js:166-170 음수 결제액 클램프 없음
+- [CRIT] PromotionCode.js:44-53 라인합계에 수량 재곱 → 할인 이중 적용
+- [CRIT] PayScreen.js:96-102 검증식 ≠ 결제식 (certifiedReviewerRewardUse/글로벌 할인 누락) → 정상 결제 차단
+- [CRIT] MakeOrderScreen.js:230,638 전액 리워드 판정에 글로벌 할인 누락 + ===0 (<=0 필요)
+- [CRIT] MakeOrderScreen.js:135-137 shippingRegion 무시하고 국내 배송비로 finalPrice 세팅
+- [IMP] 597,616 해외 배송비 $20 하드코딩 (셀러 설정/무료배송 임계값 무시)
+- [IMP] RewardUse.js:132-139 등호 시 미적용 + KRW/USD 혼합 비교 + 문자열 state
+- [IMP] RewardUse.js:111-117 전액 사용 시 certifiedReviewerRewardUse 미초기화 → 이중 차감
+- [IMP] PayPaypalScreen.js:29 객체를 상태코드와 비교 → 결제 완료가 항상 실패 알럿
+- [IMP] CartScreen.js:181 KRWPerUSD 항상 undefined → 50,000원이 $50,000 표시; MakeOrder에도 미전달
+- [IMP] OrderPageScreen.js:181 rewardUse undefined 전파 → 총액 '-' 표시; certifiedReviewerRewardUse 누락
+- [IMP] utils changeCurrency 0-나눗셈 (currencyRate 초기값 0) / getKRWPerUSD 문자열·undefined 전파
+- [MIN] RewardUse.js:119 경계조건 > vs >=, B2BProductInquiry 할인가 무시/수량 필드 불일치
+
+### 영역 4 — 게스트/인증 가드
+- [CRIT] TryScreen/CampaignDetail.js:16-44 캠페인 신청/업로드 CTA 게스트 가드 전무 → 게스트 공용계정으로 실제 신청
+- [CRIT] AddingNewVideoScreen 전체 무가드 → 게스트 토큰으로 영상 업로드 가능 (호출부 의존 구조)
+- [HIGH] QNAList/QNAChatView/bubbleView QnA 생성·채팅·삭제 무가드 → 게스트끼리 상호 삭제 가능
+- [HIGH] RevenueGuideModal.js:26 업로드 진입 무가드
+- [HIGH] utils isGuestUser 하드코딩 ObjectId 2개 의존 + redux isGuest 미사용(죽은 코드) → 서버 계정 변경 시 전체 fail-open
+- [M-H] VideoPage ⋯ 신고 무가드 (ModalMenuButton 가드 주석처리)
+- [M-H] ReviewComments.js:286,338 myUserId 비동기 로드 전 탭 → 정상 유저에게 로그아웃 알럿 (역방향 오동작)
+- [MED] CommentListItemView 가드 기준 혼재, B2BProductInquiry initialParams 누락
+
+### 영역 5 — Greyd 2.0 신규/리팩터
+- [HIGH] ActivityScreen이 fetchCampaigns를 직접 dispatch하지 않음 → Try 탭 미방문 시 미션 빈 화면; applications 미영속(재시작 유실)
+- [HIGH] VideoPageScreenWrapper.js:77-84 findIndex -1 → 크래시 (딥링크/삭제 영상)
+- [HIGH] ⋯ 메뉴 음소거 무동작 (RenderSlide가 muted prop 미전달, volume=1 하드코딩)
+- [M-H] Strings 비대칭: PUSH_PERMISSION_REQUEST(eng 없음), ORDER_PURCHASE_ALARM_*(eng 없음), TUTORIAL_REVIEW_BODY_1_4(kor 없음)
+- [M-H] Try/Activity 탭 아이콘 색 white/lightgray on #F4F4F4 → 사실상 안 보임 (renderTabBar.js:88)
+- [M-H] CampaignDetail 신청 결과 미확인 성공 알럿; slice rejected 핸들러 없음; api 응답 무시
+- [M-H] GlobalMakeOrder 진입 시 shippingRegion/KRWPerUSD 미전달 → 해외 주문이 국내 PG 경로
+- [MED] 캠페인 id vs _id 컨벤션 불일치 (서버 연동 시 파손), 상태머신 4/5 도달불가+한국어 하드코딩, rewardPoint/remaining 미반영, countries 널 가드 없음
+- [MED] VideoPageScreenWrapper deps 없는 useEffect → 콜백 매 렌더 호출
+- [MED] persistLoginSession currencyRate.toString() 널 가드 없음 → 부분 로그인+실패 알럿
+- [L-M] share.js url undefined 가드 없음("…undefined" 공유), linking.js 스킴 화이트리스트 협소/mylinker:// 폴백, 푸시 initialRouteName 미연결(선재)
+- [LOW] B2B 버튼 이중 래핑, COLOR_POINT_BLUE==COLOR_MAIN(신청완료 색 구분 안 됨), logCallback 죽은 코드

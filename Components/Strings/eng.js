@@ -1606,4 +1606,19 @@ export default {
   MY_MISSIONS: 'My Review Missions',
   UPLOAD_REVIEW_CTA: 'Upload Review Video',
   NO_CAMPAIGNS: 'No open campaigns right now',
+  CAMPAIGN_STATUS_APPLIED: 'Pending approval',
+  CAMPAIGN_STATUS_APPROVED: 'Preparing shipment',
+  CAMPAIGN_STATUS_SHIPPED: 'Shipping',
+  CAMPAIGN_STATUS_REVIEWING: 'Write your review',
+  CAMPAIGN_STATUS_DONE: 'Done',
+  // navigation/root.js가 사용하는 키 — 영문판에는 _TITLE 이름만 있어 제목이 undefined로 노출됐다
+  PUSH_PERMISSION_REQUEST: 'Notification permissions are required to use greyd',
+  ORDER_PURCHASE_ALARM_TO_REVIEWER_TITLE: (params) =>
+    `Congrats! ${params.eventMakerId.name} purchased after watching your review`,
+  ORDER_PURCHASE_ALARM_TO_REVIEWER_BODY: (params) =>
+    `${params.eventMakerId.name} watched your review "${
+      params.videoId.title.en || params.videoId.title.ko || params.videoId.title
+    }" and purchased "${
+      params.productId.title.en || params.productId.title.ko || params.productId.title
+    }"!`,
 };

@@ -113,6 +113,9 @@ export default function RenderSlide({ context, item, index }) {
             resizeMode={context.isVideoPortrait() ? 'cover' : 'contain'}
             style={context.getPlayerStyle()}
             volume={1}
+            // ⋯ 메뉴의 음소거 상태를 플레이어 초기값에 연결
+            // (미전달 시 muted:false 고정이라 메뉴 토글이 무동작이었다)
+            muted={context.state.isMuted}
             ignoreSilentSwitch="ignore"
             fullscreenAutorotate={true}
             repeat={true}

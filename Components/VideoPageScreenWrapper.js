@@ -74,29 +74,34 @@ export default function VideoPageScreenWrapper(props) {
   const [isTouchingDetail, setIsTouchingDetail] = useState(false);
   const pagerRef = useRef(null);
 
-  const product = videoList
-    ? videoList[videoList.findIndex((item) => item._id === videoId)].linkedProduct
-    : null;
+  // videoId가 목록에 없으면(딥링크·삭제된 영상 등) findIndex가 -1이라
+  // videoList[-1].linkedProduct 접근으로 렌더 중 크래시했다 — 널 안전 접근
+  const currentVideo = videoList ? videoList.find((item) => item._id === videoId) : null;
+  const product = currentVideo?.linkedProduct ?? null;
   const productId =
     typeof product?.productId === 'object' ? product?.productId._id : product?.productId;
-  const user = videoList
-    ? videoList[videoList.findIndex((item) => item._id === videoId)].author
-    : null;
+  const user = currentVideo?.author ?? null;
   const userId = user?.userId;
 
   // let isRefreshing = false;
   const [_isRefreshing, setIsRefreshing] = useState(false);
 
+  // 최신 값을 ref로 들고 있다가 "언마운트 시 1회"만 부모에 동기화한다
+  // (기존엔 deps 없는 effect라 매 렌더마다 cleanup이 돌아 콜백이 수십 번 호출됐다)
+  const syncRef = useRef({ storedVideoList, index });
+  syncRef.current = { storedVideoList, index };
   useEffect(() => {
     return () => {
       if (onVideoListChanged) {
-        onVideoListChanged(storedVideoList);
+        onVideoListChanged(syncRef.current.storedVideoList);
       }
       if (onVideoIndexChanged) {
-        onVideoIndexChanged(index);
+        onVideoIndexChanged(syncRef.current.index);
       }
     };
-  });
+    // 언마운트 시 1회
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onListLoadError = () => {
     // Alert.alert(
@@ -146,7 +151,10 @@ export default function VideoPageScreenWrapper(props) {
   };
 
   const onListEndReached = () => {
-    // isRefreshing = true;
+    // 페이저가 연속 발화해도 동일 offset 요청이 중복 발사되지 않도록 재진입 가드
+    if (_isRefreshing) {
+      return;
+    }
     setIsRefreshing(true);
 
     const limit = 15;
