@@ -1817,6 +1817,9 @@ export default {
   G_UNLOCKED: 'Curated campaigns unlocked',
   CAMPAIGN_FIRST_COME: (n) => `First come — ${n} left`,
   CURATED_LOCKED_HINT: (g) => `Unlocks at G${g}`,
+  // Social sign-in (new design — after gate)
+  SIGNIN_TITLE: 'Almost in',
+  SIGNIN_SUB: 'Link an account so your invite,\nreviews, and points stay safe',
   // Offered seedings (D25 · I11)
   OFFER_SECTION_TITLE: 'A brand picked you first',
   OFFER_BADGE: 'Offer',

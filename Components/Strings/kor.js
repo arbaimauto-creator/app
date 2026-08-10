@@ -1749,6 +1749,9 @@ export default {
   G_UNLOCKED: 'Curated 캠페인 신청 가능',
   CAMPAIGN_FIRST_COME: (n) => `선착순 ${n}개 남음`,
   CURATED_LOCKED_HINT: (g) => `G${g} 달성 시 신청 가능`,
+  // 소셜 로그인 (신규 디자인 — 게이트 통과 후)
+  SIGNIN_TITLE: '거의 다 왔어요',
+  SIGNIN_SUB: '계정을 연결하면 초대·리뷰·포인트가\n안전하게 보관돼요',
   // 제안형 시딩 (D25 · I11)
   OFFER_SECTION_TITLE: '브랜드가 먼저 제안했어요',
   OFFER_BADGE: '제안',

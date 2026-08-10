@@ -1,11 +1,32 @@
 import { StyleSheet } from 'react-native';
 import Constants from '../../Components/Constants';
+import T from '../../Components/Constants/DesignTokens';
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor: Constants.COLOR_BACKGROUND_DARK, //'rgb(72, 69, 61)',
-    backgroundColor: '#F4F4F4',
+    backgroundColor: T.COLORS.BG, // 신규 디자인 공통 배경 (게이트·홈과 동일)
+  },
+  symbol: { width: 84, height: 84, marginBottom: 12 },
+  heroTitle: {
+    marginTop: 22,
+    fontFamily: T.FONT.ExtraBold,
+    fontSize: 19,
+    color: T.COLORS.INK,
+    textAlign: 'center',
+  },
+  heroSub: {
+    ...T.TYPE.SUB,
+    fontSize: 12.5,
+    lineHeight: 18,
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  arbaimFooter: {
+    ...T.TYPE.XS,
+    textAlign: 'center',
+    paddingBottom: 26,
+    letterSpacing: 1,
   },
   logoContainer: {
     flex: 10,

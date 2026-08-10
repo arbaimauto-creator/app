@@ -10,6 +10,7 @@ import { requestTrackingPermission } from 'react-native-tracking-transparency';
 import { connect } from 'react-redux';
 import Constants from '../../Components/Constants';
 import Strings from '../../Components/Strings';
+import { Wordmark } from '../../Components/UI';
 import Utils, { menuLogout } from '../../Components/utils';
 import { LoadingView } from '../../Components/Views';
 import { setGuest } from '../../slices/user';
@@ -192,21 +193,13 @@ class SignInScreen extends React.Component {
       <View style={styles.container}>
         <View style={styles.logoContainer}>
           <View style={styles.flex4} />
-          <Text style={styles.arbaim}>{Strings.ARBAIM_INC}</Text>
           <FastImage
             source={require('../../Resources/img/icGreydSplashSymbol126.png')}
-            style={{ width: 126, height: 126, marginTop: 30, marginBottom: 10 }}
+            style={styles.symbol}
           />
-          <Text
-            style={{
-              color: 'black',
-              fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
-              fontSize: 30,
-              lineHeight: 30,
-            }}
-          >
-            greyd
-          </Text>
+          <Wordmark size={32} center />
+          <Text style={styles.heroTitle}>{Strings.SIGNIN_TITLE}</Text>
+          <Text style={styles.heroSub}>{Strings.SIGNIN_SUB}</Text>
           <View style={styles.flex4} />
         </View>
 
@@ -265,6 +258,8 @@ class SignInScreen extends React.Component {
             </View>
           )}
         </View>
+
+        <Text style={styles.arbaimFooter}>{Strings.ARBAIM_INC}</Text>
 
         {this.state.isLoggingIn && <LoadingView message={''} opacity={0.5} />}
       </View>

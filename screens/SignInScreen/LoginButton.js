@@ -3,6 +3,7 @@ import { Platform, StyleSheet, Text, TouchableWithoutFeedback, View } from 'reac
 import FastImage from 'react-native-fast-image';
 import Strings, { getLanguage } from '../../Components/Strings';
 import Constants from '../../Components/Constants';
+import T from '../../Components/Constants/DesignTokens';
 
 const LoginButtons = (props) => {
   const { kakaoLogin, facebookLogin, googleLogin, appleLogin } = props;
@@ -75,79 +76,46 @@ export function GuestLoginButton({ onPress }) {
   );
 }
 
-const styles = StyleSheet.create({
-  kakaoContainer: {
-    height: 50,
-    width: '80%',
-    marginBottom: 10,
-    backgroundColor: '#fee500',
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'row',
-  },
-  kakaoLogo: { position: 'absolute', left: 20, width: 20, height: 18, marginRight: 10 },
-  kakaoLoginText: {
-    fontSize: 16,
-    color: 'rgba(0, 0, 0, .85)',
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
-    lineHeight: 20,
-  },
-  fbContainer: {
-    height: 50,
-    width: '80%',
-    marginBottom: 10,
-    backgroundColor: '#1877F2',
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'row',
-  },
-  fbLogo: { position: 'absolute', left: 20, width: 20, height: 20, marginRight: 10 },
-  fbLoginText: {
-    fontSize: 16,
-    color: 'white',
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
-    lineHeight: 20,
-  },
+// 신규 디자인 토큰 기반 리스타일 — 브랜드 컬러(카카오/FB)는 각사 가이드 유지,
+// 라운드·높이·타이포만 게이트/홈 버튼과 통일
+const btnBase = {
+  height: 52,
+  width: '84%',
+  marginBottom: 10,
+  borderRadius: T.RADIUS.BTN,
+  justifyContent: 'center',
+  alignItems: 'center',
+  flexDirection: 'row',
+};
+const btnText = {
+  fontSize: 15,
+  fontFamily: T.FONT.SemiBold,
+  lineHeight: 20,
+};
 
+const styles = StyleSheet.create({
+  kakaoContainer: { ...btnBase, backgroundColor: '#fee500' },
+  kakaoLogo: { position: 'absolute', left: 20, width: 20, height: 18, marginRight: 10 },
+  kakaoLoginText: { ...btnText, color: 'rgba(0, 0, 0, .85)' },
+  fbContainer: { ...btnBase, backgroundColor: '#1877F2' },
+  fbLogo: { position: 'absolute', left: 20, width: 20, height: 20, marginRight: 10 },
+  fbLoginText: { ...btnText, color: 'white' },
   googleContainer: {
-    height: 50,
-    width: '80%',
-    marginBottom: 10,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
+    ...btnBase,
+    backgroundColor: T.COLORS.SURFACE,
+    borderWidth: 1,
+    borderColor: T.COLORS.LINE,
   },
   googleLogo: { position: 'absolute', left: 20, width: 20, height: 20, marginRight: 10 },
-  googleLoginText: {
-    fontSize: 16,
-    color: 'rgba(0, 0, 0, .54)',
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
-    lineHeight: 20,
-  },
-  appleContainer: {
-    height: 50,
-    width: '80%',
-    marginBottom: 10,
-    backgroundColor: 'black',
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  googleLoginText: { ...btnText, color: T.COLORS.DARK },
+  appleContainer: { ...btnBase, backgroundColor: T.COLORS.INK },
   appleLogo: { position: 'absolute', left: 20, width: 20, height: 20, marginRight: 10 },
-  appleLoginText: {
-    fontSize: 16,
-    color: 'white',
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
-    lineHeight: 20,
-  },
+  appleLoginText: { ...btnText, color: 'white' },
   guestLoginText: {
     marginTop: Platform.OS !== 'ios' ? 20 : 0,
-    fontSize: 16,
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
-    color: 'rgba(0, 0, 0, .54)',
+    fontSize: 13.5,
+    fontFamily: T.FONT.SemiBold,
+    color: T.COLORS.GREY,
     lineHeight: 20,
   },
 });

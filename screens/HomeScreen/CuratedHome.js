@@ -29,6 +29,21 @@ import { CURATED_MIN_G, personalizedPoints } from '../TryScreen/points';
 const { COLORS, TYPE } = T;
 const GRID_HEIGHTS = [118, 96, 100, 132]; // 시안: 96~140 사이에서 리듬만 준다
 
+// 서버 API 실패/빈 응답 시 그리드 폴백 (Phase 1 mock — 실연동 시 제거).
+// 홈의 "발견과 욕망"(D23)은 리뷰 그리드가 절반이므로 빈 화면을 허용하지 않는다.
+const MOCK_TRENDING = [
+  { _id: 'mock-r1', title: 'Time slip eye cream · 2 weeks', score: '4.8', seed: 'greyd-r1' },
+  { _id: 'mock-r2', title: 'Brow lift kit self perm', score: '4.6', seed: 'greyd-r2' },
+  { _id: 'mock-r3', title: 'Hair treatment before/after', score: '4.9', seed: 'greyd-r3' },
+  { _id: 'mock-r4', title: 'Glass skin routine', score: '4.7', seed: 'greyd-r4' },
+  { _id: 'mock-r5', title: 'Cushion 12h wear test', score: '4.5', seed: 'greyd-r5' },
+  { _id: 'mock-r6', title: 'Vegan lip tint swatch', score: '4.8', seed: 'greyd-r6' },
+].map((m) => ({
+  ...m,
+  isMock: true,
+  thumbnailUrl: `https://picsum.photos/seed/${m.seed}/400/560`,
+}));
+
 // 할 일 스트립 요약 (v2 §3-⑥ 우선순위: 주소 > 수령 > 업로드 D-N)
 function buildTodos(seedings, campaignById) {
   const todos = [];
@@ -59,6 +74,9 @@ function buildTodos(seedings, campaignById) {
 
 // 점수 없으면 null — 배지 숨김 (✓ 0.0 노출 금지)
 function reviewScore(item) {
+  if (item.isMock) {
+    return item.score;
+  }
   const raw = item.g6RatingCount > 0 ? item.g6AvgRatingScore : item.ratingScore;
   const n = Number(raw || 0);
   return n > 0 ? n.toFixed(1) : null;
@@ -90,10 +108,12 @@ export default function CuratedHome({ navigation }) {
         ? await APIprovider.getVideoList('main', undefined, '', '', 0, 12)
         : await APIprovider.getCategorizedVideoList(categoryKey, undefined, '', 0, 12);
     if (APIprovider.isFailure(res)) {
-      setVideos(null);
+      setVideos(MOCK_TRENDING); // 서버 부재(mock 단계) — 그리드는 항상 채운다
     } else {
-      const list = res?.recent?.videoList ?? res?.videoList ?? [];
-      setVideos(list.filter((v) => gridThumbUrl(v)));
+      const list = (res?.recent?.videoList ?? res?.videoList ?? []).filter((v) =>
+        gridThumbUrl(v),
+      );
+      setVideos(list.length ? list : MOCK_TRENDING);
     }
     setVideosLoading(false);
   }, []);
@@ -250,7 +270,9 @@ export default function CuratedHome({ navigation }) {
                     style={styles.gridItem}
                     activeOpacity={0.85}
                     onPress={() =>
-                      navigation.navigate('VideoPage', { videoList: videos, videoId: item._id })
+                      item.isMock
+                        ? navigation.navigate('HomeFeed')
+                        : navigation.navigate('VideoPage', { videoList: videos, videoId: item._id })
                     }
                   >
                     <View style={[styles.gridThumbWrap, { height: GRID_HEIGHTS[index % 4] }]}>

@@ -2,6 +2,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
 import { PermissionsAndroid, Platform, SafeAreaView, Text } from 'react-native';
+import SplashScreen from 'react-native-splash-screen';
 import { horizontalAnimation } from '../Components/CustomComponents/horizontalAnimation';
 import { initializeFBPixel, setCountryFromLocation } from '../Components/utils';
 import linking from '../Components/utils/linking';
@@ -31,7 +32,13 @@ const Root = () => {
   }, []);
 
   return (
-    <NavigationContainer theme={navigationTheme} linking={linking}>
+    <NavigationContainer
+      theme={navigationTheme}
+      linking={linking}
+      // 최종 안전장치: 어떤 화면이 첫 라우트여도 내비 준비 즉시 네이티브 스플래시 해제.
+      // (개별 화면의 hide()가 실행되지 않는 경로에서 스플래시 영구 잔류 방지)
+      onReady={() => SplashScreen.hide()}
+    >
       <Stack.Navigator initialRouteName={'Main'} screenOptions={horizontalAnimation}>
         <Stack.Screen
           name="Main"
