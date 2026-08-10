@@ -1,5 +1,6 @@
 // 서버 API 준비 전 목데이터 스텁. 서버 연동 시 이 파일의 함수 본문만 교체한다.
-// v2 스키마: track(open/curated), base_points, content_guide, 국가별 쿼터.
+// v2.4 스키마(ops 정합 I1·I10): track은 ops 예약어(캠페인 상품 유형) — 앱 노출분은 'SEEDING' 고정.
+// 신청 유형은 applyMode('open'|'curated'). 필드명은 greyd-ops Prisma와 일치시킨다.
 // 캠페인 식별자는 앱 전역 컨벤션에 맞춰 서버 연동 시 _id로 매핑한다.
 
 // FGI 설문 공통 문항 (계획서 TSK-001: 정량 구매의향/가격적정성/경쟁력 + 정성)
@@ -23,7 +24,8 @@ const MOCK_CAMPAIGNS = [
     seedingQuotaPerCountry: { KR: 10, US: 10, JP: 10 },
     rewardPoint: 500, // 하위 호환 (base_points 표시용)
     basePoints: 500,
-    track: 'open',
+    track: 'SEEDING',
+    applyMode: 'open',
     uploadDays: 14,
     contentGuide: ['타임 슬립 성분 언급', '눈가 사용 장면', '#sonplan 해시태그'],
     fgiExtraQuestions: ['향에 대한 인상은 어땠나요?', '민감성 피부에도 괜찮았나요?'],
@@ -42,7 +44,8 @@ const MOCK_CAMPAIGNS = [
     seedingQuotaPerCountry: { US: 30, BR: 20 },
     rewardPoint: 300,
     basePoints: 300,
-    track: 'open',
+    track: 'SEEDING',
+    applyMode: 'open',
     uploadDays: 14,
     contentGuide: ['젖은 모발 사용법', '비포/애프터'],
     status: 'closed',
@@ -60,7 +63,8 @@ const MOCK_CAMPAIGNS = [
     seedingQuotaPerCountry: { KR: 10, US: 10, JP: 10, DE: 10 },
     rewardPoint: 800,
     basePoints: 800,
-    track: 'curated',
+    track: 'SEEDING',
+    applyMode: 'curated',
     uploadDays: 14,
     contentGuide: ['셀프 펌 과정 풀샷', '지속력 언급', '#orgbeauty'],
     status: 'open',

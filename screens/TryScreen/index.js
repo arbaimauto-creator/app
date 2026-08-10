@@ -20,10 +20,11 @@ import { personalizedPoints, CURATED_MIN_G } from './points';
 
 const { COLORS, TYPE } = T;
 
-// v2 §4-1: Open/Curated 2-트랙. Curated 미달은 숨기지 말고 잠가서 보여준다.
+// v2 §4-1: 신청 유형 2종(applyMode — ops 정합 I1: track은 'SEEDING' 고정 예약어).
+// Curated 미달은 숨기지 말고 잠가서 보여준다.
 function CampaignCard({ campaign, applied, gScore, completedCount, onPress }) {
   const closed = campaign.status !== 'open' || campaign.remaining <= 0;
-  const isCurated = campaign.track === 'curated';
+  const isCurated = campaign.applyMode === 'curated';
   const curatedUnlocked = gScore >= CURATED_MIN_G || completedCount >= 2;
   const locked = isCurated && !curatedUnlocked;
   const deadline = campaign.deadline ? campaign.deadline.slice(5, 10).replace('-', '/') : '';
@@ -105,8 +106,8 @@ export default function TryScreen({ navigation }) {
 
   // Open 캠페인 최상단 고정 (v2 §3-④)
   const sorted = [...campaigns].sort((a, b) => {
-    const aOpen = a.track !== 'curated' ? 0 : 1;
-    const bOpen = b.track !== 'curated' ? 0 : 1;
+    const aOpen = a.applyMode !== 'curated' ? 0 : 1;
+    const bOpen = b.applyMode !== 'curated' ? 0 : 1;
     return aOpen - bOpen;
   });
 

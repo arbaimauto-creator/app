@@ -33,11 +33,18 @@ async function persist(seedings) {
   return seedings;
 }
 
-// seeding: { campaignId, status, appliedAt, approvedAt, shippedAt, receivedAt,
+// seeding: { campaignId, surface, status, appliedAt, approvedAt, shippedAt, receivedAt,
 //            uploadedAt, pledgeChecked, appealText, address, trackingNo, extensionUsed }
+// surface: 'app' 고정 — ops Match의 표면 구분(I5). 허브(비앱) 시딩은 ops에만 존재한다.
+// 앱 인바운드 신청은 ops에 Match를 ACCEPTED로 생성하는 것과 등가 (정합 I2·I3).
 export async function upsertSeeding(campaignId, patch) {
   const seedings = await getSeedings();
-  seedings[campaignId] = { campaignId, ...(seedings[campaignId] || {}), ...patch };
+  seedings[campaignId] = {
+    campaignId,
+    surface: 'app',
+    ...(seedings[campaignId] || {}),
+    ...patch,
+  };
   return persist(seedings);
 }
 

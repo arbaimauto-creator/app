@@ -43,7 +43,7 @@ export default function CampaignDetail({ route, navigation }) {
   }, []);
 
   const points = personalizedPoints(campaign.basePoints ?? campaign.rewardPoint, gScore);
-  const isCurated = campaign.track === 'curated';
+  const isCurated = campaign.applyMode === 'curated';
 
   // 게스트는 신청/업로드 불가 — 로그인 유도 (다른 업로드 진입점과 동일 정책)
   // __DEV__: 에뮬레이터는 소셜 로그인이 불가하므로 개발 빌드에서만 가드 통과 (프로덕션 무영향)
@@ -98,7 +98,7 @@ export default function CampaignDetail({ route, navigation }) {
     // 신청 완료 전용 화면(시안)으로 이동 — 신청 후 활성 시딩 수 = 기존 카운트 + 1
     navigation.navigate('ApplyDone', {
       campaignTitle: campaign.title,
-      track: campaign.track,
+      applyMode: campaign.applyMode,
       usedCount: activeCount + 1,
       limit,
     });

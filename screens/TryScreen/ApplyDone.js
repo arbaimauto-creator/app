@@ -8,7 +8,7 @@ import Strings from '../../Components/Strings';
 const { COLORS, FONT, TYPE } = T;
 
 export default function ApplyDone({ navigation, route }) {
-  const { campaignTitle, track, usedCount, limit } = route.params || {};
+  const { campaignTitle, applyMode, usedCount, limit } = route.params || {};
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -26,7 +26,7 @@ export default function ApplyDone({ navigation, route }) {
           <Text style={styles.emoji}>🙌</Text>
           <Text style={styles.title}>{Strings.APPLYDONE_HERO}</Text>
           <Text style={styles.sub}>
-            {campaignTitle} · {Strings.APPLYDONE_TRACK(track === 'curated' ? 'Curated' : 'Open')}
+            {campaignTitle} · {Strings.APPLYDONE_TRACK(applyMode === 'curated' ? 'Curated' : 'Open')}
           </Text>
         </View>
 
