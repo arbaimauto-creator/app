@@ -111,10 +111,12 @@ android {
             keyPassword 'android'
         }
         release {
-            storeFile file(MYAPP_RELEASE_STORE_FILE)
-            storePassword MYAPP_RELEASE_STORE_PASSWORD
-            keyAlias MYAPP_RELEASE_KEY_ALIAS
-            keyPassword MYAPP_RELEASE_KEY_PASSWORD
+            // 로컬: gradle.properties(미추적)의 MYAPP_RELEASE_* 사용.
+            // EAS 클라우드: 속성이 없으므로 debug 폴백 후 EAS가 credentials.json 서명으로 대체
+            storeFile file(findProperty('MYAPP_RELEASE_STORE_FILE') ?: 'debug.keystore')
+            storePassword findProperty('MYAPP_RELEASE_STORE_PASSWORD') ?: 'android'
+            keyAlias findProperty('MYAPP_RELEASE_KEY_ALIAS') ?: 'androiddebugkey'
+            keyPassword findProperty('MYAPP_RELEASE_KEY_PASSWORD') ?: 'android'
         }
     }
     buildTypes {
