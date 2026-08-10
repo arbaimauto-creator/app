@@ -42,7 +42,11 @@ export default function CampaignDetail({ route, navigation }) {
   const points = personalizedPoints(campaign.basePoints ?? campaign.rewardPoint, gScore);
 
   // 게스트는 신청/업로드 불가 — 로그인 유도 (다른 업로드 진입점과 동일 정책)
+  // __DEV__: 에뮬레이터는 소셜 로그인이 불가하므로 개발 빌드에서만 가드 통과 (프로덕션 무영향)
   const guardGuest = async () => {
+    if (__DEV__) {
+      return false;
+    }
     const userId = await Preference.get('userId');
     if (isGuestUser(userId)) {
       LogoutAlert({ route, navigation });
