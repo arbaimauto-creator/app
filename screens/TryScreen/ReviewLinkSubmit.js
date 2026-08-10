@@ -24,6 +24,7 @@ import { selectCampaigns } from '../../slices/campaign';
 import { getSeedings, upsertSeeding, setSeedingStatus, SEEDING_STATUS } from '../../api/seedings';
 import { daysLeft } from '../ActivityScreen/missionLogic';
 import { cancelUploadReminders } from '../ActivityScreen/reminders';
+import { opsUpload } from '../../api/opsBridge';
 import { logEvent } from '../../api/common/analytics';
 
 const { COLORS, RADIUS, FONT, TYPE } = T;
@@ -104,6 +105,8 @@ export default function ReviewLinkSubmit({ route, navigation }) {
     await setSeedingStatus(campaignId, SEEDING_STATUS.REVIEWING);
     cancelUploadReminders(campaignId);
     logEvent('review_link_submit', { campaign_id: campaignId, format });
+    // Phase 1.5: ops Content + POSTED 미러링 (수동 브리지 ③ 대체)
+    opsUpload(campaignId, platformUrl, format);
     Alert.alert(Strings.REVIEW_SUBMIT_DONE_TITLE, Strings.REVIEW_SUBMIT_DONE_BODY, [
       {
         text: Strings.OK,

@@ -32,6 +32,7 @@ import {
 import { daysLeft, isInGrace, isNoShowDue, EXTENSION_DAYS } from './missionLogic';
 import AddressModal from './AddressModal';
 import { scheduleUploadReminders, cancelUploadReminders } from './reminders';
+import { opsReceived } from '../../api/opsBridge';
 
 const { COLORS, RADIUS, FONT, TYPE } = T;
 
@@ -116,6 +117,8 @@ export default function ActivityScreen({ navigation }) {
         : -1,
     });
     scheduleUploadReminders(campaignId, campaignById[campaignId]?.title || '', s.receivedAt, false);
+    // Phase 1.5: ops Shipment DELIVERED 미러링
+    opsReceived(campaignId);
     // 시안 22: 알림 가치가 가장 높은 순간(리마인더 시작 직후)에만 권한 컨텍스트 프롬프트 (Android 13+, 1회)
     if (Platform.OS === 'android' && Platform.Version >= 33) {
       const shown = await Preference.get('notifPromptShown');

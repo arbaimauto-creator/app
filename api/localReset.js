@@ -13,7 +13,13 @@ const GREYD_PII_KEYS = [
 
 // 게이트 통과 상태 — 계정이 아니라 기기 상태. 초대 코드는 유효 7일·1회성이라
 // 로그아웃마다 지우면 재입장이 막힌다. 계정 삭제 때만 함께 지운다.
-const GREYD_GATE_KEYS = ['inviteRole', 'inviteCode', 'inviteBrandId', 'inviteBrandName'];
+const GREYD_GATE_KEYS = [
+  'inviteRole',
+  'inviteCode',
+  'inviteBrandId',
+  'inviteBrandName',
+  'greydAppId', // 기기 식별자 — 계정 삭제 시에만 재발급 (ops 골든 레코드 연동 키)
+];
 
 export async function clearGreydLocalData({ keepGate = false } = {}) {
   const keys = keepGate ? GREYD_PII_KEYS : [...GREYD_PII_KEYS, ...GREYD_GATE_KEYS];

@@ -21,6 +21,7 @@ import { getCreatorProfile } from '../../api/creators';
 import { getSeedings, upsertSeeding, setSeedingStatus, SEEDING_STATUS } from '../../api/seedings';
 import { personalizedPoints, concurrentLimit, canAutoConfirm } from './points';
 import { logEvent } from '../../api/common/analytics';
+import { opsApply } from '../../api/opsBridge';
 
 const { COLORS, RADIUS, TYPE } = T;
 
@@ -112,6 +113,8 @@ export default function CampaignDetail({ route, navigation }) {
       appeal_len: appeal.trim().length,
       auto_confirmed: autoConfirmed,
     });
+    // Phase 1.5 2단계: ops Match 미러링 (실패해도 로컬 진행 무영향)
+    opsApply({ campaign, appealText: appeal.trim(), autoConfirmed });
     // 신청 완료 전용 화면(시안)으로 이동 — 신청 후 활성 시딩 수 = 기존 카운트 + 1
     navigation.navigate('ApplyDone', {
       campaignTitle: campaign.title,

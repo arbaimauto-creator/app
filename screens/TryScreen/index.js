@@ -21,6 +21,7 @@ import { getOffers, respondToOffer } from '../../api/offers';
 import { getSeedings, upsertSeeding, setSeedingStatus, SEEDING_STATUS } from '../../api/seedings';
 import { personalizedPoints, concurrentLimit, CURATED_MIN_G } from './points';
 import { logEvent } from '../../api/common/analytics';
+import { opsApply } from '../../api/opsBridge';
 
 const { COLORS, TYPE } = T;
 
@@ -170,6 +171,8 @@ export default function TryScreen({ navigation }) {
             await upsertSeeding(offer.campaignId, { pledgeChecked: true, offerId: offer.id });
             await setSeedingStatus(offer.campaignId, SEEDING_STATUS.APPROVED);
             logEvent('offer_accept', { campaign_id: offer.campaignId });
+            // Phase 1.5: 제안 수락도 ops Match 미러링 (수락 = 즉시 확정 경로)
+            opsApply({ campaign: offer.campaign, appealText: null, autoConfirmed: true });
             refreshOffers();
             navigation.navigate('ApplyDone', {
               campaignTitle: offer.campaign.title,
