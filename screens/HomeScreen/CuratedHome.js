@@ -57,9 +57,16 @@ function buildTodos(seedings, campaignById) {
   return todos;
 }
 
+// 점수 없으면 null — 배지 숨김 (✓ 0.0 노출 금지)
 function reviewScore(item) {
   const raw = item.g6RatingCount > 0 ? item.g6AvgRatingScore : item.ratingScore;
-  return Number(raw || 0).toFixed(1);
+  const n = Number(raw || 0);
+  return n > 0 ? n.toFixed(1) : null;
+}
+
+// 큐레이션 그리드는 썸네일 있는 리뷰만 전시
+function gridThumbUrl(item) {
+  return item.thumbnailUrl || item?.relayedVideo?.thumbnailUrl || null;
 }
 
 export default function CuratedHome({ navigation }) {
@@ -85,7 +92,8 @@ export default function CuratedHome({ navigation }) {
     if (APIprovider.isFailure(res)) {
       setVideos(null);
     } else {
-      setVideos(res?.recent?.videoList ?? res?.videoList ?? []);
+      const list = res?.recent?.videoList ?? res?.videoList ?? [];
+      setVideos(list.filter((v) => gridThumbUrl(v)));
     }
     setVideosLoading(false);
   }, []);
@@ -248,15 +256,14 @@ export default function CuratedHome({ navigation }) {
                     }
                   >
                     <View style={[styles.gridThumbWrap, { height: GRID_HEIGHTS[index % 4] }]}>
-                      <FastImage
-                        source={{ uri: item.thumbnailUrl || item?.relayedVideo?.thumbnailUrl }}
-                        style={styles.gridThumb}
-                      />
-                      <Badge
-                        tone="amber"
-                        text={`✓ ${reviewScore(item)}`}
-                        style={styles.gridBadge}
-                      />
+                      <FastImage source={{ uri: gridThumbUrl(item) }} style={styles.gridThumb} />
+                      {reviewScore(item) ? (
+                        <Badge
+                          tone="amber"
+                          text={`✓ ${reviewScore(item)}`}
+                          style={styles.gridBadge}
+                        />
+                      ) : null}
                       <Text style={styles.gridTitle} numberOfLines={1}>
                         {item.title}
                       </Text>
