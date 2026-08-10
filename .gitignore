@@ -79,3 +79,6 @@ vendor/
 # Sentry auth token (보안 감사 2026-08-10 — 로컬 전용)
 android/sentry.properties
 ios/sentry.properties
+
+# 키스토어 비밀번호 메모 (로컬 전용)
+android/greyd-upload-keystore-비밀번호.txt
