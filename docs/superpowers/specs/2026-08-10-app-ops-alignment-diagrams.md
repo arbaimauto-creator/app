@@ -176,6 +176,119 @@ flowchart TD
 
 ---
 
+---
+
+# 실연동 아키텍처 (Phase 1.5 제안 — 수동 브리지 제거)
+
+앱을 greyd-ops에 직접 연결하는 구조. 핵심: **ops의 기존 인프라(Vercel API·매직링크 토큰·상태머신 엔진)를 그대로 재사용**하고, 앱은 "4번째 표면"으로 붙는다.
+
+## 7. 전체 아키텍처 — 무엇이 어디에 붙는가
+
+```mermaid
+flowchart LR
+    subgraph PHONE["📱 greyd 앱 (React Native)"]
+        UI["화면들<br/>Try · Activity · Done"]
+        API_LAYER["api/*.js 데이터 계층<br/>(함수 본문 교체형)"]
+        FLAG{"Features.<br/>LIVE_OPS_API"}
+        MOCK[("로컬 mock<br/>Preference")]
+        UI --> API_LAYER --> FLAG
+        FLAG -- OFF --> MOCK
+    end
+
+    subgraph VERCEL["⚙️ greyd-ops (Vercel — 이미 배포돼 있음)"]
+        MOBILE["/api/mobile/* 🆕<br/>auth · campaigns · apply<br/>seedings · received · upload · feedback"]
+        ENGINE["lib/engine/transitions<br/>상태머신 엔진 (기존)"]
+        TOKEN["MagicLink 토큰 시스템 (기존)<br/>+ purpose: APP 🆕"]
+        MSG["메시지 엔진 40종 (기존)"]
+        MOBILE --> ENGINE
+        MOBILE --> TOKEN
+        ENGINE --> MSG
+    end
+
+    DB[("Neon PostgreSQL<br/>Match · Campaign · Influencer<br/>greydAppId · applyMode ✅ 반영됨")]
+
+    FLAG -- "ON · HTTPS + Bearer 토큰" --> MOBILE
+    ENGINE --> DB
+    CONSOLE["운영 콘솔<br/>+ 앱 신청 승인 큐 🆕"] --> DB
+    BRAND["브랜드 대시보드·평가<br/>(기존 매직링크)"] --> DB
+
+    style PHONE fill:#E4F3E9,stroke:#1F8A4C
+    style VERCEL fill:#FFF3D9,stroke:#8A5D00,stroke-width:2px
+    style DB fill:#E3EDF7,stroke:#2B5E8E
+    style MOBILE fill:#FCE9E2,stroke:#E53400
+```
+
+> 🆕 = 새로 만드는 것 (API 라우트 6개 + 토큰 purpose 1개 + 콘솔 큐 1화면). 나머지는 전부 기존 재사용.
+
+## 8. 인증 — 초대 코드가 곧 계정 연동
+
+```mermaid
+sequenceDiagram
+    participant A as 📱 앱
+    participant M as /api/mobile/auth
+    participant DB as Neon DB
+
+    A->>M: POST { 초대코드, 닉네임, 국가 }
+    M->>DB: 코드 대장 조회 (유효 7일 · 역할 · 발급 대상)
+    alt 코드 무효/만료
+        M-->>A: 401 — "초대해 준 사람에게 다시 요청"
+    else 코드 유효
+        M->>DB: Influencer 조회/생성 + greydAppId 발급·매핑 (I4 자동화)
+        M->>DB: source = GREYD_APP 기록 (골든 레코드 합류)
+        M-->>A: { appToken (장수명 Bearer), greydAppId, role }
+        Note over A: 토큰 저장 — 이후 모든 호출에 첨부.<br/>수동 매핑 대장이 통째로 사라지는 지점
+    end
+```
+
+## 9. 검증 루프 실연동 — 수동 브리지 3개가 사라지는 흐름
+
+```mermaid
+sequenceDiagram
+    participant C as 📱 크리에이터 앱
+    participant API as /api/mobile/*
+    participant DB as ops DB (정본)
+    participant OP as 운영 콘솔
+    participant B as 브랜드
+
+    C->>API: POST /apply { campaignId, 서약, 어필 }
+    API->>DB: Match 생성 — ACCEPTED · surface:'app' (자동 ← 구 브리지①)
+    alt applyMode = open
+        API->>DB: 잔여 수량 차감 · 자동 승인 → CONFIRMED
+    else applyMode = curated
+        DB->>OP: 신청 승인 큐에 노출 → 운영/브랜드 승인
+    end
+    C->>API: POST /address (48h 내)
+    OP->>DB: 운송장 입력 → SHIPPED
+    C->>API: GET /seedings — 운송장·상태 실시간 동기화 (자동 ← 구 브리지②)
+    C->>API: POST /received → DELIVERED · D+14 타이머 기점
+    C->>API: POST /upload { postUrl, format } → POSTED + greyd_uploaded (자동 ← 구 브리지③)
+    DB->>B: 평가 대기 목록에 자동 등장
+    B->>DB: 트리아지 → 루브릭 → rebook
+    C->>API: GET /feedback → 피드백 카드 + 포인트 + G-스코어
+    Note over C,B: 루프 완료가 사람 손 없이 DB에 실시간 집계 —<br/>북극성 지표가 운영 대시보드에서 자동 산출
+```
+
+## 10. 롤아웃 3단 증분 + 폴백 — 언제든 mock으로 복귀 가능
+
+```mermaid
+flowchart TD
+    S1["1단계 (반나절)<br/>읽기 전용 — GET /campaigns만 실연동"] --> S2["2단계 (2~3일)<br/>쓰기 — apply · received · upload POST"]
+    S2 --> S3["3단계 (2~3일)<br/>인증 — 코드→토큰 · greydAppId 자동 매핑"]
+    S3 --> DONE["수동 브리지 0개<br/>주간 루틴 = 지표 입력만 남음"]
+
+    subgraph FALLBACK["모든 단계 공통 폴백"]
+        F1{"API 호출 실패?"} -- "예" --> F2["mock 데이터로 즉시 폴백<br/>+ 백그라운드 재시도"]
+        F1 -- "플래그 OFF" --> F3["전면 mock 모드<br/>(현행과 동일)"]
+    end
+
+    style DONE fill:#E4F3E9,stroke:#1F8A4C,stroke-width:2px
+    style FALLBACK fill:#FCE9E2,stroke:#E53400
+```
+
+**전제 조건 체크리스트**: ① 스키마 3건 — ✅ 완료(b428d67) ② API 라우트 6개 — ops 세션 작업 ③ 콘솔 신청 큐 — ops 세션 작업 ④ 앱 fetch 교체 + LIVE_OPS_API 플래그 — 앱 세션 작업 ⑤ rate limit·토큰 만료 정책 — 설계 시 확정
+
+---
+
 ## 결정 대기 4건 (양측 합의 필요)
 
 | # | 쟁점 | 제안 |
