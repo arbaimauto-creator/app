@@ -113,6 +113,23 @@ table.board { border-collapse: collapse; width: 100%; font-size: 14px; backgroun
 
 footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--ink-soft); }
 
+/* ── admin ── */
+.adminForm { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+@media (max-width: 760px) { .adminForm { grid-template-columns: 1fr; } }
+.af { display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; color: var(--ink-soft); }
+.af input, .af textarea {
+  border: 1px solid var(--line); border-radius: 9px; padding: 9px 12px;
+  font-size: 14px; font-family: inherit; color: var(--ink);
+}
+.adminForm .btn { grid-column: 1 / -1; justify-self: start; }
+.st { border-radius: 999px; padding: 3px 12px; font-size: 12px; font-weight: 700; }
+.st-applied { background: var(--accent-soft); color: var(--accent-deep); }
+.st-approved { background: #e2f5e5; color: var(--green); }
+.st-shipped { background: #e5edfb; color: #2a5db0; }
+.st-rejected { background: #fdeaea; color: var(--red); }
+.trk { border: 1px solid var(--line); border-radius: 7px; padding: 6px 9px; font-size: 12.5px; width: 130px; }
+.btn.sm { padding: 5px 12px; font-size: 12px; border-radius: 8px; }
+
 /* ── print (PDF) ── */
 @media print {
   .no-print { display: none !important; }

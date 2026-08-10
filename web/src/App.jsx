@@ -17,6 +17,7 @@ import {
   REVIEWS,
   QUALITATIVE,
 } from './mock.js';
+import Admin from './Admin.jsx';
 
 ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip);
 
@@ -335,6 +336,10 @@ export default function App() {
     const brandName = sessionStorage.getItem('brandName');
     return brandId ? { brandId, brandName } : null;
   });
+  // #admin — ARBAIM 운영 전용 (TSK-009/010). 1단계는 해시 라우트로 분리.
+  if (window.location.hash === '#admin') {
+    return <Admin />;
+  }
   if (!brand) {
     return <Gate onEnter={setBrand} />;
   }
