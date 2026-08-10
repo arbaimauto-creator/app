@@ -81,7 +81,8 @@ function BottomTabNavigator({ route, navigation }) {
   };
 
   // 브랜드 셸: 대시보드가 곧 홈. 피드/체험/활동 탭은 브랜드에게 소음이므로 없다.
-  if (inviteRole === 'brand') {
+  // D26: BRAND_APP off면 잔존 brand 역할이 있어도 브랜드 셸 미노출 (게이트가 신규 진입 차단)
+  if (inviteRole === 'brand' && FEATURES.BRAND_APP) {
     return (
       <Tab.Navigator
         screenOptions={({ navigation: nav, route: tabRoute }) => ({
