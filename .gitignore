@@ -82,3 +82,5 @@ ios/sentry.properties
 
 # 키스토어 비밀번호 메모 (로컬 전용)
 android/greyd-upload-keystore-비밀번호.txt
+
+credentials.json
