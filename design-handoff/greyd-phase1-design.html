@@ -175,7 +175,8 @@ footer{margin-top:64px;border-top:1px solid var(--line);padding-top:16px;font-si
     <tr><td>5 온보딩 3장 (검증 루프)</td><td>"브랜드가 직접 평가합니다"</td><td class="ok">목업 ↓</td></tr>
     <tr><td>6 온보딩 4장 (첫 행동)</td><td>"이번 주 12자리 남음" + 시작 CTA</td><td class="ok">목업 ↓</td></tr>
     <tr><td>7 프로필 폼</td><td>핸들·팔로워 밴드·카테고리·3문항</td><td class="ok">목업 ↓</td></tr>
-    <tr><td>8 홈 (피드)</td><td>세로 스와이프 리뷰 피드 — 기존 유지</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>8 홈 (대시보드)</td><td>오늘 할 일 · G-스코어 · 신규 캠페인 · 피드백 (D23)</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>8b 리뷰 피드</td><td>세로 스와이프 — 홈 "리뷰 구경하기"로 진입 (탭 아님)</td><td class="ok">목업 ↓</td></tr>
     <tr><td>9 체험 (Try)</td><td>신청 유형 2종(Open/Curated·applyMode) + 잠금 + 개인화 P</td><td class="ok">목업 ↓</td></tr>
     <tr><td>10 캠페인 상세 + 신청 시트</td><td>서약 체크박스 · 어필 · 선착순</td><td class="ok">목업 ↓</td></tr>
     <tr><td>11 신청 완료</td><td>applied 확인 · 승인 타임라인 안내</td><td class="ok">목업 ↓</td></tr>
@@ -343,8 +344,50 @@ footer{margin-top:64px;border-top:1px solid var(--line);padding-top:16px;font-si
 
   <section>
     <div class="sec-head"><h3>탭 홈 — 피드 · 빈 상태 · 마이</h3><span class="ref">작업 #3 #13 · 4탭 상시 화면</span></div>
-    <p class="sec-note">홈 피드는 기존 세로 스와이프 리뷰 피드를 유지한다(Buy 제거·탭 5→4가 작업 #3의 전부). 마이는 G-스코어의 집이고, 빈 상태는 첫 신청으로 밀어넣는 전환 장치다.</p>
+    <p class="sec-note">홈은 안정형 대시보드다(D23) — 진입 즉시 자동재생 영상은 불안정한 첫인상이고, 이 앱의 본업은 검증 루프이지 콘텐츠 소비가 아니다. 릴스 피드는 홈의 "리뷰 구경하기"로 진입하는 스택 화면으로 이동. 마이는 G-스코어의 집이고, 빈 상태는 첫 신청으로 밀어넣는 전환 장치다.</p>
     <div class="rail">
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>&#9679;&#9679;&#9679;</span></div>
+        <div class="body" style="gap:9px">
+          <div class="row"><b style="font-size:17px;font-weight:900;color:var(--app-ink)">greyd<span style="color:var(--amber)">.</span></b><div class="grow"></div><span class="xs">&#128276;</span></div>
+          <div><b style="font-size:16.5px;color:var(--app-ink)">mia님, 오늘 할 일 1개</b></div>
+          <div class="card" style="border:1.5px solid var(--amber)">
+            <div class="row"><h5>어성초 토너 패드 업로드</h5><div class="grow"></div><span class="badge b-red">D-3</span></div>
+            <div class="xs" style="margin-top:4px">업로드 기한 7/5 &middot; 무료 연장 1회 남음</div>
+            <a class="btn" style="margin-top:9px;padding:10px">리뷰 올리러 가기</a>
+          </div>
+          <div class="card" style="padding:10px 13px">
+            <div class="gbar"><b style="font-size:12.5px;color:var(--app-ink)">G57</b><div class="prog"><i style="width:90%"></i></div><span class="xs">G60까지 완주 1회</span></div>
+          </div>
+          <div class="row" style="margin-top:2px"><b style="font-size:13px;color:var(--app-ink)">새 캠페인</b><div class="grow"></div><span class="xs">전체 보기 &#8250;</span></div>
+          <div class="row" style="gap:8px;align-items:stretch">
+            <div class="card grow" style="padding:10px 11px">
+              <span class="badge b-open">Open &middot; 8 남음</span>
+              <div class="row" style="margin-top:7px;gap:8px"><div class="thumb" style="width:34px;height:34px"></div>
+              <div class="grow"><h5 style="font-size:11.5px">세이지 카밍 세럼</h5><div class="xs">200P</div></div></div>
+            </div>
+            <div class="card grow" style="padding:10px 11px;opacity:.7">
+              <span class="badge b-cur">&#128274; Curated</span>
+              <div class="row" style="margin-top:7px;gap:8px"><div class="thumb t2" style="width:34px;height:34px"></div>
+              <div class="grow"><h5 style="font-size:11.5px">퍼밍 3종 세트</h5><div class="xs">400P~</div></div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="row"><span class="badge b-amber">피드백 도착</span><div class="grow"></div><span class="xs">3일 전</span></div>
+            <div class="s" style="margin-top:5px;color:var(--app-ink)">SonPlan이 당신의 리뷰를 평가했어요 &rarr;</div>
+          </div>
+          <div class="card" style="padding:10px 13px">
+            <div class="row" style="gap:8px">
+              <div class="thumb" style="width:30px;height:42px"></div><div class="thumb t2" style="width:30px;height:42px"></div><div class="thumb t3" style="width:30px;height:42px"></div>
+              <div class="grow"><h5 style="font-size:12px">리뷰 구경하기</h5><div class="xs">다른 크리에이터의 최신 리뷰 &#9654;</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="tabs"><div class="on"><i></i>홈</div><div><i></i>체험</div><div><i></i>활동</div><div><i></i>마이</div></div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>8 &middot; 홈 (대시보드) — D23</h4><p><span class="tag">#17</span>안정형 첫 화면: 오늘 할 일(다음 액션) &gt; G-스코어 &gt; 새 캠페인 &gt; 피드백 도착 &gt; 피드 진입. 자동재생 없음 — 루프의 다음 행동이 항상 최상단.</p></div></div>
 
       <div class="shot"><div class="phone">
         <div class="sb" style="color:#fff;position:relative;z-index:2"><span>9:41</span><span>●●●</span></div>
@@ -370,7 +413,7 @@ footer{margin-top:64px;border-top:1px solid var(--line);padding-top:16px;font-si
         <div class="tabs" style="position:relative;z-index:2"><div class="on"><i></i>홈</div><div><i></i>체험</div><div><i></i>활동</div><div><i></i>마이</div></div>
         <div class="home-bar"></div>
       </div>
-      <div class="cap"><h4>8 · 홈 (리뷰 피드)</h4><p><span class="tag">#3</span>기존 세로 스와이프 피드 유지 — Buy 버튼 제거, 커머스 OFF. 피드는 캠페인 결과물의 쇼윈도 역할.</p></div></div>
+      <div class="cap"><h4>8b &middot; 리뷰 피드 (홈에서 진입)</h4><p><span class="tag">#3</span>기존 세로 스와이프 피드 재사용 — 탭이 아니라 홈 "리뷰 구경하기"로 여는 풀스크린 스택 화면. 뒤로가기로 홈 복귀. Buy 제거·커머스 OFF 유지.</p></div></div>
 
       <div class="shot"><div class="phone">
         <div class="sb"><span>9:41</span><span>●●●</span></div>
