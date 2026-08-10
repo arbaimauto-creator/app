@@ -5,14 +5,14 @@
   <uses-permission android:name="com.android.vending.CHECK_LICENSE" />
   <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
   <uses-permission android:name="android.permission.CAMERA"/>
-  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+  <!-- 권한 다이어트(보안 감사 Low): 레거시 저장소 권한은 Android 9 이하로 한정, 정밀 위치·미디어 오디오 제거.
+       위치는 국가 감지(setCountryFromLocation)용이라 COARSE만으로 충분 -->
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29"/>
   <uses-permission android:name="android.permission.RECORD_AUDIO"/>
   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
   <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
   <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
-  <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
   <uses-permission android:name="android.permission.VIBRATE"/>
 
   <queries>

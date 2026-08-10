@@ -1,4 +1,9 @@
 {
   "name": "greyd",
-  "displayName": "greyd"
+  "displayName": "greyd",
+  "extra": {
+    "eas": {
+      "projectId": "71e0b20a-2c22-4078-b845-6d59941cc484"
+    }
+  }
 }
