@@ -8,47 +8,21 @@ import linking from '../Components/utils/linking';
 import { navigationTheme } from '../Components/utils/navigationTheme';
 import MainDrawerNavigator from './stacks/MainDrawerNavigator';
 import CameraNavigator from './stacks/navigator/CameraNavigator';
-import { PERMISSIONS, RESULTS, check, openSettings, request } from 'react-native-permissions';
-import { Alert } from 'react-native';
-import Strings from '../Components/Strings';
 
 const Stack = createStackNavigator();
 
 const Root = () => {
   React.useEffect(() => {
+    // 실행 시점 권한 요청 금지 (D11): 알림은 수령 확인 직후 컨텍스트 프롬프트가 담당,
+    // 국가는 게이트에서 직접 입력받는다. 위치는 이미 허용된 기기에서만 보조로 사용.
     if (Platform.OS === 'android') {
-      PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION).then(
-        (result) => {
-          if (PermissionsAndroid.RESULTS.GRANTED === result) {
+      PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION).then(
+        (granted) => {
+          if (granted) {
             setCountryFromLocation();
           }
         },
       );
-      request(PERMISSIONS.ANDROID.POST_NOTIFICATIONS).then((notiPermission) => {
-        if (notiPermission === RESULTS.BLOCKED) {
-          Alert.alert(
-            Strings.PUSH_PERMISSION_REQUEST,
-            Strings.PUSH_PERMISSION_REQUEST_CONTENT,
-            [
-              {
-                text: Strings.CANCEL,
-                onPress: () => {
-                  console.log('Cancel Pressed');
-                },
-                style: 'cancel',
-              },
-              {
-                text: Strings.OK,
-                onPress: () => {
-                  openSettings();
-                },
-                style: 'default',
-              },
-            ],
-            { cancelable: true },
-          );
-        }
-      });
     } else {
       setCountryFromLocation();
     }

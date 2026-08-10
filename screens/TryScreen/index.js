@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
+  Alert,
   FlatList,
   RefreshControl,
   SafeAreaView,
@@ -16,7 +17,9 @@ import T from '../../Components/Constants/DesignTokens';
 import { Card, Badge, NoteBox } from '../../Components/UI';
 import { fetchCampaigns, selectCampaigns, selectMyApplications } from '../../slices/campaign';
 import { getCreatorProfile } from '../../api/creators';
-import { personalizedPoints, CURATED_MIN_G } from './points';
+import { getOffers, respondToOffer } from '../../api/offers';
+import { getSeedings, upsertSeeding, setSeedingStatus, SEEDING_STATUS } from '../../api/seedings';
+import { personalizedPoints, concurrentLimit, CURATED_MIN_G } from './points';
 import { logEvent } from '../../api/common/analytics';
 
 const { COLORS, TYPE } = T;
@@ -81,6 +84,41 @@ function CampaignCard({ campaign, applied, gScore, completedCount, onPress }) {
   );
 }
 
+// 제안형 시딩 카드 (D25 · I11) — ops 아웃바운드 매칭이 이 계정을 선정했을 때만 노출.
+// 수락 = applied 스킵하고 approved로 즉시 시작. 거절/만료는 G-스코어 무영향.
+function OfferCard({ offer, gScore, onAccept, onDecline }) {
+  const { campaign } = offer;
+  const points = personalizedPoints(campaign.basePoints ?? campaign.rewardPoint, gScore);
+  const daysLeft = Math.max(0, Math.ceil((Date.parse(offer.expiresAt) - Date.now()) / 86400000));
+
+  return (
+    <Card style={styles.offerCard}>
+      <View style={styles.rowBetween}>
+        <Badge tone="amber" text={Strings.OFFER_BADGE} />
+        <Text style={styles.xs}>{Strings.OFFER_DDAY(daysLeft)}</Text>
+      </View>
+      <View style={styles.midRow}>
+        <FastImage source={{ uri: campaign.thumbnailUrl }} style={styles.thumb} />
+        <View style={styles.midBody}>
+          <Text style={styles.brand}>{campaign.brand}</Text>
+          <Text style={styles.title} numberOfLines={2}>
+            {campaign.title}
+          </Text>
+          <Text style={styles.xs}>+{points}P</Text>
+        </View>
+      </View>
+      <View style={styles.offerBtnRow}>
+        <TouchableOpacity style={styles.offerDecline} onPress={onDecline}>
+          <Text style={styles.offerDeclineText}>{Strings.OFFER_DECLINE}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.offerAccept} onPress={onAccept}>
+          <Text style={styles.offerAcceptText}>{Strings.OFFER_ACCEPT}</Text>
+        </TouchableOpacity>
+      </View>
+    </Card>
+  );
+}
+
 export default function TryScreen({ navigation }) {
   const dispatch = useDispatch();
   const campaigns = useSelector(selectCampaigns);
@@ -88,6 +126,77 @@ export default function TryScreen({ navigation }) {
   const loading = useSelector((s) => s.campaign.loading);
   const [gScore, setGScore] = useState(50);
   const [completedCount, setCompletedCount] = useState(0);
+  const [pendingOffers, setPendingOffers] = useState([]);
+
+  const refreshOffers = useCallback(() => {
+    getOffers().then((offers) => {
+      const pending = offers.filter((o) => o.status === 'pending');
+      setPendingOffers(pending);
+      if (pending.length) {
+        logEvent('offer_view', { count: pending.length });
+      }
+    });
+  }, []);
+
+  // 수락 = 서약 확인 → 동시 한도 검사 → approved로 즉시 시작 (D25: applied 스킵)
+  const onAcceptOffer = (offer) => {
+    Alert.alert(
+      Strings.OFFER_ACCEPT_CONFIRM_TITLE,
+      Strings.OFFER_ACCEPT_CONFIRM_BODY(Strings.APPLY_PLEDGE),
+      [
+        { text: Strings.CANCEL, style: 'cancel' },
+        {
+          text: Strings.OFFER_ACCEPT_CONFIRM_OK,
+          onPress: async () => {
+            // 한도 초과 유저에겐 ops가 제안을 보류하지만(I11) mock에선 클라이언트가 이중 방어
+            const seedings = await getSeedings();
+            const activeStatuses = [
+              SEEDING_STATUS.APPLIED,
+              SEEDING_STATUS.APPROVED,
+              SEEDING_STATUS.SHIPPED,
+              SEEDING_STATUS.RECEIVED,
+              SEEDING_STATUS.REVIEWING,
+            ];
+            const activeCount = Object.values(seedings).filter((s) =>
+              activeStatuses.includes(s.status),
+            ).length;
+            const limit = concurrentLimit(gScore, completedCount);
+            if (activeCount >= limit) {
+              logEvent('apply_limit_blocked', { limit, source: 'offer' });
+              Alert.alert(Strings.CONCURRENT_LIMIT_ALERT(limit));
+              return;
+            }
+            await respondToOffer(offer.id, 'accepted');
+            await upsertSeeding(offer.campaignId, { pledgeChecked: true, offerId: offer.id });
+            await setSeedingStatus(offer.campaignId, SEEDING_STATUS.APPROVED);
+            logEvent('offer_accept', { campaign_id: offer.campaignId });
+            refreshOffers();
+            navigation.navigate('ApplyDone', {
+              campaignTitle: offer.campaign.title,
+              applyMode: offer.campaign.applyMode,
+              usedCount: activeCount + 1,
+              limit,
+              autoConfirmed: true,
+            });
+          },
+        },
+      ],
+    );
+  };
+
+  // 거절 — 사유 1탭은 선택 항목 (매칭 학습 재료, G-스코어 무영향)
+  const onDeclineOffer = (offer) => {
+    const decline = async (reason) => {
+      await respondToOffer(offer.id, 'declined', reason);
+      logEvent('offer_decline', { campaign_id: offer.campaignId, reason });
+      refreshOffers();
+    };
+    Alert.alert(Strings.OFFER_DECLINE_TITLE, Strings.OFFER_DECLINE_BODY, [
+      { text: Strings.OFFER_REASON_PRODUCT, onPress: () => decline('product_fit') },
+      { text: Strings.OFFER_REASON_SCHEDULE, onPress: () => decline('schedule') },
+      { text: Strings.OFFER_REASON_SKIP, onPress: () => decline(null) },
+    ]);
+  };
 
   useEffect(() => {
     dispatch(fetchCampaigns());
@@ -112,7 +221,8 @@ export default function TryScreen({ navigation }) {
           setCompletedCount(profile.completedCount ?? 0);
         }
       });
-    }, []),
+      refreshOffers();
+    }, [refreshOffers]),
   );
 
   // Open 캠페인 최상단 고정 (v2 §3-④)
@@ -134,6 +244,22 @@ export default function TryScreen({ navigation }) {
         contentContainerStyle={styles.listContent}
         refreshControl={
           <RefreshControl refreshing={loading} onRefresh={() => dispatch(fetchCampaigns())} />
+        }
+        ListHeaderComponent={
+          pendingOffers.length ? (
+            <View style={styles.offerSection}>
+              <Text style={styles.offerSectionTitle}>{Strings.OFFER_SECTION_TITLE}</Text>
+              {pendingOffers.map((offer) => (
+                <OfferCard
+                  key={offer.id}
+                  offer={offer}
+                  gScore={gScore}
+                  onAccept={() => onAcceptOffer(offer)}
+                  onDecline={() => onDeclineOffer(offer)}
+                />
+              ))}
+            </View>
+          ) : null
         }
         ListEmptyComponent={
           !loading ? <Text style={styles.empty}>{Strings.NO_CAMPAIGNS}</Text> : null
@@ -184,4 +310,25 @@ const styles = StyleSheet.create({
   bonusText: { ...TYPE.XS, fontFamily: T.FONT.ExtraBold, color: COLORS.GREEN },
   lockNote: { marginTop: 9 },
   empty: { ...TYPE.SUB, textAlign: 'center', marginTop: 60 },
+  offerSection: { marginBottom: 14 },
+  offerSectionTitle: { ...TYPE.CARD_TITLE, fontSize: 15, marginBottom: 9 },
+  offerCard: { marginBottom: 11, borderWidth: 1.5, borderColor: COLORS.AMBER },
+  offerBtnRow: { flexDirection: 'row', gap: 8, marginTop: 11 },
+  offerDecline: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: COLORS.LINE,
+    borderRadius: T.RADIUS.BTN,
+    paddingVertical: 11,
+    alignItems: 'center',
+  },
+  offerDeclineText: { ...TYPE.SUB, fontFamily: T.FONT.SemiBold },
+  offerAccept: {
+    flex: 2,
+    backgroundColor: COLORS.AMBER,
+    borderRadius: T.RADIUS.BTN,
+    paddingVertical: 11,
+    alignItems: 'center',
+  },
+  offerAcceptText: { ...TYPE.BTN, fontSize: 13.5 },
 });

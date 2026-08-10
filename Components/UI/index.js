@@ -38,6 +38,23 @@ export function Btn({ title, onPress, variant = 'primary', small, disabled, styl
   );
 }
 
+// 브랜드 워드마크 — "greyd" + 앰버 점. 로고 텍스트는 반드시 이 컴포넌트로 (점 누락 방지).
+export function Wordmark({ size = 30, style, center }) {
+  return (
+    <Text
+      style={[
+        styles.wordmark,
+        { fontSize: size },
+        center && { textAlign: 'center' },
+        style,
+      ]}
+    >
+      greyd
+      <Text style={styles.wordmarkDot}>.</Text>
+    </Text>
+  );
+}
+
 // 상태 배지 — tone: 'open'(초록) | 'curated'(회색) | 'amber' | 'red'
 const BADGE_TONES = {
   open: { backgroundColor: COLORS.GREEN_SOFT, color: COLORS.GREEN },
@@ -149,6 +166,12 @@ const styles = StyleSheet.create({
   btnSm: { paddingVertical: 7, paddingHorizontal: 12, borderRadius: RADIUS.BTN_SM },
   btnText: { ...TYPE.BTN, textAlign: 'center' },
   btnTextGhost: { color: COLORS.INK, fontFamily: T.FONT.Bold },
+  wordmark: {
+    fontFamily: T.FONT.Black,
+    color: COLORS.INK,
+    letterSpacing: -0.5,
+  },
+  wordmarkDot: { color: COLORS.AMBER, fontFamily: T.FONT.Black },
   badge: {
     borderRadius: RADIUS.BADGE,
     paddingVertical: 2,

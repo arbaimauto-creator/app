@@ -19,7 +19,7 @@ import APIprovider from '../../Components/APIprovider';
 import Constants from '../../Components/Constants';
 import T from '../../Components/Constants/DesignTokens';
 import Strings from '../../Components/Strings';
-import { Badge, Card, Chips } from '../../Components/UI';
+import { Badge, Card, Chips, Wordmark } from '../../Components/UI';
 import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
 import { getCreatorProfile } from '../../api/creators';
 import { getSeedings, SEEDING_STATUS } from '../../api/seedings';
@@ -132,9 +132,7 @@ export default function CuratedHome({ navigation }) {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* 1. 헤더 */}
         <View style={styles.headerRow}>
-          <Text style={styles.wordmark}>
-            greyd<Text style={styles.wordmarkDot}>.</Text>
-          </Text>
+          <Wordmark size={17} />
           <View style={styles.headerIcons}>
             <TouchableOpacity onPress={() => navigation.navigate('Search')} hitSlop={HIT_SLOP}>
               <Text style={styles.headerIcon}>🔍</Text>
@@ -296,8 +294,6 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.BG, paddingTop: T.TOP_INSET },
   content: { paddingHorizontal: 16, paddingTop: 10, paddingBottom: 28, gap: 9 },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  wordmark: { fontFamily: T.FONT.Black, fontSize: 17, color: COLORS.INK },
-  wordmarkDot: { color: COLORS.AMBER },
   headerIcons: { flexDirection: 'row', gap: 14 },
   headerIcon: { fontSize: 15 },
   todoStrip: {

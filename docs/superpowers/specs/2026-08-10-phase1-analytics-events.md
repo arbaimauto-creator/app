@@ -39,8 +39,11 @@ logEvent(name, params) → firebase.analytics().logEvent(name, {role, country, g
 | `campaign_open` | `campaign_id`, `track` | 카드→상세 전환 |
 | `campaign_locked_tap` | `campaign_id` | Curated 잠금이 욕망을 만드는가 (G60 목표 동기) |
 | `apply_sheet_open` | `campaign_id` | 상세→시트 전환 |
-| `apply_submit` | `campaign_id`, `track`, `appeal_len` | 시트→신청 전환. **퍼널: try_view→campaign_open→apply_sheet_open→apply_submit** |
-| `apply_limit_blocked` | `limit` | 동시 한도에 막힌 수요량 |
+| `apply_submit` | `campaign_id`, `track`, `appeal_len`, `auto_confirmed` | 시트→신청 전환. **퍼널: try_view→campaign_open→apply_sheet_open→apply_submit**. `auto_confirmed`(D24)로 자동 확정 비율 측정 |
+| `apply_limit_blocked` | `limit`, `source?` | 동시 한도에 막힌 수요량 (`source: 'offer'`면 제안 수락 시 차단) |
+| `offer_view` | `count` | 제안형(D25) 노출량 — 수락률의 분모 |
+| `offer_accept` | `campaign_id` | 제안 수락률 — ops 매칭 품질의 직접 지표 |
+| `offer_decline` | `campaign_id`, `reason?` | 거절 사유(product_fit/schedule/null) — 매칭 학습 재료 |
 
 ### 이행 (상태머신 — 가드레일 지표의 원천)
 

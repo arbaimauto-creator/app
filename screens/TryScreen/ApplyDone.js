@@ -28,7 +28,8 @@ export default function ApplyDone({ navigation, route }) {
             {autoConfirmed ? Strings.APPLYDONE_HERO_CONFIRMED : Strings.APPLYDONE_HERO}
           </Text>
           <Text style={styles.sub}>
-            {campaignTitle} · {Strings.APPLYDONE_TRACK(applyMode === 'curated' ? 'Curated' : 'Open')}
+            {campaignTitle} ·{' '}
+            {Strings.APPLYDONE_TRACK(applyMode === 'curated' ? 'Curated' : 'Open')}
           </Text>
         </View>
 
@@ -45,7 +46,9 @@ export default function ApplyDone({ navigation, route }) {
           <View style={styles.timelineRow}>
             <StatusPill status="approved" label={Strings.CAMPAIGN_STATUS_APPROVED} />
             <Text style={styles.xs}>
-              {autoConfirmed ? Strings.APPLYDONE_AUTO_CONFIRM_NOTE : Strings.APPLYDONE_APPROVAL_NOTE}
+              {autoConfirmed
+                ? Strings.APPLYDONE_AUTO_CONFIRM_NOTE
+                : Strings.APPLYDONE_APPROVAL_NOTE}
             </Text>
           </View>
           <View style={styles.divider} />

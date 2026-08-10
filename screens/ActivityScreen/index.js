@@ -184,7 +184,7 @@ export default function ActivityScreen({ navigation }) {
       navigation.navigate('FgiSurvey', { campaign });
       return;
     }
-    navigation.navigate('AddingNewVideo', { campaignId });
+    navigation.navigate('ReviewLinkSubmit', { campaignId });
   };
 
   const onSubmitAddress = async (address) => {

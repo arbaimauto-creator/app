@@ -676,8 +676,8 @@ export default {
     return productCount === 1 || productCount === undefined
       ? `${productTitle}`
       : productCount > 2
-      ? `${productTitle} (+ ${productCount - 1} items)`
-      : `${productTitle} (+ ${productCount - 1} item)`;
+        ? `${productTitle} (+ ${productCount - 1} items)`
+        : `${productTitle} (+ ${productCount - 1} item)`;
   },
   NEW_COMMENT_ON_UPLOADED_REVIEW_YOU_COMMENTED_BODY: ({ comment }) => {
     return `${comment}`;
@@ -765,8 +765,8 @@ export default {
     return otherCount === 0
       ? `${title}`
       : otherCount > 1
-      ? `${title} (+ ${otherCount} items)`
-      : `${title} (+ ${otherCount} item)`;
+        ? `${title} (+ ${otherCount} items)`
+        : `${title} (+ ${otherCount} item)`;
   },
   GO_TO_HOME: 'Go to home',
   GO_TO_SHOPPING: 'Go to shopping',
@@ -1632,6 +1632,7 @@ export default {
   INVITE_CODE_PLACEHOLDER: '6-digit code',
   INVITE_CODE_FORMAT_ERROR: 'Enter your 6-digit invite code',
   INVITE_CODE_INVALID: "That code doesn't work. Ask the person who invited you for a new one.",
+  INVITE_THROTTLED: (sec) => `Too many attempts. Try again in ${sec} seconds.`,
   INVITE_COUNTRY_LABEL: 'Where do you create?',
   INVITE_COUNTRY_REQUIRED: 'Pick your country',
   INVITE_SUBMIT: 'Enter greyd',
@@ -1642,7 +1643,8 @@ export default {
   ONBOARD_2_TITLE: 'Real products from Korea,\nshipped to your door.',
   ONBOARD_2_BODY: 'Ships from Seoul in 3–5 days. Tracking number included.',
   ONBOARD_3_TITLE: 'Your honest take gets\ngraded by the brand.',
-  ONBOARD_3_BODY: "That's the 'grade' in greyd. Post your review — the brand scores it within 7 days.",
+  ONBOARD_3_BODY:
+    "That's the 'grade' in greyd. Post your review — the brand scores it within 7 days.",
   ONBOARD_NEXT: 'Next',
   ONBOARD_FINISH: 'Start (+50P)',
   ONBOARD_PROFILE_TITLE: 'Tell us about\nyour channel',
@@ -1669,18 +1671,40 @@ export default {
   // Brand screens (v2 §5)
   // FGI survey (plan TSK-001/007)
   FGI_TITLE: 'FGI Survey',
-  FGI_SUBTITLE: (brand) => `Your honest take goes straight to ${brand} — fill this in before uploading`,
+  FGI_SUBTITLE: (brand) =>
+    `Your honest take goes straight to ${brand} — fill this in before uploading`,
   FGI_PURCHASE_INTENT: 'Would you buy this product yourself?',
   FGI_PRICE_FAIRNESS: 'Does the local price feel fair?',
   FGI_COMPETITIVENESS: 'Is it competitive vs what you use now?',
   FGI_FAIR_PRICE: 'What would be a fair local price? (USD)',
   FGI_PROS: 'What did you like most?',
-  FGI_CONS: "What fell short? (be honest!)",
+  FGI_CONS: 'What fell short? (be honest!)',
   FGI_TEXT_PLACEHOLDER: 'Write freely',
   FGI_INCOMPLETE: 'Please fill in every item',
   FGI_SUBMIT: 'Submit survey',
   FGI_DONE_TITLE: 'Survey done!',
   FGI_DONE_BODY: 'Now upload your review video',
+  // Screen 15 · review link submission
+  REVIEW_SUBMIT_TITLE: 'Upload review',
+  REVIEW_SUBMIT_MUST_MENTION: (list) => `Must mention: ${list}`,
+  REVIEW_SUBMIT_LINK_LABEL: 'Review link',
+  REVIEW_SUBMIT_LINK_PLACEHOLDER: 'instagram.com/reel/…',
+  REVIEW_SUBMIT_FORMAT_LABEL: 'Format',
+  REVIEW_SUBMIT_FORMAT_SHORT: 'Short-form',
+  REVIEW_SUBMIT_FORMAT_LONG: 'Long-form',
+  REVIEW_SUBMIT_FORMAT_IMAGE: 'Image',
+  REVIEW_SUBMIT_FORMAT_STORY: 'Story',
+  REVIEW_SUBMIT_HASHTAG_LABEL: 'Hashtags',
+  REVIEW_SUBMIT_COPY: 'Copy ⧉',
+  REVIEW_SUBMIT_COPIED: 'Hashtags copied',
+  REVIEW_SUBMIT_CHECK_POINTS: (n) => `I mentioned all ${n} required points in my review`,
+  REVIEW_SUBMIT_CHECK_TAGGED: 'I tagged the brand account (optional)',
+  REVIEW_SUBMIT_FOOTNOTE: 'Submitting starts the brand check · feedback arrives within 7 days',
+  REVIEW_SUBMIT_CTA: 'Upload complete',
+  REVIEW_SUBMIT_INVALID_URL: 'Please enter a valid review link (URL)',
+  REVIEW_SUBMIT_INCOMPLETE: 'Complete the link, format, and required checkbox',
+  REVIEW_SUBMIT_DONE_TITLE: 'Uploaded!',
+  REVIEW_SUBMIT_DONE_BODY: 'The brand check has started. Feedback arrives within 7 days.',
   BRAND_GAUGE_LABEL: 'Overall appeal',
   BRAND_INTENT_LABEL: 'Purchase intent',
   BRAND_FGI_SECTION: 'FGI quantitative results',
@@ -1731,7 +1755,7 @@ export default {
   BRAND_COL_DAYS: 'Days',
   BRAND_PHASE2_CTA: (country, rate) =>
     `${country} hit ${rate}% fulfillment — see the Phase 2 group-buy quote`,
-  BRAND_PHASE2_THANKS: "Noted! Your manager will reach out shortly.",
+  BRAND_PHASE2_THANKS: 'Noted! Your manager will reach out shortly.',
   BRAND_REPORT_DOWNLOAD: 'Download FGI report',
   BRAND_REPORT_PENDING: 'Your analyst prepares the report after the campaign closes.',
   TRIAGE_PICK: 'Pick',
@@ -1785,11 +1809,27 @@ export default {
   G_UNLOCKED: 'Curated campaigns unlocked',
   CAMPAIGN_FIRST_COME: (n) => `First come — ${n} left`,
   CURATED_LOCKED_HINT: (g) => `Unlocks at G${g}`,
+  // Offered seedings (D25 · I11)
+  OFFER_SECTION_TITLE: 'A brand picked you first',
+  OFFER_BADGE: 'Offer',
+  OFFER_DDAY: (d) => `Respond within D-${d}`,
+  OFFER_ACCEPT: 'Accept',
+  OFFER_DECLINE: 'No thanks',
+  OFFER_ACCEPT_CONFIRM_TITLE: 'Accept this offer?',
+  OFFER_ACCEPT_CONFIRM_BODY: (pledge) => `You'll be confirmed right away.\nPledge: ${pledge}`,
+  OFFER_ACCEPT_CONFIRM_OK: 'Pledge & accept',
+  OFFER_DECLINE_TITLE: 'No pressure',
+  OFFER_DECLINE_BODY:
+    'Declining never affects your G-score. Telling us why makes future offers sharper.',
+  OFFER_REASON_PRODUCT: 'Not my kind of product',
+  OFFER_REASON_SCHEDULE: "Can't fit it in right now",
+  OFFER_REASON_SKIP: 'Just skip',
   APPLY_PLEDGE: 'I will upload my review within 14 days of receiving the product',
   APPLY_PLEDGE_REQUIRED: 'Check the upload pledge to apply',
   APPLY_APPEAL_PLACEHOLDER: 'One line for the brand (optional, 100 chars)',
   APPLY_AVG_APPROVAL: 'Average approval: 2 days',
-  APPLY_HONESTY_NOTE: 'Points are based on production quality only. Honest opinions never affect your score.',
+  APPLY_HONESTY_NOTE:
+    'Points are based on production quality only. Honest opinions never affect your score.',
   // navigation/root.js가 사용하는 키 — 영문판에는 _TITLE 이름만 있어 제목이 undefined로 노출됐다
   PUSH_PERMISSION_REQUEST: 'Notification permissions are required to use greyd',
   ORDER_PURCHASE_ALARM_TO_REVIEWER_TITLE: (params) =>

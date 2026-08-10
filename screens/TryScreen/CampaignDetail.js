@@ -132,7 +132,7 @@ export default function CampaignDetail({ route, navigation }) {
       navigation.navigate('FgiSurvey', { campaign });
       return;
     }
-    navigation.navigate('AddingNewVideo', { campaignId: campaign.id });
+    navigation.navigate('ReviewLinkSubmit', { campaignId: campaign.id });
   };
 
   return (

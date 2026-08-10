@@ -77,7 +77,7 @@ export default function FgiSurvey({ route, navigation }) {
     Alert.alert(Strings.FGI_DONE_TITLE, Strings.FGI_DONE_BODY, [
       {
         text: Strings.UPLOAD_REVIEW_CTA,
-        onPress: () => navigation.replace('AddingNewVideo', { campaignId: campaign.id }),
+        onPress: () => navigation.replace('ReviewLinkSubmit', { campaignId: campaign.id }),
       },
     ]);
   };

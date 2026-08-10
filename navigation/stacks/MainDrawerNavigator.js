@@ -51,7 +51,6 @@ import {
   VideoListScreen,
   WithdrawalManagementScreen,
   WithdrawalRequestScreen,
-
 } from '../../Components/index';
 import B2BNavigator from './navigator/B2BNavigator';
 import VideoPageScreenWrapper from '../../Components/VideoPageScreenWrapper';
@@ -72,6 +71,7 @@ import GlobalMakeOrderScreen from '../../Components/GlobalMakeOrderScreen';
 import InviteGateScreen from '../../screens/InviteGateScreen';
 import CreatorOnboarding from '../../screens/InviteGateScreen/CreatorOnboarding';
 import FgiSurvey from '../../screens/TryScreen/FgiSurvey';
+import ReviewLinkSubmit from '../../screens/TryScreen/ReviewLinkSubmit';
 import BrandWelcome from '../../screens/InviteGateScreen/BrandWelcome';
 import AddressBook from '../../screens/MyScreen/AddressBook';
 import AboutScreen from '../../screens/MyScreen/AboutScreen';
@@ -94,6 +94,15 @@ function MainDrawerNavigator({ route, navigation }) {
 
   const [isOnboarded, setIsOnboarded] = useState(false);
   const [previousPage, setPreviousPage] = useState('');
+  // 클로즈드 베타 게이트 (v2 §3-1): 초대 코드 통과 전엔 게이트가 최전면
+  const [gatePassed, setGatePassed] = useState(null);
+
+  if (gatePassed === null) {
+    Preference.get('inviteRole').then((value) => {
+      setGatePassed(value ? 'yes' : 'no');
+    });
+    return <View />;
+  }
 
   if (isOnboarded === false) {
     Preference.get('isOnboarded').then((value) => {
@@ -169,9 +178,9 @@ function MainDrawerNavigator({ route, navigation }) {
 
   return (
     <Stack.Navigator
-      // v2 화면 인벤토리 1번 = 소셜 로그인이 첫 화면 (프리로그인 인트로 제외).
-      // §7-1 온보딩 4장은 게이트 이후 CreatorOnboarding이 담당 — 중복 인트로는 플로우에서 뺀다.
-      initialRouteName={'NotSignedIn'}
+      // v2 §3-1: 게이트 미통과 = 초대 게이트가 최전면 (클로즈드 베타 — 신규 디자인 진입점).
+      // 통과 후에는 화면 인벤토리 1번 = 소셜 로그인. 온보딩 4장은 게이트 이후 CreatorOnboarding 담당.
+      initialRouteName={gatePassed === 'yes' ? 'NotSignedIn' : 'InviteGate'}
       screenOptions={horizontalAnimation}
     >
       <Stack.Screen
@@ -243,6 +252,12 @@ function MainDrawerNavigator({ route, navigation }) {
       />
       {/* FGI 설문 — 업로드 전 필수 단계 (계획서 TSK-007) */}
       <Stack.Screen name="FgiSurvey" component={FgiSurvey} options={{ headerShown: false }} />
+      {/* 시안 15: 미션 리뷰는 링크 제출 — 피드 업로더(AddingNewVideo)와 별개 */}
+      <Stack.Screen
+        name="ReviewLinkSubmit"
+        component={ReviewLinkSubmit}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen name="BrandWelcome" component={BrandWelcome} options={{ headerShown: false }} />
       {/* 마이 탭 서브 화면 + 신청·완주 결과 화면 (시안 11·16·17·18·19·20·25) */}
       <Stack.Screen name="AddressBook" component={AddressBook} options={{ headerShown: false }} />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -10,10 +10,11 @@ import {
   View,
 } from 'react-native';
 import { CommonActions } from '@react-navigation/native';
+import SplashScreen from 'react-native-splash-screen';
 import Preference from 'react-native-default-preference';
 import T from '../../Components/Constants/DesignTokens';
 import Strings from '../../Components/Strings';
-import { Btn, Chips } from '../../Components/UI';
+import { Btn, Chips, Wordmark } from '../../Components/UI';
 import { verifyInviteCode } from '../../api/invites';
 import { logEvent, resetAnalyticsContext } from '../../api/common/analytics';
 
@@ -23,14 +24,31 @@ const { COLORS, FONT } = T;
 const COUNTRIES = ['US', 'JP', 'DE', 'IN', 'BR', 'VN', 'TH', 'KR'];
 const COUNTRY_ITEMS = COUNTRIES.map((c) => ({ key: c, label: c }));
 
+// 무차별 대입 완화(보안 감사 M3 — 클라 UX 가드, 실보안은 서버 레이트리밋):
+// 연속 실패 시 지수 쿨다운. 서버 검증 도입 시에도 UI 스로틀로 유지.
+const THROTTLE_AFTER = 5; // 연속 실패 허용 횟수
+const COOLDOWN_BASE_SEC = 30;
+
 export default function InviteGateScreen({ navigation }) {
   const [code, setCode] = useState('');
   const [country, setCountry] = useState(null);
   const [error, setError] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
 
+  // 게이트가 첫 화면일 때 네이티브 스플래시 해제 (레거시는 SignInScreen이 담당)
+  useEffect(() => {
+    SplashScreen.hide();
+  }, []);
+  const [failCount, setFailCount] = useState(0);
+  const [cooldownUntil, setCooldownUntil] = useState(0);
+
   const onSubmit = async () => {
     if (isVerifying) {
+      return;
+    }
+    const now = Date.now();
+    if (now < cooldownUntil) {
+      setError(Strings.INVITE_THROTTLED(Math.ceil((cooldownUntil - now) / 1000)));
       return;
     }
     setError('');
@@ -47,9 +65,19 @@ export default function InviteGateScreen({ navigation }) {
     setIsVerifying(false);
     if (!result.success) {
       logEvent('gate_code_submit', { result: result.reason === 'expired' ? 'expired' : 'invalid' });
+      const nextFails = failCount + 1;
+      setFailCount(nextFails);
+      if (nextFails >= THROTTLE_AFTER) {
+        // 5회부터 30초, 이후 실패마다 2배 (30→60→120…)
+        const cooldownSec = COOLDOWN_BASE_SEC * Math.pow(2, nextFails - THROTTLE_AFTER);
+        setCooldownUntil(Date.now() + cooldownSec * 1000);
+        setError(Strings.INVITE_THROTTLED(cooldownSec));
+        return;
+      }
       setError(Strings.INVITE_CODE_INVALID);
       return;
     }
+    setFailCount(0);
     await Preference.set('inviteRole', result.role);
     await Preference.set('inviteCode', code.trim().toUpperCase());
     await Preference.set('creatorCountry', country);
@@ -78,10 +106,7 @@ export default function InviteGateScreen({ navigation }) {
         behavior={Platform.OS === 'ios' ? 'padding' : null}
         style={styles.inner}
       >
-        <Text style={styles.logo}>
-          greyd
-          <Text style={styles.logoDot}>.</Text>
-        </Text>
+        <Wordmark size={30} center style={styles.logo} />
         <Text style={styles.title}>{Strings.INVITE_GATE_TITLE}</Text>
         <Text style={styles.subtitle}>{Strings.INVITE_GATE_SUBTITLE}</Text>
 
