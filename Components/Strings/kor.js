@@ -86,6 +86,14 @@ export default {
   POPUP_TITLE_INSTAGRAM_SHARE: '인스타그램에 공유하기',
   POPUP_NOTICE_INSTAGRAM_SHARE:
     '인스타그램에 공유하기 위한 영상을 준비하는데 다소 시간이 소요될 수 있습니다.',
+  SHARE_TO_TIKTOK: '틱톡에 올리기',
+  POPUP_TITLE_TIKTOK_SHARE: '틱톡에 올리기',
+  POPUP_NOTICE_TIKTOK_SHARE:
+    '업로드가 끝나면 영상이 갤러리에 저장되고 캡션이 복사돼요. 틱톡이 열리면 방금 저장한 영상을 선택하고 캡션을 붙여넣으세요.',
+  TIKTOK_ALSO_TITLE: '틱톡에도 올릴까요?',
+  TIKTOK_ALSO_LATER: '나중에',
+  TIKTOK_ALSO_OPEN: '틱톡 열기',
+  TIKTOK_CAPTION_COPIED: '캡션이 복사됐어요 — 틱톡에서 붙여넣으세요',
   NO_AGREEMENT_ALL_TO_NEW_ACCOUNT: '계정을 생성하기 위해 모든 항목에 동의하셔야 합니다.',
   FAILED_TO_LOAD_TERMS: '약관 로드 실패',
   MESSAGE_SET_PROFILE: '프로필 설정을 하면 회원 가입이 완료됩니다.',

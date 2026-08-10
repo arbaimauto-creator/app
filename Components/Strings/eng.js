@@ -86,6 +86,14 @@ export default {
   SHARE_TO_INSTAGRAM: 'Instagram',
   POPUP_NOTICE_INSTAGRAM_SHARE:
     'It might take some time to prepare the video to share on Instagram.',
+  SHARE_TO_TIKTOK: 'Post to TikTok',
+  POPUP_TITLE_TIKTOK_SHARE: 'Post to TikTok',
+  POPUP_NOTICE_TIKTOK_SHARE:
+    'When the upload finishes, the video is saved to your gallery and the caption is copied. Once TikTok opens, pick the video you just saved and paste the caption.',
+  TIKTOK_ALSO_TITLE: 'Post to TikTok too?',
+  TIKTOK_ALSO_LATER: 'Later',
+  TIKTOK_ALSO_OPEN: 'Open TikTok',
+  TIKTOK_CAPTION_COPIED: 'Caption copied — paste it in TikTok',
   NO_AGREEMENT_ALL_TO_NEW_ACCOUNT: 'You should agree with all to create account',
   FAILED_TO_LOAD_TERMS: 'Failed to load terms',
   MESSAGE_SET_PROFILE: 'Set profile to sign up',

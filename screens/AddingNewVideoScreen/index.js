@@ -7,6 +7,7 @@ import {
   Image,
   Keyboard,
   LayoutAnimation,
+  Linking,
   NativeModules,
   Platform,
   Pressable,
@@ -292,8 +293,10 @@ class AddingNewVideoScreen extends Component {
               reasonable: 0,
             },
       // share
-      shareTo: null,
+      shareToInstagram: false,
+      shareToTiktok: false,
       isAvailableInstagramToShare: false,
+      isAvailableTiktokToShare: false,
       isInvalidVideo: false,
       isFirstWriting: false,
       isShowingReviewGuide: false,
@@ -322,6 +325,24 @@ class AddingNewVideoScreen extends Component {
     AppInstalledChecker.isAppInstalled('instagram').then((isInstalled) => {
       this.setState({ isAvailableInstagramToShare: isInstalled });
     });
+
+    // 틱톡 설치 확인 — Android는 글로벌/아시아 패키지 둘 다, iOS는 스킴으로 확인
+    if (Platform.OS === 'android') {
+      Promise.all([
+        Share.isPackageInstalled('com.zhiliaoapp.musically').catch(() => ({ isInstalled: false })),
+        Share.isPackageInstalled('com.ss.android.ugc.trill').catch(() => ({ isInstalled: false })),
+      ]).then(([global, asia]) => {
+        this.setState({
+          isAvailableTiktokToShare: Boolean(global?.isInstalled || asia?.isInstalled),
+        });
+      });
+    } else {
+      Linking.canOpenURL('snssdk1233://')
+        .then((canOpen) => {
+          this.setState({ isAvailableTiktokToShare: canOpen });
+        })
+        .catch(() => {});
+    }
 
     this.removedAttachmentList = [];
     this.attachmentListVar = [];
@@ -694,7 +715,7 @@ class AddingNewVideoScreen extends Component {
         payload: newVideo,
       });
       this.saveUploadingVideosInfo(videoId);
-      if (!this.state.shareTo) {
+      if (!this.state.shareToInstagram && !this.state.shareToTiktok) {
         this.props.navigation.reset({
           index: 0,
           routes: [{ name: 'MainBottom' }],
@@ -843,7 +864,7 @@ class AddingNewVideoScreen extends Component {
       }
     };
 
-    if (this.state.shareTo) {
+    if (this.state.shareToInstagram || this.state.shareToTiktok) {
       Utils.putWatermarkOnVideo(
         this.state.videoUri,
         this.userName,
@@ -854,8 +875,28 @@ class AddingNewVideoScreen extends Component {
       });
     }
   }
+  getTiktokCaption() {
+    // 캡션 = 영상 제목 + 해시태그
+    const title = this.state.title ? this.state.title.trim() : '';
+    const hashTags = (this.state.hashTagArr || []).map((tag) => `#${tag}`).join(' ');
+    return [title, hashTags].filter(Boolean).join(' ');
+  }
+
+  shareToTiktokFlow() {
+    const caption = this.getTiktokCaption();
+    Utils.shareVideoToTiktok(this.watermarkedVideoUri, caption)
+      .then(() => {
+        if (caption && toastRef) {
+          toastRef.show(Strings.TIKTOK_CAPTION_COPIED);
+        }
+      })
+      .catch((err) => {
+        console.error('shareToTiktokFlow error', err);
+      });
+  }
+
   handleShareImage() {
-    if (this.state.shareTo === Share.Social.INSTAGRAM) {
+    if (this.state.shareToInstagram) {
       Utils.shareVideo(this.watermarkedVideoUri, null, Share.Social.INSTAGRAM)
         .then((res) => {
           console.log('handleShareImage result', res);
@@ -863,6 +904,15 @@ class AddingNewVideoScreen extends Component {
         .catch((err) => {
           console.error('handleShareImage error', err);
         });
+      if (this.state.shareToTiktok) {
+        // 인스타 공유가 먼저 뜨므로, 틱톡은 확인 후 이어서 진행
+        Alert.alert(Strings.TIKTOK_ALSO_TITLE, Strings.POPUP_NOTICE_TIKTOK_SHARE, [
+          { text: Strings.TIKTOK_ALSO_LATER, style: 'cancel' },
+          { text: Strings.TIKTOK_ALSO_OPEN, onPress: () => this.shareToTiktokFlow() },
+        ]);
+      }
+    } else if (this.state.shareToTiktok) {
+      this.shareToTiktokFlow();
     }
   }
   onLinkedProductSelected(product) {

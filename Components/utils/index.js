@@ -28,6 +28,7 @@ import SHA256 from './SHA256';
 
 import { AppEventsLogger, Settings } from 'react-native-fbsdk-next';
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
+import Clipboard from '@react-native-clipboard/clipboard';
 import * as Sentry from '@sentry/react-native';
 
 const allowedImageExtension = ['jpeg', 'jpg', 'png', 'gif', 'bmp'];
@@ -520,6 +521,33 @@ function shareVideo(videoUri, message = null, target = null) {
     .catch((err) => {
       console.log('shareVideo err', err);
     });
+}
+
+// TikTok Phase 1: 공개 API 직접 게시는 심사가 필요해
+// "갤러리 저장 + 캡션 클립보드 복사 + 틱톡 앱 열기" 보조 플로우로 공유한다.
+async function shareVideoToTiktok(videoUri, caption = null) {
+  try {
+    await CameraRoll.save(videoUri, 'video');
+  } catch (err) {
+    console.log('shareVideoToTiktok save err', err);
+    Sentry.captureException(err);
+  }
+
+  if (caption) {
+    Clipboard.setString(caption);
+  }
+
+  try {
+    await Linking.openURL('snssdk1233://');
+  } catch (err) {
+    console.log('shareVideoToTiktok openURL err', err);
+    // 틱톡 스킴 열기 실패 시 일반 공유 시트로 폴백
+    try {
+      await Share.open({ url: videoUri, type: 'video/mp4' });
+    } catch (shareErr) {
+      console.log('shareVideoToTiktok share fallback err', shareErr);
+    }
+  }
 }
 
 // FFmpegKit으로 변경된 비디오 정보 함수
@@ -1072,6 +1100,7 @@ export default {
   getCategoryTitle,
   putWatermarkOnVideo,
   shareVideo,
+  shareVideoToTiktok,
   getVideoInfo,
   checkPermissionToAccessGallery,
   scheduleBackgroundTask,

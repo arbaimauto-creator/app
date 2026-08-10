@@ -43,6 +43,12 @@
     <package android:name="com.samsung.android.spay"/>
     <package android:name="com.samsung.android.spaylite"/>
     <package android:name="com.instagram.android"/>
+    <package android:name="com.zhiliaoapp.musically"/>
+    <package android:name="com.ss.android.ugc.trill"/>
+    <intent>
+      <action android:name="android.intent.action.VIEW"/>
+      <data android:scheme="snssdk1233"/>
+    </intent>
     <package android:name="kvp.jjy.MispAndroid320"/>
     <package android:name="nh.smart.nhallonepay"/>
     <package android:name="kr.co.samsungcard.mpocket"/>
