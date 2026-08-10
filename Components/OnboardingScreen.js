@@ -1,302 +1,228 @@
 import { CommonActions } from '@react-navigation/native';
-import React from 'react';
-import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import Preference from 'react-native-default-preference';
-import { Button } from 'react-native-elements';
-import FastImage from 'react-native-fast-image';
-import { getBottomSpace, isIphoneX } from 'react-native-iphone-x-helper';
-import Carousel, { Pagination } from 'react-native-snap-carousel';
 import SplashScreen from 'react-native-splash-screen';
-import Constants from './Constants';
-import Strings, { getLanguage } from './Strings';
 import { SafeAreaView } from 'react-native';
+import Constants from './Constants';
+import Strings from './Strings';
 
-const data = [
-  {
-    image: 'https://d3ags90eq0etbz.cloudfront.net/app-banner/onboarding/en-initial-guide-01.png',
-  },
-  {
-    image: 'https://d3ags90eq0etbz.cloudfront.net/app-banner/onboarding/en-initial-guide-02.png',
-  },
-  {
-    image: 'https://d3ags90eq0etbz.cloudfront.net/app-banner/onboarding/en-initial-guide-03.png',
-  },
-  {
-    image: 'https://d3ags90eq0etbz.cloudfront.net/app-banner/onboarding/en-initial-guide-04.png',
-  },
-  {
-    image: 'https://d3ags90eq0etbz.cloudfront.net/app-banner/onboarding/en-initial-guide-05.png',
-  },
-  {
-    image: 'https://d3ags90eq0etbz.cloudfront.net/app-banner/onboarding/en-initial-guide-06.png',
-  },
-  // {
-  //   image: require('../Resources/img/imgObd1.png'),
-  //   title: Strings.ONBOARING_1_TITLE,
-  //   message: Strings.ONBOARING_1_MESSAGE,
-  //   backgroundColor: 'rgb(175, 111, 120)',
-  // },
-  // {
-  //   image: require('../Resources/img/imgObd2.png'),
-  //   title: Strings.ONBOARING_2_TITLE,
-  //   message: Strings.ONBOARING_2_MESSAGE,
-  //   backgroundColor: 'rgb(87, 100, 132)',
-  // },
-  // {
-  //   image: require('../Resources/img/imgObd3.png'),
-  //   title: Strings.ONBOARING_3_TITLE,
-  //   message: Strings.ONBOARING_3_MESSAGE,
-  //   backgroundColor: 'rgb(192, 142, 50)',
-  // },
+// 첫 실행 온보딩 — 퍼널(초대→신청→배송→설문·업로드→평가·보상)을 이해시키는 5장.
+// 구형 CDN 이미지 튜토리얼(홈 탭 조작법 안내)을 대체한다. 완료 처리(isOnboarded)는 기존과 동일.
+const { width } = Dimensions.get('window');
+
+const FUNNEL_STEPS = () => [
+  { n: 1, icon: '✉️', title: Strings.OB_STEP1_T, body: Strings.OB_STEP1_B },
+  { n: 2, icon: '🎁', title: Strings.OB_STEP2_T, body: Strings.OB_STEP2_B },
+  { n: 3, icon: '✈️', title: Strings.OB_STEP3_T, body: Strings.OB_STEP3_B },
+  { n: 4, icon: '🎬', title: Strings.OB_STEP4_T, body: Strings.OB_STEP4_B },
+  { n: 5, icon: '🏆', title: Strings.OB_STEP5_T, body: Strings.OB_STEP5_B },
 ];
 
-/*
- * CDN 온보딩 1페이지 이미지에는 구버전 문구("Swipe left or right" / "좌우로")가 박혀 있다.
- * 영상 탐색이 세로 스와이프로 바뀌었으므로, CDN 이미지가 교체되기 전까지
- * 해당 문구 한 줄만 흰 패치로 덮고 새 문구를 그린다.
- * 좌표는 원본 이미지(2588x4600) 픽셀 기준이며 화면 표시 배율로 환산해 쓴다.
- */
-const GUIDE_IMG_W = 2588;
-const GUIDE_IMG_H = 4600;
-const SWIPE_PATCH = { left: 230, top: 320, width: 1500, height: 180, textLeft: 30, fontSize: 103 };
-const getSwipeGuideText = (language) =>
-  language === 'ko' ? '위아래로' : 'Swipe up or down';
+export default function OnboardingScreen({ navigation }) {
+  const scrollRef = useRef(null);
+  const [page, setPage] = useState(0);
+  const PAGE_COUNT = 5;
 
-const getOnboardingImages = (language) => [
-  {
-    image: `https://d3ags90eq0etbz.cloudfront.net/app-banner/onboarding/${language}-initial-guide-01.png`,
-  },
-  {
-    image: `https://d3ags90eq0etbz.cloudfront.net/app-banner/onboarding/${language}-initial-guide-02.png`,
-  },
-  {
-    image: `https://d3ags90eq0etbz.cloudfront.net/app-banner/onboarding/${language}-initial-guide-03.png`,
-  },
-  {
-    image: `https://d3ags90eq0etbz.cloudfront.net/app-banner/onboarding/${language}-initial-guide-04.png`,
-  },
-  {
-    image: `https://d3ags90eq0etbz.cloudfront.net/app-banner/onboarding/${language}-initial-guide-05.png`,
-  },
-  {
-    image: `https://d3ags90eq0etbz.cloudfront.net/app-banner/onboarding/${language}-initial-guide-06.png`,
-  },
-];
-
-export default class OnboardingScreen extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      activeSlideIndex: 0,
-      language: 'en',
-      slideSize: null,
-    };
-    this._carousel = null;
-  }
-
-  onSlideLayout = (e) => {
-    const { width, height } = e.nativeEvent.layout;
-    if (
-      !this.state.slideSize ||
-      this.state.slideSize.width !== width ||
-      this.state.slideSize.height !== height
-    ) {
-      this.setState({ slideSize: { width, height } });
-    }
-  };
-
-  // resizeMode 'contain'으로 표시되는 이미지의 실제 영역에 맞춰 패치 위치를 환산한다.
-  renderSwipeGuidePatch() {
-    const { slideSize } = this.state;
-    if (!slideSize) {
-      return null;
-    }
-
-    const scale = Math.min(slideSize.width / GUIDE_IMG_W, slideSize.height / GUIDE_IMG_H);
-    const offsetX = (slideSize.width - GUIDE_IMG_W * scale) / 2;
-    const offsetY = (slideSize.height - GUIDE_IMG_H * scale) / 2;
-
-    return (
-      <View
-        style={{
-          position: 'absolute',
-          left: offsetX + SWIPE_PATCH.left * scale,
-          top: offsetY + SWIPE_PATCH.top * scale,
-          width: SWIPE_PATCH.width * scale,
-          height: SWIPE_PATCH.height * scale,
-          backgroundColor: '#FFFFFF',
-          justifyContent: 'center',
-        }}
-      >
-        <Text
-          style={{
-            marginLeft: SWIPE_PATCH.textLeft * scale,
-            fontSize: SWIPE_PATCH.fontSize * scale,
-            fontFamily: Constants.CUSTOM_FONTS.PRETENDARD.Regular,
-            color: '#111111',
-          }}
-        >
-          {getSwipeGuideText(getLanguage())}
-        </Text>
-      </View>
-    );
-  }
-
-  componentDidMount() {
+  useEffect(() => {
     SplashScreen.hide();
-  }
+  }, []);
 
-  onPressStartButton() {
+  const finish = () => {
     Preference.set('isOnboarded', 'true');
-    this.props.navigation.dispatch(
+    navigation.dispatch(
       CommonActions.reset({
         index: 1,
         routes: [{ name: 'Main' }],
       }),
     );
-  }
+  };
 
-  _renderSlide({ item, index }) {
-    return (
-      <View style={{ flex: 1 }} onLayout={index === 0 ? this.onSlideLayout : undefined}>
-        <FastImage source={{ uri: item.image }} style={styles.slideImage} resizeMode={'contain'} />
-        {index === 0 && this.renderSwipeGuidePatch()}
-        {/* Android에서는 나중에 그려진 형제 뷰가 터치를 가로채므로 Skip을 마지막에 렌더링한다 */}
-        <View style={{ position: 'absolute', top: 20, right: 20, zIndex: 999 }}>
-          <Button
-            title={Strings.SKIP}
-            type="clear"
-            titleStyle={styles.skipButtonTitle}
-            onPress={this.onPressStartButton.bind(this)}
-          />
+  const goTo = (idx) => {
+    if (idx >= PAGE_COUNT) {
+      finish();
+      return;
+    }
+    setPage(idx);
+    scrollRef.current?.scrollTo({ x: idx * width, animated: true });
+  };
+
+  const Page = ({ children }) => <View style={[styles.page, { width }]}>{children}</View>;
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <TouchableOpacity style={styles.skip} onPress={finish}>
+        <Text style={styles.skipText}>{Strings.SKIP}</Text>
+      </TouchableOpacity>
+
+      <ScrollView
+        ref={scrollRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={(e) =>
+          setPage(Math.round(e.nativeEvent.contentOffset.x / width))
+        }
+      >
+        {/* 1. 환영 — greyd가 뭐 하는 곳인지 */}
+        <Page>
+          <View style={styles.center}>
+            <Image
+              source={require('../Resources/img/icGreydSplashSymbol126.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+            <Text style={styles.title}>{Strings.OB_WELCOME_T}</Text>
+            <Text style={styles.body}>{Strings.OB_WELCOME_B}</Text>
+          </View>
+        </Page>
+
+        {/* 2. 퍼널 전체 그림 — 5단계 */}
+        <Page>
+          <Text style={styles.pageHeading}>{Strings.OB_FUNNEL_T}</Text>
+          <Text style={styles.pageSub}>{Strings.OB_FUNNEL_B}</Text>
+          <View style={{ marginTop: 18 }}>
+            {FUNNEL_STEPS().map((s) => (
+              <View key={s.n} style={styles.stepRow}>
+                <View style={styles.stepNum}>
+                  <Text style={styles.stepNumText}>{s.n}</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.stepTitle}>
+                    {s.icon} {s.title}
+                  </Text>
+                  <Text style={styles.stepBody}>{s.body}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        </Page>
+
+        {/* 3. 솔직함 원칙 */}
+        <Page>
+          <View style={styles.center}>
+            <Text style={styles.bigEmoji}>🤍</Text>
+            <Text style={styles.title}>{Strings.OB_HONEST_T}</Text>
+            <Text style={styles.body}>{Strings.OB_HONEST_B}</Text>
+            <View style={styles.quoteBox}>
+              <Text style={styles.quoteText}>{Strings.OB_HONEST_QUOTE}</Text>
+            </View>
+          </View>
+        </Page>
+
+        {/* 4. 성장 — G-스코어와 보상 */}
+        <Page>
+          <View style={styles.center}>
+            <Text style={styles.bigEmoji}>📈</Text>
+            <Text style={styles.title}>{Strings.OB_GROW_T}</Text>
+            <Text style={styles.body}>{Strings.OB_GROW_B}</Text>
+            <View style={styles.growList}>
+              <Text style={styles.growItem}>{Strings.OB_GROW_1}</Text>
+              <Text style={styles.growItem}>{Strings.OB_GROW_2}</Text>
+              <Text style={styles.growItem}>{Strings.OB_GROW_3}</Text>
+            </View>
+          </View>
+        </Page>
+
+        {/* 5. 시작 — 코드 안내 */}
+        <Page>
+          <View style={styles.center}>
+            <Text style={styles.bigEmoji}>🔑</Text>
+            <Text style={styles.title}>{Strings.OB_READY_T}</Text>
+            <Text style={styles.body}>{Strings.OB_READY_B}</Text>
+          </View>
+        </Page>
+      </ScrollView>
+
+      <View style={styles.footer}>
+        <View style={styles.dots}>
+          {Array.from({ length: PAGE_COUNT }).map((_, i) => (
+            <View key={i} style={[styles.dot, page === i && styles.dotOn]} />
+          ))}
         </View>
+        <TouchableOpacity style={styles.next} onPress={() => goTo(page + 1)}>
+          <Text style={styles.nextText}>
+            {page === PAGE_COUNT - 1 ? Strings.START : Strings.ONBOARD_NEXT}
+          </Text>
+        </TouchableOpacity>
       </View>
-    );
-  }
-
-  render() {
-    const { navigation } = this.props;
-
-    return (
-      <SafeAreaView style={styles.container}>
-        <Carousel
-          ref={(c) => {
-            this._carousel = c;
-          }}
-          data={getOnboardingImages(getLanguage())}
-          renderItem={this._renderSlide.bind(this)}
-          sliderWidth={Dimensions.get('window').width}
-          itemWidth={Dimensions.get('window').width}
-          onSnapToItem={(index) => this.setState({ activeSlideIndex: index })}
-          useExperimentalSnap={true}
-          disableIntervalMomentum={true}
-        />
-        {/* <View style={styles.headerBarContainer}>
-          <Image style={styles.logo} source={require('../Resources/img/icGreydLogo32.png')} />
-          <Button
-            title={Strings.SKIP}
-            type="clear"
-            titleStyle={styles.skipButtonTitle}
-            onPress={this.onPressStartButton.bind(this)}
-          />
-        </View> */}
-        <View style={styles.slidePagination}>
-          <Pagination
-            dotsLength={data.length}
-            activeDotIndex={this.state.activeSlideIndex}
-            dotContainerStyle={{
-              marginHorizontal: 2,
-            }}
-            dotStyle={{
-              width: 5,
-              height: 5,
-              borderRadius: 5,
-              backgroundColor: 'rgba(255, 255, 255, 1)',
-              display: 'none',
-            }}
-            inactiveDotStyle={{ display: 'none' }}
-            inactiveDotOpacity={0.2}
-            inactiveDotScale={1}
-          />
-        </View>
-        {this.state.activeSlideIndex === data.length - 1 && (
-          <Button
-            title={Strings.START}
-            type="clear"
-            titleStyle={styles.startButtonTitle}
-            containerStyle={styles.startButtonContainer}
-            onPress={this.onPressStartButton.bind(this)}
-          />
-        )}
-      </SafeAreaView>
-    );
-  }
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Constants.TIER_COLORS.PIONEER,
-  },
-  headerBarContainer: {
-    position: 'absolute',
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    marginTop: isIphoneX() ? 40 : 20,
-    alignItems: 'center',
-  },
-  slideImage: {
-    // marginTop: isIphoneX() ? 100 : 70,
-    // height: Dimensions.get('window').height * 0.52,
-    height: '100%',
-    width: '100%',
-    alignSelf: 'center',
-  },
-  skipButtonTitle: {
+  container: { flex: 1, backgroundColor: Constants.COLOR_BACKGROUND_DARK },
+  skip: { position: 'absolute', top: 18, right: 22, zIndex: 10, padding: 8 },
+  skipText: { fontSize: 14, color: Constants.TIER_COLORS.STRIVER },
+  page: { flex: 1, paddingHorizontal: 28, paddingTop: 70, paddingBottom: 10 },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'flex-start' },
+  logo: { width: 64, height: 64, marginBottom: 20 },
+  bigEmoji: { fontSize: 44, marginBottom: 16 },
+  title: {
+    fontSize: 26,
+    lineHeight: 36,
+    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
     color: Constants.TIER_COLORS.ARTISAN,
-    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
-    fontSize: 14,
   },
-  slideMessageContainer: {
-    position: 'absolute',
-    alignSelf: 'center',
-    alignItems: 'center',
-    bottom: getBottomSpace() + 140,
-  },
-  slideTitle: {
-    color: 'white',
-    fontSize: 24,
-    lineHeight: 26,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  slideMessage: {
-    color: 'white',
+  body: {
+    marginTop: 14,
     fontSize: 15,
-    lineHeight: 20,
-    marginTop: 6,
-    textAlign: 'center',
+    lineHeight: 24,
+    color: Constants.TIER_COLORS.STRIVER,
   },
-  slidePagination: {
-    position: 'absolute',
-    alignSelf: 'center',
-    bottom: getBottomSpace() + 70,
+  pageHeading: {
+    fontSize: 24,
+    lineHeight: 33,
+    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
+    color: Constants.TIER_COLORS.ARTISAN,
   },
-  startButtonContainer: {
-    position: 'absolute',
-    paddingTop: 20,
-    paddingBottom: isIphoneX() ? getBottomSpace() : 20,
-    bottom: 0,
-    alignSelf: 'center',
-    backgroundColor: Constants.TIER_COLORS.GIVER,
-    width: '100%',
+  pageSub: { marginTop: 8, fontSize: 14, lineHeight: 21, color: Constants.TIER_COLORS.STRIVER },
+  stepRow: { flexDirection: 'row', marginBottom: 16 },
+  stepNum: {
+    width: 26,
+    height: 26,
+    borderRadius: 14,
+    backgroundColor: Constants.COLOR_MAIN,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+    marginTop: 2,
   },
-  startButtonTitle: {
-    fontSize: 18,
-    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
-    color: 'white',
+  stepNumText: { fontSize: 13, fontWeight: '900', color: '#16130d' },
+  stepTitle: { fontSize: 15.5, fontWeight: '700', color: Constants.TIER_COLORS.ARTISAN },
+  stepBody: { fontSize: 13, lineHeight: 19, color: Constants.TIER_COLORS.STRIVER, marginTop: 3 },
+  quoteBox: {
+    marginTop: 20,
+    backgroundColor: '#26231d',
+    borderLeftWidth: 4,
+    borderLeftColor: Constants.COLOR_MAIN,
+    borderRadius: 10,
+    padding: 16,
   },
+  quoteText: { fontSize: 14, lineHeight: 22, color: '#f4f1ea' },
+  growList: { marginTop: 18 },
+  growItem: {
+    fontSize: 14.5,
+    lineHeight: 26,
+    color: Constants.TIER_COLORS.ARTISAN,
+  },
+  footer: { paddingHorizontal: 28, paddingBottom: 22 },
+  dots: { flexDirection: 'row', justifyContent: 'center', marginBottom: 14 },
+  dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#d8d5cf', marginHorizontal: 4 },
+  dotOn: { backgroundColor: Constants.COLOR_MAIN, width: 18 },
+  next: {
+    backgroundColor: Constants.COLOR_MAIN,
+    borderRadius: 12,
+    paddingVertical: 15,
+    alignItems: 'center',
+  },
+  nextText: { fontSize: 16, fontWeight: '800', color: '#16130d' },
 });
