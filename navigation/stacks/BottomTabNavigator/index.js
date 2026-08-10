@@ -90,6 +90,7 @@ function BottomTabNavigator({ route, navigation }) {
         shifting={false}
         labeled={false}
         barStyle={{ backgroundColor: '#F4F4F4', elevation: 20 }}
+        onIndexChange={(index) => {}}
       >
         <Tab.Screen name="BrandDashboard" component={BrandDashboard} initialParams={initialParams} />
         <Tab.Screen name="BrandReview" component={BrandReview} initialParams={initialParams} />
