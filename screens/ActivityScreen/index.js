@@ -20,6 +20,7 @@ import { Card, Btn, Badge, StatusPill, ProgressBar, NoteBox } from '../../Compon
 import Strings from '../../Components/Strings';
 import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
 import { getSeedings, setSeedingStatus, upsertSeeding, SEEDING_STATUS } from '../../api/seedings';
+import { logEvent } from '../../api/common/analytics';
 import { getCreatorProfile, saveCreatorProfile } from '../../api/creators';
 import { referralCodesFor } from '../../api/referral';
 import {
@@ -103,20 +104,34 @@ export default function ActivityScreen({ navigation }) {
   const points = (totalReward ?? 0) + localPoints + bonusPoints;
 
   const onReceive = async (campaignId) => {
+    const prev = seedings[campaignId];
     const all = await setSeedingStatus(campaignId, SEEDING_STATUS.RECEIVED);
     // 수령 확인 = 리마인더 시퀀스 시작 (D+7/D-3/D-1/마감/유예)
     const s = all[campaignId];
+    // 이벤트 맵: 북극성 분모 — 배송 리드타임 분포의 원천
+    logEvent('received_confirm', {
+      campaign_id: campaignId,
+      days_since_shipped: prev?.shippedAt
+        ? Math.round((Date.now() - new Date(prev.shippedAt).getTime()) / 86400000)
+        : -1,
+    });
     scheduleUploadReminders(campaignId, campaignById[campaignId]?.title || '', s.receivedAt, false);
     // 시안 22: 알림 가치가 가장 높은 순간(리마인더 시작 직후)에만 권한 컨텍스트 프롬프트 (Android 13+, 1회)
     if (Platform.OS === 'android' && Platform.Version >= 33) {
       const shown = await Preference.get('notifPromptShown');
       if (shown !== 'true') {
         Alert.alert(Strings.ACT_NOTIF_TITLE, Strings.ACT_NOTIF_BODY, [
-          { text: Strings.ACT_NOTIF_LATER, style: 'cancel' },
+          {
+            text: Strings.ACT_NOTIF_LATER,
+            style: 'cancel',
+            onPress: () => logEvent('noti_permission_prompt', { result: 'later' }),
+          },
           {
             text: Strings.ACT_NOTIF_ALLOW,
-            onPress: () =>
-              PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS),
+            onPress: () => {
+              logEvent('noti_permission_prompt', { result: 'allow' });
+              PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+            },
           },
         ]);
         await Preference.set('notifPromptShown', 'true');
@@ -133,6 +148,10 @@ export default function ActivityScreen({ navigation }) {
         text: Strings.ACT_CANCEL_CONFIRM,
         style: 'destructive',
         onPress: async () => {
+          logEvent('cancel_confirm', {
+            campaign_id: campaignId,
+            status_at_cancel: seedings[campaignId]?.status || 'unknown',
+          });
           await setSeedingStatus(campaignId, SEEDING_STATUS.CANCELLED);
           reload();
         },
@@ -144,6 +163,7 @@ export default function ActivityScreen({ navigation }) {
     if (seeding.extensionUsed) {
       return;
     }
+    logEvent('extension_use', { campaign_id: seeding.campaignId });
     await upsertSeeding(seeding.campaignId, { extensionUsed: true });
     // 연장된 마감 기준으로 리마인더 재스케줄
     scheduleUploadReminders(

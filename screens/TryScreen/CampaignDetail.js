@@ -20,6 +20,7 @@ import { isGuestUser, LogoutAlert } from '../../Components/utils';
 import { getCreatorProfile } from '../../api/creators';
 import { getSeedings, upsertSeeding, setSeedingStatus, SEEDING_STATUS } from '../../api/seedings';
 import { personalizedPoints, concurrentLimit } from './points';
+import { logEvent } from '../../api/common/analytics';
 
 const { COLORS, RADIUS, TYPE } = T;
 
@@ -35,11 +36,14 @@ export default function CampaignDetail({ route, navigation }) {
   const [gScore, setGScore] = useState(50);
 
   useEffect(() => {
+    // 이벤트 맵: 카드→상세 전환 (신청 퍼널 2단계)
+    logEvent('campaign_open', { campaign_id: campaign.id, apply_mode: campaign.applyMode });
     getCreatorProfile().then((p) => {
       if (p?.gScore != null) {
         setGScore(p.gScore);
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const points = personalizedPoints(campaign.basePoints ?? campaign.rewardPoint, gScore);
@@ -82,6 +86,7 @@ export default function CampaignDetail({ route, navigation }) {
     ).length;
     const limit = concurrentLimit(profile?.gScore ?? 50, profile?.completedCount ?? 0);
     if (activeCount >= limit) {
+      logEvent('apply_limit_blocked', { limit });
       Alert.alert(Strings.CONCURRENT_LIMIT_ALERT(limit));
       return;
     }
@@ -95,6 +100,12 @@ export default function CampaignDetail({ route, navigation }) {
     // 시딩 인스턴스 생성 (상태머신 시작점)
     await upsertSeeding(campaign.id, { pledgeChecked: true, appealText: appeal.trim() });
     await setSeedingStatus(campaign.id, SEEDING_STATUS.APPLIED);
+    // 이벤트 맵: 신청 퍼널 완성점 — appeal은 길이만 (PII 금지)
+    logEvent('apply_submit', {
+      campaign_id: campaign.id,
+      apply_mode: campaign.applyMode,
+      appeal_len: appeal.trim().length,
+    });
     // 신청 완료 전용 화면(시안)으로 이동 — 신청 후 활성 시딩 수 = 기존 카운트 + 1
     navigation.navigate('ApplyDone', {
       campaignTitle: campaign.title,

@@ -17,6 +17,7 @@ import { Card, Badge, NoteBox } from '../../Components/UI';
 import { fetchCampaigns, selectCampaigns, selectMyApplications } from '../../slices/campaign';
 import { getCreatorProfile } from '../../api/creators';
 import { personalizedPoints, CURATED_MIN_G } from './points';
+import { logEvent } from '../../api/common/analytics';
 
 const { COLORS, TYPE } = T;
 
@@ -91,6 +92,16 @@ export default function TryScreen({ navigation }) {
   useEffect(() => {
     dispatch(fetchCampaigns());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (campaigns.length) {
+      logEvent('try_view', {
+        open_count: campaigns.filter((c) => c.applyMode !== 'curated').length,
+        curated_count: campaigns.filter((c) => c.applyMode === 'curated').length,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [campaigns.length]);
 
   // 완주/평가로 G-스코어가 바뀔 수 있으므로 포커스마다 갱신
   useFocusEffect(

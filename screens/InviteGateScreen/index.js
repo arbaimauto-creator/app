@@ -15,6 +15,7 @@ import T from '../../Components/Constants/DesignTokens';
 import Strings from '../../Components/Strings';
 import { Btn, Chips } from '../../Components/UI';
 import { verifyInviteCode } from '../../api/invites';
+import { logEvent, resetAnalyticsContext } from '../../api/common/analytics';
 
 const { COLORS, FONT } = T;
 
@@ -45,12 +46,15 @@ export default function InviteGateScreen({ navigation }) {
     const result = await verifyInviteCode(code);
     setIsVerifying(false);
     if (!result.success) {
+      logEvent('gate_code_submit', { result: result.reason === 'expired' ? 'expired' : 'invalid' });
       setError(Strings.INVITE_CODE_INVALID);
       return;
     }
     await Preference.set('inviteRole', result.role);
     await Preference.set('inviteCode', code.trim().toUpperCase());
     await Preference.set('creatorCountry', country);
+    resetAnalyticsContext(); // role·country 확정 — 공통 파라미터 갱신
+    logEvent('gate_code_submit', { result: 'ok' });
     if (result.brandId) {
       await Preference.set('inviteBrandId', result.brandId);
       await Preference.set('inviteBrandName', result.brandName || '');

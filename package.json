@@ -26,6 +26,7 @@
     "@react-native-community/cli-platform-android": "^14.1.0",
     "@react-native-community/hooks": "^3.0.0",
     "@react-native-community/push-notification-ios": "^1.11.0",
+    "@react-native-firebase/analytics": "^20.5.0",
     "@react-native-firebase/app": "^20.4.0",
     "@react-native-firebase/auth": "^20.4.0",
     "@react-native-firebase/dynamic-links": "^20.4.0",

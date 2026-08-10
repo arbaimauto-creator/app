@@ -1,5 +1,5 @@
 // 완주 보상 (시안 화면 16+17) — 포인트·브랜드 피드백·G-스코어·추천 코드 해제.
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -14,6 +14,7 @@ import { Card, Btn, Badge, ProgressBar, NoteBox } from '../../Components/UI';
 import Strings from '../../Components/Strings';
 import { referralCodesFor } from '../../api/referral';
 import { CURATED_MIN_G } from '../TryScreen/points';
+import { logEvent } from '../../api/common/analytics';
 
 const { COLORS, FONT, TYPE } = T;
 
@@ -22,7 +23,17 @@ export default function MissionDone({ navigation, route }) {
     route.params || {};
   const codes = referralCodesFor({ handleUrl });
 
+  useEffect(() => {
+    // 이벤트 맵: 루프 완료 — 북극성 분자
+    logEvent('done_view', {
+      points: pointsGranted ?? 0,
+      quality_bonus: (multiplier ?? 1) > 1,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const onShareCode = (code) => {
+    logEvent('referral_share_open', {});
     Share.share({
       message: Strings.DONE_SHARE_MESSAGE(code),
     });
