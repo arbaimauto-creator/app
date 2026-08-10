@@ -1,7 +1,63 @@
 # greyd 앱 ↔ greyd-ops 얼라인 다이어그램
 
-정본 문서: `2026-08-10-app-ops-integration.md` (I1~I10) — 이 문서는 그 시각화판이다.
-원칙 한 줄: **비즈니스 상태의 정본은 greyd-ops. 앱은 SEEDING 트랙의 크리에이터 표면이다.**
+정본 문서: `2026-08-10-app-ops-integration.md` (I1~I11) — 이 문서는 그 시각화판이다.
+원칙 한 줄: **비즈니스 상태의 정본은 greyd-ops. 앱은 SEEDING 트랙의 인플루언서 표면이다.**
+
+---
+
+## 0. 전체 그림 한 장 (2026-08-11 현재 — D24~D28 반영)
+
+역할마다 표면이 정확히 하나씩이다: **인플루언서=앱 · 브랜드=웹 매직링크 · 운영=ops 콘솔.** 데이터의 정본은 전부 ops DB.
+
+```mermaid
+flowchart TB
+    subgraph PEOPLE["사람 (역할별 표면 1개씩)"]
+        INF["🧑‍🎤 인플루언서"]
+        BRAND["🏢 브랜드"]
+        OPER["🛠 운영·애널리스트"]
+    end
+
+    subgraph APP["📱 greyd 앱 — 인플루언서 전용 (D26)"]
+        FLOW["게이트(초대 코드) → 로그인 → 온보딩 (D28)"]
+        TABS["홈(큐레이션 D23) · 체험 · 활동 · 마이"]
+        LOOP["검증 루프<br/>신청(자동 확정 D24)·제안 수락(D25)<br/>→ 주소 → 수령 → 첫인상·FGI 설문(D27)<br/>→ 리뷰 업로드 → 보상·피드백"]
+        DATA["로컬 mock + LIVE_OPS_API 플래그<br/>(실패 시 mock 폴백)"]
+        FLOW --> TABS --> LOOP
+    end
+
+    subgraph OPS["⚙️ greyd-ops — Next.js + Prisma (Vercel)"]
+        MAPI["/api/mobile/*<br/>campaigns ✅ 가동 · auth/apply/offers/<br/>received/upload ⏳ (2·3단계)"]
+        CONSOLE["운영 콘솔<br/>매칭 · 배송 · 14마디 루프<br/>+ 승인 큐 · 초대 코드 관리 (백로그)"]
+        MAGIC["매직링크 웹<br/>브랜드 평가(트리아지→루브릭, 백로그)<br/>· 파트너스 허브"]
+        DB[("Neon DB — 정본<br/>골든 레코드 11,850 · Campaign(applyMode)<br/>Match · Influencer(greydAppId)")]
+        MAPI --> DB
+        CONSOLE --> DB
+        MAGIC --> DB
+    end
+
+    INF --> FLOW
+    BRAND --> MAGIC
+    OPER --> CONSOLE
+    DATA -- "1단계 실연동 (캠페인 읽기)" --> MAPI
+    LOOP <-. "주간 수동 브리지 4개<br/>(신청·운송장·업로드·제안 — 실연동 완성 시 소멸)" .-> CONSOLE
+    CONSOLE -- "ops 매칭 → 앱 유저면 제안 카드 (I11)" --> LOOP
+
+    style APP fill:#E4F3E9,stroke:#1F8A4C,stroke-width:2px
+    style OPS fill:#FFF3D9,stroke:#8A5D00,stroke-width:2px
+    style DB fill:#E3EDF7,stroke:#2B5E8E
+    style MAPI fill:#FCE9E2,stroke:#E53400
+```
+
+**현재 상태 요약**
+
+| 영역 | 상태 |
+|---|---|
+| 앱 인플루언서 퍼널 (게이트→루프 전체) | ✅ 구현·에뮬레이터 검증 완료 (D1~D28) |
+| ops 스키마 정합 (greydAppId·applyMode·GREYD_APP) | ✅ db push까지 완료 |
+| 실연동 1단계 — 캠페인 목록 | ✅ ops 라우트 가동 + 앱 플래그·폴백 준비 (켜기만 하면 됨) |
+| 실연동 2·3단계 — 신청·제안·수령·업로드·인증 | ⏳ 그때까지 주간 수동 브리지 4개 |
+| 브랜드 평가 웹 · 콘솔 승인 큐 · 초대 코드 관리 | ⏳ ops 백로그 (28번) |
+| 론칭 | 29번 플랜 — Wave 0(내부 QA) 대기 |
 
 ---
 
