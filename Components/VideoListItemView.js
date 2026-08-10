@@ -281,8 +281,20 @@ export default class VideoListItemView extends PureComponent {
   }
 
   async componentDidMount() {
+    this._isMounted = true;
     const KRWPerUSD = await getKRWPerUSD();
-    this.setState({ KRWPerUSD: KRWPerUSD });
+    if (this._isMounted) {
+      this.setState({ KRWPerUSD: KRWPerUSD });
+    }
+  }
+
+  componentWillUnmount() {
+    // 리스트 아이템은 스크롤 중 대량 마운트/언마운트되므로 타이머를 반드시 정리
+    this._isMounted = false;
+    if (this.touchTimeout != null) {
+      clearTimeout(this.touchTimeout);
+      this.touchTimeout = null;
+    }
   }
 
   getDurationString = function (seconds) {

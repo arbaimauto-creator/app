@@ -480,13 +480,18 @@ export default class SliderEntry extends PureComponent {
         });
         if (Platform.OS !== 'ios') {
           setTimeout(() => {
+            if (!this._isMounted) {
+              return;
+            }
             this.setState({
               isNavigationFocused: false,
             });
             setTimeout(() => {
-              this.setState({
-                isNavigationFocused: true,
-              });
+              if (this._isMounted) {
+                this.setState({
+                  isNavigationFocused: true,
+                });
+              }
             }, 1);
           }, 1);
         }

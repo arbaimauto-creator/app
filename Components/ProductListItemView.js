@@ -106,6 +106,14 @@ export default class ProductListItemView extends PureComponent {
     };
   }
 
+  componentWillUnmount() {
+    // 리스트 아이템은 스크롤 중 대량 마운트/언마운트되므로 타이머를 반드시 정리
+    if (this.touchTimeout != null) {
+      clearTimeout(this.touchTimeout);
+      this.touchTimeout = null;
+    }
+  }
+
   async onClicked() {
     const { data, logonUserId, disableDefaultNavigation } = this.props;
 

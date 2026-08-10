@@ -669,7 +669,7 @@ function MainScreen(props) {
         });
       }
     }
-    pushNotifications.setNotificationHandler((notification) => {
+    const onPushNotification = (notification) => {
       // 알림 클릭을 이용해 바로 링크가 되는 경우
       const data = notification.data;
 
@@ -707,7 +707,8 @@ function MainScreen(props) {
       } else if (data.type === 'store') {
         props.navigation.navigate('Store');
       }
-    });
+    };
+    pushNotifications.setNotificationHandler(onPushNotification);
     Preference.get('userId').then(async (value) => {
       if (value) {
         // Check user token
@@ -821,6 +822,8 @@ function MainScreen(props) {
 
     return () => {
       mountedRef.current = false;
+      // 언마운트된 화면의 navigation을 잡고 있는 전역 푸시 핸들러 해제
+      pushNotifications.clearNotificationHandler(onPushNotification);
     };
 
     // }, [global.dispatch, logout, props.navigation]);

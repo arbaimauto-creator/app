@@ -275,7 +275,40 @@ class VideoPageScreen extends React.PureComponent {
 
     // If not signed in, move to sign in
     this._isMounted = true;
+
+    // 리스너는 반드시 동기로 등록/해제한다.
+    // (기존엔 Preference.get().then() 안에서 등록해, 화면을 빨리 이탈하면
+    //  componentWillUnmount 이후에 등록되어 영구 누수 — 죽은 인스턴스의
+    //  BackHandler가 뒤로가기를 삼키고 AppState 리스너가 무한 누적됐다)
+    this._appStateSubscription = AppState.addEventListener('change', this._handleAppStateChange);
+    if (AppState.currentState.match(/inactive|background/)) {
+      this.setState({ isBlurred: true });
+    }
+    this._unsubscribeFocusEvent = this.props.navigation.addListener('focus', () => {
+      if (this._isMounted) {
+        this.setState({ isBlurred: false });
+      }
+    });
+    this._unsubscribeBlueEvent = this.props.navigation.addListener('blur', () => {
+      if (this._isMounted) {
+        this.setState({ isBlurred: true });
+      }
+    });
+    BackHandler.addEventListener('hardwareBackPress', this.backAction);
+    this._unsubscribeBeforeRemoveEvent = this.props.navigation.addListener('beforeRemove', (_e) => {
+      if (
+        this.props.route.params.isFocused &&
+        this.props.route.params.changeNavigatedVideoScreen &&
+        useIsFocused
+      ) {
+        this.props.route.params.changeNavigatedVideoScreen();
+      }
+    });
+
     Preference.get('userId').then((userId) => {
+      if (!this._isMounted) {
+        return;
+      }
       if (userId) {
         this.setState({ myUserId: userId });
         Preference.get('userProfilePicUrl').then((value) => {
@@ -285,42 +318,11 @@ class VideoPageScreen extends React.PureComponent {
             });
           }
         });
-        AppState.addEventListener('change', this._handleAppStateChange);
-        if (AppState.currentState.match(/inactive|background/)) {
-          if (this._isMounted) {
-            this.setState({ isBlurred: true });
-          }
-        }
-        this._unsubscribeFocusEvent = this.props.navigation.addListener('focus', () => {
-          if (this._isMounted) {
-            this.setState({ isBlurred: false });
-          }
-        });
-        this._unsubscribeBlueEvent = this.props.navigation.addListener('blur', () => {
-          if (this._isMounted) {
-            this.setState({ isBlurred: true });
-          }
-        });
 
         this.loadData();
 
-        BackHandler.addEventListener('hardwareBackPress', this.backAction);
-
-        this._unsubscribeBeforeRemoveEvent = this.props.navigation.addListener(
-          'beforeRemove',
-          (_e) => {
-            if (
-              this.props.route.params.isFocused &&
-              this.props.route.params.changeNavigatedVideoScreen &&
-              useIsFocused
-            ) {
-              this.props.route.params.changeNavigatedVideoScreen();
-            }
-          },
-        );
-
         Preference.get(`helpBubble[${Constants.HELP_BUBBLE_PAGE_KEY.VIDEO}]`).then((res) => {
-          if (res) {
+          if (res && this._isMounted) {
             this.setState({ helpBubbleIndex: +res });
           }
         });
@@ -385,7 +387,8 @@ class VideoPageScreen extends React.PureComponent {
   }
 
   componentWillUnmount() {
-    // AppState.removeEventListener('change', this._handleAppStateChange);
+    // 등록과 대칭으로 전부 동기 해제 (AppState는 subscription.remove 방식)
+    this._appStateSubscription?.remove();
 
     if (this._unsubscribeFocusEvent) {
       this._unsubscribeFocusEvent();
@@ -399,10 +402,8 @@ class VideoPageScreen extends React.PureComponent {
       this._unsubscribeBeforeRemoveEvent();
     }
 
-    this.setState = (_state, _callback) => {
-      return;
-    };
-
+    // setState를 no-op으로 덮어쓰는 안티패턴 제거 — 모든 비동기 콜백은
+    // _isMounted 가드를 사용한다 (경고 은폐로 진짜 누수가 감춰지던 문제)
     this._isMounted = false;
 
     this.clearVideoInfoTimer();

@@ -30,8 +30,13 @@ const getDeviceToken = async () => {
 };
 
 const setNotificationHandler = (onNotification) => {
-  if (onNotification) {
-    notificationHandler = onNotification;
+  notificationHandler = onNotification;
+};
+
+// 핸들러를 등록한 화면이 언마운트될 때 죽은 navigation 참조가 남지 않도록 해제용
+const clearNotificationHandler = (onNotification) => {
+  if (notificationHandler === onNotification) {
+    notificationHandler = undefined;
   }
 };
 
@@ -300,4 +305,4 @@ const configure = async (onNotification) => {
   });
 };
 
-export { configure, getDeviceToken, setNotificationHandler };
+export { configure, getDeviceToken, setNotificationHandler, clearNotificationHandler };
