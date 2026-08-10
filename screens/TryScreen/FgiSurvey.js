@@ -45,9 +45,18 @@ export default function FgiSurvey({ route, navigation }) {
   const [fairPrice, setFairPrice] = useState('');
   const [pros, setPros] = useState('');
   const [cons, setCons] = useState('');
+  // 캠페인별 커스텀 질문 (Admin에서 설정 — 브랜드가 진짜 궁금한 것)
+  const extraQuestions = Array.isArray(campaign.fgiExtraQuestions)
+    ? campaign.fgiExtraQuestions
+    : [];
+  const [extraAnswers, setExtraAnswers] = useState({});
 
   const complete =
-    QUANT.every((q) => scores[q.key]) && fairPrice.trim() && pros.trim() && cons.trim();
+    QUANT.every((q) => scores[q.key]) &&
+    fairPrice.trim() &&
+    pros.trim() &&
+    cons.trim() &&
+    extraQuestions.every((q) => (extraAnswers[q] || '').trim());
 
   const onSubmit = async () => {
     if (!complete) {
@@ -60,6 +69,7 @@ export default function FgiSurvey({ route, navigation }) {
         fairPriceUsd: Number(fairPrice) || fairPrice.trim(),
         pros: pros.trim(),
         cons: cons.trim(),
+        extraAnswers,
         submittedAt: new Date().toISOString(),
       },
     });
@@ -123,6 +133,20 @@ export default function FgiSurvey({ route, navigation }) {
               onChangeText={setCons}
             />
           </View>
+
+          {extraQuestions.map((q) => (
+            <View key={q} style={styles.block}>
+              <Text style={styles.label}>{q}</Text>
+              <TextInput
+                style={[styles.input, styles.multiline]}
+                multiline
+                placeholder={Strings.FGI_TEXT_PLACEHOLDER}
+                placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+                value={extraAnswers[q] || ''}
+                onChangeText={(v) => setExtraAnswers({ ...extraAnswers, [q]: v })}
+              />
+            </View>
+          ))}
 
           <Text style={styles.honesty}>{Strings.APPLY_HONESTY_NOTE}</Text>
 

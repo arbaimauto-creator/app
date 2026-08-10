@@ -12,6 +12,7 @@ import {
 import FEATURES from '../../Components/Constants/Features';
 import { useFocusEffect } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
+import Preference from 'react-native-default-preference';
 import Constants from '../../Components/Constants';
 import Strings from '../../Components/Strings';
 import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
@@ -25,6 +26,7 @@ import { getCreatorProfile, saveCreatorProfile } from '../../api/creators';
 import { personalizedPoints, G_DELTA, GRACE_MULTIPLIER } from '../TryScreen/points';
 import { daysLeft, isInGrace, isNoShowDue, EXTENSION_DAYS } from './missionLogic';
 import AddressModal from './AddressModal';
+import { scheduleUploadReminders, cancelUploadReminders } from './reminders';
 
 const STATUS_LABEL = () => ({
   [SEEDING_STATUS.APPLIED]: Strings.CAMPAIGN_STATUS_APPLIED,
@@ -36,6 +38,13 @@ const STATUS_LABEL = () => ({
   [SEEDING_STATUS.CANCELLED]: Strings.CAMPAIGN_STATUS_CANCELLED,
   [SEEDING_STATUS.NO_SHOW]: Strings.CAMPAIGN_STATUS_NO_SHOW,
 });
+
+// 발급자 핸들 기반 개인화 추천 코드 3장 (mock — 서버 발급 시 교체)
+function referralCodesFor(profile) {
+  const seed = (profile?.handleUrl || 'GREYD').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+  const head = (seed + 'XXX').slice(0, 3);
+  return [1, 2, 3].map((n) => `${head}${n}${String(seed.length % 10)}${String((seed.charCodeAt(0) || 65) % 10)}`);
+}
 
 // 운영 수동 전이(승인·발송)를 에뮬레이터에서 확인하기 위한 개발 전용 시뮬 버튼
 const DEV_NEXT = {
@@ -53,9 +62,13 @@ export default function ActivityScreen({ navigation }) {
   const [addressFor, setAddressFor] = useState(null); // campaignId | null
   const [localPoints, setLocalPoints] = useState(0);
 
+  const [bonusPoints, setBonusPoints] = useState(0);
+
   const reload = useCallback(() => {
     getSeedings().then(setSeedings);
     getCreatorProfile().then(setProfile);
+    // 온보딩 완료 보상 +50P (v2 §3-③) — mock: 로컬 합산
+    Preference.get('onboardingBonusGranted').then((v) => setBonusPoints(v === 'true' ? 50 : 0));
   }, []);
 
   useFocusEffect(
@@ -77,7 +90,15 @@ export default function ActivityScreen({ navigation }) {
   const gScore = profile?.gScore ?? 50;
 
   const onReceive = async (campaignId) => {
-    await setSeedingStatus(campaignId, SEEDING_STATUS.RECEIVED);
+    const all = await setSeedingStatus(campaignId, SEEDING_STATUS.RECEIVED);
+    // 수령 확인 = 리마인더 시퀀스 시작 (D+7/D-3/D-1/마감/유예)
+    const s = all[campaignId];
+    scheduleUploadReminders(
+      campaignId,
+      campaignById[campaignId]?.title || '',
+      s.receivedAt,
+      false,
+    );
     reload();
   };
 
@@ -86,6 +107,13 @@ export default function ActivityScreen({ navigation }) {
       return;
     }
     await upsertSeeding(seeding.campaignId, { extensionUsed: true });
+    // 연장된 마감 기준으로 리마인더 재스케줄
+    scheduleUploadReminders(
+      seeding.campaignId,
+      campaignById[seeding.campaignId]?.title || '',
+      seeding.receivedAt,
+      true,
+    );
     Alert.alert(Strings.EXTENSION_GRANTED(EXTENSION_DAYS));
     reload();
   };
@@ -120,6 +148,9 @@ export default function ActivityScreen({ navigation }) {
       return;
     }
     await setSeedingStatus(seeding.campaignId, next);
+    if (next === SEEDING_STATUS.REVIEWING) {
+      cancelUploadReminders(seeding.campaignId);
+    }
     if (next === SEEDING_STATUS.DONE) {
       const campaign = campaignById[seeding.campaignId];
       const grace = isInGrace(seeding);
@@ -238,7 +269,7 @@ export default function ActivityScreen({ navigation }) {
       <View style={styles.pointCard}>
         <View style={{ flex: 1 }}>
           <Text style={styles.pointLabel}>Point</Text>
-          <Text style={styles.pointValue}>{(totalReward ?? 0) + localPoints}P</Text>
+          <Text style={styles.pointValue}>{(totalReward ?? 0) + localPoints + bonusPoints}P</Text>
           <Text style={styles.pointNote}>{Strings.POINT_CASHOUT_NOTE}</Text>
         </View>
         <View style={styles.gBox}>
@@ -258,24 +289,31 @@ export default function ActivityScreen({ navigation }) {
         </View>
       </View>
 
-      {/* v2 §7-4 (D6): 첫 검증 루프 완료 시 추천 코드 3장 */}
+      {/* v2 §7-4 (D6): 첫 검증 루프 완료 시 추천 코드 3장 — 발급자 핸들 각인 */}
       {FEATURES.REFERRAL && (profile?.completedCount ?? 0) >= 1 ? (
         <View style={styles.referralCard}>
           <Text style={styles.referralTitle}>{Strings.REFERRAL_TITLE}</Text>
           <View style={styles.referralCodes}>
-            {['CREW26', 'CREW27', 'CREW28'].map((code) => (
+            {referralCodesFor(profile).map((code) => (
               <TouchableOpacity
                 key={code}
                 style={styles.referralCode}
                 onPress={() =>
-                  Share.share({ message: Strings.REFERRAL_SHARE_MESSAGE(code) }).catch(() => {})
+                  Share.share({
+                    message: Strings.REFERRAL_SHARE_MESSAGE_NAMED(
+                      code,
+                      profile?.handleUrl || 'greyd',
+                    ),
+                  }).catch(() => {})
                 }
               >
                 <Text style={styles.referralCodeText}>{code}</Text>
               </TouchableOpacity>
             ))}
           </View>
-          <Text style={styles.referralNote}>{Strings.REFERRAL_NOTE}</Text>
+          <Text style={styles.referralNote}>
+            {Strings.REFERRAL_INVITED_BY(profile?.handleUrl || '')} · {Strings.REFERRAL_NOTE}
+          </Text>
         </View>
       ) : null}
 

@@ -17,8 +17,8 @@ import Strings from '../../Components/Strings';
 import { applyToCampaign, selectMyApplications } from '../../slices/campaign';
 import { isGuestUser, LogoutAlert } from '../../Components/utils';
 import { getCreatorProfile } from '../../api/creators';
-import { upsertSeeding, setSeedingStatus, SEEDING_STATUS } from '../../api/seedings';
-import { personalizedPoints } from './points';
+import { getSeedings, upsertSeeding, setSeedingStatus, SEEDING_STATUS } from '../../api/seedings';
+import { personalizedPoints, concurrentLimit } from './points';
 
 export default function CampaignDetail({ route, navigation }) {
   const { campaign } = route.params;
@@ -63,6 +63,24 @@ export default function CampaignDetail({ route, navigation }) {
       Alert.alert(Strings.APPLY_PLEDGE_REQUIRED);
       return;
     }
+    // 동시 진행 한도 (v2 §4-1): 이력 0회 1건 / G50~79 2건 / G80+ 3건
+    const profile = await getCreatorProfile();
+    const seedings = await getSeedings();
+    const activeStatuses = [
+      SEEDING_STATUS.APPLIED,
+      SEEDING_STATUS.APPROVED,
+      SEEDING_STATUS.SHIPPED,
+      SEEDING_STATUS.RECEIVED,
+      SEEDING_STATUS.REVIEWING,
+    ];
+    const activeCount = Object.values(seedings).filter((s) =>
+      activeStatuses.includes(s.status),
+    ).length;
+    const limit = concurrentLimit(profile?.gScore ?? 50, profile?.completedCount ?? 0);
+    if (activeCount >= limit) {
+      Alert.alert(Strings.CONCURRENT_LIMIT_ALERT(limit));
+      return;
+    }
     const userId = await Preference.get('userId');
     const action = await dispatch(applyToCampaign({ campaignId: campaign.id, userId }));
     // thunk 실패 시 완료 알럿을 띄우지 않는다
@@ -81,7 +99,6 @@ export default function CampaignDetail({ route, navigation }) {
       return;
     }
     // FGI 설문 미완료 시 설문부터 (업로드는 설문 완료 화면에서 이어짐)
-    const { getSeedings } = require('../../api/seedings');
     const seedings = await getSeedings();
     if (!seedings[campaign.id]?.fgiSurvey) {
       navigation.navigate('FgiSurvey', { campaign });

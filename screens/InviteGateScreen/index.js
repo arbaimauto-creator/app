@@ -53,12 +53,14 @@ export default function InviteGateScreen({ navigation }) {
       await Preference.set('inviteBrandId', result.brandId);
       await Preference.set('inviteBrandName', result.brandName || '');
     }
-    // 크리에이터는 온보딩으로, 브랜드는 곧장 메인(브랜드 셸)으로
+    // 크리에이터는 온보딩으로, 브랜드는 역할 안내 1장(BrandWelcome)으로
     navigation.dispatch(
       CommonActions.reset({
         index: 0,
         routes: [
-          result.role === 'influencer' ? { name: 'CreatorOnboarding' } : { name: 'MainBottom' },
+          result.role === 'influencer'
+            ? { name: 'CreatorOnboarding' }
+            : { name: 'BrandWelcome', params: { brandName: result.brandName } },
         ],
       }),
     );

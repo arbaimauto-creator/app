@@ -1632,6 +1632,28 @@ export default {
   BRAND_GALLERY_SECTION: 'UGC 갤러리',
   BRAND_HD_DOWNLOAD: '원본 HD 요청',
   BRAND_HD_PENDING: '원본 파일은 담당 매니저가 전달드려요.',
+  CONCURRENT_LIMIT_ALERT: (n) =>
+    `동시에 진행할 수 있는 캠페인은 ${n}건이에요. 진행 중인 리뷰를 완료하면 신청할 수 있어요.`,
+  REM_MID_T: '리뷰 마감까지 절반!',
+  REM_MID_B: (t) => `"${t}" — 15초 언박싱 영상도 좋아요 🎬`,
+  REM_D3_T: '3일 남았어요',
+  REM_D3_B: (t) => `"${t}" — 어렵다면 마감을 7일 연장할 수 있어요`,
+  REM_D1_T: '내일 마감돼요',
+  REM_D1_B: (t) => `"${t}" — 미업로드 시 포인트가 사라지고 G-스코어가 내려가요`,
+  REM_DUE_T: '오늘 마감!',
+  REM_DUE_B: (t) => `"${t}" — 48시간 내 업로드하면 아직 인정돼요 (포인트 -30%)`,
+  REM_GRACE_T: '마지막 기회예요',
+  REM_GRACE_B: (t) => `"${t}" — 유예가 곧 끝나요. 지금 올려주세요!`,
+  BRAND_WELCOME_T: (name) => `${name ? name + '님, ' : ''}환영합니다`,
+  BRAND_WELCOME_B:
+    '캠페인 개설·크리에이터 모집·배송은 전부 ARBAIM이 운영해요.\n여러분은 결과를 보고 평가만 하시면 됩니다.',
+  BRAND_WELCOME_1: '📊  대시보드 — 국가별 반응과 위클리 발견',
+  BRAND_WELCOME_2: '✅  리뷰 평가 — 👍👌👎 트리아지 후 후보만 채점',
+  BRAND_WELCOME_3: '📄  FGI 리포트 — 캠페인 종료 후 애널리스트가 전달',
+  BRAND_WELCOME_CTA: '대시보드 열기',
+  REFERRAL_INVITED_BY: (handle) => (handle ? `코드에 @${handle} 이름이 각인돼요` : ''),
+  REFERRAL_SHARE_MESSAGE_NAMED: (code, handle) =>
+    `@${handle}이(가) greyd에 초대합니다 — 한국 브랜드가 당신의 리뷰를 직접 읽는 초대제 패널. 코드: ${code}`,
   REFERRAL_TITLE: '초대장 3장이 열렸어요',
   REFERRAL_NOTE: '첫 리뷰 루프를 완료한 크리에이터에게만 발급돼요. 코드에는 당신의 이름이 새겨집니다.',
   REFERRAL_SHARE_MESSAGE: (code) =>

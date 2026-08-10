@@ -1,5 +1,39 @@
 import React, { useState } from 'react';
-import { CAMPAIGNS } from './mock.js';
+import { CAMPAIGNS, ADMIN_CODE } from './mock.js';
+
+// 운영자 코드 게이트 — #admin은 코드 없이 열리지 않는다 (1단계 mock, 서버 인증으로 교체 예정)
+function AdminGate({ onEnter }) {
+  const [code, setCode] = useState('');
+  const [err, setErr] = useState('');
+  const submit = () => {
+    if (code.trim().toUpperCase() !== ADMIN_CODE) {
+      setErr('운영자 코드가 아니에요.');
+      return;
+    }
+    sessionStorage.setItem('adminOk', '1');
+    onEnter();
+  };
+  return (
+    <div className="gate">
+      <div className="logo">
+        grey<b>d</b> <span style={{ fontWeight: 400, fontSize: 18 }}>Admin</span>
+      </div>
+      <p>ARBAIM 운영자 코드를 입력하세요</p>
+      <input
+        value={code}
+        maxLength={6}
+        placeholder="CODE"
+        onChange={(e) => {
+          setCode(e.target.value);
+          setErr('');
+        }}
+        onKeyDown={(e) => e.key === 'Enter' && submit()}
+      />
+      {err ? <div className="err">{err}</div> : null}
+      <button onClick={submit}>Admin 열기</button>
+    </div>
+  );
+}
 
 // B2B Admin (계획서 TSK-009/010) — 1단계 mock: 로컬 상태, 서버 연동 시 API 교체.
 // 캠페인 등록(질문지 설정 포함) + 신청 크리에이터 승인 + 운송장 입력.
@@ -11,6 +45,7 @@ const MOCK_APPLICANTS = [
 ];
 
 export default function Admin() {
+  const [adminOk, setAdminOk] = useState(() => sessionStorage.getItem('adminOk') === '1');
   const [campaigns, setCampaigns] = useState(CAMPAIGNS);
   const [applicants, setApplicants] = useState(MOCK_APPLICANTS);
   const [form, setForm] = useState({
@@ -50,6 +85,10 @@ export default function Admin() {
     setApplicants(applicants.map((a) => (a.id === id ? { ...a, status } : a)));
   const setTracking = (id, trackingNo) =>
     setApplicants(applicants.map((a) => (a.id === id ? { ...a, trackingNo } : a)));
+
+  if (!adminOk) {
+    return <AdminGate onEnter={() => setAdminOk(true)} />;
+  }
 
   const field = (label, key, props = {}) => (
     <label className="af">

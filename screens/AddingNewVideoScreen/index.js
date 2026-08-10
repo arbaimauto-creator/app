@@ -799,6 +799,16 @@ class AddingNewVideoScreen extends Component {
               const result = await APIprovider.createVideo(video);
 
               if (result) {
+                // 캠페인 미션에서 진입한 업로드면 상태머신을 reviewing으로 전이 + 리마인더 취소
+                const missionCampaignId = this.props.route?.params?.campaignId;
+                if (missionCampaignId) {
+                  const { setSeedingStatus, SEEDING_STATUS } = require('../../api/seedings');
+                  const {
+                    cancelUploadReminders,
+                  } = require('../ActivityScreen/reminders');
+                  setSeedingStatus(missionCampaignId, SEEDING_STATUS.REVIEWING).catch(() => {});
+                  cancelUploadReminders(missionCampaignId);
+                }
                 this.props.setReward(result.totalReward);
                 APIprovider.createNotification({
                   title: Strings.REVIEW_UPLOAD_COMPLETE_TITLE(),

@@ -5,6 +5,9 @@ export const INVITE_CODES = [
   { code: 'BRAND2', brandId: 'brand-org', brandName: 'ORG' },
 ];
 
+// ARBAIM 운영자 전용 (#admin 게이트) — 서버 인증 도입 전 임시
+export const ADMIN_CODE = 'ADMIN1';
+
 export const CAMPAIGNS = [
   {
     id: 'cmp-001',

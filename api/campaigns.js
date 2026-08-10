@@ -26,6 +26,7 @@ const MOCK_CAMPAIGNS = [
     track: 'open',
     uploadDays: 14,
     contentGuide: ['타임 슬립 성분 언급', '눈가 사용 장면', '#sonplan 해시태그'],
+    fgiExtraQuestions: ['향에 대한 인상은 어땠나요?', '민감성 피부에도 괜찮았나요?'],
     status: 'open',
   },
   {

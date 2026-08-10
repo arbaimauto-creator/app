@@ -1695,6 +1695,28 @@ export default {
   BRAND_GALLERY_SECTION: 'UGC gallery',
   BRAND_HD_DOWNLOAD: 'Request HD original',
   BRAND_HD_PENDING: 'Your manager will deliver the original files.',
+  CONCURRENT_LIMIT_ALERT: (n) =>
+    `You can run ${n} campaign${n > 1 ? 's' : ''} at a time. Finish an active review to apply.`,
+  REM_MID_T: 'Halfway to your deadline!',
+  REM_MID_B: (t) => `"${t}" — a 15-second unboxing counts 🎬`,
+  REM_D3_T: '3 days left',
+  REM_D3_B: (t) => `"${t}" — need more time? You can extend by 7 days`,
+  REM_D1_T: 'Due tomorrow',
+  REM_D1_B: (t) => `"${t}" — missing it costs your points and G-score`,
+  REM_DUE_T: 'Due today!',
+  REM_DUE_B: (t) => `"${t}" — upload within 48h and it still counts (points -30%)`,
+  REM_GRACE_T: 'Last chance',
+  REM_GRACE_B: (t) => `"${t}" — the grace window is closing. Upload now!`,
+  BRAND_WELCOME_T: (name) => `Welcome${name ? ', ' + name : ''}`,
+  BRAND_WELCOME_B:
+    'ARBAIM runs everything — campaign setup, creator recruiting, shipping.\nYou just watch the results and score the reviews.',
+  BRAND_WELCOME_1: '📊  Dashboard — country signals & weekly findings',
+  BRAND_WELCOME_2: '✅  Review — 👍👌👎 triage, then score the picks',
+  BRAND_WELCOME_3: '📄  FGI report — delivered by your analyst after the campaign',
+  BRAND_WELCOME_CTA: 'Open dashboard',
+  REFERRAL_INVITED_BY: (handle) => (handle ? `Your name @${handle} is on each code` : ''),
+  REFERRAL_SHARE_MESSAGE_NAMED: (code, handle) =>
+    `@${handle} invited you to greyd — the invite-only panel where Korean brands actually read your review. Code: ${code}`,
   REFERRAL_TITLE: '3 invites unlocked',
   REFERRAL_NOTE:
     'Issued only to creators who completed their first review loop. Your name is on the code.',
