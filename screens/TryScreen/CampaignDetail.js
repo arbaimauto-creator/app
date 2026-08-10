@@ -12,13 +12,16 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import FastImage from 'react-native-fast-image';
 import Preference from 'react-native-default-preference';
-import Constants from '../../Components/Constants';
 import Strings from '../../Components/Strings';
+import T from '../../Components/Constants/DesignTokens';
+import { Card, Badge } from '../../Components/UI';
 import { applyToCampaign, selectMyApplications } from '../../slices/campaign';
 import { isGuestUser, LogoutAlert } from '../../Components/utils';
 import { getCreatorProfile } from '../../api/creators';
 import { getSeedings, upsertSeeding, setSeedingStatus, SEEDING_STATUS } from '../../api/seedings';
 import { personalizedPoints, concurrentLimit } from './points';
+
+const { COLORS, RADIUS, TYPE } = T;
 
 export default function CampaignDetail({ route, navigation }) {
   const { campaign } = route.params;
@@ -40,6 +43,7 @@ export default function CampaignDetail({ route, navigation }) {
   }, []);
 
   const points = personalizedPoints(campaign.basePoints ?? campaign.rewardPoint, gScore);
+  const isCurated = campaign.track === 'curated';
 
   // 게스트는 신청/업로드 불가 — 로그인 유도 (다른 업로드 진입점과 동일 정책)
   // __DEV__: 에뮬레이터는 소셜 로그인이 불가하므로 개발 빌드에서만 가드 통과 (프로덕션 무영향)
@@ -91,7 +95,13 @@ export default function CampaignDetail({ route, navigation }) {
     // 시딩 인스턴스 생성 (상태머신 시작점)
     await upsertSeeding(campaign.id, { pledgeChecked: true, appealText: appeal.trim() });
     await setSeedingStatus(campaign.id, SEEDING_STATUS.APPLIED);
-    Alert.alert(Strings.CAMPAIGN_APPLIED);
+    // 신청 완료 전용 화면(시안)으로 이동 — 신청 후 활성 시딩 수 = 기존 카운트 + 1
+    navigation.navigate('ApplyDone', {
+      campaignTitle: campaign.title,
+      track: campaign.track,
+      usedCount: activeCount + 1,
+      limit,
+    });
   };
 
   const onUpload = async () => {
@@ -112,22 +122,31 @@ export default function CampaignDetail({ route, navigation }) {
       <ScrollView>
         <FastImage source={{ uri: campaign.thumbnailUrl }} style={styles.hero} />
         <View style={styles.body}>
-          <Text style={styles.brand}>{campaign.brand}</Text>
-          <Text style={styles.title}>{campaign.title}</Text>
-          <Text style={styles.meta}>
-            {Strings.CAMPAIGN_REMAINING(campaign.remaining)} ·{' '}
-            {(campaign.countries || []).join(' · ')} · +{points}P
-          </Text>
-          <Text style={styles.approvalNote}>{Strings.APPLY_AVG_APPROVAL}</Text>
+          {/* 조건·기한·잔여 수량 상단 고정 카드 */}
+          <Card style={styles.topCard}>
+            <View style={styles.badgeRow}>
+              <Badge tone={isCurated ? 'curated' : 'open'} text={isCurated ? 'Curated' : 'Open'} />
+              <Badge tone="amber" text={`+${points}P`} style={styles.pointBadge} />
+              <View style={styles.grow} />
+              <Text style={styles.xs}>{Strings.CAMPAIGN_REMAINING(campaign.remaining)}</Text>
+            </View>
+            <Text style={styles.brand}>{campaign.brand}</Text>
+            <Text style={styles.title}>{campaign.title}</Text>
+            <Text style={styles.meta}>
+              {(campaign.countries || []).join(' · ')} ·{' '}
+              <Text style={styles.pointsEmph}>+{points}P</Text>
+            </Text>
+            <Text style={styles.approvalNote}>{Strings.APPLY_AVG_APPROVAL}</Text>
+          </Card>
 
           {Array.isArray(campaign.contentGuide) && campaign.contentGuide.length > 0 ? (
-            <View style={styles.guideBox}>
+            <Card style={styles.guideCard}>
               {campaign.contentGuide.map((g) => (
                 <Text key={g} style={styles.guideItem}>
                   · {g}
                 </Text>
               ))}
-            </View>
+            </Card>
           ) : null}
 
           {!applied ? (
@@ -135,7 +154,7 @@ export default function CampaignDetail({ route, navigation }) {
               <TextInput
                 style={styles.appealInput}
                 placeholder={Strings.APPLY_APPEAL_PLACEHOLDER}
-                placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+                placeholderTextColor={COLORS.GREY}
                 maxLength={100}
                 value={appeal}
                 onChangeText={setAppeal}
@@ -154,13 +173,12 @@ export default function CampaignDetail({ route, navigation }) {
       <View style={styles.footer}>
         {applied ? (
           <TouchableOpacity style={[styles.cta, styles.ctaSecondary]} onPress={onUpload}>
-            <Text style={styles.ctaText}>{Strings.UPLOAD_REVIEW_CTA}</Text>
+            <Text style={[styles.ctaText, styles.ctaTextSecondary]}>
+              {Strings.UPLOAD_REVIEW_CTA}
+            </Text>
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity
-            style={[styles.cta, !pledged && styles.ctaDisabled]}
-            onPress={onApply}
-          >
+          <TouchableOpacity style={[styles.cta, !pledged && styles.ctaDisabled]} onPress={onApply}>
             <Text style={styles.ctaText}>{Strings.CAMPAIGN_APPLY}</Text>
           </TouchableOpacity>
         )}
@@ -170,60 +188,63 @@ export default function CampaignDetail({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Constants.COLOR_BACKGROUND_DARK },
-  hero: { width: '100%', height: 220, backgroundColor: '#eee' },
+  container: { flex: 1, backgroundColor: COLORS.BG },
+  hero: { width: '100%', height: 220, backgroundColor: COLORS.TRACK },
   body: { padding: 16 },
-  brand: { fontSize: 13, color: Constants.TIER_COLORS.OPERATOR },
-  title: {
-    fontSize: 20,
-    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-    color: Constants.TIER_COLORS.ARTISAN,
-    marginVertical: 6,
+  topCard: { marginBottom: 10 },
+  badgeRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+  pointBadge: { marginLeft: 6 },
+  grow: { flex: 1 },
+  xs: { ...TYPE.XS },
+  brand: { ...TYPE.XS },
+  title: { ...TYPE.CARD_TITLE, fontSize: 16, marginTop: 2, marginBottom: 4 },
+  meta: { ...TYPE.SUB },
+  pointsEmph: { fontFamily: T.FONT.ExtraBold, color: COLORS.AMBER_DEEP },
+  approvalNote: {
+    ...TYPE.XS,
+    fontFamily: T.FONT.SemiBold,
+    color: COLORS.GREEN,
+    marginTop: 6,
   },
-  meta: { fontSize: 13, color: Constants.TIER_COLORS.STRIVER },
-  approvalNote: { fontSize: 12, color: '#1c7c31', marginTop: 6, fontWeight: '600' },
-  guideBox: {
-    marginTop: 14,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 12,
-  },
-  guideItem: { fontSize: 13, color: Constants.TIER_COLORS.ARTISAN, lineHeight: 21 },
+  guideCard: { marginBottom: 10 },
+  guideItem: { ...TYPE.BODY, lineHeight: 21 },
   appealInput: {
-    marginTop: 14,
+    marginTop: 4,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
+    borderColor: COLORS.LINE,
+    borderRadius: RADIUS.FIELD,
     paddingVertical: 10,
     paddingHorizontal: 12,
-    fontSize: 13.5,
-    backgroundColor: '#fff',
-    color: Constants.TIER_COLORS.ARTISAN,
+    fontFamily: T.FONT.Regular,
+    fontSize: 13,
+    backgroundColor: COLORS.SURFACE,
+    color: COLORS.INK,
   },
   pledgeRow: { flexDirection: 'row', alignItems: 'center', marginTop: 14 },
   checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
+    width: 17,
+    height: 17,
+    borderRadius: 4,
     borderWidth: 1.5,
-    borderColor: '#bbb',
+    borderColor: COLORS.LINE,
     marginRight: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.SURFACE,
   },
-  checkboxOn: { backgroundColor: Constants.COLOR_MAIN, borderColor: Constants.COLOR_MAIN },
-  checkboxMark: { fontSize: 14, fontWeight: '900', color: '#16130d' },
-  pledgeText: { flex: 1, fontSize: 13.5, color: Constants.TIER_COLORS.ARTISAN, lineHeight: 20 },
-  honestyNote: { fontSize: 12, color: Constants.TIER_COLORS.STRIVER, marginTop: 10, lineHeight: 18 },
+  checkboxOn: { backgroundColor: COLORS.AMBER, borderColor: COLORS.AMBER },
+  checkboxMark: { fontSize: 11, fontFamily: T.FONT.ExtraBold, color: COLORS.SURFACE },
+  pledgeText: { flex: 1, ...TYPE.BODY, fontSize: 12.5, lineHeight: 19 },
+  honestyNote: { ...TYPE.XS, marginTop: 10, lineHeight: 16.5 },
   ctaDisabled: { opacity: 0.45 },
-  footer: { padding: 16 },
+  footer: { padding: 16, backgroundColor: COLORS.BG },
   cta: {
-    backgroundColor: Constants.COLOR_MAIN,
-    borderRadius: 12,
-    paddingVertical: 15,
+    backgroundColor: COLORS.AMBER,
+    borderRadius: RADIUS.BTN,
+    paddingVertical: 14,
     alignItems: 'center',
   },
-  ctaSecondary: { backgroundColor: Constants.COLOR_POINT_BLUE },
-  ctaText: { fontSize: 16, fontWeight: '800', color: '#16130d' },
+  ctaSecondary: { backgroundColor: COLORS.INK },
+  ctaText: { ...TYPE.BTN, fontSize: 14.5 },
+  ctaTextSecondary: { color: '#FFFFFF' },
 });

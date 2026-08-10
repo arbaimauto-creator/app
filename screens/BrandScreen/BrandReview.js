@@ -13,11 +13,14 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import FastImage from 'react-native-fast-image';
-import Constants from '../../Components/Constants';
+import T from '../../Components/Constants/DesignTokens';
+import { Card, Btn, ProgressBar } from '../../Components/UI';
 import Strings from '../../Components/Strings';
 import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
 import { fetchCampaignReviews } from '../../api/reviews';
 import { getEvaluations, saveEvaluation, TRIAGE, SKIP_REASONS } from '../../api/evaluations';
+
+const { COLORS, FONT } = T;
 
 // v2 §5-2: 1차 트리아지(👍👌👎) → 👍 후보에만 정량 4항목 + 재협업 Y/N + 코멘트.
 const RUBRIC = [
@@ -27,19 +30,22 @@ const RUBRIC = [
   { key: 'marketSignal', label: () => Strings.RUBRIC_MARKET_SIGNAL },
 ];
 
-function Stars({ value, onChange }) {
+const FLAGS = { US: '🇺🇸', JP: '🇯🇵', KR: '🇰🇷', ID: '🇮🇩', TH: '🇹🇭', VN: '🇻🇳' };
+
+// 5점 dots — 기존 Stars를 dots로 교체 (저장 로직은 동일)
+function Dots({ value, onChange }) {
   return (
     <View style={{ flexDirection: 'row' }}>
       {[1, 2, 3, 4, 5].map((n) => (
-        <TouchableOpacity key={n} onPress={() => onChange(n)} style={{ padding: 3 }}>
-          <Text style={[styles.star, n <= (value || 0) && styles.starOn]}>★</Text>
+        <TouchableOpacity key={n} onPress={() => onChange(n)} style={{ padding: 4 }}>
+          <View style={[styles.dot, n <= (value || 0) && styles.dotOn]} />
         </TouchableOpacity>
       ))}
     </View>
   );
 }
 
-export default function BrandReview() {
+export default function BrandReview({ navigation }) {
   const dispatch = useDispatch();
   const campaigns = useSelector(selectCampaigns);
   const [campaignId, setCampaignId] = useState(null);
@@ -47,6 +53,9 @@ export default function BrandReview() {
   const [evaluations, setEvaluations] = useState({});
   const [expanded, setExpanded] = useState(null); // reviewId — 루브릭 열림
   const [draft, setDraft] = useState({}); // { [reviewId]: {scores, rebook, comment} }
+  // 시안 6b: 세션 트리아지 카운트 + 요약 뷰 이후 '남은 후보 마저 평가' 모드
+  const [session, setSession] = useState({ pick: 0, ok: 0, skip: 0 });
+  const [rubricQueue, setRubricQueue] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -64,6 +73,15 @@ export default function BrandReview() {
   );
 
   const evaluatedCount = reviews.filter((r) => evaluations[r.id]?.triage).length;
+  const allTriaged = reviews.length > 0 && evaluatedCount === reviews.length;
+  const pendingPicks = reviews.filter(
+    (r) => evaluations[r.id]?.triage === TRIAGE.PICK && !evaluations[r.id]?.scores,
+  );
+  const scoredCount = reviews.filter((r) => evaluations[r.id]?.scores).length;
+  const sessionTotal = session.pick + session.ok + session.skip;
+  const showSummary = allTriaged && !(rubricQueue && pendingPicks.length > 0);
+
+  const bumpSession = (triage) => setSession((prev) => ({ ...prev, [triage]: prev[triage] + 1 }));
 
   const onTriage = async (reviewId, triage) => {
     if (triage === TRIAGE.SKIP) {
@@ -75,6 +93,7 @@ export default function BrandReview() {
           onPress: async () => {
             const all = await saveEvaluation(reviewId, { triage, skipReason: reason });
             setEvaluations({ ...all });
+            bumpSession(triage);
           },
         })),
         { cancelable: true },
@@ -83,6 +102,7 @@ export default function BrandReview() {
     }
     const all = await saveEvaluation(reviewId, { triage });
     setEvaluations({ ...all });
+    bumpSession(triage);
     if (triage === TRIAGE.PICK) {
       setExpanded(reviewId);
     }
@@ -105,7 +125,11 @@ export default function BrandReview() {
       comment: (d.comment || '').trim(),
     });
     setEvaluations({ ...all });
-    setExpanded(null);
+    // '저장하고 다음 후보' — 다음 미채점 후보를 자동으로 연다
+    const next = reviews.find(
+      (r) => r.id !== reviewId && all[r.id]?.triage === TRIAGE.PICK && !all[r.id]?.scores,
+    );
+    setExpanded(next ? next.id : null);
   };
 
   const setScore = (reviewId, key, value) => {
@@ -125,118 +149,197 @@ export default function BrandReview() {
     const d = draft[item.id] || {};
 
     return (
-      <View style={styles.card}>
-        <View style={styles.cardTop}>
-          <FastImage source={{ uri: item.thumbnailUrl }} style={styles.thumb} />
-          <View style={{ flex: 1, marginLeft: 12 }}>
-            <Text style={styles.reviewer}>@{item.reviewer}</Text>
-            <Text style={styles.meta}>
-              {item.country} · {item.format} · {item.views7d?.toLocaleString()} views
+      <Card style={styles.card}>
+        {/* 썸네일 */}
+        <FastImage source={{ uri: item.thumbnailUrl }} style={styles.thumb} />
+
+        <View style={styles.cardBody}>
+          <View style={styles.handleRow}>
+            <Text style={styles.reviewer}>
+              @{item.reviewer} · {FLAGS[item.country] || item.country}
             </Text>
-            {ev?.scores ? (
-              <Text style={styles.doneTag}>
-                {Strings.RUBRIC_SAVED} · {ev.rebook ? Strings.REBOOK_YES : Strings.REBOOK_NO}
-              </Text>
-            ) : null}
+            <Text style={styles.formatTag}>{item.format}</Text>
           </View>
-        </View>
+          <Text style={styles.meta}>
+            {item.country} · {item.views7d?.toLocaleString()} views
+          </Text>
+          {ev?.scores ? (
+            <Text style={styles.doneTag}>
+              {Strings.RUBRIC_SAVED} · {ev.rebook ? Strings.REBOOK_YES : Strings.REBOOK_NO}
+            </Text>
+          ) : null}
 
-        {/* 1차 트리아지 */}
-        <View style={styles.triageRow}>
-          {[
-            { t: TRIAGE.PICK, icon: '👍', label: Strings.TRIAGE_PICK },
-            { t: TRIAGE.OK, icon: '👌', label: Strings.TRIAGE_OK },
-            { t: TRIAGE.SKIP, icon: '👎', label: Strings.TRIAGE_SKIP },
-          ].map(({ t, icon, label }) => (
-            <TouchableOpacity
-              key={t}
-              style={[styles.triageBtn, ev?.triage === t && styles.triageBtnOn]}
-              onPress={() => onTriage(item.id, t)}
-            >
-              <Text style={styles.triageIcon}>{icon}</Text>
-              <Text style={styles.triageLabel}>{label}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* 2차 루브릭 — 👍 후보에만 */}
-        {isPick && (isOpen || !ev?.scores) ? (
-          <View style={styles.rubricBox}>
-            {RUBRIC.map((r) => (
-              <View key={r.key} style={styles.rubricRow}>
-                <Text style={styles.rubricLabel}>{r.label()}</Text>
-                <Stars
-                  value={(d.scores || {})[r.key] ?? ev?.scores?.[r.key]}
-                  onChange={(v) => setScore(item.id, r.key, v)}
-                />
-              </View>
+          {/* 1차 트리아지 */}
+          <View style={styles.triageRow}>
+            {[
+              {
+                t: TRIAGE.PICK,
+                icon: '👍',
+                label: Strings.TRIAGE_PICK,
+                on: styles.triagePickOn,
+                onText: styles.triagePickTextOn,
+              },
+              {
+                t: TRIAGE.OK,
+                icon: '👌',
+                label: Strings.TRIAGE_OK,
+                on: styles.triageOkOn,
+                onText: styles.triageOkTextOn,
+              },
+              {
+                t: TRIAGE.SKIP,
+                icon: '👎',
+                label: Strings.TRIAGE_SKIP,
+                on: styles.triageSkipOn,
+                onText: styles.triageSkipTextOn,
+              },
+            ].map(({ t, icon, label, on, onText }) => (
+              <TouchableOpacity
+                key={t}
+                style={[styles.triageBtn, ev?.triage === t && on]}
+                onPress={() => onTriage(item.id, t)}
+              >
+                <Text style={styles.triageIcon}>{icon}</Text>
+                <Text style={[styles.triageLabel, ev?.triage === t && onText]}>{label}</Text>
+              </TouchableOpacity>
             ))}
-            <View style={styles.rubricRow}>
-              <Text style={styles.rubricLabel}>{Strings.REBOOK_LABEL}</Text>
-              <View style={{ flexDirection: 'row' }}>
-                {[true, false].map((v) => (
-                  <TouchableOpacity
-                    key={String(v)}
-                    style={[
-                      styles.rebookBtn,
-                      (d.rebook ?? ev?.rebook) === v && styles.rebookBtnOn,
-                    ]}
-                    onPress={() =>
-                      setDraft((prev) => ({
-                        ...prev,
-                        [item.id]: { ...(prev[item.id] || {}), rebook: v },
-                      }))
-                    }
-                  >
-                    <Text
-                      style={[
-                        styles.rebookText,
-                        (d.rebook ?? ev?.rebook) === v && styles.rebookTextOn,
-                      ]}
-                    >
-                      {v ? 'Y' : 'N'}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-            <TextInput
-              style={styles.commentInput}
-              placeholder={Strings.RUBRIC_COMMENT_PLACEHOLDER}
-              placeholderTextColor={Constants.TIER_COLORS.STRIVER}
-              value={d.comment ?? ev?.comment ?? ''}
-              onChangeText={(v) =>
-                setDraft((prev) => ({ ...prev, [item.id]: { ...(prev[item.id] || {}), comment: v } }))
-              }
-            />
-            <TouchableOpacity style={styles.saveBtn} onPress={() => onSaveRubric(item.id)}>
-              <Text style={styles.saveBtnText}>{Strings.RUBRIC_SAVE}</Text>
-            </TouchableOpacity>
           </View>
-        ) : null}
-      </View>
+          <Text style={styles.triageHint}>👎 선택 시 사유 1개 · 100건 10분 목표</Text>
+
+          {/* 2차 루브릭 — 👍 후보에만 */}
+          {isPick && (isOpen || !ev?.scores) ? (
+            <View style={styles.rubricBox}>
+              {RUBRIC.map((r) => (
+                <View key={r.key}>
+                  <View style={styles.rubricRow}>
+                    <Text style={styles.rubricLabel}>{r.label()}</Text>
+                    <Dots
+                      value={(d.scores || {})[r.key] ?? ev?.scores?.[r.key]}
+                      onChange={(v) => setScore(item.id, r.key, v)}
+                    />
+                  </View>
+                  {r.key === 'quality' ? (
+                    <Text style={styles.bonusHint}>4점↑ = 크리에이터 품질 보너스 +20%</Text>
+                  ) : null}
+                </View>
+              ))}
+              <View style={[styles.rubricRow, { borderBottomWidth: 0 }]}>
+                <Text style={styles.rubricLabel}>{Strings.REBOOK_LABEL}</Text>
+                <View style={{ flexDirection: 'row' }}>
+                  {[true, false].map((v) => (
+                    <TouchableOpacity
+                      key={String(v)}
+                      style={[
+                        styles.rebookBtn,
+                        (d.rebook ?? ev?.rebook) === v && styles.rebookBtnOn,
+                      ]}
+                      onPress={() =>
+                        setDraft((prev) => ({
+                          ...prev,
+                          [item.id]: { ...(prev[item.id] || {}), rebook: v },
+                        }))
+                      }
+                    >
+                      <Text
+                        style={[
+                          styles.rebookText,
+                          (d.rebook ?? ev?.rebook) === v && styles.rebookTextOn,
+                        ]}
+                      >
+                        {v ? 'Y' : 'N'}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+              <TextInput
+                style={styles.commentInput}
+                placeholder="코멘트 (선택) — 크리에이터에게 전달돼요"
+                placeholderTextColor={COLORS.GREY}
+                value={d.comment ?? ev?.comment ?? ''}
+                onChangeText={(v) =>
+                  setDraft((prev) => ({
+                    ...prev,
+                    [item.id]: { ...(prev[item.id] || {}), comment: v },
+                  }))
+                }
+              />
+              <Btn
+                title="저장하고 다음 후보"
+                onPress={() => onSaveRubric(item.id)}
+                style={{ marginTop: 10 }}
+              />
+            </View>
+          ) : null}
+        </View>
+      </Card>
     );
   };
 
+  // 시안 6b: 세션 요약 뷰 — 트리아지 큐 소진 시
+  if (showSummary) {
+    const doneCount = sessionTotal > 0 ? sessionTotal : evaluatedCount;
+    return (
+      <SafeAreaView style={styles.container}>
+        <ScrollView contentContainerStyle={styles.summaryWrap}>
+          <Text style={styles.summaryEmoji}>✅</Text>
+          <Text style={styles.summaryTitle}>오늘 {doneCount}건 평가 완료</Text>
+          <Text style={styles.summaryCounts}>
+            👍 후보 {session.pick} · 👌 보통 {session.ok} · 👎 스킵 {session.skip}
+          </Text>
+
+          <Card style={styles.summaryCard}>
+            <Text style={styles.summaryCardLabel}>정량 평가 진행</Text>
+            <Text style={styles.summaryCardMeta}>
+              {reviews.length}건 중 {scoredCount}건
+            </Text>
+            <ProgressBar
+              ratio={reviews.length ? scoredCount / reviews.length : 0}
+              style={{ marginTop: 8 }}
+            />
+            <Text style={styles.summaryCardHint}>20건만 평가해도 리포트 정확도는 충분해요.</Text>
+          </Card>
+
+          <Card style={styles.summaryCard}>
+            <Text style={styles.summaryCardLabel}>평가는 크리에이터에게 전달돼요</Text>
+            <Text style={styles.summaryCardHint}>응답 목표 ≤ 7일</Text>
+          </Card>
+
+          {pendingPicks.length > 0 ? (
+            <Btn
+              title={`남은 후보 ${pendingPicks.length}건 마저 평가`}
+              onPress={() => setRubricQueue(true)}
+              style={{ alignSelf: 'stretch', marginTop: 18 }}
+            />
+          ) : null}
+          <Btn
+            variant="ghost"
+            title="대시보드로"
+            onPress={() => navigation.navigate('BrandDashboard')}
+            style={{ alignSelf: 'stretch', marginTop: 8 }}
+          />
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
+  const listData = rubricQueue ? pendingPicks : reviews;
+
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>{Strings.BRAND_REVIEW_TITLE}</Text>
-      <View style={styles.progressRow}>
-        <View style={styles.progressTrack}>
-          <View
-            style={[
-              styles.progressFill,
-              { width: `${reviews.length ? (evaluatedCount / reviews.length) * 100 : 0}%` },
-            ]}
-          />
-        </View>
-        <Text style={styles.progressText}>
-          {evaluatedCount}/{reviews.length}
+      <View style={styles.headerRow}>
+        <Text style={styles.header}>{Strings.BRAND_REVIEW_TITLE}</Text>
+        <Text style={styles.headerCount}>
+          {evaluatedCount} / {reviews.length}
         </Text>
       </View>
+      <ProgressBar
+        ratio={reviews.length ? evaluatedCount / reviews.length : 0}
+        style={{ marginHorizontal: 16, marginTop: 8 }}
+      />
       <Text style={styles.progressHint}>{Strings.RUBRIC_20_ENOUGH}</Text>
       <FlatList
-        data={reviews}
+        data={listData}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
         renderItem={renderReview}
@@ -247,78 +350,140 @@ export default function BrandReview() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Constants.COLOR_BACKGROUND_DARK },
-  header: {
-    fontSize: 22,
-    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-    color: Constants.TIER_COLORS.ARTISAN,
+  container: { flex: 1, backgroundColor: COLORS.BG, paddingTop: T.TOP_INSET },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingTop: 12,
   },
-  progressRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginTop: 10 },
-  progressTrack: { flex: 1, height: 8, borderRadius: 5, backgroundColor: '#e8e5df', overflow: 'hidden' },
-  progressFill: { height: '100%', backgroundColor: Constants.COLOR_MAIN },
-  progressText: { marginLeft: 10, fontSize: 12.5, fontWeight: '700', color: Constants.TIER_COLORS.ARTISAN },
-  progressHint: { paddingHorizontal: 16, marginTop: 4, fontSize: 11.5, color: Constants.TIER_COLORS.STRIVER },
-  card: { backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 12 },
-  cardTop: { flexDirection: 'row', alignItems: 'center' },
-  thumb: { width: 54, height: 54, borderRadius: 9, backgroundColor: '#eee' },
-  reviewer: { fontSize: 14.5, fontWeight: '700', color: '#26231d' },
-  meta: { fontSize: 12, color: '#8a857b', marginTop: 2 },
-  doneTag: { fontSize: 11.5, color: '#1c7c31', fontWeight: '700', marginTop: 3 },
+  header: { fontFamily: FONT.ExtraBold, fontSize: 17, color: COLORS.INK, letterSpacing: -0.2 },
+  headerCount: {
+    fontFamily: FONT.Bold,
+    fontSize: 10.5,
+    color: COLORS.GREY,
+    fontVariant: ['tabular-nums'],
+  },
+  progressHint: {
+    paddingHorizontal: 16,
+    marginTop: 5,
+    fontFamily: FONT.Regular,
+    fontSize: 10.5,
+    color: COLORS.GREY,
+  },
+
+  card: { paddingVertical: 0, paddingHorizontal: 0, marginBottom: 12, overflow: 'hidden' },
+  thumb: {
+    width: '100%',
+    height: 230,
+    borderTopLeftRadius: T.RADIUS.CARD,
+    borderTopRightRadius: T.RADIUS.CARD,
+    backgroundColor: COLORS.LINE,
+  },
+  cardBody: { paddingVertical: 11, paddingHorizontal: 13 },
+  handleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  reviewer: { fontFamily: FONT.Bold, fontSize: 13.5, color: COLORS.INK },
+  formatTag: { fontFamily: FONT.Regular, fontSize: 10.5, color: COLORS.GREY },
+  meta: { fontFamily: FONT.Regular, fontSize: 10.5, color: COLORS.GREY, marginTop: 2 },
+  doneTag: { fontFamily: FONT.Bold, fontSize: 11, color: COLORS.GREEN, marginTop: 3 },
+
   triageRow: { flexDirection: 'row', marginTop: 12, gap: 8 },
   triageBtn: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: '#e4e1da',
-    borderRadius: 10,
-    paddingVertical: 8,
+    borderWidth: 1.5,
+    borderColor: COLORS.LINE,
+    borderRadius: 11,
+    paddingVertical: 9,
     alignItems: 'center',
-    backgroundColor: '#faf9f7',
+    backgroundColor: COLORS.SURFACE,
   },
-  triageBtnOn: { borderColor: Constants.COLOR_MAIN, backgroundColor: '#fff3d6' },
-  triageIcon: { fontSize: 17 },
-  triageLabel: { fontSize: 10.5, color: '#5c574d', marginTop: 2 },
-  rubricBox: { marginTop: 12, borderTopWidth: 1, borderTopColor: '#f0eee9', paddingTop: 10 },
+  triagePickOn: { borderColor: COLORS.GREEN, backgroundColor: COLORS.GREEN_SOFT },
+  triagePickTextOn: { color: COLORS.GREEN },
+  triageOkOn: { borderColor: COLORS.AMBER, backgroundColor: COLORS.AMBER_SOFT },
+  triageOkTextOn: { color: COLORS.AMBER_DEEP },
+  triageSkipOn: { borderColor: COLORS.RED, backgroundColor: COLORS.RED_SOFT },
+  triageSkipTextOn: { color: COLORS.RED },
+  triageIcon: { fontSize: 19 },
+  triageLabel: { fontFamily: FONT.Bold, fontSize: 11, color: COLORS.GREY, marginTop: 2 },
+  triageHint: {
+    marginTop: 8,
+    textAlign: 'center',
+    fontFamily: FONT.Regular,
+    fontSize: 10.5,
+    color: COLORS.GREY,
+  },
+
+  rubricBox: { marginTop: 12, borderTopWidth: 1, borderTopColor: COLORS.LINE, paddingTop: 10 },
   rubricRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    backgroundColor: COLORS.SURFACE,
+    borderWidth: 1,
+    borderColor: COLORS.LINE,
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 11,
     marginBottom: 6,
   },
-  rubricLabel: { fontSize: 13, color: '#26231d' },
-  star: { fontSize: 20, color: '#ddd9d0' },
-  starOn: { color: '#f5a300' },
+  rubricLabel: { fontFamily: FONT.Bold, fontSize: 12.5, color: COLORS.INK },
+  dot: { width: 15, height: 15, borderRadius: 8, backgroundColor: COLORS.TRACK },
+  dotOn: { backgroundColor: COLORS.AMBER },
+  bonusHint: {
+    fontFamily: FONT.Regular,
+    fontSize: 10.5,
+    color: COLORS.AMBER_DEEP,
+    marginTop: -2,
+    marginBottom: 6,
+    paddingHorizontal: 4,
+  },
   rebookBtn: {
-    width: 38,
-    height: 30,
-    borderWidth: 1,
-    borderColor: '#e4e1da',
+    width: 96,
+    height: 32,
+    borderWidth: 1.5,
+    borderColor: COLORS.LINE,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: 6,
+    backgroundColor: COLORS.SURFACE,
   },
-  rebookBtnOn: { backgroundColor: Constants.COLOR_MAIN, borderColor: Constants.COLOR_MAIN },
-  rebookText: { fontSize: 13, fontWeight: '800', color: '#8a857b' },
-  rebookTextOn: { color: '#16130d' },
+  rebookBtnOn: { backgroundColor: COLORS.DARK, borderColor: COLORS.DARK },
+  rebookText: { fontFamily: FONT.ExtraBold, fontSize: 13, color: COLORS.GREY },
+  rebookTextOn: { color: '#FFFFFF' },
   commentInput: {
     borderWidth: 1,
-    borderColor: '#e4e1da',
-    borderRadius: 9,
+    borderColor: COLORS.LINE,
+    borderRadius: 10,
     paddingVertical: 9,
     paddingHorizontal: 12,
+    fontFamily: FONT.Regular,
     fontSize: 13,
     marginTop: 4,
-    color: '#26231d',
+    color: COLORS.INK,
   },
-  saveBtn: {
-    marginTop: 10,
-    backgroundColor: Constants.COLOR_MAIN,
-    borderRadius: 9,
-    paddingVertical: 10,
-    alignItems: 'center',
+  empty: { textAlign: 'center', marginTop: 40, fontFamily: FONT.Regular, color: COLORS.GREY },
+
+  // 세션 요약 (시안 6b)
+  summaryWrap: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
+  summaryEmoji: { fontSize: 34 },
+  summaryTitle: {
+    fontFamily: FONT.Black,
+    fontSize: 20,
+    color: COLORS.INK,
+    marginTop: 12,
+    letterSpacing: -0.2,
   },
-  saveBtnText: { fontSize: 13.5, fontWeight: '800', color: '#16130d' },
-  empty: { textAlign: 'center', marginTop: 40, color: Constants.TIER_COLORS.STRIVER },
+  summaryCounts: { fontFamily: FONT.Regular, fontSize: 11.5, color: COLORS.GREY, marginTop: 6 },
+  summaryCard: { alignSelf: 'stretch', marginTop: 12 },
+  summaryCardLabel: { fontFamily: FONT.Bold, fontSize: 12.5, color: COLORS.INK },
+  summaryCardMeta: {
+    fontFamily: FONT.Regular,
+    fontSize: 10.5,
+    color: COLORS.GREY,
+    marginTop: 4,
+    fontVariant: ['tabular-nums'],
+  },
+  summaryCardHint: { fontFamily: FONT.Regular, fontSize: 10.5, color: COLORS.GREY, marginTop: 7 },
 });

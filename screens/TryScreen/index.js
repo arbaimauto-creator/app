@@ -11,11 +11,14 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import FastImage from 'react-native-fast-image';
-import Constants from '../../Components/Constants';
 import Strings from '../../Components/Strings';
+import T from '../../Components/Constants/DesignTokens';
+import { Card, Badge, NoteBox } from '../../Components/UI';
 import { fetchCampaigns, selectCampaigns, selectMyApplications } from '../../slices/campaign';
 import { getCreatorProfile } from '../../api/creators';
 import { personalizedPoints, CURATED_MIN_G } from './points';
+
+const { COLORS, TYPE } = T;
 
 // v2 §4-1: Open/Curated 2-트랙. Curated 미달은 숨기지 말고 잠가서 보여준다.
 function CampaignCard({ campaign, applied, gScore, completedCount, onPress }) {
@@ -27,47 +30,51 @@ function CampaignCard({ campaign, applied, gScore, completedCount, onPress }) {
   const points = personalizedPoints(campaign.basePoints ?? campaign.rewardPoint, gScore);
   const bonus = points - (campaign.basePoints ?? campaign.rewardPoint);
 
+  const trackBadge = isCurated
+    ? { tone: 'curated', text: locked ? '🔒 Curated' : 'Curated' }
+    : {
+        tone: 'open',
+        text: !closed ? `Open · ${Strings.CAMPAIGN_FIRST_COME(campaign.remaining)}` : 'Open',
+      };
+  const pointBadge = closed
+    ? { tone: 'curated', text: Strings.CAMPAIGN_CLOSED }
+    : applied
+      ? { tone: 'curated', text: Strings.CAMPAIGN_APPLIED }
+      : { tone: locked ? 'curated' : 'amber', text: `+${points}P` };
+
   return (
-    <TouchableOpacity
-      style={[styles.card, locked && styles.cardLocked]}
-      activeOpacity={0.85}
-      onPress={onPress}
-      disabled={closed || locked}
-    >
-      <FastImage source={{ uri: campaign.thumbnailUrl }} style={styles.thumb} />
-      <View style={styles.cardBody}>
-        <View style={styles.trackRow}>
-          <Text style={[styles.trackTag, isCurated ? styles.trackCurated : styles.trackOpen]}>
-            {isCurated ? 'Curated' : 'Open'}
-          </Text>
-          {!isCurated && !closed ? (
-            <Text style={styles.firstCome}>
-              {Strings.CAMPAIGN_FIRST_COME(campaign.remaining)}
+    <TouchableOpacity activeOpacity={0.85} onPress={onPress} disabled={closed || locked}>
+      <Card style={styles.card}>
+        <View style={styles.rowBetween}>
+          <Badge tone={trackBadge.tone} text={trackBadge.text} />
+          <Text style={styles.xs}>{Strings.CAMPAIGN_DEADLINE(deadline)}</Text>
+        </View>
+        <View style={styles.midRow}>
+          <FastImage source={{ uri: campaign.thumbnailUrl }} style={styles.thumb} />
+          <View style={styles.midBody}>
+            <Text style={styles.brand}>{campaign.brand}</Text>
+            <Text style={styles.title} numberOfLines={2}>
+              {campaign.title}
             </Text>
+            <Text style={styles.xs} numberOfLines={1}>
+              {Strings.CAMPAIGN_REMAINING(campaign.remaining)} · {campaign.countries.join(' · ')}
+            </Text>
+          </View>
+        </View>
+        <View style={styles.pointRow}>
+          <Badge tone={pointBadge.tone} text={pointBadge.text} />
+          {!closed && !applied && bonus > 0 ? (
+            <Text style={styles.bonusText}>+{bonus}P</Text>
           ) : null}
         </View>
-        <Text style={styles.brand}>{campaign.brand}</Text>
-        <Text style={styles.title} numberOfLines={2}>
-          {campaign.title}
-        </Text>
-        <Text style={styles.meta}>
-          {Strings.CAMPAIGN_REMAINING(campaign.remaining)} · {Strings.CAMPAIGN_DEADLINE(deadline)}
-        </Text>
-        <Text style={styles.countries}>{campaign.countries.join(' · ')}</Text>
         {locked ? (
-          <Text style={styles.lockHint}>{Strings.CURATED_LOCKED_HINT(CURATED_MIN_G)}</Text>
+          <NoteBox
+            tone="amber"
+            style={styles.lockNote}
+            text={Strings.CURATED_LOCKED_HINT(CURATED_MIN_G)}
+          />
         ) : null}
-      </View>
-      <View
-        style={[styles.badge, closed ? styles.badgeClosed : applied ? styles.badgeApplied : null]}
-      >
-        <Text style={styles.badgeText}>
-          {closed ? Strings.CAMPAIGN_CLOSED : applied ? Strings.CAMPAIGN_APPLIED : `+${points}P`}
-        </Text>
-        {!closed && !applied && bonus > 0 ? (
-          <Text style={styles.bonusText}>+{bonus}P</Text>
-        ) : null}
-      </View>
+      </Card>
     </TouchableOpacity>
   );
 }
@@ -107,12 +114,12 @@ export default function TryScreen({ navigation }) {
     <SafeAreaView style={styles.container}>
       <View style={styles.headerRow}>
         <Text style={styles.header}>{Strings.TRY_TAB}</Text>
-        <Text style={styles.gScore}>G{gScore}</Text>
+        <Badge tone="amber" text={`G${gScore}`} />
       </View>
       <FlatList
         data={sorted}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 16 }}
+        contentContainerStyle={styles.listContent}
         refreshControl={
           <RefreshControl refreshing={loading} onRefresh={() => dispatch(fetchCampaigns())} />
         }
@@ -134,7 +141,7 @@ export default function TryScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Constants.COLOR_BACKGROUND_DARK },
+  container: { flex: 1, backgroundColor: COLORS.BG, paddingTop: T.TOP_INSET },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -142,61 +149,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 12,
   },
-  header: {
-    fontSize: 24,
-    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-    color: Constants.TIER_COLORS.ARTISAN,
-  },
-  gScore: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: Constants.COLOR_MAIN,
-    backgroundColor: '#26231d',
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    overflow: 'hidden',
-  },
-  card: {
+  header: { ...TYPE.H_TITLE },
+  listContent: { padding: 16 },
+  card: { marginBottom: 11 },
+  rowBetween: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 12,
-    alignItems: 'center',
-    elevation: 2,
-  },
-  cardLocked: { opacity: 0.55 },
-  thumb: { width: 64, height: 64, borderRadius: 10, backgroundColor: '#eee' },
-  cardBody: { flex: 1, marginLeft: 12, marginRight: 8 },
-  trackRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 2 },
-  trackTag: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    borderRadius: 5,
-    paddingHorizontal: 6,
-    paddingVertical: 1.5,
-    overflow: 'hidden',
-    marginRight: 6,
-  },
-  trackOpen: { backgroundColor: '#e2f5e5', color: '#1c7c31' },
-  trackCurated: { backgroundColor: '#f1eafc', color: '#6b3fc9' },
-  firstCome: { fontSize: 10.5, color: '#1c7c31', fontWeight: '600' },
-  brand: { fontSize: 12, color: Constants.TIER_COLORS.OPERATOR },
-  title: { fontSize: 15, fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5, marginVertical: 2 },
-  meta: { fontSize: 12, color: Constants.TIER_COLORS.STRIVER },
-  countries: { fontSize: 11, color: Constants.TIER_COLORS.OPERATOR, marginTop: 2 },
-  lockHint: { fontSize: 11.5, color: '#6b3fc9', marginTop: 4, fontWeight: '600' },
-  badge: {
-    backgroundColor: Constants.COLOR_MAIN,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  badgeApplied: { backgroundColor: '#d9d6cf' },
-  badgeClosed: { backgroundColor: '#bbb' },
-  badgeText: { fontSize: 12, fontWeight: '700', color: '#16130d' },
-  bonusText: { fontSize: 10, fontWeight: '800', color: '#1c7c31', marginTop: 2 },
-  empty: { textAlign: 'center', marginTop: 60, color: Constants.TIER_COLORS.STRIVER },
+  xs: { ...TYPE.XS },
+  midRow: { flexDirection: 'row', alignItems: 'center', marginTop: 9 },
+  thumb: {
+    width: 52,
+    height: 52,
+    borderRadius: 10,
+    backgroundColor: COLORS.TRACK,
+  },
+  midBody: { flex: 1, marginLeft: 11 },
+  brand: { ...TYPE.XS, marginBottom: 1 },
+  title: { ...TYPE.CARD_TITLE },
+  pointRow: { flexDirection: 'row', alignItems: 'center', marginTop: 9, gap: 8 },
+  bonusText: { ...TYPE.XS, fontFamily: T.FONT.ExtraBold, color: COLORS.GREEN },
+  lockNote: { marginTop: 9 },
+  empty: { ...TYPE.SUB, textAlign: 'center', marginTop: 60 },
 });

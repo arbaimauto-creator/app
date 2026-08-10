@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Modal,
@@ -9,10 +9,14 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Constants from '../../Components/Constants';
+import T from '../../Components/Constants/DesignTokens';
+import { Badge } from '../../Components/UI';
 import Strings from '../../Components/Strings';
+import { getSavedAddress, saveSavedAddress } from '../../api/address';
 
-// v2 §3-⑤: 승인 직후 주소 수집 — 48시간 데드라인 문구, 미입력 취소는 무페널티(문구만).
+const { COLORS, RADIUS, FONT, TYPE } = T;
+
+// v2 §3-⑤ · 시안 12: 승인 직후 주소 수집 — 48시간 데드라인, 미입력 취소는 무페널티(문구만).
 export default function AddressModal({ visible, initial, onSubmit, onClose }) {
   const [name, setName] = useState(initial?.name || '');
   const [line, setLine] = useState(initial?.line || '');
@@ -22,7 +26,46 @@ export default function AddressModal({ visible, initial, onSubmit, onClose }) {
   const [postalCode, setPostalCode] = useState(initial?.postalCode || '');
   const [phone, setPhone] = useState(initial?.phone || '');
 
+  const fillFrom = (a) => {
+    setName(a?.name || '');
+    setLine(a?.line || '');
+    setCity(a?.city || '');
+    setStateProvince(a?.state || '');
+    setPostalCode(a?.postalCode || '');
+    setPhone(a?.phone || '');
+  };
+
+  // 시안 12: 열릴 때 initial이 비어 있으면 저장된 기본 배송지로 프리필
+  useEffect(() => {
+    if (!visible) {
+      return;
+    }
+    if (initial && (initial.name || initial.line)) {
+      fillFrom(initial);
+      return;
+    }
+    getSavedAddress().then((saved) => {
+      if (saved) {
+        fillFrom(saved);
+      }
+    });
+  }, [visible, initial]);
+
   const canSubmit = name.trim() && line.trim() && city.trim() && postalCode.trim() && phone.trim();
+
+  const submit = async () => {
+    const address = {
+      name: name.trim(),
+      line: line.trim(),
+      city: city.trim(),
+      state: stateProvince.trim(),
+      postalCode: postalCode.trim(),
+      phone: phone.trim(),
+    };
+    // 다음 캠페인 자동 입력용 기본 배송지 저장
+    await saveSavedAddress(address);
+    onSubmit(address);
+  };
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -31,72 +74,64 @@ export default function AddressModal({ visible, initial, onSubmit, onClose }) {
         style={styles.backdrop}
       >
         <View style={styles.sheet}>
-          <Text style={styles.title}>{Strings.ADDRESS_MODAL_TITLE}</Text>
+          <View style={styles.grabBar} />
+          <View style={styles.titleRow}>
+            <Text style={styles.title}>{Strings.ADDRESS_MODAL_TITLE}</Text>
+            <Badge tone="red" text="48시간" />
+          </View>
           <Text style={styles.deadline}>{Strings.ADDRESS_MODAL_DEADLINE}</Text>
-          <TextInput
-            style={styles.input}
-            placeholder={Strings.ADDRESS_NAME}
-            placeholderTextColor={Constants.TIER_COLORS.STRIVER}
-            value={name}
-            onChangeText={setName}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder={Strings.ADDRESS_LINE}
-            placeholderTextColor={Constants.TIER_COLORS.STRIVER}
-            value={line}
-            onChangeText={setLine}
-          />
+
+          <Text style={styles.label}>{Strings.ADDRESS_NAME}</Text>
+          <TextInput style={styles.input} value={name} onChangeText={setName} />
+          <Text style={styles.label}>{Strings.ADDRESS_LINE}</Text>
+          <TextInput style={styles.input} value={line} onChangeText={setLine} />
           <View style={styles.row}>
-            <TextInput
-              style={[styles.input, styles.rowInput]}
-              placeholder={Strings.ADDRESS_CITY}
-              placeholderTextColor={Constants.TIER_COLORS.STRIVER}
-              value={city}
-              onChangeText={setCity}
-            />
-            <TextInput
-              style={[styles.input, styles.rowInput]}
-              placeholder={Strings.ADDRESS_STATE}
-              placeholderTextColor={Constants.TIER_COLORS.STRIVER}
-              value={stateProvince}
-              onChangeText={setStateProvince}
-            />
+            <View style={styles.rowItem}>
+              <Text style={styles.label}>{Strings.ADDRESS_CITY}</Text>
+              <TextInput style={styles.input} value={city} onChangeText={setCity} />
+            </View>
+            <View style={styles.rowItem}>
+              <Text style={styles.label}>{Strings.ADDRESS_STATE}</Text>
+              <TextInput
+                style={styles.input}
+                value={stateProvince}
+                onChangeText={setStateProvince}
+              />
+            </View>
           </View>
           <View style={styles.row}>
-            <TextInput
-              style={[styles.input, styles.rowInput]}
-              placeholder={Strings.ADDRESS_POSTAL}
-              placeholderTextColor={Constants.TIER_COLORS.STRIVER}
-              autoCapitalize="characters"
-              value={postalCode}
-              onChangeText={setPostalCode}
-            />
-            <TextInput
-              style={[styles.input, styles.rowInput]}
-              placeholder={Strings.ADDRESS_PHONE}
-              placeholderTextColor={Constants.TIER_COLORS.STRIVER}
-              keyboardType="phone-pad"
-              value={phone}
-              onChangeText={setPhone}
-            />
+            <View style={styles.rowItem}>
+              <Text style={styles.label}>{Strings.ADDRESS_POSTAL}</Text>
+              <TextInput
+                style={styles.input}
+                autoCapitalize="characters"
+                value={postalCode}
+                onChangeText={setPostalCode}
+              />
+            </View>
+            <View style={styles.rowItem}>
+              <Text style={styles.label}>{Strings.ADDRESS_PHONE}</Text>
+              <TextInput
+                style={styles.input}
+                keyboardType="phone-pad"
+                value={phone}
+                onChangeText={setPhone}
+              />
+            </View>
           </View>
+
           <TouchableOpacity
             style={[styles.submit, !canSubmit && styles.submitDisabled]}
             disabled={!canSubmit}
-            onPress={() =>
-              onSubmit({
-                name: name.trim(),
-                line: line.trim(),
-                city: city.trim(),
-                state: stateProvince.trim(),
-                postalCode: postalCode.trim(),
-                phone: phone.trim(),
-              })
-            }
+            onPress={submit}
+            activeOpacity={0.8}
           >
-            <Text style={styles.submitText}>{Strings.ADDRESS_SUBMIT}</Text>
+            <Text style={styles.submitText}>저장 — 다음부터 자동 입력</Text>
           </TouchableOpacity>
+          <Text style={styles.customsNote}>
+            해외 배송은 통관 사정으로 지연될 수 있어요. 통관 지연 기간은 업로드 기한(D-day)에서
+            제외됩니다.
+          </Text>
           <TouchableOpacity style={styles.close} onPress={onClose}>
             <Text style={styles.closeText}>{Strings.CANCEL}</Text>
           </TouchableOpacity>
@@ -109,40 +144,49 @@ export default function AddressModal({ visible, initial, onSubmit, onClose }) {
 const styles = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },
   sheet: {
-    backgroundColor: Constants.COLOR_BACKGROUND_DARK,
-    borderTopLeftRadius: 18,
-    borderTopRightRadius: 18,
-    padding: 22,
-    paddingBottom: 34,
+    backgroundColor: COLORS.SURFACE,
+    borderTopLeftRadius: RADIUS.SHEET,
+    borderTopRightRadius: RADIUS.SHEET,
+    padding: 20,
+    paddingBottom: 30,
+    ...T.SHADOW_SHEET,
   },
-  title: {
-    fontSize: 18,
-    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-    color: Constants.TIER_COLORS.ARTISAN,
+  grabBar: {
+    alignSelf: 'center',
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#DDD9D2',
+    marginBottom: 14,
   },
-  deadline: { fontSize: 12.5, color: '#c47b00', marginTop: 6, marginBottom: 14 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  title: { fontFamily: FONT.ExtraBold, fontSize: 14.5, color: COLORS.INK, letterSpacing: -0.2 },
+  deadline: { ...TYPE.XS, marginTop: 6, marginBottom: 14, lineHeight: 15 },
+  label: { fontFamily: FONT.Bold, fontSize: 11, color: COLORS.INK, marginBottom: 5 },
   input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
-    paddingVertical: 11,
-    paddingHorizontal: 13,
-    fontSize: 14,
-    backgroundColor: '#fff',
-    color: Constants.TIER_COLORS.ARTISAN,
+    borderWidth: 1.5,
+    borderColor: COLORS.LINE,
+    borderRadius: RADIUS.FIELD,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    fontFamily: FONT.Regular,
+    fontSize: 13,
+    backgroundColor: COLORS.SURFACE,
+    color: COLORS.INK,
     marginBottom: 10,
   },
   row: { flexDirection: 'row', gap: 8 },
-  rowInput: { flex: 1 },
+  rowItem: { flex: 1 },
   submit: {
-    backgroundColor: Constants.COLOR_MAIN,
-    borderRadius: 12,
-    paddingVertical: 14,
+    backgroundColor: COLORS.AMBER,
+    borderRadius: RADIUS.BTN,
+    paddingVertical: 13,
     alignItems: 'center',
-    marginTop: 6,
+    marginTop: 4,
   },
-  submitDisabled: { opacity: 0.4 },
-  submitText: { fontSize: 15, fontWeight: '800', color: '#16130d' },
-  close: { alignItems: 'center', paddingVertical: 12 },
-  closeText: { fontSize: 13.5, color: Constants.TIER_COLORS.STRIVER },
+  submitDisabled: { opacity: 0.45 },
+  submitText: { fontFamily: FONT.ExtraBold, fontSize: 13.5, color: COLORS.ON_AMBER },
+  customsNote: { ...TYPE.XS, marginTop: 10, lineHeight: 15 },
+  close: { alignItems: 'center', paddingVertical: 11, marginTop: 2 },
+  closeText: { fontFamily: FONT.SemiBold, fontSize: 13, color: COLORS.GREY },
 });

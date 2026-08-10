@@ -1,24 +1,26 @@
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
-  Image,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { CommonActions } from '@react-navigation/native';
 import Preference from 'react-native-default-preference';
-import Constants from '../../Components/Constants';
+import T from '../../Components/Constants/DesignTokens';
 import Strings from '../../Components/Strings';
+import { Btn, Chips } from '../../Components/UI';
 import { verifyInviteCode } from '../../api/invites';
+
+const { COLORS, FONT } = T;
 
 // v2 §3-①②: 초대 코드 게이트. 필수 입력 3개 이하(코드·국가), 실패는 인라인 에러.
 const COUNTRIES = ['US', 'JP', 'DE', 'IN', 'BR', 'VN', 'TH', 'KR'];
+const COUNTRY_ITEMS = COUNTRIES.map((c) => ({ key: c, label: c }));
 
 export default function InviteGateScreen({ navigation }) {
   const [code, setCode] = useState('');
@@ -72,18 +74,17 @@ export default function InviteGateScreen({ navigation }) {
         behavior={Platform.OS === 'ios' ? 'padding' : null}
         style={styles.inner}
       >
-        <Image
-          source={require('../../Resources/img/icGreydSplashSymbol126.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
+        <Text style={styles.logo}>
+          greyd
+          <Text style={styles.logoDot}>.</Text>
+        </Text>
         <Text style={styles.title}>{Strings.INVITE_GATE_TITLE}</Text>
         <Text style={styles.subtitle}>{Strings.INVITE_GATE_SUBTITLE}</Text>
 
         <TextInput
           style={styles.codeInput}
           placeholder={Strings.INVITE_CODE_PLACEHOLDER}
-          placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+          placeholderTextColor={COLORS.GREY}
           autoCapitalize="characters"
           autoCorrect={false}
           maxLength={6}
@@ -95,36 +96,30 @@ export default function InviteGateScreen({ navigation }) {
         />
 
         <Text style={styles.countryLabel}>{Strings.INVITE_COUNTRY_LABEL}</Text>
-        <View style={styles.countryRow}>
-          {COUNTRIES.map((c) => (
-            <TouchableOpacity
-              key={c}
-              style={[styles.countryChip, country === c && styles.countryChipOn]}
-              onPress={() => {
-                setCountry(c);
-                setError('');
-              }}
-            >
-              <Text style={[styles.countryChipText, country === c && styles.countryChipTextOn]}>
-                {c}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        <Chips
+          items={COUNTRY_ITEMS}
+          selected={country}
+          onSelect={(k) => {
+            setCountry(k);
+            setError('');
+          }}
+          style={styles.countryRow}
+        />
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <TouchableOpacity
-          style={[styles.submit, (!code || !country) && styles.submitDisabled]}
-          disabled={!code || !country || isVerifying}
-          onPress={onSubmit}
-        >
-          {isVerifying ? (
-            <ActivityIndicator color="#16130d" />
-          ) : (
-            <Text style={styles.submitText}>{Strings.INVITE_SUBMIT}</Text>
-          )}
-        </TouchableOpacity>
+        {isVerifying ? (
+          <View style={styles.submitLoading}>
+            <ActivityIndicator color={COLORS.ON_AMBER} />
+          </View>
+        ) : (
+          <Btn
+            title={Strings.INVITE_SUBMIT}
+            onPress={onSubmit}
+            disabled={!code || !country}
+            style={styles.submit}
+          />
+        )}
 
         <Text style={styles.help}>{Strings.INVITE_NO_CODE_HELP}</Text>
       </KeyboardAvoidingView>
@@ -133,69 +128,64 @@ export default function InviteGateScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Constants.COLOR_BACKGROUND_DARK },
+  container: { flex: 1, backgroundColor: COLORS.BG },
   inner: { flex: 1, paddingHorizontal: 28, justifyContent: 'center' },
-  logo: { width: 72, height: 72, alignSelf: 'center', marginBottom: 18 },
-  title: {
-    fontSize: 22,
-    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-    color: Constants.TIER_COLORS.ARTISAN,
+  logo: {
+    fontFamily: FONT.Black,
+    fontSize: 30,
+    color: COLORS.INK,
     textAlign: 'center',
+    letterSpacing: -0.5,
+    marginBottom: 16,
+  },
+  logoDot: { color: COLORS.AMBER, fontFamily: FONT.Black },
+  title: {
+    fontSize: 20,
+    lineHeight: 28,
+    fontFamily: FONT.ExtraBold,
+    color: COLORS.INK,
+    textAlign: 'center',
+    letterSpacing: -0.2,
   },
   subtitle: {
-    fontSize: 14,
-    color: Constants.TIER_COLORS.STRIVER,
+    ...T.TYPE.SUB,
+    fontSize: 12.5,
     textAlign: 'center',
     marginTop: 8,
-    marginBottom: 28,
+    marginBottom: 26,
   },
   codeInput: {
     borderWidth: 1.5,
-    borderColor: Constants.COLOR_MAIN,
-    borderRadius: 12,
+    borderColor: COLORS.AMBER,
+    borderRadius: 9,
     paddingVertical: 14,
     fontSize: 22,
-    letterSpacing: 8,
+    letterSpacing: 10,
     textAlign: 'center',
-    color: Constants.TIER_COLORS.ARTISAN,
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
-    backgroundColor: '#fff',
+    color: COLORS.INK,
+    fontFamily: FONT.ExtraBold,
+    backgroundColor: COLORS.AMBER_FAINT,
   },
   countryLabel: {
+    ...T.TYPE.LABEL,
     marginTop: 22,
-    marginBottom: 8,
-    fontSize: 13,
-    color: Constants.TIER_COLORS.STRIVER,
+    marginBottom: 9,
   },
-  countryRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  countryChip: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 999,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    marginRight: 8,
-    marginBottom: 8,
-    backgroundColor: '#fff',
-  },
-  countryChipOn: { backgroundColor: Constants.COLOR_MAIN, borderColor: Constants.COLOR_MAIN },
-  countryChipText: { fontSize: 13, color: Constants.TIER_COLORS.ARTISAN },
-  countryChipTextOn: { fontWeight: '800', color: '#16130d' },
-  error: { marginTop: 14, color: '#d33', fontSize: 13 },
-  submit: {
+  countryRow: { justifyContent: 'flex-start' },
+  error: { marginTop: 14, color: COLORS.RED, fontSize: 12, fontFamily: FONT.SemiBold },
+  submit: { marginTop: 24, paddingVertical: 14 },
+  submitLoading: {
     marginTop: 24,
-    backgroundColor: Constants.COLOR_MAIN,
-    borderRadius: 12,
-    paddingVertical: 15,
+    backgroundColor: COLORS.AMBER,
+    borderRadius: T.RADIUS.BTN,
+    paddingVertical: 14,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  submitDisabled: { opacity: 0.4 },
-  submitText: { fontSize: 16, fontWeight: '800', color: '#16130d' },
   help: {
+    ...T.TYPE.XS,
     marginTop: 18,
-    fontSize: 12.5,
-    color: Constants.TIER_COLORS.STRIVER,
     textAlign: 'center',
-    lineHeight: 19,
+    lineHeight: 16,
   },
 });

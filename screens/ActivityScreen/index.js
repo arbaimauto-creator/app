@@ -2,6 +2,8 @@ import React, { useCallback, useState } from 'react';
 import {
   Alert,
   FlatList,
+  PermissionsAndroid,
+  Platform,
   SafeAreaView,
   Share,
   StyleSheet,
@@ -13,20 +15,24 @@ import FEATURES from '../../Components/Constants/Features';
 import { useFocusEffect } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import Preference from 'react-native-default-preference';
-import Constants from '../../Components/Constants';
+import T from '../../Components/Constants/DesignTokens';
+import { Card, Btn, Badge, StatusPill, ProgressBar, NoteBox } from '../../Components/UI';
 import Strings from '../../Components/Strings';
 import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
-import {
-  getSeedings,
-  setSeedingStatus,
-  upsertSeeding,
-  SEEDING_STATUS,
-} from '../../api/seedings';
+import { getSeedings, setSeedingStatus, upsertSeeding, SEEDING_STATUS } from '../../api/seedings';
 import { getCreatorProfile, saveCreatorProfile } from '../../api/creators';
-import { personalizedPoints, G_DELTA, GRACE_MULTIPLIER } from '../TryScreen/points';
+import { referralCodesFor } from '../../api/referral';
+import {
+  personalizedPoints,
+  gradeMultiplier,
+  G_DELTA,
+  GRACE_MULTIPLIER,
+} from '../TryScreen/points';
 import { daysLeft, isInGrace, isNoShowDue, EXTENSION_DAYS } from './missionLogic';
 import AddressModal from './AddressModal';
 import { scheduleUploadReminders, cancelUploadReminders } from './reminders';
+
+const { COLORS, RADIUS, FONT, TYPE } = T;
 
 const STATUS_LABEL = () => ({
   [SEEDING_STATUS.APPLIED]: Strings.CAMPAIGN_STATUS_APPLIED,
@@ -39,19 +45,21 @@ const STATUS_LABEL = () => ({
   [SEEDING_STATUS.NO_SHOW]: Strings.CAMPAIGN_STATUS_NO_SHOW,
 });
 
-// 발급자 핸들 기반 개인화 추천 코드 3장 (mock — 서버 발급 시 교체)
-function referralCodesFor(profile) {
-  const seed = (profile?.handleUrl || 'GREYD').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-  const head = (seed + 'XXX').slice(0, 3);
-  return [1, 2, 3].map((n) => `${head}${n}${String(seed.length % 10)}${String((seed.charCodeAt(0) || 65) % 10)}`);
-}
-
 // 운영 수동 전이(승인·발송)를 에뮬레이터에서 확인하기 위한 개발 전용 시뮬 버튼
 const DEV_NEXT = {
   [SEEDING_STATUS.APPLIED]: SEEDING_STATUS.APPROVED,
   [SEEDING_STATUS.SHIPPED]: null, // 수령은 사용자 버튼
   [SEEDING_STATUS.REVIEWING]: SEEDING_STATUS.DONE,
 };
+
+// 시안 24: 진행/완료 세그먼트 분류 기준
+const ONGOING_STATUSES = [
+  SEEDING_STATUS.APPLIED,
+  SEEDING_STATUS.APPROVED,
+  SEEDING_STATUS.SHIPPED,
+  SEEDING_STATUS.RECEIVED,
+  SEEDING_STATUS.REVIEWING,
+];
 
 export default function ActivityScreen({ navigation }) {
   const dispatch = useDispatch();
@@ -61,6 +69,7 @@ export default function ActivityScreen({ navigation }) {
   const [profile, setProfile] = useState(null);
   const [addressFor, setAddressFor] = useState(null); // campaignId | null
   const [localPoints, setLocalPoints] = useState(0);
+  const [tab, setTab] = useState('ongoing'); // 시안 24: 'ongoing' | 'done'
 
   const [bonusPoints, setBonusPoints] = useState(0);
 
@@ -86,20 +95,57 @@ export default function ActivityScreen({ navigation }) {
   const missions = Object.values(seedings)
     .filter((s) => campaignById[s.campaignId])
     .sort((a, b) => (b.appliedAt || '').localeCompare(a.appliedAt || ''));
+  const ongoingMissions = missions.filter((s) => ONGOING_STATUSES.includes(s.status));
+  const doneMissions = missions.filter((s) => !ONGOING_STATUSES.includes(s.status));
+  const shownMissions = tab === 'ongoing' ? ongoingMissions : doneMissions;
 
   const gScore = profile?.gScore ?? 50;
+  const points = (totalReward ?? 0) + localPoints + bonusPoints;
 
   const onReceive = async (campaignId) => {
     const all = await setSeedingStatus(campaignId, SEEDING_STATUS.RECEIVED);
     // 수령 확인 = 리마인더 시퀀스 시작 (D+7/D-3/D-1/마감/유예)
     const s = all[campaignId];
-    scheduleUploadReminders(
-      campaignId,
-      campaignById[campaignId]?.title || '',
-      s.receivedAt,
-      false,
-    );
+    scheduleUploadReminders(campaignId, campaignById[campaignId]?.title || '', s.receivedAt, false);
+    // 시안 22: 알림 가치가 가장 높은 순간(리마인더 시작 직후)에만 권한 컨텍스트 프롬프트 (Android 13+, 1회)
+    if (Platform.OS === 'android' && Platform.Version >= 33) {
+      const shown = await Preference.get('notifPromptShown');
+      if (shown !== 'true') {
+        Alert.alert(
+          'D-day 알림을 켤까요?',
+          '마감을 놓치면 G-스코어가 내려가요.\n딱 필요한 순간에만 보내드려요.',
+          [
+            { text: '나중에 할게요', style: 'cancel' },
+            {
+              text: '알림 허용',
+              onPress: () =>
+                PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS),
+            },
+          ],
+        );
+        await Preference.set('notifPromptShown', 'true');
+      }
+    }
     reload();
+  };
+
+  // 시안 23: 발송 전(applied/approved) 무페널티 취소
+  const onCancel = (campaignId) => {
+    Alert.alert(
+      '체험을 취소할까요?',
+      '발송 전이라 페널티 없이 취소돼요.\n자리는 다른 크리에이터에게 넘어가요.',
+      [
+        { text: '계속하기', style: 'cancel' },
+        {
+          text: '취소하기',
+          style: 'destructive',
+          onPress: async () => {
+            await setSeedingStatus(campaignId, SEEDING_STATUS.CANCELLED);
+            reload();
+          },
+        },
+      ],
+    );
   };
 
   const onExtend = async (seeding) => {
@@ -135,6 +181,22 @@ export default function ActivityScreen({ navigation }) {
     reload();
   };
 
+  // 시안 16: 완주 리포트 화면 이동 params (devAdvance 전이 직후·완료 카드 재진입 공용)
+  const openMissionDone = (seeding, campaign, gBefore, gAfter) => {
+    const grace = isInGrace(seeding);
+    const base = personalizedPoints(campaign?.basePoints ?? 0, gBefore);
+    const granted = Math.round(base * (grace ? GRACE_MULTIPLIER : 1));
+    navigation.navigate('MissionDone', {
+      pointsGranted: granted,
+      basePoints: campaign?.basePoints ?? 0,
+      multiplier: gradeMultiplier(gBefore),
+      gBefore,
+      gAfter,
+      brandName: campaign?.brand,
+      handleUrl: profile?.handleUrl,
+    });
+  };
+
   // 개발용 운영 시뮬: 다음 상태로 전이 + done 시 보상/G-스코어 반영
   const devAdvance = async (seeding) => {
     if (!__DEV__) {
@@ -163,6 +225,8 @@ export default function ActivityScreen({ navigation }) {
         completedCount: (profile?.completedCount ?? 0) + 1,
       };
       await saveCreatorProfile(nextProfile);
+      // 시안 16: 완주 보상 리포트로 즉시 연결
+      openMissionDone(seeding, campaign, gScore, nextProfile.gScore);
     }
     reload();
   };
@@ -175,30 +239,41 @@ export default function ActivityScreen({ navigation }) {
     const label = STATUS_LABEL()[seeding.status] || seeding.status;
 
     return (
-      <View style={styles.mission}>
+      <Card
+        style={[
+          styles.mission,
+          seeding.status === SEEDING_STATUS.CANCELLED && styles.cancelledCard,
+        ]}
+      >
         <View style={styles.missionHeader}>
           <Text style={styles.missionTitle} numberOfLines={1}>
             {campaign.title}
           </Text>
           <TouchableOpacity onLongPress={() => devAdvance(seeding)}>
-            <Text
-              style={[
-                styles.missionStatus,
-                seeding.status === SEEDING_STATUS.NO_SHOW && styles.statusDanger,
-              ]}
-            >
-              {label}
-            </Text>
+            <StatusPill status={seeding.status} label={label} />
           </TouchableOpacity>
         </View>
 
         {seeding.status === SEEDING_STATUS.APPROVED && !seeding.address ? (
-          <TouchableOpacity style={styles.actionBtn} onPress={() => setAddressFor(seeding.campaignId)}>
-            <Text style={styles.actionBtnText}>{Strings.ADDRESS_CTA}</Text>
-          </TouchableOpacity>
+          <Btn
+            title={Strings.ADDRESS_CTA}
+            onPress={() => setAddressFor(seeding.campaignId)}
+            style={styles.actionGap}
+          />
         ) : null}
         {seeding.status === SEEDING_STATUS.APPROVED && seeding.address ? (
           <Text style={styles.subInfo}>{Strings.ADDRESS_SAVED}</Text>
+        ) : null}
+
+        {/* 시안 23: 발송 전에는 무페널티 취소 가능 */}
+        {seeding.status === SEEDING_STATUS.APPLIED || seeding.status === SEEDING_STATUS.APPROVED ? (
+          <Btn
+            variant="ghost"
+            small
+            title="취소"
+            onPress={() => onCancel(seeding.campaignId)}
+            style={styles.cancelBtn}
+          />
         ) : null}
 
         {seeding.status === SEEDING_STATUS.SHIPPED ? (
@@ -208,41 +283,42 @@ export default function ActivityScreen({ navigation }) {
                 {Strings.TRACKING_NO}: {seeding.trackingNo}
               </Text>
             ) : null}
-            <TouchableOpacity style={styles.actionBtn} onPress={() => onReceive(seeding.campaignId)}>
-              <Text style={styles.actionBtnText}>{Strings.RECEIVED_CTA}</Text>
-            </TouchableOpacity>
+            <Btn
+              title={Strings.RECEIVED_CTA}
+              onPress={() => onReceive(seeding.campaignId)}
+              style={styles.actionGap}
+            />
             <Text style={styles.subInfo}>{Strings.AUTO_RECEIVE_NOTE}</Text>
           </>
         ) : null}
 
         {seeding.status === SEEDING_STATUS.RECEIVED ? (
           <>
-            <Text
-              style={[
-                styles.dday,
-                (left != null && left <= 3) || grace ? styles.ddayDanger : null,
-              ]}
-            >
-              {grace
-                ? Strings.GRACE_NOTE
-                : noShowDue
-                ? Strings.CAMPAIGN_STATUS_NO_SHOW
-                : Strings.DDAY_LEFT(left)}
-            </Text>
-            <View style={styles.rowBtns}>
-              <TouchableOpacity
-                style={[styles.actionBtn, styles.rowBtn]}
-                onPress={() => onUpload(seeding.campaignId)}
+            {grace ? (
+              <NoteBox tone="amber" text={Strings.GRACE_NOTE} style={styles.actionGap} />
+            ) : (
+              <Text
+                style={[
+                  styles.dday,
+                  (left != null && left <= 3) || noShowDue ? styles.ddayDanger : null,
+                ]}
               >
-                <Text style={styles.actionBtnText}>{Strings.UPLOAD_REVIEW_CTA}</Text>
-              </TouchableOpacity>
+                {noShowDue ? Strings.CAMPAIGN_STATUS_NO_SHOW : Strings.DDAY_LEFT(left)}
+              </Text>
+            )}
+            <View style={styles.rowBtns}>
+              <Btn
+                title={Strings.UPLOAD_REVIEW_CTA}
+                onPress={() => onUpload(seeding.campaignId)}
+                style={styles.rowBtn}
+              />
               {!seeding.extensionUsed && left != null && left <= 3 && !grace ? (
-                <TouchableOpacity
-                  style={[styles.actionBtn, styles.rowBtn, styles.extendBtn]}
+                <Btn
+                  variant="ghost"
+                  title={Strings.EXTEND_CTA(EXTENSION_DAYS)}
                   onPress={() => onExtend(seeding)}
-                >
-                  <Text style={styles.extendBtnText}>{Strings.EXTEND_CTA(EXTENSION_DAYS)}</Text>
-                </TouchableOpacity>
+                  style={styles.rowBtn}
+                />
               ) : null}
             </View>
           </>
@@ -250,54 +326,82 @@ export default function ActivityScreen({ navigation }) {
 
         {seeding.status === SEEDING_STATUS.DONE ? (
           <View style={styles.feedbackCard}>
-            <Text style={styles.feedbackStars}>★★★★★</Text>
+            <Text style={styles.feedbackStars}>★★★★☆</Text>
             <Text style={styles.feedbackText}>{Strings.BRAND_FEEDBACK_MOCK(campaign.brand)}</Text>
+            <Btn
+              variant="ghost"
+              small
+              title="피드백 전체 보기"
+              onPress={() => openMissionDone(seeding, campaign, gScore, gScore)}
+              style={styles.actionGap}
+            />
           </View>
         ) : null}
 
-        {seeding.status === SEEDING_STATUS.NO_SHOW ? (
-          <Text style={styles.strikeWarn}>{Strings.STRIKE_WARNING}</Text>
+        {seeding.status === SEEDING_STATUS.CANCELLED ? (
+          <Text style={styles.cancelledNote}>본인 취소 · 페널티 없음</Text>
         ) : null}
-      </View>
+
+        {seeding.status === SEEDING_STATUS.NO_SHOW ? (
+          <NoteBox tone="red" text={Strings.STRIKE_WARNING} style={styles.actionGap} />
+        ) : null}
+      </Card>
     );
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>{Strings.ACTIVITY_TAB}</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.header}>{Strings.ACTIVITY_TAB}</Text>
+        <Badge tone="amber" text={`${points}P`} />
+      </View>
 
-      <View style={styles.pointCard}>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.pointLabel}>Point</Text>
-          <Text style={styles.pointValue}>{(totalReward ?? 0) + localPoints + bonusPoints}P</Text>
-          <Text style={styles.pointNote}>{Strings.POINT_CASHOUT_NOTE}</Text>
-        </View>
-        <View style={styles.gBox}>
-          <Text style={styles.gLabel}>G-Score</Text>
+      {/* 시안 24: 진행/완료 세그먼트 */}
+      <View style={styles.segWrap}>
+        {[
+          ['ongoing', `진행 ${ongoingMissions.length}`],
+          ['done', `완료 ${doneMissions.length}`],
+        ].map(([key, segLabel]) => (
+          <TouchableOpacity
+            key={key}
+            style={[styles.segCell, tab === key && styles.segCellOn]}
+            onPress={() => setTab(key)}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.segText, tab === key && styles.segTextOn]}>{segLabel}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <View style={styles.topRow}>
+        <Card style={styles.topCard}>
+          <Text style={styles.topLabel}>G-Score</Text>
           <Text style={styles.gValue}>G{gScore}</Text>
-          <View style={styles.gBarTrack}>
-            <View
-              style={[
-                styles.gBarFill,
-                { width: `${Math.min(100, Math.max(4, ((gScore - 50) / 10) * 100))}%` },
-              ]}
-            />
-          </View>
-          <Text style={styles.gNext}>
+          <ProgressBar
+            ratio={Math.min(100, Math.max(4, ((gScore - 50) / 10) * 100)) / 100}
+            style={styles.gBar}
+          />
+          <Text style={styles.topNote}>
             {gScore < 60 ? Strings.G_NEXT_UNLOCK(60 - gScore) : Strings.G_UNLOCKED}
           </Text>
-        </View>
+        </Card>
+        <Card style={styles.topCard}>
+          <Text style={styles.topLabel}>Point</Text>
+          <Text style={styles.pointValue}>{points}P</Text>
+          <Text style={styles.topNote}>{Strings.POINT_CASHOUT_NOTE}</Text>
+        </Card>
       </View>
 
       {/* v2 §7-4 (D6): 첫 검증 루프 완료 시 추천 코드 3장 — 발급자 핸들 각인 */}
       {FEATURES.REFERRAL && (profile?.completedCount ?? 0) >= 1 ? (
-        <View style={styles.referralCard}>
+        <Card style={styles.referralCard}>
           <Text style={styles.referralTitle}>{Strings.REFERRAL_TITLE}</Text>
           <View style={styles.referralCodes}>
             {referralCodesFor(profile).map((code) => (
               <TouchableOpacity
                 key={code}
                 style={styles.referralCode}
+                activeOpacity={0.7}
                 onPress={() =>
                   Share.share({
                     message: Strings.REFERRAL_SHARE_MESSAGE_NAMED(
@@ -314,15 +418,20 @@ export default function ActivityScreen({ navigation }) {
           <Text style={styles.referralNote}>
             {Strings.REFERRAL_INVITED_BY(profile?.handleUrl || '')} · {Strings.REFERRAL_NOTE}
           </Text>
-        </View>
+        </Card>
       ) : null}
 
       <Text style={styles.section}>{Strings.MY_MISSIONS}</Text>
       <FlatList
-        data={missions}
+        data={shownMissions}
         keyExtractor={(item) => item.campaignId}
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
-        ListEmptyComponent={<Text style={styles.empty}>{Strings.NO_CAMPAIGNS}</Text>}
+        ListEmptyComponent={
+          <View style={styles.emptyWrap}>
+            <Text style={styles.emptyEmoji}>📦</Text>
+            <Text style={styles.emptyTitle}>{Strings.NO_CAMPAIGNS}</Text>
+          </View>
+        }
         renderItem={renderMission}
       />
 
@@ -336,101 +445,107 @@ export default function ActivityScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Constants.COLOR_BACKGROUND_DARK },
-  header: {
-    fontSize: 24,
-    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-    color: Constants.TIER_COLORS.ARTISAN,
+  container: { flex: 1, backgroundColor: COLORS.BG, paddingTop: T.TOP_INSET },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingTop: 12,
   },
-  pointCard: {
-    margin: 16,
-    padding: 18,
-    borderRadius: 14,
-    backgroundColor: Constants.COLOR_MAIN,
+  header: { ...TYPE.H_TITLE },
+
+  // 시안 24: 진행/완료 세그먼트
+  segWrap: {
     flexDirection: 'row',
-    alignItems: 'center',
-  },
-  pointLabel: { fontSize: 12, fontWeight: '700', color: '#16130d', opacity: 0.7 },
-  pointValue: { fontSize: 28, fontWeight: '900', color: '#16130d' },
-  pointNote: { fontSize: 10.5, color: '#16130d', opacity: 0.65, marginTop: 4 },
-  gBox: { width: 130, marginLeft: 12 },
-  gLabel: { fontSize: 11, fontWeight: '700', color: '#16130d', opacity: 0.7 },
-  gValue: { fontSize: 20, fontWeight: '900', color: '#16130d' },
-  gBarTrack: {
-    height: 6,
-    borderRadius: 4,
-    backgroundColor: 'rgba(22,19,13,0.25)',
-    marginTop: 6,
+    marginHorizontal: 16,
+    marginTop: 12,
+    backgroundColor: COLORS.SURFACE,
+    borderWidth: 1.5,
+    borderColor: COLORS.LINE,
+    borderRadius: 9,
     overflow: 'hidden',
   },
-  gBarFill: { height: '100%', backgroundColor: '#16130d', borderRadius: 4 },
-  gNext: { fontSize: 10, color: '#16130d', opacity: 0.75, marginTop: 4 },
+  segCell: { flex: 1, alignItems: 'center', paddingVertical: 8 },
+  segCellOn: { backgroundColor: COLORS.INK },
+  segText: { fontFamily: FONT.Bold, fontSize: 11.5, color: COLORS.GREY },
+  segTextOn: { color: COLORS.SURFACE },
+
+  // 상단 G-스코어 · 포인트 카드
+  topRow: { flexDirection: 'row', gap: 10, margin: 16 },
+  topCard: { flex: 1 },
+  topLabel: { fontFamily: FONT.Bold, fontSize: 11, color: COLORS.GREY },
+  gValue: { fontFamily: FONT.ExtraBold, fontSize: 30, color: COLORS.INK, letterSpacing: -0.4 },
+  gBar: { marginTop: 7 },
+  topNote: { ...TYPE.XS, marginTop: 6 },
+  pointValue: {
+    fontFamily: FONT.ExtraBold,
+    fontSize: 30,
+    color: COLORS.AMBER_DEEP,
+    letterSpacing: -0.4,
+  },
+
   section: {
-    fontSize: 16,
-    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-    color: Constants.TIER_COLORS.ARTISAN,
+    fontFamily: FONT.Bold,
+    fontSize: 14,
+    color: COLORS.INK,
+    letterSpacing: -0.1,
     paddingHorizontal: 16,
     marginBottom: 8,
   },
-  mission: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 10,
-  },
+
+  // 진행 카드
+  mission: { marginBottom: 10 },
   missionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  missionTitle: { flex: 1, fontSize: 14, marginRight: 10, color: '#26231d' },
-  missionStatus: { fontSize: 12, fontWeight: '700', color: '#c47b00' },
-  statusDanger: { color: '#d33' },
-  subInfo: { fontSize: 12, color: '#8a857b', marginTop: 8 },
-  actionBtn: {
-    marginTop: 10,
-    backgroundColor: Constants.COLOR_MAIN,
-    borderRadius: 9,
-    paddingVertical: 10,
-    alignItems: 'center',
-  },
-  actionBtnText: { fontSize: 13.5, fontWeight: '800', color: '#16130d' },
-  rowBtns: { flexDirection: 'row', gap: 8 },
+  missionTitle: { ...TYPE.CARD_TITLE, flex: 1, marginRight: 10 },
+  subInfo: { ...TYPE.SUB, marginTop: 8 },
+  actionGap: { marginTop: 10 },
+  rowBtns: { flexDirection: 'row', gap: 8, marginTop: 10 },
   rowBtn: { flex: 1 },
-  extendBtn: { backgroundColor: '#efede8' },
-  extendBtnText: { fontSize: 13, fontWeight: '700', color: '#26231d' },
-  dday: { marginTop: 10, fontSize: 13, fontWeight: '800', color: '#1c7c31' },
-  ddayDanger: { color: '#d33' },
+  dday: {
+    marginTop: 10,
+    fontFamily: FONT.ExtraBold,
+    fontSize: 13,
+    color: COLORS.GREEN,
+    fontVariant: ['tabular-nums'],
+  },
+  ddayDanger: { color: COLORS.RED },
   feedbackCard: {
     marginTop: 10,
-    backgroundColor: '#faf6ea',
-    borderRadius: 10,
+    backgroundColor: COLORS.AMBER_FAINT,
+    borderRadius: RADIUS.FIELD,
     padding: 12,
   },
-  feedbackStars: { color: '#c47b00', fontSize: 13, letterSpacing: 2 },
-  feedbackText: { fontSize: 12.5, color: '#5c574d', marginTop: 4, lineHeight: 18 },
-  strikeWarn: { marginTop: 10, fontSize: 12.5, color: '#d33', lineHeight: 18 },
-  empty: { textAlign: 'center', marginTop: 40, color: Constants.TIER_COLORS.STRIVER },
-  referralCard: {
-    marginHorizontal: 16,
-    marginBottom: 14,
-    backgroundColor: '#26231d',
-    borderRadius: 12,
-    padding: 14,
-  },
-  referralTitle: { fontSize: 13.5, fontWeight: '800', color: Constants.COLOR_MAIN },
+  feedbackStars: { color: COLORS.AMBER, fontSize: 13, letterSpacing: 2 },
+  cancelBtn: { marginTop: 10, alignSelf: 'flex-start' },
+  cancelledCard: { opacity: 0.75 },
+  cancelledNote: { ...TYPE.XS, marginTop: 8 },
+  feedbackText: { ...TYPE.SUB, fontSize: 12.5, color: COLORS.INK, marginTop: 4, lineHeight: 18 },
+
+  // 빈 상태
+  emptyWrap: { alignItems: 'center', marginTop: 40, gap: 8 },
+  emptyEmoji: { fontSize: 34 },
+  emptyTitle: { fontFamily: FONT.Bold, fontSize: 14.5, color: COLORS.INK },
+
+  // 추천 코드 카드
+  referralCard: { marginHorizontal: 16, marginBottom: 14 },
+  referralTitle: { ...TYPE.CARD_TITLE, fontSize: 13.5 },
   referralCodes: { flexDirection: 'row', marginTop: 10, gap: 8 },
   referralCode: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: Constants.COLOR_MAIN,
-    borderRadius: 8,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: COLORS.AMBER,
+    borderRadius: 9,
+    backgroundColor: COLORS.AMBER_FAINT,
     paddingVertical: 8,
     alignItems: 'center',
   },
   referralCodeText: {
+    fontFamily: FONT.ExtraBold,
     fontSize: 13,
-    fontWeight: '800',
-    color: '#f4f1ea',
+    color: COLORS.AMBER_DEEP,
     letterSpacing: 2,
   },
-  referralNote: { fontSize: 11, color: '#a39d90', marginTop: 8 },
+  referralNote: { ...TYPE.XS, marginTop: 8 },
 });

@@ -73,6 +73,11 @@ import InviteGateScreen from '../../screens/InviteGateScreen';
 import CreatorOnboarding from '../../screens/InviteGateScreen/CreatorOnboarding';
 import FgiSurvey from '../../screens/TryScreen/FgiSurvey';
 import BrandWelcome from '../../screens/InviteGateScreen/BrandWelcome';
+import AddressBook from '../../screens/MyScreen/AddressBook';
+import AboutScreen from '../../screens/MyScreen/AboutScreen';
+import GreydSettingsScreen from '../../screens/MyScreen/SettingsScreen';
+import ApplyDone from '../../screens/TryScreen/ApplyDone';
+import MissionDone from '../../screens/ActivityScreen/MissionDone';
 
 const Stack = createStackNavigator();
 
@@ -239,6 +244,16 @@ function MainDrawerNavigator({ route, navigation }) {
       {/* FGI 설문 — 업로드 전 필수 단계 (계획서 TSK-007) */}
       <Stack.Screen name="FgiSurvey" component={FgiSurvey} options={{ headerShown: false }} />
       <Stack.Screen name="BrandWelcome" component={BrandWelcome} options={{ headerShown: false }} />
+      {/* 마이 탭 서브 화면 + 신청·완주 결과 화면 (시안 11·16·17·18·19·20·25) */}
+      <Stack.Screen name="AddressBook" component={AddressBook} options={{ headerShown: false }} />
+      <Stack.Screen name="AboutGreyd" component={AboutScreen} options={{ headerShown: false }} />
+      <Stack.Screen
+        name="GreydSettings"
+        component={GreydSettingsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen name="ApplyDone" component={ApplyDone} options={{ headerShown: false }} />
+      <Stack.Screen name="MissionDone" component={MissionDone} options={{ headerShown: false }} />
       <Stack.Screen
         name="VideoPage"
         component={VideoPageScreenWrapper}

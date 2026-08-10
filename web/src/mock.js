@@ -17,7 +17,21 @@ export const CAMPAIGNS = [
     period: '2026.08.11 – 2026.09.10',
     countries: ['US', 'JP', 'KR'],
     seedingTotal: 30,
+    // Admin 콘솔 확장 필드 — 브랜드 리포트(App.jsx)에서는 사용하지 않음
+    openPct: 70,
+    curatedPct: 30,
+    uploadDays: 14,
+    unitCost: 12000, // 내부용 — 브랜드 비노출
+    shipCost: 8500, // 내부용 — 브랜드 비노출
   },
+];
+
+// 초대 코드 원장 (mock) — 운영 콘솔 '초대 코드' 탭 초기 데이터
+export const INVITE_CODE_LEDGER = [
+  { code: 'GRD-K71', role: 'influencer', channel: '운영 직접', engraving: '', validLabel: 'D-2', status: 'unused', usedBy: '' },
+  { code: 'GRD-M1A', role: 'influencer', channel: '추천 (@mia_beauty)', engraving: 'Invited by @mia', validLabel: 'D-6', status: 'used', usedBy: '@yuna_j' },
+  { code: 'GRD-B02', role: 'brand', channel: '세일즈 (SonPlan)', engraving: '', validLabel: 'D-5', status: 'used', usedBy: 'SonPlan' },
+  { code: 'GRD-K58', role: 'influencer', channel: '운영 직접', engraving: '', validLabel: '만료', status: 'expired', usedBy: '' },
 ];
 
 export const FGI_STATS = {

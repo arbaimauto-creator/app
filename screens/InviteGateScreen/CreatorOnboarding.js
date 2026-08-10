@@ -6,14 +6,16 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { CommonActions } from '@react-navigation/native';
 import Preference from 'react-native-default-preference';
-import Constants from '../../Components/Constants';
+import T from '../../Components/Constants/DesignTokens';
 import Strings from '../../Components/Strings';
+import { Badge, Btn, Card, Chips } from '../../Components/UI';
 import { saveCreatorProfile } from '../../api/creators';
+
+const { COLORS, FONT, RADIUS } = T;
 
 // v2 §7-1 온보딩 4장 + §6 creator 프로필 폼 (밴드형 인구통계·피부타입).
 // 4장 구성: 자격 → 구조 → 검증 루프 → 프로필 입력(첫 행동 전 단계)
@@ -46,13 +48,9 @@ const SKIN_TYPES = [
   { key: 'sensitive', label: Strings.SKIN_SENSITIVE },
 ];
 
-function Chip({ label, on, onPress }) {
-  return (
-    <TouchableOpacity style={[styles.chip, on && styles.chipOn]} onPress={onPress}>
-      <Text style={[styles.chipText, on && styles.chipTextOn]}>{label}</Text>
-    </TouchableOpacity>
-  );
-}
+const PLATFORM_ITEMS = PLATFORMS.map((p) => ({ key: p, label: p }));
+const AGE_ITEMS = AGE_BANDS.map((a) => ({ key: a, label: a }));
+const CATEGORY_ITEMS = CATEGORIES.map((c) => ({ key: c, label: c }));
 
 export default function CreatorOnboarding({ navigation }) {
   const scrollRef = useRef(null);
@@ -103,32 +101,30 @@ export default function CreatorOnboarding({ navigation }) {
         {PAGES.map((p, idx) => (
           <View key={p.key} style={[styles.page, { width }]}>
             <View style={styles.pageBody}>
-              <Text style={styles.pageTitle}>{p.title}</Text>
-              <Text style={styles.pageText}>{p.body}</Text>
+              <Card style={styles.copyCard}>
+                <Badge text={`${idx + 1} / 4`} tone="amber" style={styles.copyBadge} />
+                <Text style={styles.pageTitle}>{p.title}</Text>
+                <View style={styles.divline} />
+                <Text style={styles.pageText}>{p.body}</Text>
+              </Card>
             </View>
-            <TouchableOpacity style={styles.next} onPress={() => goTo(idx + 1)}>
-              <Text style={styles.nextText}>{Strings.ONBOARD_NEXT}</Text>
-            </TouchableOpacity>
+            <Btn title={Strings.ONBOARD_NEXT} onPress={() => goTo(idx + 1)} style={styles.next} />
           </View>
         ))}
 
         <View style={[styles.page, { width }]}>
-          <ScrollView style={styles.formScroll} contentContainerStyle={{ paddingBottom: 30 }}>
-            <Text style={styles.pageTitle}>{Strings.ONBOARD_PROFILE_TITLE}</Text>
-            <Text style={styles.pageText}>{Strings.ONBOARD_PROFILE_BODY}</Text>
+          <ScrollView style={styles.formScroll} contentContainerStyle={styles.formContent}>
+            <Text style={styles.formTitle}>{Strings.ONBOARD_PROFILE_TITLE}</Text>
+            <Text style={styles.formSub}>{Strings.ONBOARD_PROFILE_BODY}</Text>
 
             <Text style={styles.label}>{Strings.PROFILE_PLATFORM}</Text>
-            <View style={styles.chipRow}>
-              {PLATFORMS.map((p) => (
-                <Chip key={p} label={p} on={platform === p} onPress={() => setPlatform(p)} />
-              ))}
-            </View>
+            <Chips items={PLATFORM_ITEMS} selected={platform} onSelect={setPlatform} />
 
             <Text style={styles.label}>{Strings.PROFILE_HANDLE}</Text>
             <TextInput
               style={styles.input}
               placeholder="@your_handle"
-              placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+              placeholderTextColor={COLORS.GREY}
               autoCapitalize="none"
               autoCorrect={false}
               value={handle}
@@ -136,63 +132,27 @@ export default function CreatorOnboarding({ navigation }) {
             />
 
             <Text style={styles.label}>{Strings.PROFILE_FOLLOWERS}</Text>
-            <View style={styles.chipRow}>
-              {FOLLOWER_BANDS.map((b) => (
-                <Chip
-                  key={b.key}
-                  label={b.label}
-                  on={followerBand === b.key}
-                  onPress={() => setFollowerBand(b.key)}
-                />
-              ))}
-            </View>
+            <Chips items={FOLLOWER_BANDS} selected={followerBand} onSelect={setFollowerBand} />
 
             <Text style={styles.label}>{Strings.PROFILE_AGE}</Text>
-            <View style={styles.chipRow}>
-              {AGE_BANDS.map((a) => (
-                <Chip key={a} label={a} on={ageBand === a} onPress={() => setAgeBand(a)} />
-              ))}
-            </View>
+            <Chips items={AGE_ITEMS} selected={ageBand} onSelect={setAgeBand} />
 
             <Text style={styles.label}>{Strings.PROFILE_GENDER}</Text>
-            <View style={styles.chipRow}>
-              {GENDERS.map((g) => (
-                <Chip
-                  key={g.key}
-                  label={g.label}
-                  on={gender === g.key}
-                  onPress={() => setGender(g.key)}
-                />
-              ))}
-            </View>
+            <Chips items={GENDERS} selected={gender} onSelect={setGender} />
 
             <Text style={styles.label}>{Strings.PROFILE_CATEGORY}</Text>
-            <View style={styles.chipRow}>
-              {CATEGORIES.map((c) => (
-                <Chip key={c} label={c} on={category === c} onPress={() => setCategory(c)} />
-              ))}
-            </View>
+            <Chips items={CATEGORY_ITEMS} selected={category} onSelect={setCategory} />
 
             <Text style={styles.label}>{Strings.PROFILE_SKIN}</Text>
-            <View style={styles.chipRow}>
-              {SKIN_TYPES.map((s) => (
-                <Chip
-                  key={s.key}
-                  label={s.label}
-                  on={skinType === s.key}
-                  onPress={() => setSkinType(s.key)}
-                />
-              ))}
-            </View>
-
-            <TouchableOpacity
-              style={[styles.next, !canFinish && styles.nextDisabled]}
-              disabled={!canFinish}
-              onPress={onFinish}
-            >
-              <Text style={styles.nextText}>{Strings.ONBOARD_FINISH}</Text>
-            </TouchableOpacity>
+            <Chips items={SKIN_TYPES} selected={skinType} onSelect={setSkinType} />
           </ScrollView>
+
+          <Btn
+            title={Strings.ONBOARD_FINISH}
+            onPress={onFinish}
+            disabled={!canFinish}
+            style={styles.next}
+          />
         </View>
       </ScrollView>
 
@@ -206,59 +166,62 @@ export default function CreatorOnboarding({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Constants.COLOR_BACKGROUND_DARK },
-  page: { flex: 1, paddingHorizontal: 28, paddingTop: 40 },
+  container: { flex: 1, backgroundColor: COLORS.BG, paddingTop: T.TOP_INSET },
+  page: { flex: 1, paddingHorizontal: 24, paddingTop: 24 },
   pageBody: { flex: 1, justifyContent: 'center' },
-  pageTitle: {
-    fontSize: 26,
-    lineHeight: 36,
-    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-    color: Constants.TIER_COLORS.ARTISAN,
-  },
-  pageText: { marginTop: 14, fontSize: 15, lineHeight: 24, color: Constants.TIER_COLORS.STRIVER },
-  next: {
-    backgroundColor: Constants.COLOR_MAIN,
-    borderRadius: 12,
-    paddingVertical: 15,
+  copyCard: {
+    paddingVertical: 24,
+    paddingHorizontal: 20,
     alignItems: 'center',
-    marginBottom: 34,
-    marginTop: 20,
   },
-  nextDisabled: { opacity: 0.4 },
-  nextText: { fontSize: 16, fontWeight: '800', color: '#16130d' },
+  copyBadge: { alignSelf: 'center', marginBottom: 14 },
+  pageTitle: {
+    fontSize: 18,
+    lineHeight: 26,
+    fontFamily: FONT.ExtraBold,
+    color: COLORS.INK,
+    textAlign: 'center',
+    letterSpacing: -0.2,
+  },
+  divline: {
+    alignSelf: 'stretch',
+    height: 1,
+    backgroundColor: COLORS.LINE,
+    marginVertical: 14,
+  },
+  pageText: {
+    ...T.TYPE.SUB,
+    fontSize: 12.5,
+    lineHeight: 19,
+    textAlign: 'center',
+  },
+  next: { marginBottom: 30, marginTop: 16, paddingVertical: 14 },
   formScroll: { flex: 1 },
-  label: { marginTop: 18, marginBottom: 8, fontSize: 13, color: Constants.TIER_COLORS.STRIVER },
+  formContent: { paddingBottom: 30 },
+  formTitle: {
+    ...T.TYPE.H_TITLE,
+    lineHeight: 27,
+  },
+  formSub: { ...T.TYPE.SUB, marginTop: 6 },
+  label: { ...T.TYPE.LABEL, marginTop: 18, marginBottom: 8 },
   input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: COLORS.LINE,
+    borderRadius: RADIUS.FIELD,
     paddingVertical: 11,
     paddingHorizontal: 14,
-    fontSize: 15,
-    color: Constants.TIER_COLORS.ARTISAN,
-    backgroundColor: '#fff',
+    fontSize: 14,
+    fontFamily: FONT.SemiBold,
+    color: COLORS.INK,
+    backgroundColor: COLORS.SURFACE,
   },
-  chipRow: { flexDirection: 'row', flexWrap: 'wrap' },
-  chip: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 999,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    marginRight: 8,
-    marginBottom: 8,
-    backgroundColor: '#fff',
-  },
-  chipOn: { backgroundColor: Constants.COLOR_MAIN, borderColor: Constants.COLOR_MAIN },
-  chipText: { fontSize: 13.5, color: Constants.TIER_COLORS.ARTISAN },
-  chipTextOn: { fontWeight: '800', color: '#16130d' },
   dots: { flexDirection: 'row', justifyContent: 'center', paddingBottom: 16 },
   dot: {
     width: 7,
     height: 7,
     borderRadius: 4,
-    backgroundColor: '#d8d5cf',
+    backgroundColor: '#D8D5CF',
     marginHorizontal: 4,
   },
-  dotOn: { backgroundColor: Constants.COLOR_MAIN },
+  dotOn: { backgroundColor: COLORS.AMBER, width: 18 },
 });

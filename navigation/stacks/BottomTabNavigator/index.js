@@ -11,7 +11,6 @@ import { capitalizeFirstLetter } from '../../../Components/utils';
 import DiscoverNavigator from '../navigator/DiscoverNavigator';
 import HomeNavigator from '../navigator/HomeNavigator';
 import ProductsNavigator from '../navigator/ProductsNavigator';
-import UserPageNavigator from '../navigator/UserPageNavigator';
 import TryNavigator from '../navigator/TryNavigator';
 import ActivityNavigator from '../navigator/ActivityNavigator';
 import { tabBarIcon, tabBarLabel } from './renderTabBar';
@@ -23,6 +22,8 @@ import { useSelector } from 'react-redux';
 import Preference from 'react-native-default-preference';
 import BrandDashboard from '../../../screens/BrandScreen/BrandDashboard';
 import BrandReview from '../../../screens/BrandScreen/BrandReview';
+import BrandMy from '../../../screens/BrandScreen/BrandMy';
+import MyScreen from '../../../screens/MyScreen';
 
 function BottomTabNavigator({ route, navigation }) {
   const [loading, setLoading] = useState(true);
@@ -92,9 +93,13 @@ function BottomTabNavigator({ route, navigation }) {
         barStyle={{ backgroundColor: '#F4F4F4', elevation: 20 }}
         onIndexChange={(index) => {}}
       >
-        <Tab.Screen name="BrandDashboard" component={BrandDashboard} initialParams={initialParams} />
+        <Tab.Screen
+          name="BrandDashboard"
+          component={BrandDashboard}
+          initialParams={initialParams}
+        />
         <Tab.Screen name="BrandReview" component={BrandReview} initialParams={initialParams} />
-        <Tab.Screen name="Profile" component={UserPageNavigator} initialParams={initialParams} />
+        <Tab.Screen name="Profile" component={BrandMy} initialParams={initialParams} />
       </Tab.Navigator>
     );
   }
@@ -200,7 +205,7 @@ function BottomTabNavigator({ route, navigation }) {
       />
       <Tab.Screen
         name="Profile"
-        component={UserPageNavigator}
+        component={MyScreen}
         listeners={() => ({
           tabPress: (e) => {
             FastImage.clearMemoryCache();
