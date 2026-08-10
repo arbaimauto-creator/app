@@ -15,7 +15,6 @@ import Preference from 'react-native-default-preference';
 import T from '../../Components/Constants/DesignTokens';
 import Strings from '../../Components/Strings';
 import { Btn, Chips, Wordmark } from '../../Components/UI';
-import FEATURES from '../../Components/Constants/Features';
 import { verifyInviteCode } from '../../api/invites';
 import { logEvent, resetAnalyticsContext } from '../../api/common/analytics';
 
@@ -79,8 +78,9 @@ export default function InviteGateScreen({ navigation }) {
       return;
     }
     setFailCount(0);
-    // D26: 브랜드는 웹 리포트 전용 — 앱 진입 차단 (역할 저장 전에 안내로 종료)
-    if (result.role === 'brand' && !FEATURES.BRAND_APP) {
+    // D26 확정: 앱 초대 코드는 인플루언서 전용 — 브랜드 코드는 발급 개념 자체가 없다.
+    // (브랜드=ops 웹 매직링크, 운영=ops 콘솔. 서버 연동 후 role≠influencer 응답은 방어적으로 차단)
+    if (result.role !== 'influencer') {
       setError(Strings.INVITE_BRAND_WEB_ONLY);
       return;
     }
@@ -89,20 +89,8 @@ export default function InviteGateScreen({ navigation }) {
     await Preference.set('creatorCountry', country);
     resetAnalyticsContext(); // role·country 확정 — 공통 파라미터 갱신
     logEvent('gate_code_submit', { result: 'ok' });
-    if (result.brandId) {
-      await Preference.set('inviteBrandId', result.brandId);
-      await Preference.set('inviteBrandName', result.brandName || '');
-    }
-    // 크리에이터는 온보딩으로, 브랜드는 역할 안내 1장(BrandWelcome)으로
     navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [
-          result.role === 'influencer'
-            ? { name: 'CreatorOnboarding' }
-            : { name: 'BrandWelcome', params: { brandName: result.brandName } },
-        ],
-      }),
+      CommonActions.reset({ index: 0, routes: [{ name: 'CreatorOnboarding' }] }),
     );
   };
 
