@@ -71,6 +71,7 @@ import MustReadDetail from '../../screens/AddingNewVideoScreen/MustReadDetail';
 import GlobalMakeOrderScreen from '../../Components/GlobalMakeOrderScreen';
 import InviteGateScreen from '../../screens/InviteGateScreen';
 import CreatorOnboarding from '../../screens/InviteGateScreen/CreatorOnboarding';
+import FgiSurvey from '../../screens/TryScreen/FgiSurvey';
 
 const Stack = createStackNavigator();
 
@@ -234,6 +235,8 @@ function MainDrawerNavigator({ route, navigation }) {
         component={CreatorOnboarding}
         options={{ headerShown: false }}
       />
+      {/* FGI 설문 — 업로드 전 필수 단계 (계획서 TSK-007) */}
+      <Stack.Screen name="FgiSurvey" component={FgiSurvey} options={{ headerShown: false }} />
       <Stack.Screen
         name="VideoPage"
         component={VideoPageScreenWrapper}

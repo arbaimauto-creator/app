@@ -64,8 +64,23 @@ const MOCK_WEEKLY_FINDINGS = {
   'cmp-001': "🇯🇵 일본: 예상 밖 '지속력' 언급 집중 (7건 중 5건). 데모형 콘텐츠 도달이 페이스 리뷰 대비 1.7배.",
 };
 
+// FGI 설문 집계 mock (계획서 시트4 §1·2: 종합점수·구매의향 %·정량 3항목 평균·적정가 분포)
+const MOCK_FGI_STATS = {
+  'cmp-001': {
+    overallScore: 82, // 100점 만점 (정량 평균 × 20)
+    purchaseIntentRate: 71, // 구매의향 4점 이상 비율 %
+    quant: { purchaseIntent: 4.1, priceFairness: 3.6, competitiveness: 4.3 },
+    fairPriceUsdMedian: 24,
+    responses: 24,
+  },
+};
+
 export function fetchCampaignReviews(campaignId) {
   return Promise.resolve(MOCK_REVIEWS[campaignId] || []);
+}
+
+export function fetchFgiStats(campaignId) {
+  return Promise.resolve(MOCK_FGI_STATS[campaignId] || null);
 }
 
 export function fetchCountryStats(campaignId) {

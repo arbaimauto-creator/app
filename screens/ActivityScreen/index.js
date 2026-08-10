@@ -91,6 +91,13 @@ export default function ActivityScreen({ navigation }) {
   };
 
   const onUpload = (campaignId) => {
+    // FGI 설문(구매의향·가격·경쟁력 + 정성)이 업로드보다 먼저다 — 리포트 데이터 원천
+    const seeding = seedings[campaignId];
+    const campaign = campaignById[campaignId];
+    if (!seeding?.fgiSurvey && campaign) {
+      navigation.navigate('FgiSurvey', { campaign });
+      return;
+    }
     navigation.navigate('AddingNewVideo', { campaignId });
   };
 

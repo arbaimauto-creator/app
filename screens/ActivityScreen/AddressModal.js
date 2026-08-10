@@ -16,9 +16,13 @@ import Strings from '../../Components/Strings';
 export default function AddressModal({ visible, initial, onSubmit, onClose }) {
   const [name, setName] = useState(initial?.name || '');
   const [line, setLine] = useState(initial?.line || '');
+  // 글로벌 주소 포맷 (계획서 TSK-006): 도시/주·도/우편번호를 분리 수집
+  const [city, setCity] = useState(initial?.city || '');
+  const [stateProvince, setStateProvince] = useState(initial?.state || '');
+  const [postalCode, setPostalCode] = useState(initial?.postalCode || '');
   const [phone, setPhone] = useState(initial?.phone || '');
 
-  const canSubmit = name.trim() && line.trim() && phone.trim();
+  const canSubmit = name.trim() && line.trim() && city.trim() && postalCode.trim() && phone.trim();
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -43,18 +47,53 @@ export default function AddressModal({ visible, initial, onSubmit, onClose }) {
             value={line}
             onChangeText={setLine}
           />
-          <TextInput
-            style={styles.input}
-            placeholder={Strings.ADDRESS_PHONE}
-            placeholderTextColor={Constants.TIER_COLORS.STRIVER}
-            keyboardType="phone-pad"
-            value={phone}
-            onChangeText={setPhone}
-          />
+          <View style={styles.row}>
+            <TextInput
+              style={[styles.input, styles.rowInput]}
+              placeholder={Strings.ADDRESS_CITY}
+              placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+              value={city}
+              onChangeText={setCity}
+            />
+            <TextInput
+              style={[styles.input, styles.rowInput]}
+              placeholder={Strings.ADDRESS_STATE}
+              placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+              value={stateProvince}
+              onChangeText={setStateProvince}
+            />
+          </View>
+          <View style={styles.row}>
+            <TextInput
+              style={[styles.input, styles.rowInput]}
+              placeholder={Strings.ADDRESS_POSTAL}
+              placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+              autoCapitalize="characters"
+              value={postalCode}
+              onChangeText={setPostalCode}
+            />
+            <TextInput
+              style={[styles.input, styles.rowInput]}
+              placeholder={Strings.ADDRESS_PHONE}
+              placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+              keyboardType="phone-pad"
+              value={phone}
+              onChangeText={setPhone}
+            />
+          </View>
           <TouchableOpacity
             style={[styles.submit, !canSubmit && styles.submitDisabled]}
             disabled={!canSubmit}
-            onPress={() => onSubmit({ name: name.trim(), line: line.trim(), phone: phone.trim() })}
+            onPress={() =>
+              onSubmit({
+                name: name.trim(),
+                line: line.trim(),
+                city: city.trim(),
+                state: stateProvince.trim(),
+                postalCode: postalCode.trim(),
+                phone: phone.trim(),
+              })
+            }
           >
             <Text style={styles.submitText}>{Strings.ADDRESS_SUBMIT}</Text>
           </TouchableOpacity>
@@ -93,6 +132,8 @@ const styles = StyleSheet.create({
     color: Constants.TIER_COLORS.ARTISAN,
     marginBottom: 10,
   },
+  row: { flexDirection: 'row', gap: 8 },
+  rowInput: { flex: 1 },
   submit: {
     backgroundColor: Constants.COLOR_MAIN,
     borderRadius: 12,

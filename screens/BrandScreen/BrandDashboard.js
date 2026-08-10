@@ -10,11 +10,17 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
+import FastImage from 'react-native-fast-image';
 import Preference from 'react-native-default-preference';
 import Constants from '../../Components/Constants';
 import Strings from '../../Components/Strings';
 import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
-import { fetchCampaignReviews, fetchCountryStats, fetchWeeklyFinding } from '../../api/reviews';
+import {
+  fetchCampaignReviews,
+  fetchCountryStats,
+  fetchWeeklyFinding,
+  fetchFgiStats,
+} from '../../api/reviews';
 import { getEvaluations } from '../../api/evaluations';
 
 // v2 §5-3: 브랜드 대시보드 — 임원 보고 순서.
@@ -28,6 +34,7 @@ export default function BrandDashboard() {
   const [stats, setStats] = useState([]);
   const [finding, setFinding] = useState(null);
   const [evaluations, setEvaluations] = useState({});
+  const [fgi, setFgi] = useState(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -41,6 +48,7 @@ export default function BrandDashboard() {
         fetchCampaignReviews(id).then(setReviews);
         fetchCountryStats(id).then(setStats);
         fetchWeeklyFinding(id).then(setFinding);
+        fetchFgiStats(id).then(setFgi);
         getEvaluations().then(setEvaluations);
       }
       // 포커스마다 갱신
@@ -115,6 +123,44 @@ export default function BrandDashboard() {
         </View>
         <Text style={styles.manualNote}>{Strings.BRAND_METRICS_MANUAL_NOTE}</Text>
 
+        {/* FGI 정량 결과 (계획서 시트4 §1·2: 게이지 + 구매의향 % + 3항목 평균 + 적정가) */}
+        {fgi ? (
+          <>
+            <Text style={styles.section}>{Strings.BRAND_FGI_SECTION}</Text>
+            <View style={styles.fgiRow}>
+              <View style={styles.gaugeCard}>
+                <View style={styles.gaugeCircle}>
+                  <Text style={styles.gaugeValue}>{fgi.overallScore}</Text>
+                  <Text style={styles.gaugeMax}>/100</Text>
+                </View>
+                <Text style={styles.gaugeLabel}>{Strings.BRAND_GAUGE_LABEL}</Text>
+              </View>
+              <View style={styles.intentCard}>
+                <Text style={styles.intentValue}>{fgi.purchaseIntentRate}%</Text>
+                <Text style={styles.gaugeLabel}>{Strings.BRAND_INTENT_LABEL}</Text>
+                <Text style={styles.fairPrice}>fair price ${fgi.fairPriceUsdMedian} · n={fgi.responses}</Text>
+              </View>
+            </View>
+            <View style={styles.quantBox}>
+              {[
+                { k: 'purchaseIntent', label: Strings.FGI_PURCHASE_INTENT },
+                { k: 'priceFairness', label: Strings.FGI_PRICE_FAIRNESS },
+                { k: 'competitiveness', label: Strings.FGI_COMPETITIVENESS },
+              ].map(({ k, label }) => (
+                <View key={k} style={styles.quantRow}>
+                  <Text style={styles.quantLabel} numberOfLines={1}>
+                    {label}
+                  </Text>
+                  <View style={styles.quantTrack}>
+                    <View style={[styles.quantFill, { width: `${(fgi.quant[k] / 5) * 100}%` }]} />
+                  </View>
+                  <Text style={styles.quantVal}>{fgi.quant[k].toFixed(1)}</Text>
+                </View>
+              ))}
+            </View>
+          </>
+        ) : null}
+
         {/* ② 위클리 발견 카드 */}
         {finding ? (
           <View style={styles.findingCard}>
@@ -152,6 +198,32 @@ export default function BrandDashboard() {
             </View>
           ))}
         </View>
+
+        {/* UGC 갤러리 (계획서 시트4 §4: 미디어 모아보기 + 크리에이터 프로필 + HD 요청) */}
+        {reviews.length > 0 ? (
+          <>
+            <Text style={styles.section}>{Strings.BRAND_GALLERY_SECTION}</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {reviews.map((r) => (
+                <View key={r.id} style={styles.galleryCard}>
+                  <FastImage source={{ uri: r.thumbnailUrl }} style={styles.galleryThumb} />
+                  <Text style={styles.galleryName} numberOfLines={1}>
+                    @{r.reviewer}
+                  </Text>
+                  <Text style={styles.galleryMeta}>
+                    {r.country} · {r.views7d?.toLocaleString()} views
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.hdBtn}
+                    onPress={() => Alert.alert(Strings.BRAND_HD_PENDING)}
+                  >
+                    <Text style={styles.hdBtnText}>{Strings.BRAND_HD_DOWNLOAD}</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </ScrollView>
+          </>
+        ) : null}
 
         {/* ④ 2차 CTA */}
         {bestCountry ? (
@@ -261,4 +333,66 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   reportText: { fontSize: 13.5, fontWeight: '700', color: Constants.TIER_COLORS.ARTISAN },
+  fgiRow: { flexDirection: 'row', gap: 8 },
+  gaugeCard: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 14,
+    alignItems: 'center',
+  },
+  gaugeCircle: {
+    width: 92,
+    height: 92,
+    borderRadius: 46,
+    borderWidth: 7,
+    borderColor: Constants.COLOR_MAIN,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+  },
+  gaugeValue: { fontSize: 26, fontWeight: '900', color: '#26231d' },
+  gaugeMax: { fontSize: 12, color: '#8a857b', marginTop: 8 },
+  gaugeLabel: { fontSize: 11.5, color: '#8a857b', marginTop: 8 },
+  intentCard: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  intentValue: { fontSize: 34, fontWeight: '900', color: '#1c7c31' },
+  fairPrice: { fontSize: 11, color: '#8a857b', marginTop: 6 },
+  quantBox: { backgroundColor: '#fff', borderRadius: 12, padding: 14, marginTop: 8 },
+  quantRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 5 },
+  quantLabel: { flex: 1.6, fontSize: 11.5, color: '#5c574d', marginRight: 8 },
+  quantTrack: { flex: 1, height: 8, borderRadius: 5, backgroundColor: '#efede8', overflow: 'hidden' },
+  quantFill: { height: '100%', backgroundColor: Constants.COLOR_MAIN },
+  quantVal: {
+    width: 32,
+    textAlign: 'right',
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#26231d',
+  },
+  galleryCard: {
+    width: 140,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 10,
+    marginRight: 10,
+  },
+  galleryThumb: { width: '100%', height: 120, borderRadius: 8, backgroundColor: '#eee' },
+  galleryName: { fontSize: 12.5, fontWeight: '700', color: '#26231d', marginTop: 6 },
+  galleryMeta: { fontSize: 10.5, color: '#8a857b', marginTop: 2 },
+  hdBtn: {
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: Constants.COLOR_MAIN,
+    borderRadius: 7,
+    paddingVertical: 6,
+    alignItems: 'center',
+  },
+  hdBtnText: { fontSize: 10.5, fontWeight: '700', color: '#7a5200' },
 });

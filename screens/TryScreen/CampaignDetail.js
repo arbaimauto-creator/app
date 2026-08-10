@@ -76,7 +76,14 @@ export default function CampaignDetail({ route, navigation }) {
     if (await guardGuest()) {
       return;
     }
-    navigation.navigate('AddingNewVideo', {});
+    // FGI 설문 미완료 시 설문부터 (업로드는 설문 완료 화면에서 이어짐)
+    const { getSeedings } = require('../../api/seedings');
+    const seedings = await getSeedings();
+    if (!seedings[campaign.id]?.fgiSurvey) {
+      navigation.navigate('FgiSurvey', { campaign });
+      return;
+    }
+    navigation.navigate('AddingNewVideo', { campaignId: campaign.id });
   };
 
   return (

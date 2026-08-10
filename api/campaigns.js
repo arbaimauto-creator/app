@@ -1,6 +1,14 @@
 // 서버 API 준비 전 목데이터 스텁. 서버 연동 시 이 파일의 함수 본문만 교체한다.
 // v2 스키마: track(open/curated), base_points, content_guide, 국가별 쿼터.
 // 캠페인 식별자는 앱 전역 컨벤션에 맞춰 서버 연동 시 _id로 매핑한다.
+
+// FGI 설문 공통 문항 (계획서 TSK-001: 정량 구매의향/가격적정성/경쟁력 + 정성)
+// 캠페인별 커스텀 문항은 campaign.fgiExtraQuestions로 확장한다.
+export const FGI_QUANT_ITEMS = [
+  { key: 'purchaseIntent', type: 'quant' },
+  { key: 'priceFairness', type: 'quant' },
+  { key: 'competitiveness', type: 'quant' },
+];
 const MOCK_CAMPAIGNS = [
   {
     id: 'cmp-001',
