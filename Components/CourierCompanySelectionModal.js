@@ -10,32 +10,32 @@ const CourierCompanySelectionModal = ({ visible, onSelect, onCancel }) => {
   };
   const contents = [
     {
-      actionTitle: 'CJ대한통운',
-      onAction: () => handleAction('CJ대한통운'),
+      actionTitle: Strings.COURIER_CJ,
+      onAction: () => handleAction(Strings.COURIER_CJ),
     },
     {
-      actionTitle: '한진택배',
-      onAction: () => handleAction('한진택배'),
+      actionTitle: Strings.COURIER_HANJIN,
+      onAction: () => handleAction(Strings.COURIER_HANJIN),
     },
     {
-      actionTitle: '롯데택배',
-      onAction: () => handleAction('롯데택배'),
+      actionTitle: Strings.COURIER_LOTTE,
+      onAction: () => handleAction(Strings.COURIER_LOTTE),
     },
     {
-      actionTitle: '우체국택배',
-      onAction: () => handleAction('우체국택배'),
+      actionTitle: Strings.COURIER_EPOST,
+      onAction: () => handleAction(Strings.COURIER_EPOST),
     },
     {
-      actionTitle: '로젠택배',
-      onAction: () => handleAction('로젠택배'),
+      actionTitle: Strings.COURIER_LOGEN,
+      onAction: () => handleAction(Strings.COURIER_LOGEN),
     },
     {
-      actionTitle: 'CU 편의점택배',
-      onAction: () => handleAction('CU 편의점택배'),
+      actionTitle: Strings.COURIER_CU,
+      onAction: () => handleAction(Strings.COURIER_CU),
     },
     {
-      actionTitle: 'GS Postbox 택배',
-      onAction: () => handleAction('GS Postbox 택배'),
+      actionTitle: Strings.COURIER_GS,
+      onAction: () => handleAction(Strings.COURIER_GS),
     },
     {
       actionTitle: Strings.COURIER_OTHERS,

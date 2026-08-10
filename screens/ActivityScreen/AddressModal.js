@@ -77,7 +77,7 @@ export default function AddressModal({ visible, initial, onSubmit, onClose }) {
           <View style={styles.grabBar} />
           <View style={styles.titleRow}>
             <Text style={styles.title}>{Strings.ADDRESS_MODAL_TITLE}</Text>
-            <Badge tone="red" text="48시간" />
+            <Badge tone="red" text={Strings.ADDRESS_48H_BADGE} />
           </View>
           <Text style={styles.deadline}>{Strings.ADDRESS_MODAL_DEADLINE}</Text>
 
@@ -126,12 +126,9 @@ export default function AddressModal({ visible, initial, onSubmit, onClose }) {
             onPress={submit}
             activeOpacity={0.8}
           >
-            <Text style={styles.submitText}>저장 — 다음부터 자동 입력</Text>
+            <Text style={styles.submitText}>{Strings.ADDRESS_SAVE_AUTOFILL}</Text>
           </TouchableOpacity>
-          <Text style={styles.customsNote}>
-            해외 배송은 통관 사정으로 지연될 수 있어요. 통관 지연 기간은 업로드 기한(D-day)에서
-            제외됩니다.
-          </Text>
+          <Text style={styles.customsNote}>{Strings.ADDRESS_CUSTOMS_NOTE}</Text>
           <TouchableOpacity style={styles.close} onPress={onClose}>
             <Text style={styles.closeText}>{Strings.CANCEL}</Text>
           </TouchableOpacity>

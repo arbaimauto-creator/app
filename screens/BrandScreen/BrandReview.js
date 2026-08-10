@@ -204,7 +204,7 @@ export default function BrandReview({ navigation }) {
               </TouchableOpacity>
             ))}
           </View>
-          <Text style={styles.triageHint}>👎 선택 시 사유 1개 · 100건 10분 목표</Text>
+          <Text style={styles.triageHint}>{Strings.BRAND_TRIAGE_HINT}</Text>
 
           {/* 2차 루브릭 — 👍 후보에만 */}
           {isPick && (isOpen || !ev?.scores) ? (
@@ -219,7 +219,7 @@ export default function BrandReview({ navigation }) {
                     />
                   </View>
                   {r.key === 'quality' ? (
-                    <Text style={styles.bonusHint}>4점↑ = 크리에이터 품질 보너스 +20%</Text>
+                    <Text style={styles.bonusHint}>{Strings.BRAND_BONUS_HINT}</Text>
                   ) : null}
                 </View>
               ))}
@@ -254,7 +254,7 @@ export default function BrandReview({ navigation }) {
               </View>
               <TextInput
                 style={styles.commentInput}
-                placeholder="코멘트 (선택) — 크리에이터에게 전달돼요"
+                placeholder={Strings.RUBRIC_COMMENT_PLACEHOLDER}
                 placeholderTextColor={COLORS.GREY}
                 value={d.comment ?? ev?.comment ?? ''}
                 onChangeText={(v) =>
@@ -265,7 +265,7 @@ export default function BrandReview({ navigation }) {
                 }
               />
               <Btn
-                title="저장하고 다음 후보"
+                title={Strings.BRAND_SAVE_NEXT}
                 onPress={() => onSaveRubric(item.id)}
                 style={{ marginTop: 10 }}
               />
@@ -283,38 +283,38 @@ export default function BrandReview({ navigation }) {
       <SafeAreaView style={styles.container}>
         <ScrollView contentContainerStyle={styles.summaryWrap}>
           <Text style={styles.summaryEmoji}>✅</Text>
-          <Text style={styles.summaryTitle}>오늘 {doneCount}건 평가 완료</Text>
+          <Text style={styles.summaryTitle}>{Strings.BRAND_SESSION_DONE(doneCount)}</Text>
           <Text style={styles.summaryCounts}>
-            👍 후보 {session.pick} · 👌 보통 {session.ok} · 👎 스킵 {session.skip}
+            {Strings.BRAND_SESSION_COUNTS(session.pick, session.ok, session.skip)}
           </Text>
 
           <Card style={styles.summaryCard}>
-            <Text style={styles.summaryCardLabel}>정량 평가 진행</Text>
+            <Text style={styles.summaryCardLabel}>{Strings.BRAND_RUBRIC_PROGRESS}</Text>
             <Text style={styles.summaryCardMeta}>
-              {reviews.length}건 중 {scoredCount}건
+              {Strings.BRAND_RUBRIC_COUNT(scoredCount, reviews.length)}
             </Text>
             <ProgressBar
               ratio={reviews.length ? scoredCount / reviews.length : 0}
               style={{ marginTop: 8 }}
             />
-            <Text style={styles.summaryCardHint}>20건만 평가해도 리포트 정확도는 충분해요.</Text>
+            <Text style={styles.summaryCardHint}>{Strings.RUBRIC_20_ENOUGH}</Text>
           </Card>
 
           <Card style={styles.summaryCard}>
-            <Text style={styles.summaryCardLabel}>평가는 크리에이터에게 전달돼요</Text>
-            <Text style={styles.summaryCardHint}>응답 목표 ≤ 7일</Text>
+            <Text style={styles.summaryCardLabel}>{Strings.BRAND_FEEDBACK_FORWARD}</Text>
+            <Text style={styles.summaryCardHint}>{Strings.BRAND_SLA_NOTE}</Text>
           </Card>
 
           {pendingPicks.length > 0 ? (
             <Btn
-              title={`남은 후보 ${pendingPicks.length}건 마저 평가`}
+              title={Strings.BRAND_RUBRIC_REMAINING(pendingPicks.length)}
               onPress={() => setRubricQueue(true)}
               style={{ alignSelf: 'stretch', marginTop: 18 }}
             />
           ) : null}
           <Btn
             variant="ghost"
-            title="대시보드로"
+            title={Strings.BRAND_TO_DASHBOARD}
             onPress={() => navigation.navigate('BrandDashboard')}
             style={{ alignSelf: 'stretch', marginTop: 8 }}
           />

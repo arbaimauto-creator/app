@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import T from '../../Components/Constants/DesignTokens';
 import { Card, Badge } from '../../Components/UI';
-import Strings from '../../Components/Strings';
+import Strings, { getLanguage } from '../../Components/Strings';
 import { menuLogout } from '../../Components/utils';
 import { getSeedings } from '../../api/seedings';
 
@@ -20,27 +20,23 @@ const { COLORS, FONT, TYPE } = T;
 const ACTIVE_STATUSES = ['applied', 'approved', 'shipped', 'received', 'reviewing'];
 
 export default function SettingsScreen({ navigation, route }) {
-  const isKorean = Strings.CANCEL === '취소';
+  const isKorean = getLanguage() === 'ko';
 
   const onDeleteAccount = async () => {
     const seedings = await getSeedings();
     const hasActive = Object.values(seedings).some((s) => ACTIVE_STATUSES.includes(s.status));
     if (hasActive) {
-      Alert.alert('진행 중인 체험이 있어요 — 완료하거나 취소한 뒤 삭제할 수 있어요.');
+      Alert.alert(Strings.SET_DELETE_BLOCKED);
       return;
     }
-    Alert.alert(
-      '정말 삭제할까요?',
-      '이 작업은 되돌릴 수 없어요. 포인트·G-스코어·추천 코드가 모두 사라져요.',
-      [
-        { text: Strings.CANCEL, style: 'cancel' },
-        {
-          text: '삭제',
-          style: 'destructive',
-          onPress: () => navigation.navigate('AgreementToWithdrawal'),
-        },
-      ],
-    );
+    Alert.alert(Strings.SET_DELETE_CONFIRM_TITLE, Strings.SET_DELETE_CONFIRM_BODY, [
+      { text: Strings.CANCEL, style: 'cancel' },
+      {
+        text: Strings.SET_DELETE,
+        style: 'destructive',
+        onPress: () => navigation.navigate('AgreementToWithdrawal'),
+      },
+    ]);
   };
 
   return (
@@ -52,35 +48,37 @@ export default function SettingsScreen({ navigation, route }) {
         >
           <Text style={styles.back}>‹</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>설정</Text>
+        <Text style={styles.headerTitle}>{Strings.SET_TITLE}</Text>
       </View>
       <ScrollView contentContainerStyle={styles.scroll}>
         <Card>
           <View style={styles.row}>
-            <Text style={styles.rowTitle}>D-day 리마인더</Text>
-            <Badge tone="open" text="켜짐" />
+            <Text style={styles.rowTitle}>{Strings.SET_REMINDER_TITLE}</Text>
+            <Badge tone="open" text={Strings.SET_ON} />
           </View>
-          <Text style={[styles.xs, styles.mt4]}>마감 관련 알림만 — 마케팅 알림 없음</Text>
+          <Text style={[styles.xs, styles.mt4]}>{Strings.SET_REMINDER_NOTE}</Text>
         </Card>
 
         <Card>
           <View style={styles.row}>
-            <Text style={styles.rowTitle}>언어</Text>
+            <Text style={styles.rowTitle}>{Strings.SET_LANGUAGE}</Text>
             <View style={styles.seg}>
               <View style={[styles.segItem, !isKorean && styles.segItemOn]}>
                 <Text style={[styles.segText, !isKorean && styles.segTextOn]}>EN</Text>
               </View>
               <View style={[styles.segItem, isKorean && styles.segItemOn]}>
-                <Text style={[styles.segText, isKorean && styles.segTextOn]}>한국어</Text>
+                <Text style={[styles.segText, isKorean && styles.segTextOn]}>
+                  {Strings.SET_LANG_KO}
+                </Text>
               </View>
             </View>
           </View>
-          <Text style={[styles.xs, styles.mt4]}>글로벌 기본 English · 기기 언어 자동 감지</Text>
+          <Text style={[styles.xs, styles.mt4]}>{Strings.SET_LANGUAGE_NOTE}</Text>
         </Card>
 
         <Card>
           <View style={styles.row}>
-            <Text style={styles.rowTitle}>이용약관 · 개인정보 처리방침</Text>
+            <Text style={styles.rowTitle}>{Strings.SET_TERMS_PRIVACY}</Text>
             <Text style={styles.chev}>›</Text>
           </View>
         </Card>
@@ -88,7 +86,7 @@ export default function SettingsScreen({ navigation, route }) {
         <TouchableOpacity activeOpacity={0.7} onPress={() => menuLogout({ navigation, route })}>
           <Card>
             <View style={styles.row}>
-              <Text style={styles.rowTitle}>로그아웃</Text>
+              <Text style={styles.rowTitle}>{Strings.SET_LOGOUT}</Text>
               <Text style={styles.chev}>›</Text>
             </View>
           </Card>
@@ -96,11 +94,8 @@ export default function SettingsScreen({ navigation, route }) {
 
         <TouchableOpacity activeOpacity={0.7} onPress={onDeleteAccount}>
           <Card style={styles.dangerCard}>
-            <Text style={styles.dangerTitle}>계정 삭제</Text>
-            <Text style={[styles.xs, styles.mt4]}>
-              포인트 · G-스코어 · 추천 코드가 모두 사라져요. 진행 중인 체험이 있으면 완료하거나
-              취소한 뒤 삭제할 수 있어요.
-            </Text>
+            <Text style={styles.dangerTitle}>{Strings.SET_DELETE_ACCOUNT}</Text>
+            <Text style={[styles.xs, styles.mt4]}>{Strings.SET_DELETE_ACCOUNT_NOTE}</Text>
           </Card>
         </TouchableOpacity>
 

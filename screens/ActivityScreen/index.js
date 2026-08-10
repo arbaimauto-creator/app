@@ -111,18 +111,14 @@ export default function ActivityScreen({ navigation }) {
     if (Platform.OS === 'android' && Platform.Version >= 33) {
       const shown = await Preference.get('notifPromptShown');
       if (shown !== 'true') {
-        Alert.alert(
-          'D-day 알림을 켤까요?',
-          '마감을 놓치면 G-스코어가 내려가요.\n딱 필요한 순간에만 보내드려요.',
-          [
-            { text: '나중에 할게요', style: 'cancel' },
-            {
-              text: '알림 허용',
-              onPress: () =>
-                PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS),
-            },
-          ],
-        );
+        Alert.alert(Strings.ACT_NOTIF_TITLE, Strings.ACT_NOTIF_BODY, [
+          { text: Strings.ACT_NOTIF_LATER, style: 'cancel' },
+          {
+            text: Strings.ACT_NOTIF_ALLOW,
+            onPress: () =>
+              PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS),
+          },
+        ]);
         await Preference.set('notifPromptShown', 'true');
       }
     }
@@ -131,21 +127,17 @@ export default function ActivityScreen({ navigation }) {
 
   // 시안 23: 발송 전(applied/approved) 무페널티 취소
   const onCancel = (campaignId) => {
-    Alert.alert(
-      '체험을 취소할까요?',
-      '발송 전이라 페널티 없이 취소돼요.\n자리는 다른 크리에이터에게 넘어가요.',
-      [
-        { text: '계속하기', style: 'cancel' },
-        {
-          text: '취소하기',
-          style: 'destructive',
-          onPress: async () => {
-            await setSeedingStatus(campaignId, SEEDING_STATUS.CANCELLED);
-            reload();
-          },
+    Alert.alert(Strings.ACT_CANCEL_TITLE, Strings.ACT_CANCEL_BODY, [
+      { text: Strings.ACT_CANCEL_KEEP, style: 'cancel' },
+      {
+        text: Strings.ACT_CANCEL_CONFIRM,
+        style: 'destructive',
+        onPress: async () => {
+          await setSeedingStatus(campaignId, SEEDING_STATUS.CANCELLED);
+          reload();
         },
-      ],
-    );
+      },
+    ]);
   };
 
   const onExtend = async (seeding) => {
@@ -270,7 +262,7 @@ export default function ActivityScreen({ navigation }) {
           <Btn
             variant="ghost"
             small
-            title="취소"
+            title={Strings.CANCEL}
             onPress={() => onCancel(seeding.campaignId)}
             style={styles.cancelBtn}
           />
@@ -331,7 +323,7 @@ export default function ActivityScreen({ navigation }) {
             <Btn
               variant="ghost"
               small
-              title="피드백 전체 보기"
+              title={Strings.ACT_FEEDBACK_VIEW_ALL}
               onPress={() => openMissionDone(seeding, campaign, gScore, gScore)}
               style={styles.actionGap}
             />
@@ -339,7 +331,7 @@ export default function ActivityScreen({ navigation }) {
         ) : null}
 
         {seeding.status === SEEDING_STATUS.CANCELLED ? (
-          <Text style={styles.cancelledNote}>본인 취소 · 페널티 없음</Text>
+          <Text style={styles.cancelledNote}>{Strings.ACT_CANCELLED_NOTE}</Text>
         ) : null}
 
         {seeding.status === SEEDING_STATUS.NO_SHOW ? (
@@ -359,8 +351,8 @@ export default function ActivityScreen({ navigation }) {
       {/* 시안 24: 진행/완료 세그먼트 */}
       <View style={styles.segWrap}>
         {[
-          ['ongoing', `진행 ${ongoingMissions.length}`],
-          ['done', `완료 ${doneMissions.length}`],
+          ['ongoing', Strings.ACT_SEG_ONGOING(ongoingMissions.length)],
+          ['done', Strings.ACT_SEG_DONE(doneMissions.length)],
         ].map(([key, segLabel]) => (
           <TouchableOpacity
             key={key}

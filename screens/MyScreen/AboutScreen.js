@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import T from '../../Components/Constants/DesignTokens';
 import { Card } from '../../Components/UI';
+import Strings from '../../Components/Strings';
 
 const { COLORS, FONT, TYPE } = T;
 
@@ -31,27 +32,23 @@ export default function AboutScreen({ navigation }) {
           <Text style={styles.logo}>
             greyd<Text style={{ color: COLORS.AMBER }}>.</Text>
           </Text>
-          <Text style={styles.xs}>K-Product 검증 플랫폼 · by ARBAIM INC.</Text>
+          <Text style={styles.xs}>{Strings.ABOUT_TAGLINE}</Text>
         </Card>
 
         <Card>
-          <Text style={styles.label}>사업자 정보</Text>
-          <Text style={styles.bizText}>
-            {
-              'ARBAIM INC. · 대표 ○○○\n사업자등록번호 000-00-00000\n서울특별시 ○○구 ○○로 00, 0층\nhello@greyd.app'
-            }
-          </Text>
+          <Text style={styles.label}>{Strings.ABOUT_BIZ_LABEL}</Text>
+          <Text style={styles.bizText}>{Strings.ABOUT_BIZ_INFO}</Text>
         </Card>
 
         <Card>
           <View style={styles.row}>
-            <Text style={styles.rowTitle}>이용약관</Text>
+            <Text style={styles.rowTitle}>{Strings.ABOUT_TERMS}</Text>
             <Text style={styles.chev}>›</Text>
           </View>
         </Card>
         <Card>
           <View style={styles.row}>
-            <Text style={styles.rowTitle}>개인정보 처리방침</Text>
+            <Text style={styles.rowTitle}>{Strings.ABOUT_PRIVACY}</Text>
             <Text style={styles.chev}>›</Text>
           </View>
         </Card>
@@ -61,7 +58,7 @@ export default function AboutScreen({ navigation }) {
         >
           <Card>
             <View style={styles.row}>
-              <Text style={styles.rowTitle}>문의하기</Text>
+              <Text style={styles.rowTitle}>{Strings.ABOUT_CONTACT}</Text>
               <Text style={styles.xs}>hello@greyd.app ›</Text>
             </View>
           </Card>

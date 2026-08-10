@@ -4,6 +4,7 @@ import { Button } from 'react-native-elements';
 import FastImage from 'react-native-fast-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Constants from './Constants';
+import Strings from './Strings';
 
 function BottomButton({ title, onButtonPress }) {
   return (
@@ -58,7 +59,7 @@ export default function EventNoticeModal({ visible, onCancel, bodyText }) {
               <Text style={styles.guideTitle}>{bodyText}</Text>
             </View>
             <BottomButton
-              title={'확인'}
+              title={Strings.OK}
               onButtonPress={() => {
                 onCancel();
               }}

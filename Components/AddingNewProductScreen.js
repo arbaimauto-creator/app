@@ -991,7 +991,7 @@ export default class AddingNewProductScreen extends React.Component {
       (this.state.isPromotion &&
         !validation(
           this.state.promotionStartDate < this.state.promotionEndDate,
-          '프로모션 시작일과 종료일을 확인해주세요 ',
+          Strings.CHECK_PROMOTION_PERIOD,
         ))
     ) {
       return false;

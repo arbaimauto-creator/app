@@ -21,6 +21,8 @@ import Video from 'react-native-video';
 import { Context } from '../Contexts';
 import APIprovider from './APIprovider';
 import Constants from './Constants';
+import T from './Constants/DesignTokens';
+import FEATURES from './Constants/Features';
 import { shareLink } from './utils/share';
 import ReviewDescriptionSummary from './CustomComponents/ReviewDescriptionSummary';
 import SliderRightButtons from './CustomComponents/SliderRightButtons';
@@ -65,40 +67,25 @@ function ReviewInfo({ review }) {
           {title}
         </Text>
       )}
-      {/* <Text style={styles.reviewSubInfoText}> */}
+      {/* 시안 화면 8 — "@작성자 · 조회수 · Sponsored" 메타 줄 (티어 아이콘 제거, 하트는 플래그) */}
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <Text
-          style={{
-            color: Constants.TIER_COLORS.PIONEER,
-            fontFamily: Constants.CUSTOM_FONTS.PRETENDARD.Regular,
-          }}
-        >
-          {review.author.name}
-        </Text>
-        <FastImage
-          style={{ width: 30, height: 30 }}
-          source={
-            Constants.TIER_ICONS[
-              Utils.getTierNameByClass(review.author.class) || Utils.getTierNameByClass(0)
-            ]
-          }
-        />
-        <Text style={{ marginHorizontal: 5, color: Constants.TIER_COLORS.PIONEER }}>・</Text>
-        <Text style={{ color: Constants.TIER_COLORS.PIONEER, marginLeft: 5 }}>
-          {Strings.VIEW_COUNT(review.viewCount)}
-        </Text>
-        <Text style={{ marginHorizontal: 5, color: Constants.TIER_COLORS.PIONEER }}>・</Text>
-        <FastImage
-          style={{ marginLeft: 5, marginRight: 3, width: 18, height: 18 }}
-          source={require('../Resources/img/iconRenewal/heart-on-outlined.png')}
-        />
-        <Text style={{ color: Constants.TIER_COLORS.PIONEER }}>{review?.likes || 0}</Text>
+        <Text style={styles.metaText}>{`@${review.author.name}`}</Text>
+        <Text style={styles.metaDot}>·</Text>
+        <Text style={styles.metaText}>{Strings.VIEW_COUNT(review.viewCount)}</Text>
+        {FEATURES.SOCIAL_LIKES ? (
+          <>
+            <Text style={styles.metaDot}>·</Text>
+            <FastImage
+              style={{ marginRight: 3, width: 13, height: 13 }}
+              source={require('../Resources/img/iconRenewal/heart-on-outlined.png')}
+            />
+            <Text style={styles.metaText}>{review?.likes || 0}</Text>
+          </>
+        ) : null}
         {review?.isSponsored ? (
           <>
-            <Text style={{ marginHorizontal: 5, color: Constants.TIER_COLORS.PIONEER }}>・</Text>
-            <Text style={{ marginHorizontal: 5, color: Constants.TIER_COLORS.GIVER }}>
-              {Strings.SPONSORED}
-            </Text>
+            <Text style={styles.metaDot}>·</Text>
+            <Text style={styles.metaSponsored}>{Strings.SPONSORED}</Text>
           </>
         ) : null}
       </View>
@@ -662,10 +649,40 @@ const styles = StyleSheet.create({
   },
   reviewTitle: {
     marginTop: 5,
-    fontSize: 18,
-    lineHeight: 30,
+    fontSize: 15.5,
+    lineHeight: 24,
     color: 'white',
-    fontFamily: Constants.CUSTOM_FONTS.PRETENDARD.Medium,
+    fontFamily: T.FONT.ExtraBold,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+  },
+  metaText: {
+    fontSize: 11,
+    fontFamily: T.FONT.Regular,
+    color: 'white',
+    opacity: 0.9,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+  },
+  metaDot: {
+    marginHorizontal: 5,
+    fontSize: 11,
+    fontFamily: T.FONT.Regular,
+    color: 'white',
+    opacity: 0.9,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+  },
+  metaSponsored: {
+    fontSize: 11,
+    fontFamily: T.FONT.Regular,
+    color: T.COLORS.AMBER,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
   reviewSubInfoText: {
     color: Constants.TIER_COLORS.EXPLORER,

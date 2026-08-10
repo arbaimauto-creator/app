@@ -5,6 +5,7 @@ import { store } from '../../redux/store';
 import { setGuest } from '../../slices/user';
 import APIprovider from '../APIprovider';
 import { loginWithGuest } from '../../screens/SignInScreen/commonHelperFunction';
+import Strings from '../Strings';
 
 const config = {
   screens: {
@@ -70,7 +71,7 @@ const linking = {
         isGuest &&
         (dynamicLinkParams.startsWith('users') || dynamicLinkParams.startsWith('qnas'))
       ) {
-        return Alert.alert('로그인 필요', '해당 페이지는 가입해야만 확인 할 수 있습니다.');
+        return Alert.alert(Strings.LOGIN_REQUIRED_TITLE, Strings.LOGIN_REQUIRED_TO_VIEW_PAGE);
       }
 
       const myUserId = await Preference.get('userId');
@@ -140,7 +141,7 @@ const linking = {
         isGuest &&
         (dynamicLinkParams.startsWith('users') || dynamicLinkParams.startsWith('qnas'))
       ) {
-        return Alert.alert('로그인 필요', '해당 페이지는 가입해야만 확인 할 수 있습니다.');
+        return Alert.alert(Strings.LOGIN_REQUIRED_TITLE, Strings.LOGIN_REQUIRED_TO_VIEW_PAGE);
       }
 
       const myUserId = await Preference.get('userId');

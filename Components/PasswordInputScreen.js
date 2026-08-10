@@ -2,6 +2,7 @@ import React from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
 import IconFeather from 'react-native-vector-icons/Feather';
 import Constants from './Constants';
+import Strings from './Strings';
 
 function Keypad({ number, onPress, remove, resort }) {
   return (
@@ -14,7 +15,7 @@ function Keypad({ number, onPress, remove, resort }) {
         {remove ? (
           <IconFeather name="delete" style={styles.keypadTitle} />
         ) : resort ? (
-          <Text style={styles.keypadTitle}>{'재배열'}</Text>
+          <Text style={styles.keypadTitle}>{Strings.KEYPAD_RESHUFFLE}</Text>
         ) : (
           <Text style={styles.keypadTitle}>{number}</Text>
         )}

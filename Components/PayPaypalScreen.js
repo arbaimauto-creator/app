@@ -28,7 +28,7 @@ function HeaderRight({ navigation, checkOrder }) {
 
         // 국내 결제(PayScreen)와 동일하게 주문 객체의 statusCode로 판정한다
         if (orderResult?.statusCode !== Constants.ORDER_STATUS_CODE.NOT_ACCEPTED) {
-          Alert.alert('주문이 완료되지 않았습니다.');
+          Alert.alert(Strings.ORDER_NOT_COMPLETED);
           return;
         }
 

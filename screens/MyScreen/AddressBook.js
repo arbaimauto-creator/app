@@ -12,6 +12,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import T from '../../Components/Constants/DesignTokens';
 import { Card, Btn, Badge, NoteBox } from '../../Components/UI';
+import Strings from '../../Components/Strings';
 import { getSavedAddress, saveSavedAddress, clearSavedAddress } from '../../api/address';
 
 const { COLORS, FONT, TYPE } = T;
@@ -19,12 +20,12 @@ const { COLORS, FONT, TYPE } = T;
 const EMPTY_FORM = { name: '', line: '', city: '', state: '', postalCode: '', phone: '' };
 
 const FIELDS = [
-  { key: 'name', placeholder: '받는 사람' },
-  { key: 'line', placeholder: '주소' },
-  { key: 'city', placeholder: '도시' },
-  { key: 'state', placeholder: '주·도' },
-  { key: 'postalCode', placeholder: '우편번호' },
-  { key: 'phone', placeholder: '전화' },
+  { key: 'name', placeholder: () => Strings.ADDRESS_NAME },
+  { key: 'line', placeholder: () => Strings.ADDRESS_LINE },
+  { key: 'city', placeholder: () => Strings.ADDRESS_CITY },
+  { key: 'state', placeholder: () => Strings.ADDRESS_STATE },
+  { key: 'postalCode', placeholder: () => Strings.ADDRESS_POSTAL },
+  { key: 'phone', placeholder: () => Strings.ADDRESS_PHONE },
 ];
 
 export default function AddressBook({ navigation }) {
@@ -68,14 +69,14 @@ export default function AddressBook({ navigation }) {
         >
           <Text style={styles.back}>‹</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>배송지 관리</Text>
+        <Text style={styles.headerTitle}>{Strings.ADDR_MANAGE_TITLE}</Text>
       </View>
       <ScrollView contentContainerStyle={styles.scroll}>
         {address ? (
           <Card style={styles.addrCard}>
             <View style={styles.row}>
-              <Text style={styles.addrTitle}>기본 배송지</Text>
-              <Badge tone="amber" text="기본" />
+              <Text style={styles.addrTitle}>{Strings.ADDR_DEFAULT_TITLE}</Text>
+              <Badge tone="amber" text={Strings.ADDR_DEFAULT_BADGE} />
             </View>
             <Text style={styles.body}>
               {address.name} · {address.phone}
@@ -84,14 +85,26 @@ export default function AddressBook({ navigation }) {
               {address.line}, {address.city} {address.state} {address.postalCode}
             </Text>
             <View style={styles.btnRow}>
-              <Btn variant="ghost" small title="수정" onPress={openForm} style={styles.flex1} />
-              <Btn variant="ghost" small title="삭제" onPress={onDelete} style={styles.flex1} />
+              <Btn
+                variant="ghost"
+                small
+                title={Strings.ADDR_EDIT}
+                onPress={openForm}
+                style={styles.flex1}
+              />
+              <Btn
+                variant="ghost"
+                small
+                title={Strings.ADDR_DELETE}
+                onPress={onDelete}
+                style={styles.flex1}
+              />
             </View>
           </Card>
         ) : (
           <Card style={styles.emptyCard}>
-            <Text style={styles.emptyText}>저장된 배송지가 없어요</Text>
-            <Btn variant="ghost" title="+ 새 배송지 추가" onPress={openForm} />
+            <Text style={styles.emptyText}>{Strings.ADDR_EMPTY}</Text>
+            <Btn variant="ghost" title={Strings.ADDR_ADD_NEW} onPress={openForm} />
           </Card>
         )}
 
@@ -101,20 +114,17 @@ export default function AddressBook({ navigation }) {
               <TextInput
                 key={f.key}
                 style={styles.input}
-                placeholder={f.placeholder}
+                placeholder={f.placeholder()}
                 placeholderTextColor={COLORS.GREY}
                 value={form[f.key]}
                 onChangeText={(v) => setForm((prev) => ({ ...prev, [f.key]: v }))}
               />
             ))}
-            <Btn title="저장" onPress={onSave} />
+            <Btn title={Strings.ADDRESS_SUBMIT} onPress={onSave} />
           </Card>
         ) : null}
 
-        <NoteBox
-          tone="amber"
-          text="승인 후 48시간 안에 주소가 있어야 발송돼요. 저장해두면 다음 캠페인에서 자동 입력됩니다."
-        />
+        <NoteBox tone="amber" text={Strings.ADDR_NOTE} />
       </ScrollView>
     </SafeAreaView>
   );

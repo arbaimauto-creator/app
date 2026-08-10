@@ -11,8 +11,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Constants from '../../Components/Constants';
 import Strings from '../../Components/Strings';
+import T from '../../Components/Constants/DesignTokens';
+import { Card } from '../../Components/UI';
 import { upsertSeeding } from '../../api/seedings';
 
 // 계획서 TSK-007: 신청→승인→[FGI 설문]→UGC 업로드.
@@ -83,69 +84,75 @@ export default function FgiSurvey({ route, navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : null}
-        style={{ flex: 1 }}
-      >
-        <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
-          <Text style={styles.title}>{Strings.FGI_TITLE}</Text>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : null} style={{ flex: 1 }}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={styles.backGlyph}>‹</Text>
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>{Strings.FGI_TITLE}</Text>
+        </View>
+        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
           <Text style={styles.subtitle}>{Strings.FGI_SUBTITLE(campaign.brand)}</Text>
 
           {QUANT.map((q) => (
-            <View key={q.key} style={styles.block}>
+            <Card key={q.key} style={styles.block}>
               <Text style={styles.label}>{q.label()}</Text>
               <Scale value={scores[q.key]} onChange={(v) => setScores({ ...scores, [q.key]: v })} />
-            </View>
+            </Card>
           ))}
 
-          <View style={styles.block}>
+          <Card style={styles.block}>
             <Text style={styles.label}>{Strings.FGI_FAIR_PRICE}</Text>
             <TextInput
               style={styles.input}
               placeholder="USD"
-              placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+              placeholderTextColor={T.COLORS.GREY}
               keyboardType="numeric"
               value={fairPrice}
               onChangeText={setFairPrice}
             />
-          </View>
+          </Card>
 
-          <View style={styles.block}>
+          <Card style={styles.block}>
             <Text style={styles.label}>{Strings.FGI_PROS}</Text>
             <TextInput
               style={[styles.input, styles.multiline]}
               multiline
               placeholder={Strings.FGI_TEXT_PLACEHOLDER}
-              placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+              placeholderTextColor={T.COLORS.GREY}
               value={pros}
               onChangeText={setPros}
             />
-          </View>
+          </Card>
 
-          <View style={styles.block}>
+          <Card style={styles.block}>
             <Text style={styles.label}>{Strings.FGI_CONS}</Text>
             <TextInput
               style={[styles.input, styles.multiline]}
               multiline
               placeholder={Strings.FGI_TEXT_PLACEHOLDER}
-              placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+              placeholderTextColor={T.COLORS.GREY}
               value={cons}
               onChangeText={setCons}
             />
-          </View>
+          </Card>
 
           {extraQuestions.map((q) => (
-            <View key={q} style={styles.block}>
+            <Card key={q} style={styles.block}>
               <Text style={styles.label}>{q}</Text>
               <TextInput
                 style={[styles.input, styles.multiline]}
                 multiline
                 placeholder={Strings.FGI_TEXT_PLACEHOLDER}
-                placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+                placeholderTextColor={T.COLORS.GREY}
                 value={extraAnswers[q] || ''}
                 onChangeText={(v) => setExtraAnswers({ ...extraAnswers, [q]: v })}
               />
-            </View>
+            </Card>
           ))}
 
           <Text style={styles.honesty}>{Strings.APPLY_HONESTY_NOTE}</Text>
@@ -153,6 +160,7 @@ export default function FgiSurvey({ route, navigation }) {
           <TouchableOpacity
             style={[styles.submit, !complete && styles.submitDisabled]}
             onPress={onSubmit}
+            activeOpacity={0.8}
           >
             <Text style={styles.submitText}>{Strings.FGI_SUBMIT}</Text>
           </TouchableOpacity>
@@ -163,48 +171,62 @@ export default function FgiSurvey({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Constants.COLOR_BACKGROUND_DARK },
-  title: {
-    fontSize: 22,
-    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-    color: Constants.TIER_COLORS.ARTISAN,
+  container: { flex: 1, backgroundColor: T.COLORS.BG, paddingTop: T.TOP_INSET },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
   },
-  subtitle: { fontSize: 13.5, color: Constants.TIER_COLORS.STRIVER, marginTop: 6 },
-  block: { marginTop: 22 },
-  label: { fontSize: 14.5, color: Constants.TIER_COLORS.ARTISAN, marginBottom: 10 },
+  backButton: { marginRight: 10 },
+  backGlyph: {
+    fontSize: 26,
+    lineHeight: 28,
+    color: T.COLORS.INK,
+    fontFamily: T.FONT.Regular,
+  },
+  headerTitle: { fontSize: 17, fontFamily: T.FONT.ExtraBold, color: T.COLORS.INK },
+  subtitle: { ...T.TYPE.SUB, marginBottom: 2 },
+  block: { marginTop: 12 },
+  label: {
+    fontSize: 12.5,
+    fontFamily: T.FONT.Bold,
+    color: T.COLORS.INK,
+    marginBottom: 10,
+  },
   scaleRow: { flexDirection: 'row', gap: 8 },
   scaleDot: {
     flex: 1,
-    height: 44,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#fff',
+    height: 34,
+    maxWidth: 34,
+    borderRadius: 17,
+    backgroundColor: T.COLORS.TRACK,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  scaleDotOn: { backgroundColor: Constants.COLOR_MAIN, borderColor: Constants.COLOR_MAIN },
-  scaleNum: { fontSize: 15, fontWeight: '700', color: '#b7b2a8' },
-  scaleNumOn: { color: '#16130d' },
+  scaleDotOn: { backgroundColor: T.COLORS.AMBER },
+  scaleNum: { fontSize: 13, fontFamily: T.FONT.Bold, color: T.COLORS.GREY },
+  scaleNumOn: { color: T.COLORS.ON_AMBER },
   input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: T.COLORS.LINE,
+    borderRadius: T.RADIUS.FIELD,
     paddingVertical: 11,
     paddingHorizontal: 14,
-    fontSize: 14.5,
-    backgroundColor: '#fff',
-    color: Constants.TIER_COLORS.ARTISAN,
+    fontSize: 13.5,
+    fontFamily: T.FONT.Regular,
+    backgroundColor: T.COLORS.SURFACE,
+    color: T.COLORS.INK,
   },
   multiline: { minHeight: 84, textAlignVertical: 'top' },
-  honesty: { fontSize: 12, color: Constants.TIER_COLORS.STRIVER, marginTop: 18, lineHeight: 18 },
+  honesty: { ...T.TYPE.XS, marginTop: 16, lineHeight: 16 },
   submit: {
-    marginTop: 16,
-    backgroundColor: Constants.COLOR_MAIN,
-    borderRadius: 12,
-    paddingVertical: 15,
+    marginTop: 14,
+    backgroundColor: T.COLORS.AMBER,
+    borderRadius: T.RADIUS.BTN,
+    paddingVertical: 14,
     alignItems: 'center',
   },
   submitDisabled: { opacity: 0.45 },
-  submitText: { fontSize: 16, fontWeight: '800', color: '#16130d' },
+  submitText: { ...T.TYPE.BTN, fontSize: 14.5 },
 });

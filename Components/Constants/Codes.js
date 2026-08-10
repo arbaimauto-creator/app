@@ -253,14 +253,14 @@ const BANK_LIST = [
 ];
 
 const COURIER_LIST = [
-  { key: 'cj', title: 'CJ대한통운' },
-  { key: 'hanjin', title: '한진택배' },
-  { key: 'lotte', title: '롯데택배' },
-  { key: 'post', title: '우체국택배' },
-  { key: 'logen', title: '로젠택배' },
-  { key: 'cu', title: 'CU 편의점택배' },
+  { key: 'cj', title: Strings.COURIER_CJ },
+  { key: 'hanjin', title: Strings.COURIER_HANJIN },
+  { key: 'lotte', title: Strings.COURIER_LOTTE },
+  { key: 'post', title: Strings.COURIER_EPOST },
+  { key: 'logen', title: Strings.COURIER_LOGEN },
+  { key: 'cu', title: Strings.COURIER_CU },
   { key: 'gs', title: 'GS Postbox' },
-  { key: 'etc', title: '직접 입력' },
+  { key: 'etc', title: Strings.COURIER_ENTER_MANUALLY },
 ];
 
 const SELLER_STATUS = {

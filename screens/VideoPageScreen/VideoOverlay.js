@@ -6,6 +6,7 @@ import FastImage from 'react-native-fast-image';
 import IconMaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import APIprovider from '../../Components/APIprovider';
 import Constants from '../../Components/Constants';
+import FEATURES from '../../Components/Constants/Features';
 import VideoLikeButton from '../../Components/CustomComponents/VideoLikeButton';
 import Strings from '../../Components/Strings';
 import utils, { isGuestUser, LogoutAlert } from '../../Components/utils';
@@ -57,7 +58,6 @@ function ActionRail({ context }) {
     LayoutAnimation.easeInEaseOut();
   };
 
-
   const onPressComment = () => {
     if (guardGuest()) {
       return;
@@ -86,10 +86,12 @@ function ActionRail({ context }) {
       </TouchableOpacity>
 
       {/* VideoLikeButton이 자체 탭 처리를 하므로 RailButton(터치)으로 감싸지 않는다 */}
-      <View style={styles.railButton}>
-        <VideoLikeButton context={context} size={30} center />
-        <Text style={styles.railLabel}>{review.likes || 0}</Text>
-      </View>
+      {FEATURES.SOCIAL_LIKES ? (
+        <View style={styles.railButton}>
+          <VideoLikeButton context={context} size={30} center />
+          <Text style={styles.railLabel}>{review.likes || 0}</Text>
+        </View>
+      ) : null}
 
       <RailButton
         onPress={onPressRating}
@@ -242,7 +244,7 @@ function VideoOverlay({ context }) {
           onPress={() => context.openDetails()}
         >
           <IconMaterialIcons name="keyboard-arrow-up" size={22} color="#fff" />
-          <Text style={styles.detailHandleText}>{Strings.REVIEW ?? '리뷰'}</Text>
+          <Text style={styles.detailHandleText}>{Strings.REVIEW}</Text>
         </TouchableOpacity>
       </View>
     </View>

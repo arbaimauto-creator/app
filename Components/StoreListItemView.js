@@ -4,6 +4,7 @@ import Animated from 'react-native-reanimated';
 import IconMaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import UserListItemView from '../screens/UserPageScreen/UserListItemView.js';
 import ProductListItemView from './ProductListItemView.js';
+import Strings from './Strings';
 
 export default class StoreListItemView extends Component {
   static defaultProps = {
@@ -28,13 +29,13 @@ export default class StoreListItemView extends Component {
   menu = [
     {
       key: 1,
-      name: '공유',
+      name: Strings.SHARE_SHORT,
       icon: <IconMaterialIcons name="share" color={'#000'} size={20} />,
       onClicked: this.menuShareClicked,
     },
     {
       key: 2,
-      name: '신고',
+      name: Strings.REPORT,
       icon: <IconMaterialIcons name="report" color={'#000'} size={20} />,
       onClicked: this.menuReportClicked,
     },

@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Preference from 'react-native-default-preference';
 import T from '../../Components/Constants/DesignTokens';
 import { Card, Badge, NoteBox } from '../../Components/UI';
+import Strings from '../../Components/Strings';
 import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
 import { fetchCampaignReviews } from '../../api/reviews';
 import { getEvaluations } from '../../api/evaluations';
@@ -48,27 +49,27 @@ export default function BrandMy({ navigation }) {
   );
 
   const campaignLine = campaign
-    ? `${campaign.title} · 업로드 ${uploads} · 평가 ${evaluated}/${uploads}`
-    : '진행 중인 캠페인이 없어요';
+    ? Strings.BRAND_MY_CAMPAIGN_LINE(campaign.title, uploads, evaluated)
+    : Strings.BRAND_MY_NO_CAMPAIGN;
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
-        <Text style={T.TYPE.H_TITLE}>마이</Text>
+        <Text style={T.TYPE.H_TITLE}>{Strings.MY_TITLE}</Text>
 
         {/* 계정 */}
         <Card style={styles.accountCard}>
           <View style={styles.avatar} />
           <View style={{ flex: 1, marginLeft: 11 }}>
             <Text style={styles.accountName}>{brandName}</Text>
-            <Text style={styles.xs}>브랜드 계정 · 담당 김소연</Text>
+            <Text style={styles.xs}>{Strings.BRAND_MY_ACCOUNT_META}</Text>
           </View>
         </Card>
 
         {/* 진행 중 캠페인 */}
         <Card style={styles.rowCard}>
           <View style={styles.rowHead}>
-            <Text style={styles.rowTitle}>진행 중 캠페인</Text>
+            <Text style={styles.rowTitle}>{Strings.BRAND_MY_ONGOING}</Text>
             <Badge tone="open" text="1" />
           </View>
           <Text style={styles.campaignLine}>{campaignLine}</Text>
@@ -76,19 +77,17 @@ export default function BrandMy({ navigation }) {
 
         {/* 지난 캠페인 */}
         <Card style={[styles.rowCard, styles.rowInline]}>
-          <Text style={styles.rowTitle}>지난 캠페인</Text>
-          <Text style={styles.xs}>1건 ›</Text>
+          <Text style={styles.rowTitle}>{Strings.BRAND_MY_PAST}</Text>
+          <Text style={styles.xs}>{Strings.BRAND_MY_PAST_COUNT}</Text>
         </Card>
 
         {/* FGI 리포트 */}
         <Card style={styles.rowCard}>
           <View style={styles.rowHead}>
-            <Text style={styles.rowTitle}>FGI 리포트</Text>
-            <Text style={styles.xs}>PDF 1건 ›</Text>
+            <Text style={styles.rowTitle}>{Strings.BRAND_MY_REPORT}</Text>
+            <Text style={styles.xs}>{Strings.BRAND_MY_REPORT_COUNT}</Text>
           </View>
-          <Text style={[styles.xs, { marginTop: 4 }]}>
-            애널리스트가 수동 제작 — 요청 후 5영업일
-          </Text>
+          <Text style={[styles.xs, { marginTop: 4 }]}>{Strings.BRAND_MY_REPORT_NOTE}</Text>
         </Card>
 
         {/* 담당 애널리스트 문의 */}
@@ -97,7 +96,7 @@ export default function BrandMy({ navigation }) {
           onPress={() => Linking.openURL('mailto:hello@greyd.app')}
         >
           <Card style={[styles.rowCard, styles.rowInline]}>
-            <Text style={styles.rowTitle}>담당 애널리스트에게 문의</Text>
+            <Text style={styles.rowTitle}>{Strings.BRAND_MY_CONTACT}</Text>
             <Text style={styles.xs}>✉️ ›</Text>
           </Card>
         </TouchableOpacity>
@@ -105,16 +104,12 @@ export default function BrandMy({ navigation }) {
         {/* About */}
         <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('AboutGreyd')}>
           <Card style={[styles.rowCard, styles.rowInline]}>
-            <Text style={styles.rowTitle}>About · 사업자 정보</Text>
+            <Text style={styles.rowTitle}>{Strings.MY_ABOUT_ROW}</Text>
             <Text style={styles.xs}>ARBAIM INC. ›</Text>
           </Card>
         </TouchableOpacity>
 
-        <NoteBox
-          tone="amber"
-          text="2차 공구 캠페인이 궁금하세요? 대시보드의 견적 보기에서 시작하세요."
-          style={{ marginTop: 14 }}
-        />
+        <NoteBox tone="amber" text={Strings.BRAND_MY_PHASE2_NOTE} style={{ marginTop: 14 }} />
       </ScrollView>
     </SafeAreaView>
   );

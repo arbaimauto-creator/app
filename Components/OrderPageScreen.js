@@ -17,15 +17,15 @@ let toastRef;
 
 const paymentMethod = {
   [Constants.KOVAN_PAY_GROUP.CREDIT_CARD]: {
-    [Constants.KOVAN_PAY_METHOD.CREDIT_CARD]: '신용카드',
+    [Constants.KOVAN_PAY_METHOD.CREDIT_CARD]: Strings.CREDIT_CARD,
   },
   [Constants.KOVAN_PAY_GROUP.KAKAO_PAY]: {
-    [Constants.KOVAN_PAY_METHOD.CREDIT_CARD]: '카카오페이 신용카드',
-    [Constants.KOVAN_PAY_METHOD.SIMPLE_PAY]: '카카오페이 머니',
+    [Constants.KOVAN_PAY_METHOD.CREDIT_CARD]: Strings.KAKAO_PAY_CREDIT_CARD,
+    [Constants.KOVAN_PAY_METHOD.SIMPLE_PAY]: Strings.KAKAO_PAY_MONEY,
   },
   [Constants.KOVAN_PAY_GROUP.NAVER_PAY]: {
-    [Constants.KOVAN_PAY_METHOD.CREDIT_CARD]: '네이버페이 신용카드',
-    [Constants.KOVAN_PAY_METHOD.SIMPLE_PAY]: '네이버페이 포인트',
+    [Constants.KOVAN_PAY_METHOD.CREDIT_CARD]: Strings.NAVER_PAY_CREDIT_CARD,
+    [Constants.KOVAN_PAY_METHOD.SIMPLE_PAY]: Strings.NAVER_PAY_POINT,
   },
 };
 
@@ -163,7 +163,7 @@ function Payment({ order, KRWPerUSD }) {
       {order.discountCode ? (
         <>
           <View style={styles.infoItemContainer}>
-            <Text style={styles.infoItemTitle}>{'프로모션 코드 할인'}</Text>
+            <Text style={styles.infoItemTitle}>{Strings.PROMOTION_CODE_DISCOUNT}</Text>
             <Text style={styles.infoItemValue}>
               -{Utils.displayPrice(order.promotionDiscount, global?.state?.region, KRWPerUSD)}
             </Text>
@@ -171,8 +171,10 @@ function Payment({ order, KRWPerUSD }) {
         </>
       ) : null}
       <View style={styles.infoItemContainer}>
-        <Text style={styles.infoItemTitle}>결제수단</Text>
-        <Text style={styles.infoItemValue}>{paymentMethod[payGroup]?.[payMethod] || '리워드'}</Text>
+        <Text style={styles.infoItemTitle}>{Strings.PAY_METHODS}</Text>
+        <Text style={styles.infoItemValue}>
+          {paymentMethod[payGroup]?.[payMethod] || Strings.REWARD_AMOUNT}
+        </Text>
       </View>
       <View style={styles.infoItemContainer}>
         <Text style={styles.infoItemTitle}>{Strings.TOTAL_PRICE}</Text>

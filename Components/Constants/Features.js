@@ -22,6 +22,9 @@ const FEATURES = {
 
   // 추천 코드 (첫 루프 완료 시 3장)
   REFERRAL: true,
+
+  // 좋아요(하트)·좋아요 목록 등 소셜 장식 (회의: "라이크 등 소셜 장식 제거" — 데이터는 유지, UI만 숨김)
+  SOCIAL_LIKES: false,
 };
 
 export default FEATURES;

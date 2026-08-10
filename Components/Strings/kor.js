@@ -1498,6 +1498,8 @@ export default {
     REJECTED: '거절됨',
   },
   PUSH_PERMISSION_REQUEST: 'greyd를 사용하기 위해 알림 권한이 필요합니다',
+  // eng와 키 세트 일치용 — eng에는 _TITLE 이름이 별도로 존재
+  PUSH_PERMISSION_REQUEST_TITLE: 'greyd를 사용하기 위해 알림 권한이 필요합니다',
   PUSH_PERMISSION_REQUEST_CONTENT: '앱 설정으로 이동하여 알림 권한을 허용으로 변경하시겠습니까?',
   CAUTION_VIDEO_SIZE_EXCEED: '영상이 1기가를 초과합니다.',
   CAUTION_VIDEO_SIZE_EXCEED_GUIDE: '업로드가 실패할 경우 용량을 줄여서 다시 시도해주세요',
@@ -1643,7 +1645,8 @@ export default {
   REFERRAL_SHARE_MESSAGE_NAMED: (code, handle) =>
     `@${handle}이(가) greyd에 초대합니다 — 한국 브랜드가 당신의 리뷰를 직접 읽는 초대제 패널. 코드: ${code}`,
   REFERRAL_TITLE: '초대장 3장이 열렸어요',
-  REFERRAL_NOTE: '첫 리뷰 루프를 완료한 크리에이터에게만 발급돼요. 코드에는 당신의 이름이 새겨집니다.',
+  REFERRAL_NOTE:
+    '첫 리뷰 루프를 완료한 크리에이터에게만 발급돼요. 코드에는 당신의 이름이 새겨집니다.',
   REFERRAL_SHARE_MESSAGE: (code) =>
     `greyd에 초대할게요 — 한국 브랜드가 당신의 리뷰를 직접 읽는 초대제 패널. 코드: ${code}`,
   BRAND_TAB_DASH: '대시보드',
@@ -1661,8 +1664,7 @@ export default {
   BRAND_COL_FULFILL: '이행',
   BRAND_COL_SCORE: '점수',
   BRAND_COL_DAYS: '소요',
-  BRAND_PHASE2_CTA: (country, rate) =>
-    `이행률 ${rate}% ${country} — 2차 공구 캠페인 견적 보기`,
+  BRAND_PHASE2_CTA: (country, rate) => `이행률 ${rate}% ${country} — 2차 공구 캠페인 견적 보기`,
   BRAND_PHASE2_THANKS: '관심 등록됐어요. 담당 매니저가 곧 연락드릴게요.',
   BRAND_REPORT_DOWNLOAD: 'FGI 리포트 다운로드',
   BRAND_REPORT_PENDING: '리포트는 캠페인 종료 후 애널리스트가 작성해 전달드려요.',
@@ -1690,7 +1692,8 @@ export default {
   CAMPAIGN_STATUS_CANCELLED: '취소됨',
   CAMPAIGN_STATUS_NO_SHOW: '기한 만료',
   ADDRESS_MODAL_TITLE: '배송지를 입력해주세요',
-  ADDRESS_MODAL_DEADLINE: '48시간 내 미입력 시 선정이 취소되고 다음 분에게 기회가 넘어가요 (페널티 없음)',
+  ADDRESS_MODAL_DEADLINE:
+    '48시간 내 미입력 시 선정이 취소되고 다음 분에게 기회가 넘어가요 (페널티 없음)',
   ADDRESS_NAME: '받는 사람',
   ADDRESS_LINE: '주소',
   ADDRESS_CITY: '도시',
@@ -1707,8 +1710,10 @@ export default {
   GRACE_NOTE: '마감됐어요 — 48시간 내 업로드하면 아직 인정돼요 (포인트 -30%)',
   EXTEND_CTA: (d) => `마감 ${d}일 연장 (1회)`,
   EXTENSION_GRANTED: (d) => `마감이 ${d}일 연장됐어요`,
-  BRAND_FEEDBACK_MOCK: (brand) => `${brand}: 제품 특징이 자연스럽게 전달됐어요. 다음 캠페인에서도 함께하고 싶어요!`,
-  STRIKE_WARNING: '약속 미이행 1회 — 한 번 더 발생하면 계정이 정지돼요. 연속 3회 완주하면 신뢰가 회복됩니다.',
+  BRAND_FEEDBACK_MOCK: (brand) =>
+    `${brand}: 제품 특징이 자연스럽게 전달됐어요. 다음 캠페인에서도 함께하고 싶어요!`,
+  STRIKE_WARNING:
+    '약속 미이행 1회 — 한 번 더 발생하면 계정이 정지돼요. 연속 3회 완주하면 신뢰가 회복됩니다.',
   POINT_CASHOUT_NOTE: '현금 인출·제품 구매는 2026 Q4 오픈 예정',
   G_NEXT_UNLOCK: (n) => `Curated 해제까지 +${n}`,
   G_UNLOCKED: 'Curated 캠페인 신청 가능',
@@ -1721,4 +1726,210 @@ export default {
   APPLY_HONESTY_NOTE: '포인트는 영상 완성도로만 계산돼요. 솔직한 평가는 점수에 영향이 없어요.',
   // 한글 문장은 1_1~1_3으로 완결 — eng와 세그먼트 수를 맞추기 위한 빈 값 (미정의 시 'undefined' 노출)
   TUTORIAL_REVIEW_BODY_1_4: '',
+  // i18n 배치 A — 마이 탭 (시안 18)
+  MY_TITLE: '마이',
+  MY_NEXT_UNLOCK: (g) => `다음 해제 G${g} — Curated 신청`,
+  MY_COMPLETED_COUNT: (n) => `완주 ${n}`,
+  MY_CONCURRENT_LIMIT: (n) => `동시 한도 ${n}건`,
+  MY_POINTS: '포인트',
+  MY_REFERRAL_CODES: '추천 코드',
+  MY_REFERRAL_CODES_COUNT: '3장',
+  MY_ABOUT_ROW: 'About · 사업자 정보',
+  // 배송지 관리 (시안 19)
+  ADDR_MANAGE_TITLE: '배송지 관리',
+  ADDR_DEFAULT_TITLE: '기본 배송지',
+  ADDR_DEFAULT_BADGE: '기본',
+  ADDR_EDIT: '수정',
+  ADDR_DELETE: '삭제',
+  ADDR_EMPTY: '저장된 배송지가 없어요',
+  ADDR_ADD_NEW: '+ 새 배송지 추가',
+  ADDR_NOTE:
+    '승인 후 48시간 안에 주소가 있어야 발송돼요. 저장해두면 다음 캠페인에서 자동 입력됩니다.',
+  // About · 사업자 정보 (시안 20)
+  ABOUT_TAGLINE: 'K-Product 검증 플랫폼 · by ARBAIM INC.',
+  ABOUT_BIZ_LABEL: '사업자 정보',
+  ABOUT_BIZ_INFO:
+    'ARBAIM INC. · 대표 ○○○\n사업자등록번호 000-00-00000\n서울특별시 ○○구 ○○로 00, 0층\nhello@greyd.app',
+  ABOUT_TERMS: '이용약관',
+  ABOUT_PRIVACY: '개인정보 처리방침',
+  ABOUT_CONTACT: '문의하기',
+  // 설정 · 계정 삭제 (시안 25)
+  SET_TITLE: '설정',
+  SET_REMINDER_TITLE: 'D-day 리마인더',
+  SET_ON: '켜짐',
+  SET_REMINDER_NOTE: '마감 관련 알림만 — 마케팅 알림 없음',
+  SET_LANGUAGE: '언어',
+  SET_LANG_KO: '한국어',
+  SET_LANGUAGE_NOTE: '글로벌 기본 English · 기기 언어 자동 감지',
+  SET_TERMS_PRIVACY: '이용약관 · 개인정보 처리방침',
+  SET_LOGOUT: '로그아웃',
+  SET_DELETE_ACCOUNT: '계정 삭제',
+  SET_DELETE_ACCOUNT_NOTE:
+    '포인트 · G-스코어 · 추천 코드가 모두 사라져요. 진행 중인 체험이 있으면 완료하거나 취소한 뒤 삭제할 수 있어요.',
+  SET_DELETE_BLOCKED: '진행 중인 체험이 있어요 — 완료하거나 취소한 뒤 삭제할 수 있어요.',
+  SET_DELETE_CONFIRM_TITLE: '정말 삭제할까요?',
+  SET_DELETE_CONFIRM_BODY: '이 작업은 되돌릴 수 없어요. 포인트·G-스코어·추천 코드가 모두 사라져요.',
+  SET_DELETE: '삭제',
+  // 신청 완료 (시안 11)
+  APPLYDONE_TITLE: '신청 완료',
+  APPLYDONE_HERO: '신청 완료!',
+  APPLYDONE_TRACK: (name) => `${name} 트랙`,
+  APPLYDONE_NOW: '지금',
+  APPLYDONE_APPROVAL_NOTE: '평균 2일 — 승인되면 주소를 물어볼게요',
+  APPLYDONE_SHIP_NOTE: '서울 출고 3–5일 · 운송장 제공',
+  APPLYDONE_LIMIT_PRE: '동시 진행 한도 ',
+  APPLYDONE_LIMIT_COUNT: (n) => `${n}건`,
+  APPLYDONE_LIMIT_MID: ' 중 ',
+  APPLYDONE_LIMIT_POST: ' 사용 중이에요.',
+  APPLYDONE_MORE_CTA: '다른 캠페인 더 보기',
+  // 완주 보상 (시안 16+17)
+  DONE_TITLE: '완주 보상',
+  DONE_SHARE_MESSAGE: (code) =>
+    `한국 브랜드가 리뷰를 직접 읽는 패널이야. 내 이름으로 초대할게. 코드: ${code} (유효 7일)`,
+  DONE_POINTS_FORMULA: (base, mult) => `기본 ${base}P × 품질 보너스 ${mult}`,
+  DONE_BRAND_FEEDBACK: '브랜드 피드백',
+  DONE_BRAND_VIEWED: (brand) => `${brand}이 3일 전 열람 ✓`,
+  DONE_QUALITY_SCORE: '콘텐츠 품질 4/5',
+  DONE_G_PROGRESS: (g) => `완주 +3 · 다음 해제: G${g} (Curated 신청)`,
+  DONE_CODES_UNLOCKED: '추천 코드 3장이 열렸어요',
+  DONE_CASHOUT_NOTE: '포인트 현금 인출·제품 구매 — 2026 Q4 오픈 예정',
+  // 활동 탭 (시안 22~24)
+  ACT_SEG_ONGOING: (n) => `진행 ${n}`,
+  ACT_SEG_DONE: (n) => `완료 ${n}`,
+  ACT_NOTIF_TITLE: 'D-day 알림을 켤까요?',
+  ACT_NOTIF_BODY: '마감을 놓치면 G-스코어가 내려가요.\n딱 필요한 순간에만 보내드려요.',
+  ACT_NOTIF_LATER: '나중에 할게요',
+  ACT_NOTIF_ALLOW: '알림 허용',
+  ACT_CANCEL_TITLE: '체험을 취소할까요?',
+  ACT_CANCEL_BODY: '발송 전이라 페널티 없이 취소돼요.\n자리는 다른 크리에이터에게 넘어가요.',
+  ACT_CANCEL_KEEP: '계속하기',
+  ACT_CANCEL_CONFIRM: '취소하기',
+  ACT_FEEDBACK_VIEW_ALL: '피드백 전체 보기',
+  ACT_CANCELLED_NOTE: '본인 취소 · 페널티 없음',
+  // 주소 모달 (시안 12)
+  ADDRESS_48H_BADGE: '48시간',
+  ADDRESS_SAVE_AUTOFILL: '저장 — 다음부터 자동 입력',
+  ADDRESS_CUSTOMS_NOTE:
+    '해외 배송은 통관 사정으로 지연될 수 있어요. 통관 지연 기간은 업로드 기한(D-day)에서 제외됩니다.',
+  // 브랜드 대시보드 빈 상태
+  BRAND_EMPTY_TITLE: '지금은 배송·제작 기간이에요',
+  BRAND_EMPTY_BODY:
+    '크리에이터 20명이 선정됐고 제품이 이동 중입니다.\n첫 리뷰는 보통 발송 후 2–3주에 도착해요.',
+  BRAND_EMPTY_PILL_APPROVED: '선정 20',
+  BRAND_EMPTY_PILL_SHIPPED: '발송 14',
+  BRAND_EMPTY_PILL_RECEIVED: '수령 6',
+  BRAND_EMPTY_NOTE: '진행 상황은 담당 애널리스트가 매주 요약해 드려요.',
+  BRAND_FINDING_LABEL: '이번 주 발견',
+  // 브랜드 리뷰 평가 (시안 6b)
+  BRAND_TRIAGE_HINT: '👎 선택 시 사유 1개 · 100건 10분 목표',
+  BRAND_BONUS_HINT: '4점↑ = 크리에이터 품질 보너스 +20%',
+  BRAND_SAVE_NEXT: '저장하고 다음 후보',
+  BRAND_SESSION_DONE: (n) => `오늘 ${n}건 평가 완료`,
+  BRAND_SESSION_COUNTS: (pick, ok, skip) => `👍 후보 ${pick} · 👌 보통 ${ok} · 👎 스킵 ${skip}`,
+  BRAND_RUBRIC_PROGRESS: '정량 평가 진행',
+  BRAND_RUBRIC_COUNT: (scored, total) => `${total}건 중 ${scored}건`,
+  BRAND_FEEDBACK_FORWARD: '평가는 크리에이터에게 전달돼요',
+  BRAND_SLA_NOTE: '응답 목표 ≤ 7일',
+  BRAND_RUBRIC_REMAINING: (n) => `남은 후보 ${n}건 마저 평가`,
+  BRAND_TO_DASHBOARD: '대시보드로',
+  // 브랜드 마이
+  BRAND_MY_CAMPAIGN_LINE: (title, uploads, evaluated) =>
+    `${title} · 업로드 ${uploads} · 평가 ${evaluated}/${uploads}`,
+  BRAND_MY_NO_CAMPAIGN: '진행 중인 캠페인이 없어요',
+  BRAND_MY_ACCOUNT_META: '브랜드 계정 · 담당 김소연',
+  BRAND_MY_ONGOING: '진행 중 캠페인',
+  BRAND_MY_PAST: '지난 캠페인',
+  BRAND_MY_PAST_COUNT: '1건 ›',
+  BRAND_MY_REPORT: 'FGI 리포트',
+  BRAND_MY_REPORT_COUNT: 'PDF 1건 ›',
+  BRAND_MY_REPORT_NOTE: '애널리스트가 수동 제작 — 요청 후 5영업일',
+  BRAND_MY_CONTACT: '담당 애널리스트에게 문의',
+  BRAND_MY_PHASE2_NOTE: '2차 공구 캠페인이 궁금하세요? 대시보드의 견적 보기에서 시작하세요.',
+  // 브랜드 웰컴 (v2 §5-1)
+  BRAND_WELCOME_TITLE: '캠페인은 ARBAIM이\n개설하고 운영합니다.',
+  BRAND_WELCOME_SUB: '결과를 보고, 평가만 하세요.\n크리에이터 관리·배송·CS 전부 저희 몫입니다.',
+  BRAND_ANALYST_LABEL: '담당 애널리스트',
+  BRAND_ANALYST_NAME: '김소연 · ARBAIM',
+  BRAND_ANALYST_SLA: '평가 응답 ≤ 7일',
+  // i18n 배치 B1 — 레거시·커머스 화면
+  COURIER_CJ: 'CJ대한통운',
+  COURIER_HANJIN: '한진택배',
+  COURIER_LOTTE: '롯데택배',
+  COURIER_EPOST: '우체국택배',
+  COURIER_LOGEN: '로젠택배',
+  COURIER_CU: 'CU 편의점택배',
+  COURIER_GS: 'GS Postbox 택배',
+  COURIER_ENTER_MANUALLY: '직접 입력',
+  TRENDING_REVIEWS_SHORT: '인기',
+  WORSTPRODUCT_REVIEWS_SHORT: '비추천',
+  ABROAD_REVIEWS_SHORT: '해외',
+  FOLLOWING_REVIEWS_SHORT: '팔로잉',
+  RECEIVING_PRIZES_GUIDE_TITLE_1: '경품 수령 안내',
+  RECEIVING_PRIZES_GUIDE_BODY_1_1:
+    '회원정보에 기입된 이메일주소를 통해 경품수령 안내 메일을 전송하고 있습니다. 연락이 가능한 이메일 주소로 확인/변경부탁드립니다. (경품수령 안내메일 전송은 평일기준 1~2일 소요됩니다.)',
+  RECEIVING_PRIZES_GUIDE_BODY_1_2:
+    '이메일 안내에 따라 연락처, 경품수령장소 등 물품수령을 위한 간단한 정보 입력 부탁드립니다.',
+  RECEIVING_PRIZES_GUIDE_BODY_1_3:
+    '일부 경품의 경우 상품 수령을 위한 제세 공과금(경품 가액 22%)을 부담해야 합니다. 자세한 내용은 안내 메일을 통해 전달됩니다.',
+  RECEIVING_PRIZES_GUIDE_BODY_1_4:
+    '22년 1월 5일까지 정보 입력 부탁드리며, 미 입력 시 재추첨을 통해 다른 회원님들에게 당첨 기회를 드리고 있습니다.',
+  RECEIVING_PRIZES_GUIDE_BODY_1_5:
+    '제공받은 메일이 잘못되어 경품 발송이 잘못된 경우 당사가 책임지지 않습니다.',
+  RECEIVING_PRIZES_GUIDE_BODY_1_6: '확인 후 배송에 다소 시간이 소요될 수 있습니다.',
+  EDIT_EMAIL: '이메일 수정하기',
+  HELP_BUBBLE_MAIN_1:
+    '왼쪽으로\n화면을 넘겨보세요.\n\n숨어있는 멋진 제품들의\n매력적인 리뷰를 볼 수 있어요!',
+  HELP_BUBBLE_MAIN_2:
+    '이용자가 직접 평가한\n리뷰어의 리뷰 평점이에요.\n화면을 클릭하시면\n평가할 수 있어요.\n\n지금 점수를 주세요.\n여러분의 리워드가 쌓일거에요!',
+  HELP_BUBBLE_MAIN_3: '노란색 바를 위로 끌어올려보세요.\n\n카테고리별로 리뷰를 확인할 수 있어요.',
+  HELP_BUBBLE_VIDEO_1:
+    'greyd의 자랑, 자부심.\n리뷰 평가 기능이에요.\n\n보신 리뷰를 평가해주세요!\n\n좋은 리뷰가 인정받는\ngreyd 를 여러분이 만들어주세요.\n\n리워드도 드립니다!',
+  HELP_BUBBLE_ADDING_NEW_VIDEO_1:
+    '리뷰를 올려주세요!\n\n올리기만 해도 리워드가 쌓이고\n올리신 제품이 판매가 되면\n수익을 나눠드립니다.',
+  HELP_BUBBLE_ADDING_NEW_VIDEO_2:
+    '리뷰하신 제품이 \ngreyd 쇼핑에서 판매중인 상품이라면\n꼭 상품을 연결해주세요.\n\n리뷰를 통해 매출이 발생하면\n수익을 나눠드립니다. \n\n(연결이 안되면 수익을 못드려요. ㅠㅠ)',
+  HELP_BUBBLE_ADDING_NEW_VIDEO_3:
+    '인스타그램에\n동시 포스팅 해보세요. \n\n더 많은 사람들에게 리뷰가 알려지고\n여러분의 팬이 생기고\n더 많은 수익이 발생할 수 있습니다.',
+  HELP_BUBBLE_TIER_GUIDE_1:
+    '리뷰어 등급에 따라\n얻을 수 있는 판매 수익의 %가 달라집니다.\n\n리뷰를 더 많이 올릴 수록\n더 많은 평가를 받을 수록\n더 높은 평점을 받을 수록\n\n등급이 올라갑니다. ',
+  PROMOTION_CODE_DISCOUNT: '프로모션 코드 할인',
+  LOGIN_REQUIRED_TITLE: '로그인 필요',
+  LOGIN_REQUIRED_TO_VIEW_PAGE: '해당 페이지는 가입해야만 확인 할 수 있습니다.',
+  REFUND_PRODUCT_ALREADY_BOUGHT_TITLE: '이미 구매했던 이력이 있는 상품입니다.',
+  REFUND_PRODUCT_ONLY_ONCE: '환불 프로모션 제품은 1회만 구매 가능합니다.',
+  BUY_VIA_REVIEW_ALERT_TITLE: '잠깐! 다른 사람의 리뷰를 보고 구매하면 적립금을 받을 수 있어요!',
+  BUY_VIA_REVIEW_ALERT_BODY: '링크된 리뷰를 보고 상품을 구매하러 오시겠어요?',
+  BUY_WITHOUT_REVIEW: '그냥 구매하기',
+  GO_TO_REVIEW: '리뷰 보러가기',
+  ORDER_NOT_COMPLETED: '주문이 완료되지 않았습니다.',
+  PAY_ERROR_TITLE: '오류가 발생했습니다.',
+  PAY_ERROR_RESTART_APP: '앱을 종료 후 다시 실행해주세요',
+  PAY_APP_OPEN_FAILED: '앱 실행이 실패했습니다. 설치가 되어있지 않은 경우 설치 후 재시도해주세요.',
+  INSTAGRAM_ID_NOT_REGISTERED: '인스타그램 아이디가 입력되지 않았습니다',
+  DELETED_USER_TITLE: '탈퇴 유저',
+  DELETED_USER_BODY: '탈퇴된 유저입니다. 유저의 정보를 확인할 수 없습니다.',
+  GLOBAL_GROUP_BUYING_DISCOUNT: '글로벌 공구 할인',
+  PROMOTION_CODE_ALREADY_APPLIED: '이미 적용된 코드입니다',
+  DOWNLOAD_COMPLETED_AT: (path) => `다운로드가 완료되었습니다. ${path}`,
+  KEYPAD_RESHUFFLE: '재배열',
+  CHECK_PROMOTION_PERIOD: '프로모션 시작일과 종료일을 확인해주세요 ',
+  SHARE_SHORT: '공유',
+  // i18n 배치 B2 — 리워드 가이드·리워드 내역
+  REMARK: '비고',
+  REWARD_GUIDE_INTRO_TITLE: '리워드 적립 방법',
+  REWARD_GUIDE_INTRO_BODY_PRE:
+    '그레이드 앱에서 현금처럼 사용 할 수 있는 화폐입니다. \n20,000 리워드 이상이 쌓였을 경우, 본인의 계좌로 출금할 수 있습니다. (1일 최대 ',
+  REWARD_GUIDE_INTRO_BODY_POST: ' 적립가능 - 리뷰 적립 제외)',
+  REWARD_GUIDE_TITLE_POST: ' 적립',
+  REWARD_GUIDE_SECTION_1_TITLE_PRE: '1. 출석 체크시 ',
+  REWARD_GUIDE_SECTION_1_BODY: (n) => `하루에 한 번 최초 접속시 자동으로 ${n}R 지급됩니다.`,
+  REWARD_GUIDE_SECTION_2_TITLE_PRE: '2. 리뷰 업로드시 최대 ',
+  REWARD_GUIDE_SECTION_2_BODY: (n) => `리뷰 컨텐츠를 업로드 할 때마다 최대 ${n}R 적립됩니다.`,
+  REWARD_GUIDE_SECTION_3_TITLE_PRE: '3. 리뷰 영상에 G6 점수 줄 시 ',
+  REWARD_GUIDE_SECTION_3_BODY: (n) =>
+    `리뷰어들이 올린 리뷰 영상에 G6 점수주기를 완료하면 ${n}R 지급됩니다. 한번 준 점수는 취소할 수 없습니다.`,
+  REWARD_GUIDE_SECTION_4_TITLE_PRE: '4. 댓글 작성시 ',
+  REWARD_GUIDE_SECTION_4_BODY: (n) => `다른 사람의 리뷰 영상에 댓글을 달면 ${n}R 지급됩니다.`,
+  REWARD_GUIDE_EXPIRY:
+    '적립식 리워드는 지급일로부터 6개월 후 소멸됩니다. \n\n단, 이벤트로 적립된 리워드는 1개월 후 소멸됩니다.',
 };

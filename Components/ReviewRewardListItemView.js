@@ -129,7 +129,7 @@ function RewardType({ data }) {
 function Remark() {
   return (
     <View style={styles.amountContainer}>
-      <Text style={styles.amountTitle}>비고</Text>
+      <Text style={styles.amountTitle}>{Strings.REMARK}</Text>
       <Text style={styles.reviewTitle} numberOfLines={1}>
         {Strings.EARNED_UPON_PURCHASE_CONFIRMATION}
       </Text>
@@ -183,7 +183,7 @@ export default class ReviewRewardListItemView extends Component {
             <ExpiredDate data={data} />
             {(data.revenueType === Constants.REWARD_TYPE.BUY_REWARD ||
               data.revenueType === Constants.REWARD_TYPE.REWARD) &&
-              !data.isValid ? (
+            !data.isValid ? (
               <Remark data={data} />
             ) : null}
           </View>

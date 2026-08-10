@@ -117,20 +117,16 @@ export default function BrandDashboard() {
           /* 빈 상태 — 배송·제작 기간 (시안: 대시보드 빈 상태) */
           <View style={styles.emptyWrap}>
             <Text style={styles.emptyEmoji}>🚚</Text>
-            <Text style={styles.emptyTitle}>지금은 배송·제작 기간이에요</Text>
-            <Text style={styles.emptyBody}>
-              {
-                '크리에이터 20명이 선정됐고 제품이 이동 중입니다.\n첫 리뷰는 보통 발송 후 2–3주에 도착해요.'
-              }
-            </Text>
+            <Text style={styles.emptyTitle}>{Strings.BRAND_EMPTY_TITLE}</Text>
+            <Text style={styles.emptyBody}>{Strings.BRAND_EMPTY_BODY}</Text>
             <View style={styles.emptyPillRow}>
-              <StatusPill status="approved" label="선정 20" />
-              <StatusPill status="shipped" label="발송 14" />
-              <StatusPill status="received" label="수령 6" />
+              <StatusPill status="approved" label={Strings.BRAND_EMPTY_PILL_APPROVED} />
+              <StatusPill status="shipped" label={Strings.BRAND_EMPTY_PILL_SHIPPED} />
+              <StatusPill status="received" label={Strings.BRAND_EMPTY_PILL_RECEIVED} />
             </View>
             <NoteBox
               tone="amber"
-              text="진행 상황은 담당 애널리스트가 매주 요약해 드려요."
+              text={Strings.BRAND_EMPTY_NOTE}
               style={{ marginTop: 18, alignSelf: 'stretch' }}
             />
           </View>
@@ -192,7 +188,7 @@ export default function BrandDashboard() {
             {/* ② 위클리 발견 카드 */}
             {finding ? (
               <Card style={styles.findingCard}>
-                <Text style={styles.findingLabel}>이번 주 발견</Text>
+                <Text style={styles.findingLabel}>{Strings.BRAND_FINDING_LABEL}</Text>
                 <Text style={styles.findingText}>{finding}</Text>
               </Card>
             ) : null}

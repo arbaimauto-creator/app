@@ -605,7 +605,7 @@ function ProfileInfo({ context, user }) {
                         user.instagramId.toString() === 'undefined' ||
                         typeof user.instagramId === 'undefined'
                       ) {
-                        return Alert.alert('Instagram', '인스타그램 아이디가 입력되지 않았습니다');
+                        return Alert.alert('Instagram', Strings.INSTAGRAM_ID_NOT_REGISTERED);
                       }
 
                       Linking.openURL(`https://instagram.com/${user.instagramId.trim()}`);
@@ -765,7 +765,7 @@ function ProfileInfo({ context, user }) {
                         user.instagramId.toString() === 'undefined' ||
                         typeof user.instagramId === 'undefined'
                       ) {
-                        return Alert.alert('Instagram', '인스타그램 아이디가 입력되지 않았습니다');
+                        return Alert.alert('Instagram', Strings.INSTAGRAM_ID_NOT_REGISTERED);
                       }
 
                       Linking.openURL(`https://instagram.com/${user.instagramId.trim()}`);
@@ -2945,7 +2945,7 @@ class UserPageScreen extends React.Component {
 
   getUserDetailsCallback(data) {
     if (data.isDeleted) {
-      Alert.alert('탈퇴 유저', '탈퇴된 유저입니다. 유저의 정보를 확인할 수 없습니다.', [
+      Alert.alert(Strings.DELETED_USER_TITLE, Strings.DELETED_USER_BODY, [
         {
           text: Strings.OK,
           onPress: () => {

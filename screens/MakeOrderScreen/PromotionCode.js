@@ -20,7 +20,7 @@ export default function PromotionCode({ context, cartItems }) {
 
   const checkPromotionCodeAndApply = async () => {
     if (currentCode === code) {
-      Alert.alert('이미 적용된 코드입니다');
+      Alert.alert(Strings.PROMOTION_CODE_ALREADY_APPLIED);
       return;
     }
 

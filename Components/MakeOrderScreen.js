@@ -707,7 +707,7 @@ class MakeOrderScreen extends React.Component {
             {/* 글로벌 공구 할인 (해외 주문에서만 값이 들어온다) */}
             {this.state.globalGroupBuyingDiscountAmount ? (
               <View style={{ ...styles.amountItemContainer, paddingVertical: 4 }}>
-                <Text style={styles.amountTitle}>{'글로벌 공구 할인'}</Text>
+                <Text style={styles.amountTitle}>{Strings.GLOBAL_GROUP_BUYING_DISCOUNT}</Text>
                 <Text style={styles.amount}>
                   -{' '}
                   {Utils.displayPrice(

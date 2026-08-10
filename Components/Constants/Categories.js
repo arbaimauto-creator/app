@@ -139,19 +139,19 @@ const DISCOVER_SCREEN_CATEGORY_LIST = [
   },
   {
     key: VIDEO_LIST_TRENDING,
-    title: Strings.TRENDING_REVIEWS.replace(' 리뷰', ''), // '인기',
+    title: Strings.TRENDING_REVIEWS_SHORT, // '인기',
   },
   {
     key: VIDEO_LIST_WORSTPRODUCT,
-    title: Strings.WORSTPRODUCT_REVIEWS.replace(' 리뷰', ''), // '비추천',
+    title: Strings.WORSTPRODUCT_REVIEWS_SHORT, // '비추천',
   },
   {
     key: VIDEO_LIST_ABROAD,
-    title: Strings.ABROAD_REVIEWS.replace(' 리뷰', ''), // '해외',
+    title: Strings.ABROAD_REVIEWS_SHORT, // '해외',
   },
   {
     key: VIDEO_LIST_FOLLOWING,
-    title: Strings.FOLLOWING_REVIEWS.replace(' 리뷰', ''), // '팔로잉',
+    title: Strings.FOLLOWING_REVIEWS_SHORT, // '팔로잉',
   },
 ];
 

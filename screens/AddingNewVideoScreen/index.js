@@ -29,6 +29,7 @@ import Share from 'react-native-share';
 import { connect } from 'react-redux';
 import APIprovider from '../../Components/APIprovider';
 import Constants from '../../Components/Constants';
+import T from '../../Components/Constants/DesignTokens';
 import Codes from '../../Components/Constants/Codes';
 import ProgressModal from '../../Components/ProgressModal';
 import Strings from '../../Components/Strings';
@@ -182,11 +183,11 @@ function SubmitButton({ context }) {
           borderRadius: 14,
         }}
         buttonStyle={{
-          backgroundColor: Constants.COLOR_POINT_BLUE,
+          backgroundColor: T.COLORS.AMBER,
           height: 45,
         }}
         titleStyle={{
-          color: Constants.COLOR_BACKGROUND_DARK,
+          color: T.COLORS.ON_AMBER,
           fontSize: 18,
           fontWeight: 'bold',
         }}

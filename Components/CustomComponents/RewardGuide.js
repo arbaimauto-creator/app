@@ -55,70 +55,69 @@ export default function RewardGuide() {
             fontSize: 18,
           }}
         >
-          리워드 적립 방법
+          {Strings.REWARD_GUIDE_INTRO_TITLE}
         </Text>
         <Text style={{ ...styles.textContent, marginLeft: 0 }}>
-          그레이드 앱에서 현금처럼 사용 할 수 있는 화폐입니다. {'\n'}20,000 리워드 이상이 쌓였을
-          경우, 본인의 계좌로 출금할 수 있습니다. (1일 최대{' '}
+          {Strings.REWARD_GUIDE_INTRO_BODY_PRE}
           <Text style={{ ...styles.rewardText, fontSize: 14 }}>
             {rewardTypes.MAX}
             <Text style={{ color: Constants.TIER_COLORS.ARTISAN }}>R</Text>
-          </Text>{' '}
-          적립가능 - 리뷰 적립 제외)
+          </Text>
+          {Strings.REWARD_GUIDE_INTRO_BODY_POST}
         </Text>
       </View>
       <View>
         <Text style={styles.textTitle}>
-          1. 출석 체크시{' '}
+          {Strings.REWARD_GUIDE_SECTION_1_TITLE_PRE}
           <Text style={styles.rewardText}>
             {rewardTypes.ATTENDANCE}
             <Text style={{ color: Constants.TIER_COLORS.ARTISAN }}>R</Text>
-          </Text>{' '}
-          적립
+          </Text>
+          {Strings.REWARD_GUIDE_TITLE_POST}
         </Text>
         <Text style={styles.textContent}>
-          하루에 한 번 최초 접속시 자동으로 {rewardTypes.ATTENDANCE}R 지급됩니다.
+          {Strings.REWARD_GUIDE_SECTION_1_BODY(rewardTypes.ATTENDANCE)}
         </Text>
       </View>
       <View>
         <Text style={styles.textTitle}>
-          2. 리뷰 업로드시 최대{' '}
+          {Strings.REWARD_GUIDE_SECTION_2_TITLE_PRE}
           <Text style={styles.rewardText}>
             {rewardTypes.EVENT_REVIEW ? rewardTypes.EVENT_REVIEW : rewardTypes.REVIEW}
             <Text style={{ color: Constants.TIER_COLORS.ARTISAN }}>R</Text>
-          </Text>{' '}
-          적립
+          </Text>
+          {Strings.REWARD_GUIDE_TITLE_POST}
         </Text>
         <Text style={styles.textContent}>
-          리뷰 컨텐츠를 업로드 할 때마다 최대{' '}
-          {rewardTypes.EVENT_REVIEW ? rewardTypes.EVENT_REVIEW : rewardTypes.REVIEW}R 적립됩니다.
+          {Strings.REWARD_GUIDE_SECTION_2_BODY(
+            rewardTypes.EVENT_REVIEW ? rewardTypes.EVENT_REVIEW : rewardTypes.REVIEW,
+          )}
         </Text>
       </View>
       <View>
         <Text style={styles.textTitle}>
-          3. 리뷰 영상에 G6 점수 줄 시{' '}
+          {Strings.REWARD_GUIDE_SECTION_3_TITLE_PRE}
           <Text style={styles.rewardText}>
             {rewardTypes.GRADE}
             <Text style={{ color: Constants.TIER_COLORS.ARTISAN }}>R</Text>
-          </Text>{' '}
-          적립
+          </Text>
+          {Strings.REWARD_GUIDE_TITLE_POST}
         </Text>
         <Text style={styles.textContent}>
-          리뷰어들이 올린 리뷰 영상에 G6 점수주기를 완료하면 {rewardTypes.GRADE}R 지급됩니다. 한번
-          준 점수는 취소할 수 없습니다.
+          {Strings.REWARD_GUIDE_SECTION_3_BODY(rewardTypes.GRADE)}
         </Text>
       </View>
       <View>
         <Text style={styles.textTitle}>
-          4. 댓글 작성시{' '}
+          {Strings.REWARD_GUIDE_SECTION_4_TITLE_PRE}
           <Text style={styles.rewardText}>
             {rewardTypes.COMMENT}
             <Text style={{ color: Constants.TIER_COLORS.ARTISAN }}>R</Text>
-          </Text>{' '}
-          적립
+          </Text>
+          {Strings.REWARD_GUIDE_TITLE_POST}
         </Text>
         <Text style={styles.textContent}>
-          다른 사람의 리뷰 영상에 댓글을 달면 {rewardTypes.COMMENT}R 지급됩니다.
+          {Strings.REWARD_GUIDE_SECTION_4_BODY(rewardTypes.COMMENT)}
         </Text>
       </View>
       <Text
@@ -128,8 +127,7 @@ export default function RewardGuide() {
           textAlign: 'right',
         }}
       >
-        적립식 리워드는 지급일로부터 6개월 후 소멸됩니다. {'\n\n'}
-        단, 이벤트로 적립된 리워드는 1개월 후 소멸됩니다.
+        {Strings.REWARD_GUIDE_EXPIRY}
       </Text>
     </SafeAreaView>
   );

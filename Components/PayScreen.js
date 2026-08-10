@@ -21,7 +21,7 @@ function HeaderRight({ navigation, checkOrder }) {
         const orderResult = await checkOrder();
 
         if (orderResult.statusCode !== Constants.ORDER_STATUS_CODE.NOT_ACCEPTED) {
-          Alert.alert('주문이 완료되지 않았습니다.');
+          Alert.alert(Strings.ORDER_NOT_COMPLETED);
           return;
         }
 
@@ -106,7 +106,7 @@ export default class PayScreen extends React.Component {
 
         if (orderPrice !== buyReqamt) {
           console.log('오류가 발생하였습니다, 주문금액과 결제금액이 일치하지 않습니다.');
-          Alert.alert('오류가 발생했습니다.', '앱을 종료 후 다시 실행해주세요');
+          Alert.alert(Strings.PAY_ERROR_TITLE, Strings.PAY_ERROR_RESTART_APP);
           this.props.navigation.dispatch(StackActions.pop(1));
         }
       });
@@ -333,7 +333,7 @@ export default class PayScreen extends React.Component {
       return false;
     } else {
       Linking.openURL(event.url).catch(() => {
-        alert('앱 실행이 실패했습니다. 설치가 되어있지 않은 경우 설치 후 재시도해주세요.');
+        alert(Strings.PAY_APP_OPEN_FAILED);
       });
       return false;
     }

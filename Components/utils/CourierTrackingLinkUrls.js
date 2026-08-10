@@ -1,4 +1,5 @@
 import { NativeModules, Platform } from 'react-native';
+import Strings from '../Strings';
 
 const deviceLanguage =
   Platform.OS === 'ios'
@@ -8,19 +9,19 @@ const deviceLanguage =
 
 const CourierTrackingLinkUrls = new Map([
   [
-    'CJ대한통운',
+    Strings.COURIER_CJ,
     'https://www.doortodoor.co.kr/parcel/doortodoor.do?fsp_action=PARC_ACT_002&fsp_cmd=retrieveInvNoACT&invc_no=',
   ],
   [
-    '한진택배',
+    Strings.COURIER_HANJIN,
     'https://www.hanjin.co.kr/kor/CMS/DeliveryMgr/WaybillResult.do?mCode=MN038&schLang=KR&wblnumText=&wblnum=',
   ],
-  ['롯데택배', 'https://www.lotteglogis.com/home/reservation/tracking/linkView?InvNo='],
-  ['우체국택배', 'https://service.epost.go.kr/trace.RetrieveDomRigiTraceList.comm?sid1='],
-  ['로젠택배', 'https://www.ilogen.com/web/personal/trace/'],
-  ['CU 편의점택배', 'https://www.cupost.co.kr/postbox/delivery/localResult.cupost?invoice_no='],
-  ['GS Postbox 택배', 'https://www.cvsnet.co.kr/invoice/tracking.do?invoice_no='],
-  ['기타', ''],
+  [Strings.COURIER_LOTTE, 'https://www.lotteglogis.com/home/reservation/tracking/linkView?InvNo='],
+  [Strings.COURIER_EPOST, 'https://service.epost.go.kr/trace.RetrieveDomRigiTraceList.comm?sid1='],
+  [Strings.COURIER_LOGEN, 'https://www.ilogen.com/web/personal/trace/'],
+  [Strings.COURIER_CU, 'https://www.cupost.co.kr/postbox/delivery/localResult.cupost?invoice_no='],
+  [Strings.COURIER_GS, 'https://www.cvsnet.co.kr/invoice/tracking.do?invoice_no='],
+  [Strings.COURIER_OTHERS, ''],
 ]);
 
 export default CourierTrackingLinkUrls;

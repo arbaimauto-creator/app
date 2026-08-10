@@ -24,7 +24,7 @@ export default function MissionDone({ navigation, route }) {
 
   const onShareCode = (code) => {
     Share.share({
-      message: `한국 브랜드가 리뷰를 직접 읽는 패널이야. 내 이름으로 초대할게. 코드: ${code} (유효 7일)`,
+      message: Strings.DONE_SHARE_MESSAGE(code),
     });
   };
 
@@ -37,26 +37,24 @@ export default function MissionDone({ navigation, route }) {
         >
           <Text style={styles.back}>‹</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>완주 보상</Text>
+        <Text style={styles.headerTitle}>{Strings.DONE_TITLE}</Text>
       </View>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.hero}>
           <Text style={styles.emoji}>🎉</Text>
           <Text style={styles.points}>+{pointsGranted}P</Text>
-          <Text style={styles.xs}>
-            기본 {basePoints}P × 품질 보너스 {multiplier}
-          </Text>
+          <Text style={styles.xs}>{Strings.DONE_POINTS_FORMULA(basePoints, multiplier)}</Text>
           <Text style={[styles.xs, styles.honesty]}>{Strings.APPLY_HONESTY_NOTE}</Text>
         </View>
 
         <Card>
           <View style={styles.rowStart}>
-            <Badge tone="amber" text="브랜드 피드백" />
-            <Text style={styles.xs}>{brandName}이 3일 전 열람 ✓</Text>
+            <Badge tone="amber" text={Strings.DONE_BRAND_FEEDBACK} />
+            <Text style={styles.xs}>{Strings.DONE_BRAND_VIEWED(brandName)}</Text>
           </View>
           <View style={[styles.rowStart, styles.mt8]}>
             <Text style={styles.stars}>★★★★☆</Text>
-            <Text style={styles.xs}>콘텐츠 품질 4/5</Text>
+            <Text style={styles.xs}>{Strings.DONE_QUALITY_SCORE}</Text>
           </View>
           <Text style={styles.feedback}>"{Strings.BRAND_FEEDBACK_MOCK(brandName)}"</Text>
         </Card>
@@ -66,13 +64,11 @@ export default function MissionDone({ navigation, route }) {
             G{gBefore} → G{gAfter}
           </Text>
           <ProgressBar ratio={gAfter / CURATED_MIN_G} style={styles.mt8} />
-          <Text style={[styles.xs, styles.mt6]}>
-            완주 +3 · 다음 해제: G{CURATED_MIN_G} (Curated 신청)
-          </Text>
+          <Text style={[styles.xs, styles.mt6]}>{Strings.DONE_G_PROGRESS(CURATED_MIN_G)}</Text>
         </Card>
 
         <Card>
-          <Text style={styles.cardTitle}>추천 코드 3장이 열렸어요</Text>
+          <Text style={styles.cardTitle}>{Strings.DONE_CODES_UNLOCKED}</Text>
           <Text style={[styles.xs, styles.mt4]}>Invited by {handleUrl}</Text>
           <View style={styles.codeRow}>
             {codes.map((code) => (
@@ -88,9 +84,9 @@ export default function MissionDone({ navigation, route }) {
           </View>
         </Card>
 
-        <NoteBox tone="amber" text="포인트 현금 인출·제품 구매 — 2026 Q4 오픈 예정" />
+        <NoteBox tone="amber" text={Strings.DONE_CASHOUT_NOTE} />
 
-        <Btn title="확인" onPress={() => navigation.goBack()} />
+        <Btn title={Strings.OK} onPress={() => navigation.goBack()} />
       </ScrollView>
     </SafeAreaView>
   );

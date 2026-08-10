@@ -46,7 +46,7 @@ export default function MyScreen({ navigation }) {
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* 헤더 행 */}
         <View style={styles.headerRow}>
-          <Text style={TYPE.H_TITLE}>마이</Text>
+          <Text style={TYPE.H_TITLE}>{Strings.MY_TITLE}</Text>
           <TouchableOpacity
             onPress={() => navigation.navigate('GreydSettings')}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -69,20 +69,20 @@ export default function MyScreen({ navigation }) {
           {meta ? <Text style={styles.xs}>{meta}</Text> : null}
           <Text style={styles.gScore}>G{gScore}</Text>
           <ProgressBar ratio={gScore / CURATED_MIN_G} style={styles.progress} />
-          <Text style={styles.xs}>다음 해제 G{CURATED_MIN_G} — Curated 신청</Text>
+          <Text style={styles.xs}>{Strings.MY_NEXT_UNLOCK(CURATED_MIN_G)}</Text>
           <View style={styles.statRow}>
-            <Text style={styles.xs}>완주 {completedCount}</Text>
+            <Text style={styles.xs}>{Strings.MY_COMPLETED_COUNT(completedCount)}</Text>
             <Text style={[styles.xs, strikes === 0 && { color: COLORS.GREEN }]}>
               Strike {strikes}
             </Text>
-            <Text style={styles.xs}>동시 한도 {limit}건</Text>
+            <Text style={styles.xs}>{Strings.MY_CONCURRENT_LIMIT(limit)}</Text>
           </View>
         </Card>
 
         {/* 포인트 카드 */}
         <Card>
           <View style={styles.row}>
-            <Text style={styles.rowTitle}>포인트</Text>
+            <Text style={styles.rowTitle}>{Strings.MY_POINTS}</Text>
             <Text style={styles.pointValue}>{points.toLocaleString()}P</Text>
           </View>
           <Text style={[styles.xs, styles.mt4]}>{Strings.POINT_CASHOUT_NOTE}</Text>
@@ -91,8 +91,8 @@ export default function MyScreen({ navigation }) {
         {/* 추천 코드 카드 */}
         <Card>
           <View style={styles.row}>
-            <Text style={styles.rowTitle}>추천 코드</Text>
-            <Text style={styles.xs}>3장</Text>
+            <Text style={styles.rowTitle}>{Strings.MY_REFERRAL_CODES}</Text>
+            <Text style={styles.xs}>{Strings.MY_REFERRAL_CODES_COUNT}</Text>
           </View>
           <View style={styles.codeRow}>
             {codes.map((code) => (
@@ -107,7 +107,7 @@ export default function MyScreen({ navigation }) {
         <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('AddressBook')}>
           <Card>
             <View style={styles.row}>
-              <Text style={styles.rowTitle}>배송지 관리</Text>
+              <Text style={styles.rowTitle}>{Strings.ADDR_MANAGE_TITLE}</Text>
               <Text style={styles.chev}>›</Text>
             </View>
           </Card>
@@ -115,7 +115,7 @@ export default function MyScreen({ navigation }) {
         <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('AboutGreyd')}>
           <Card>
             <View style={styles.row}>
-              <Text style={styles.rowTitle}>About · 사업자 정보</Text>
+              <Text style={styles.rowTitle}>{Strings.MY_ABOUT_ROW}</Text>
               <Text style={styles.xs}>ARBAIM INC. ›</Text>
             </View>
           </Card>
@@ -123,7 +123,7 @@ export default function MyScreen({ navigation }) {
         <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('GreydSettings')}>
           <Card>
             <View style={styles.row}>
-              <Text style={styles.rowTitle}>설정</Text>
+              <Text style={styles.rowTitle}>{Strings.SET_TITLE}</Text>
               <Text style={styles.chev}>›</Text>
             </View>
           </Card>

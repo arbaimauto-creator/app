@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 import { styles } from '.';
+import FEATURES from '../../Components/Constants/Features';
 import LikedBy from './LikedBy';
 import LinkedProduct from './LinkedProduct';
 import LinkedProductReviews from './LinkedProductReviews';
@@ -52,12 +53,14 @@ export default function VideoRenderDetails({ context, useIsFocused }) {
         )}
 
         <ReviewerRating context={context} />
-        <LikedBy
-          videoId={video.videoId}
-          likes={video.likes}
-          logonUserId={context.props.route.params.logonUserId}
-          navigation={context.props.navigation}
-        />
+        {FEATURES.SOCIAL_LIKES ? (
+          <LikedBy
+            videoId={video.videoId}
+            likes={video.likes}
+            logonUserId={context.props.route.params.logonUserId}
+            navigation={context.props.navigation}
+          />
+        ) : null}
         <Text style={styles.description}>{video.description || video.descriptionByCountry}</Text>
 
         <View>

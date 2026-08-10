@@ -938,8 +938,8 @@ function PurchaseButton({ context }) {
         ) {
           if (product.isRefundProductAlreadyBuy) {
             Alert.alert(
-              '이미 구매했던 이력이 있는 상품입니다.',
-              '환불 프로모션 제품은 1회만 구매 가능합니다.',
+              Strings.REFUND_PRODUCT_ALREADY_BOUGHT_TITLE,
+              Strings.REFUND_PRODUCT_ONLY_ONCE,
               [{ text: Strings.OK }],
               {
                 cancelable: true,
@@ -1346,18 +1346,18 @@ function PurchasePopup({ context }) {
             ) {
               // TODO: 구매 회차를 가져와서 적용
               Alert.alert(
-                '잠깐! 다른 사람의 리뷰를 보고 구매하면 적립금을 받을 수 있어요!',
-                '링크된 리뷰를 보고 상품을 구매하러 오시겠어요?',
+                Strings.BUY_VIA_REVIEW_ALERT_TITLE,
+                Strings.BUY_VIA_REVIEW_ALERT_BODY,
                 [
                   {
-                    text: '그냥 구매하기',
+                    text: Strings.BUY_WITHOUT_REVIEW,
                     onPress: () => {
                       handlePressBuy();
                     },
                     style: 'destructive',
                   },
                   {
-                    text: '리뷰 보러가기',
+                    text: Strings.GO_TO_REVIEW,
                     onPress: () => {
                       context.props.navigation.push('VideoList', {
                         listOf: Constants.VIDEO_LIST_LINKED_PRODUCT,

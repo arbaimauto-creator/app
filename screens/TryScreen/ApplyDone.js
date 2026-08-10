@@ -19,42 +19,49 @@ export default function ApplyDone({ navigation, route }) {
         >
           <Text style={styles.back}>‹</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>신청 완료</Text>
+        <Text style={styles.headerTitle}>{Strings.APPLYDONE_TITLE}</Text>
       </View>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.hero}>
           <Text style={styles.emoji}>🙌</Text>
-          <Text style={styles.title}>신청 완료!</Text>
+          <Text style={styles.title}>{Strings.APPLYDONE_HERO}</Text>
           <Text style={styles.sub}>
-            {campaignTitle} · {track === 'curated' ? 'Curated' : 'Open'} 트랙
+            {campaignTitle} · {Strings.APPLYDONE_TRACK(track === 'curated' ? 'Curated' : 'Open')}
           </Text>
         </View>
 
         <Card>
           <View style={styles.timelineRow}>
             <StatusPill status="applied" label={Strings.CAMPAIGN_STATUS_APPLIED} />
-            <Text style={styles.xs}>지금</Text>
+            <Text style={styles.xs}>{Strings.APPLYDONE_NOW}</Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.timelineRow}>
             <StatusPill status="approved" label={Strings.CAMPAIGN_STATUS_APPROVED} />
-            <Text style={styles.xs}>평균 2일 — 승인되면 주소를 물어볼게요</Text>
+            <Text style={styles.xs}>{Strings.APPLYDONE_APPROVAL_NOTE}</Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.timelineRow}>
             <StatusPill status="shipped" label={Strings.CAMPAIGN_STATUS_SHIPPED} />
-            <Text style={styles.xs}>서울 출고 3–5일 · 운송장 제공</Text>
+            <Text style={styles.xs}>{Strings.APPLYDONE_SHIP_NOTE}</Text>
           </View>
         </Card>
 
         <NoteBox tone="amber">
           <Text style={styles.noteText}>
-            동시 진행 한도 <Text style={styles.noteBold}>{limit}건</Text> 중{' '}
-            <Text style={styles.noteBold}>{usedCount}건</Text> 사용 중이에요.
+            {Strings.APPLYDONE_LIMIT_PRE}
+            <Text style={styles.noteBold}>{Strings.APPLYDONE_LIMIT_COUNT(limit)}</Text>
+            {Strings.APPLYDONE_LIMIT_MID}
+            <Text style={styles.noteBold}>{Strings.APPLYDONE_LIMIT_COUNT(usedCount)}</Text>
+            {Strings.APPLYDONE_LIMIT_POST}
           </Text>
         </NoteBox>
 
-        <Btn variant="ghost" title="다른 캠페인 더 보기" onPress={() => navigation.goBack()} />
+        <Btn
+          variant="ghost"
+          title={Strings.APPLYDONE_MORE_CTA}
+          onPress={() => navigation.goBack()}
+        />
       </ScrollView>
     </SafeAreaView>
   );

@@ -788,6 +788,10 @@ export default {
     'You can find the great products at affordable prices. The greyd Team offers quality products at reasonable prices directly linked to the app. You can also generate earnings from the reviews you upload.',
   REVENUE_GUIDE_BODY_3_2:
     'You can be spotlighted even without many followers. The greyd Team incorporates algorithms that will expose good reviews more often. Reviewers with many followers does not equate to exposure.',
+  REVENUE_GUIDE_BODY_3_3:
+    'Post reviews and earn revenue. The reviews you upload can also generate earnings for you.',
+  REVENUE_GUIDE_BODY_3_4:
+    'Meet great products at affordable prices. Quality products curated by the greyd team of expert MDs, offered at reasonable prices.',
 
   GRADE_GIVING_GUIDE: ({ userName }) =>
     `Was this a helpful review?\n${userName}, grade this review!`,
@@ -1796,4 +1800,215 @@ export default {
     }" and purchased "${
       params.productId.title.en || params.productId.title.ko || params.productId.title
     }"!`,
+  // i18n batch A — My tab (design 18)
+  MY_TITLE: 'My',
+  MY_NEXT_UNLOCK: (g) => `Next unlock G${g} — Curated access`,
+  MY_COMPLETED_COUNT: (n) => `Completed ${n}`,
+  MY_CONCURRENT_LIMIT: (n) => `Limit ${n} at once`,
+  MY_POINTS: 'Points',
+  MY_REFERRAL_CODES: 'Invite codes',
+  MY_REFERRAL_CODES_COUNT: '3 codes',
+  MY_ABOUT_ROW: 'About · Company info',
+  // Address book (design 19)
+  ADDR_MANAGE_TITLE: 'Shipping addresses',
+  ADDR_DEFAULT_TITLE: 'Default address',
+  ADDR_DEFAULT_BADGE: 'Default',
+  ADDR_EDIT: 'Edit',
+  ADDR_DELETE: 'Delete',
+  ADDR_EMPTY: 'No saved address yet',
+  ADDR_ADD_NEW: '+ Add a new address',
+  ADDR_NOTE:
+    'We need your address within 48 hours of approval to ship. Save it once and it auto-fills for every next campaign.',
+  // About · company info (design 20)
+  ABOUT_TAGLINE: 'K-Product validation platform · by ARBAIM INC.',
+  ABOUT_BIZ_LABEL: 'Company info',
+  ABOUT_BIZ_INFO:
+    'ARBAIM INC. · CEO ○○○\nBusiness reg. no. 000-00-00000\n0F, 00 ○○-ro, ○○-gu, Seoul\nhello@greyd.app',
+  ABOUT_TERMS: 'Terms of Service',
+  ABOUT_PRIVACY: 'Privacy Policy',
+  ABOUT_CONTACT: 'Contact us',
+  // Settings · delete account (design 25)
+  SET_TITLE: 'Settings',
+  SET_REMINDER_TITLE: 'D-day reminders',
+  SET_ON: 'On',
+  SET_REMINDER_NOTE: 'Deadline alerts only — never marketing',
+  SET_LANGUAGE: 'Language',
+  SET_LANG_KO: '한국어',
+  SET_LANGUAGE_NOTE: 'English by default · auto-detected from your device',
+  SET_TERMS_PRIVACY: 'Terms · Privacy Policy',
+  SET_LOGOUT: 'Log out',
+  SET_DELETE_ACCOUNT: 'Delete account',
+  SET_DELETE_ACCOUNT_NOTE:
+    'Your points, G-score, and invite codes will all be gone. Finish or cancel any active trials first.',
+  SET_DELETE_BLOCKED: 'You have an active trial — finish or cancel it before deleting.',
+  SET_DELETE_CONFIRM_TITLE: 'Delete for good?',
+  SET_DELETE_CONFIRM_BODY:
+    "This can't be undone. Your points, G-score, and invite codes will all be gone.",
+  SET_DELETE: 'Delete',
+  // Application sent (design 11)
+  APPLYDONE_TITLE: 'Application sent',
+  APPLYDONE_HERO: 'Application sent!',
+  APPLYDONE_TRACK: (name) => `${name} track`,
+  APPLYDONE_NOW: 'Now',
+  APPLYDONE_APPROVAL_NOTE: "Avg 2 days — we'll ask for your address once approved",
+  APPLYDONE_SHIP_NOTE: 'Ships from Seoul in 3–5 days · tracking included',
+  APPLYDONE_LIMIT_PRE: 'Concurrent limit: ',
+  APPLYDONE_LIMIT_COUNT: (n) => `${n}`,
+  APPLYDONE_LIMIT_MID: ' — ',
+  APPLYDONE_LIMIT_POST: ' in use.',
+  APPLYDONE_MORE_CTA: 'Browse more campaigns',
+  // Completion rewards (design 16+17)
+  DONE_TITLE: 'Completion rewards',
+  DONE_SHARE_MESSAGE: (code) =>
+    `It's a panel where Korean brands actually read your reviews. I'm inviting you under my name. Code: ${code} (valid 7 days)`,
+  DONE_POINTS_FORMULA: (base, mult) => `Base ${base}P × quality bonus ${mult}`,
+  DONE_BRAND_FEEDBACK: 'Brand feedback',
+  DONE_BRAND_VIEWED: (brand) => `${brand} viewed 3 days ago ✓`,
+  DONE_QUALITY_SCORE: 'Content quality 4/5',
+  DONE_G_PROGRESS: (g) => `+3 for completing · next unlock: G${g} (Curated)`,
+  DONE_CODES_UNLOCKED: '3 invite codes unlocked',
+  DONE_CASHOUT_NOTE: 'Point cash-out & product purchase — opening Q4 2026',
+  // Activity tab (design 22–24)
+  ACT_SEG_ONGOING: (n) => `Ongoing ${n}`,
+  ACT_SEG_DONE: (n) => `Done ${n}`,
+  ACT_NOTIF_TITLE: 'Turn on D-day alerts?',
+  ACT_NOTIF_BODY: 'Missing a deadline lowers your G-score.\nWe only ping when it matters.',
+  ACT_NOTIF_LATER: 'Maybe later',
+  ACT_NOTIF_ALLOW: 'Allow alerts',
+  ACT_CANCEL_TITLE: 'Cancel this trial?',
+  ACT_CANCEL_BODY:
+    "It hasn't shipped yet, so there's no penalty.\nYour spot goes to another creator.",
+  ACT_CANCEL_KEEP: 'Keep going',
+  ACT_CANCEL_CONFIRM: 'Cancel it',
+  ACT_FEEDBACK_VIEW_ALL: 'See full feedback',
+  ACT_CANCELLED_NOTE: 'Cancelled by you · no penalty',
+  // Address modal (design 12)
+  ADDRESS_48H_BADGE: '48 hours',
+  ADDRESS_SAVE_AUTOFILL: 'Save — auto-fills next time',
+  ADDRESS_CUSTOMS_NOTE:
+    "International shipping can be delayed at customs. Customs delays don't count against your upload deadline (D-day).",
+  // Brand dashboard empty state
+  BRAND_EMPTY_TITLE: "We're in the shipping & creation window",
+  BRAND_EMPTY_BODY:
+    '20 creators are selected and products are on the move.\nFirst reviews usually land 2–3 weeks after shipping.',
+  BRAND_EMPTY_PILL_APPROVED: 'Selected 20',
+  BRAND_EMPTY_PILL_SHIPPED: 'Shipped 14',
+  BRAND_EMPTY_PILL_RECEIVED: 'Received 6',
+  BRAND_EMPTY_NOTE: 'Your analyst sends a progress summary every week.',
+  BRAND_FINDING_LABEL: "This week's finding",
+  // Brand review (design 6b)
+  BRAND_TRIAGE_HINT: '👎 needs one reason · goal: 100 reviews in 10 min',
+  BRAND_BONUS_HINT: '4+ = creator quality bonus +20%',
+  BRAND_SAVE_NEXT: 'Save & next pick',
+  BRAND_SESSION_DONE: (n) => `${n} evaluated today`,
+  BRAND_SESSION_COUNTS: (pick, ok, skip) => `👍 Picks ${pick} · 👌 OK ${ok} · 👎 Skipped ${skip}`,
+  BRAND_RUBRIC_PROGRESS: 'Scoring progress',
+  BRAND_RUBRIC_COUNT: (scored, total) => `${scored} of ${total}`,
+  BRAND_FEEDBACK_FORWARD: 'Your evaluations go to the creators',
+  BRAND_SLA_NOTE: 'Response target ≤ 7 days',
+  BRAND_RUBRIC_REMAINING: (n) => `Score the remaining ${n} pick${n > 1 ? 's' : ''}`,
+  BRAND_TO_DASHBOARD: 'To dashboard',
+  // Brand My
+  BRAND_MY_CAMPAIGN_LINE: (title, uploads, evaluated) =>
+    `${title} · uploads ${uploads} · scored ${evaluated}/${uploads}`,
+  BRAND_MY_NO_CAMPAIGN: 'No active campaigns',
+  BRAND_MY_ACCOUNT_META: 'Brand account · analyst Soyeon Kim',
+  BRAND_MY_ONGOING: 'Active campaign',
+  BRAND_MY_PAST: 'Past campaigns',
+  BRAND_MY_PAST_COUNT: '1 ›',
+  BRAND_MY_REPORT: 'FGI reports',
+  BRAND_MY_REPORT_COUNT: '1 PDF ›',
+  BRAND_MY_REPORT_NOTE: 'Hand-built by your analyst — 5 business days after request',
+  BRAND_MY_CONTACT: 'Message your analyst',
+  BRAND_MY_PHASE2_NOTE:
+    'Curious about a Phase 2 group-buy? Start from the quote button on your dashboard.',
+  // Brand welcome (v2 §5-1)
+  BRAND_WELCOME_TITLE: 'ARBAIM sets up and runs\nevery campaign.',
+  BRAND_WELCOME_SUB:
+    'Just watch the results and score.\nCreator management, shipping, CS — all on us.',
+  BRAND_ANALYST_LABEL: 'Your analyst',
+  BRAND_ANALYST_NAME: 'Soyeon Kim · ARBAIM',
+  BRAND_ANALYST_SLA: 'Review response ≤ 7 days',
+  // i18n batch B1 - legacy/commerce screens
+  COURIER_CJ: 'CJ Logistics',
+  COURIER_HANJIN: 'Hanjin Express',
+  COURIER_LOTTE: 'Lotte Global Logistics',
+  COURIER_EPOST: 'Korea Post',
+  COURIER_LOGEN: 'Logen',
+  COURIER_CU: 'CU Post',
+  COURIER_GS: 'GS Postbox',
+  COURIER_ENTER_MANUALLY: 'Enter manually',
+  TRENDING_REVIEWS_SHORT: 'Top Rated',
+  WORSTPRODUCT_REVIEWS_SHORT: 'Not Recommended',
+  ABROAD_REVIEWS_SHORT: 'Overseas',
+  FOLLOWING_REVIEWS_SHORT: 'Following',
+  RECEIVING_PRIZES_GUIDE_TITLE_1: 'Prize Delivery Guide',
+  RECEIVING_PRIZES_GUIDE_BODY_1_1:
+    'We send prize delivery instructions to the email address registered in your account. Please check that it is an address where you can be reached, and update it if needed. (Instruction emails are sent within 1-2 business days.)',
+  RECEIVING_PRIZES_GUIDE_BODY_1_2:
+    'Please follow the email instructions and provide the basic information needed for delivery, such as your contact number and delivery address.',
+  RECEIVING_PRIZES_GUIDE_BODY_1_3:
+    'For some prizes, you may need to pay taxes and duties (22% of the prize value) to receive the item. Details will be provided in the instruction email.',
+  RECEIVING_PRIZES_GUIDE_BODY_1_4:
+    'Please submit your information by January 5, 2022. If not submitted, the prize will be redrawn to give other members a chance to win.',
+  RECEIVING_PRIZES_GUIDE_BODY_1_5:
+    'We are not responsible for misdelivered prizes caused by an incorrect email address.',
+  RECEIVING_PRIZES_GUIDE_BODY_1_6: 'Delivery may take some time after confirmation.',
+  EDIT_EMAIL: 'Edit Email',
+  HELP_BUBBLE_MAIN_1: 'Swipe left.\n\nDiscover engaging reviews\nof amazing hidden products!',
+  HELP_BUBBLE_MAIN_2:
+    "This is the reviewer's rating,\nscored directly by users.\nTap the screen to rate it yourself.\n\nGive a score now\nand earn rewards!",
+  HELP_BUBBLE_MAIN_3: 'Drag the yellow bar up.\n\nYou can browse reviews by category.',
+  HELP_BUBBLE_VIDEO_1:
+    "greyd's pride and joy:\nthe review rating feature.\n\nRate the reviews you watch!\n\nHelp build a greyd where\ngood reviews get recognized.\n\nRewards included!",
+  HELP_BUBBLE_ADDING_NEW_VIDEO_1:
+    'Upload a review!\n\nJust uploading earns you rewards,\nand if the product you reviewed sells,\nwe share the revenue with you.',
+  HELP_BUBBLE_ADDING_NEW_VIDEO_2:
+    'If the product you reviewed is sold\non greyd Shopping,\nbe sure to link the product.\n\nWhen your review drives sales,\nwe share the revenue with you.\n\n(No link, no revenue share!)',
+  HELP_BUBBLE_ADDING_NEW_VIDEO_3:
+    'Cross-post to Instagram.\n\nMore people will see your review,\nyou will gain fans,\nand you can earn more revenue.',
+  HELP_BUBBLE_TIER_GUIDE_1:
+    'Your share of sales revenue\ndepends on your reviewer tier.\n\nThe more reviews you upload,\nthe more ratings you receive,\nthe higher your scores,\n\nthe higher your tier.',
+  PROMOTION_CODE_DISCOUNT: 'Promo Code Discount',
+  LOGIN_REQUIRED_TITLE: 'Login Required',
+  LOGIN_REQUIRED_TO_VIEW_PAGE: 'You need to sign up to view this page.',
+  REFUND_PRODUCT_ALREADY_BOUGHT_TITLE: 'You have already purchased this product.',
+  REFUND_PRODUCT_ONLY_ONCE: 'Refund promotion products can only be purchased once.',
+  BUY_VIA_REVIEW_ALERT_TITLE: "Wait! Buy after watching someone's review and earn rewards!",
+  BUY_VIA_REVIEW_ALERT_BODY: 'Would you like to watch the linked review before buying?',
+  BUY_WITHOUT_REVIEW: 'Just Buy',
+  GO_TO_REVIEW: 'Watch Review',
+  ORDER_NOT_COMPLETED: 'The order has not been completed.',
+  PAY_ERROR_TITLE: 'An error occurred.',
+  PAY_ERROR_RESTART_APP: 'Please close and restart the app.',
+  PAY_APP_OPEN_FAILED:
+    'Failed to launch the app. If it is not installed, please install it and try again.',
+  INSTAGRAM_ID_NOT_REGISTERED: 'Instagram ID has not been entered',
+  DELETED_USER_TITLE: 'Deleted Account',
+  DELETED_USER_BODY: 'This user has deleted their account. Their information is unavailable.',
+  GLOBAL_GROUP_BUYING_DISCOUNT: 'Global Group-Buy Discount',
+  PROMOTION_CODE_ALREADY_APPLIED: 'This code has already been applied',
+  DOWNLOAD_COMPLETED_AT: (path) => `Download completed. ${path}`,
+  KEYPAD_RESHUFFLE: 'Shuffle',
+  CHECK_PROMOTION_PERIOD: 'Please check the promotion start and end dates.',
+  SHARE_SHORT: 'Share',
+  // i18n batch B2 — reward guide & reward history
+  REMARK: 'Note',
+  REWARD_GUIDE_INTRO_TITLE: 'How to earn rewards',
+  REWARD_GUIDE_INTRO_BODY_PRE:
+    'Rewards are currency you can use like cash in the greyd app. \nOnce you have accumulated 20,000 rewards or more, you can withdraw them to your bank account. (Up to ',
+  REWARD_GUIDE_INTRO_BODY_POST: ' per day — review rewards excluded)',
+  REWARD_GUIDE_TITLE_POST: ' earned',
+  REWARD_GUIDE_SECTION_1_TITLE_PRE: '1. Daily check-in: ',
+  REWARD_GUIDE_SECTION_1_BODY: (n) =>
+    `You automatically receive ${n}R on your first visit each day.`,
+  REWARD_GUIDE_SECTION_2_TITLE_PRE: '2. Uploading a review: up to ',
+  REWARD_GUIDE_SECTION_2_BODY: (n) => `Earn up to ${n}R every time you upload a review.`,
+  REWARD_GUIDE_SECTION_3_TITLE_PRE: '3. Giving a G6 score to a review: ',
+  REWARD_GUIDE_SECTION_3_BODY: (n) =>
+    `Complete a G6 rating on a reviewer's video and receive ${n}R. A score cannot be undone once given.`,
+  REWARD_GUIDE_SECTION_4_TITLE_PRE: '4. Writing a comment: ',
+  REWARD_GUIDE_SECTION_4_BODY: (n) => `Receive ${n}R when you comment on someone else's review.`,
+  REWARD_GUIDE_EXPIRY:
+    'Earned rewards expire 6 months after they are granted. \n\nRewards earned from events expire after 1 month.',
 };

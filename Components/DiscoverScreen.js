@@ -1293,18 +1293,18 @@ function NewDiscoverScreen(props) {
     { key: Constants.VIDEO_LIST_RECENT, title: Strings.NEW, props },
     {
       key: Constants.VIDEO_LIST_TRENDING,
-      title: Strings.TRENDING_REVIEWS.replace(' 리뷰', ''),
+      title: Strings.TRENDING_REVIEWS_SHORT,
       props,
     },
     {
       key: Constants.VIDEO_LIST_WORSTPRODUCT,
-      title: Strings.WORSTPRODUCT_REVIEWS.replace(' 리뷰', ''),
+      title: Strings.WORSTPRODUCT_REVIEWS_SHORT,
       props,
     },
-    { key: Constants.VIDEO_LIST_ABROAD, title: Strings.ABROAD_REVIEWS.replace(' 리뷰', ''), props },
+    { key: Constants.VIDEO_LIST_ABROAD, title: Strings.ABROAD_REVIEWS_SHORT, props },
     {
       key: Constants.VIDEO_LIST_FOLLOWING,
-      title: Strings.FOLLOWING_REVIEWS.replace(' 리뷰', ''),
+      title: Strings.FOLLOWING_REVIEWS_SHORT,
       props,
     },
     // {

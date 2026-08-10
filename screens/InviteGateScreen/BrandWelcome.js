@@ -14,18 +14,16 @@ export default function BrandWelcome({ navigation }) {
       <View style={styles.body}>
         <Card style={styles.heroCard}>
           <Text style={styles.emoji}>🤝</Text>
-          <Text style={styles.title}>{'캠페인은 ARBAIM이\n개설하고 운영합니다.'}</Text>
-          <Text style={styles.sub}>
-            {'결과를 보고, 평가만 하세요.\n크리에이터 관리·배송·CS 전부 저희 몫입니다.'}
-          </Text>
+          <Text style={styles.title}>{Strings.BRAND_WELCOME_TITLE}</Text>
+          <Text style={styles.sub}>{Strings.BRAND_WELCOME_SUB}</Text>
         </Card>
 
         <Card style={styles.analystCard}>
-          <Text style={styles.analystLabel}>담당 애널리스트</Text>
+          <Text style={styles.analystLabel}>{Strings.BRAND_ANALYST_LABEL}</Text>
           <View style={styles.analystRow}>
             <View style={styles.analystDot} />
-            <Text style={styles.analystName}>김소연 · ARBAIM</Text>
-            <Text style={styles.analystSla}>평가 응답 ≤ 7일</Text>
+            <Text style={styles.analystName}>{Strings.BRAND_ANALYST_NAME}</Text>
+            <Text style={styles.analystSla}>{Strings.BRAND_ANALYST_SLA}</Text>
           </View>
         </Card>
       </View>

@@ -39,7 +39,7 @@ export default function QRScreen(props) {
           // }
 
           console.log(RNFS.CachesDirectoryPath);
-          toastRef.show(`다운로드가 완료되었습니다. ${RNFS.CachesDirectoryPath}/some-name.png`);
+          toastRef.show(Strings.DOWNLOAD_COMPLETED_AT(`${RNFS.CachesDirectoryPath}/some-name.png`));
         });
     });
   };
