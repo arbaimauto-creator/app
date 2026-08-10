@@ -1,0 +1,1064 @@
+<title>greyd Phase 1 화면 디자인 — 3개 퍼널</title>
+<style>
+:root{
+  --ground:#EFEDE7; --panel:#FFFFFF; --ink:#1C1913; --sub:#6E675C; --line:#DDD8CE;
+  --amber:#FFB731; --amber-deep:#8A5D00; --chip:#E7E2D8;
+  --app-bg:#F4F4F4; --app-surface:#FFFFFF; --app-ink:#171717; --app-grey:#8A857B;
+  --app-line:#EAE7E1; --red:#E53400; --green:#1F8A4C; --dark:#3A3A3A;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --ground:#181511; --panel:#221E18; --ink:#F2EEE6; --sub:#A79E8F; --line:#3A342B; --chip:#332E25; --amber-deep:#FFC85E; }
+}
+:root[data-theme="dark"]{ --ground:#181511; --panel:#221E18; --ink:#F2EEE6; --sub:#A79E8F; --line:#3A342B; --chip:#332E25; --amber-deep:#FFC85E; }
+:root[data-theme="light"]{ --ground:#EFEDE7; --panel:#FFFFFF; --ink:#1C1913; --sub:#6E675C; --line:#DDD8CE; --chip:#E7E2D8; --amber-deep:#8A5D00; }
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:Pretendard,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1360px;margin:0 auto;padding:48px 28px 96px}
+header.hero{padding:26px 0 8px;border-bottom:2px solid var(--ink);margin-bottom:8px}
+.eyebrow{font-size:12px;letter-spacing:.14em;font-weight:700;color:var(--amber-deep);text-transform:uppercase}
+h1{font-size:clamp(28px,4vw,44px);line-height:1.12;margin:10px 0 14px;letter-spacing:-.02em;text-wrap:balance}
+h1 .g{color:var(--amber-deep)}
+.def{font-size:15px;color:var(--sub);max-width:64ch;margin:0 0 18px}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px}
+.meta span{font-size:12px;font-weight:600;background:var(--chip);border-radius:999px;padding:5px 12px}
+.meta b{color:var(--amber-deep)}
+/* funnel part header */
+.part{margin-top:72px;border-top:2px solid var(--ink);padding-top:18px}
+.part-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.part-head .role{font-size:12px;font-weight:800;letter-spacing:.1em;background:var(--ink);color:var(--ground);border-radius:5px;padding:3px 10px}
+.part-head h2{font-size:26px;margin:0;letter-spacing:-.01em}
+.part-head .who{font-size:13px;color:var(--sub)}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:16px 0 6px;font-size:12px;font-weight:600}
+.flow span{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:5px 12px;color:var(--ink)}
+.flow span.hot{background:var(--amber);border-color:var(--amber);color:#231B05}
+.flow i{font-style:normal;color:var(--sub)}
+section{margin-top:34px}
+.sec-head{display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--line);padding-bottom:9px;margin-bottom:6px}
+.sec-head h3{font-size:17px;margin:0}
+.sec-head .ref{margin-left:auto;font-size:12px;color:var(--sub)}
+.sec-note{font-size:13.5px;color:var(--sub);max-width:72ch;margin:6px 0 18px}
+.rail{display:flex;gap:26px;overflow-x:auto;padding:8px 4px 18px;align-items:flex-start}
+.shot{flex:0 0 auto;width:320px}
+.shot.wide{width:660px}
+.phone{width:320px;height:648px;background:var(--app-bg);border-radius:30px;border:6px solid #17150F;
+  overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 14px 34px rgba(23,18,8,.16)}
+.desk{width:660px;height:470px;background:var(--app-bg);border-radius:12px;border:5px solid #17150F;
+  overflow:hidden;display:flex;flex-direction:column;box-shadow:0 14px 34px rgba(23,18,8,.16)}
+.desk-top{flex:0 0 auto;display:flex;align-items:center;gap:6px;background:#26221B;padding:8px 12px}
+.desk-top i{width:9px;height:9px;border-radius:50%;background:#5A544A}
+.desk-top .url{margin-left:8px;font-size:10.5px;color:#B9B2A5;background:#17140F;border-radius:6px;padding:3px 12px}
+.desk-body{flex:1;padding:14px 16px;display:flex;flex-direction:column;gap:9px;overflow:hidden}
+.cap{margin-top:12px}
+.cap h4{font-size:14.5px;margin:0 0 4px}
+.cap p{font-size:12.5px;color:var(--sub);margin:0;line-height:1.5}
+.cap .tag{display:inline-block;font-size:11px;font-weight:700;color:var(--amber-deep);background:var(--chip);border-radius:4px;padding:1px 7px;margin-right:5px}
+.cap .tag.op{color:var(--sub)}
+/* ---------- in-frame primitives ---------- */
+.sb{display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:var(--app-ink);padding:9px 18px 2px}
+.body{flex:1;padding:6px 16px 14px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.home-bar{height:4px;width:110px;border-radius:4px;background:#C9C4BB;margin:5px auto 7px;flex:0 0 auto}
+.tabs{flex:0 0 auto;display:flex;background:var(--app-surface);border-top:1px solid var(--app-line);padding:7px 6px 3px}
+.tabs div{flex:1;text-align:center;font-size:10px;color:var(--app-grey);font-weight:600}
+.tabs .on{color:var(--app-ink)}
+.tabs i{display:block;width:18px;height:18px;border-radius:5px;background:currentColor;opacity:.16;margin:0 auto 3px}
+.tabs .on i{background:var(--amber);opacity:1}
+.h-title{font-size:20px;font-weight:800;color:var(--app-ink);letter-spacing:-.01em}
+.card{background:var(--app-surface);border-radius:14px;padding:13px 14px;box-shadow:0 1px 2px rgba(20,15,5,.05)}
+.card h5{margin:0;font-size:14px;color:var(--app-ink);letter-spacing:-.01em;font-weight:700}
+.s{font-size:11.5px;color:var(--app-grey)}
+.xs{font-size:10.5px;color:var(--app-grey)}
+.row{display:flex;align-items:center;gap:8px}
+.grow{flex:1}
+.badge{font-size:10px;font-weight:800;border-radius:5px;padding:2px 7px;letter-spacing:.02em}
+.b-open{background:#E4F3E9;color:var(--green)}
+.b-cur{background:#EBEAE7;color:var(--dark)}
+.b-red{background:#FCE9E2;color:var(--red)}
+.b-amber{background:#FFF3D9;color:var(--amber-deep)}
+.btn{display:block;text-align:center;background:var(--amber);color:#231B05;font-weight:800;font-size:13.5px;border-radius:11px;padding:12px}
+.btn.ghost{background:var(--app-surface);color:var(--app-ink);border:1.5px solid var(--app-line);font-weight:700}
+.btn.sm{padding:7px 12px;font-size:11.5px;border-radius:8px;display:inline-block}
+.field{background:var(--app-surface);border:1.5px solid var(--app-line);border-radius:10px;padding:10px 12px;font-size:12.5px;color:var(--app-grey)}
+.field b{color:var(--app-ink);font-weight:600}
+.lab{font-size:11px;font-weight:700;color:var(--app-ink);margin:2px 0 -4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips span{font-size:11px;font-weight:600;border:1.5px solid var(--app-line);background:var(--app-surface);border-radius:999px;padding:4px 10px;color:var(--app-grey)}
+.chips .sel{background:#FFF3D9;border-color:var(--amber);color:var(--amber-deep)}
+.prog{height:7px;border-radius:6px;background:#E8E5DF;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--amber);border-radius:6px}
+.thumb{border-radius:10px;background:linear-gradient(135deg,#D8CDBD,#B9A88F 55%,#8F7C61);position:relative;overflow:hidden}
+.thumb.t2{background:linear-gradient(135deg,#C9D4CB,#93A996 60%,#5F7A66)}
+.thumb.t3{background:linear-gradient(135deg,#D7C9CF,#B08E9C 60%,#7C5A68)}
+.code-row{display:flex;gap:7px;justify-content:center}
+.code-row b{width:38px;height:48px;border-radius:9px;background:var(--app-surface);border:1.5px solid var(--app-line);
+  display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--app-ink)}
+.code-row b.f{border-color:var(--amber);background:#FFF9EC}
+.sheet{margin:0 -16px -14px;background:var(--app-surface);border-radius:18px 18px 0 0;padding:16px 18px 16px;box-shadow:0 -6px 22px rgba(20,15,5,.14)}
+.grab{width:36px;height:4px;border-radius:4px;background:#DDD9D2;margin:0 auto 12px}
+.check{display:flex;gap:9px;align-items:flex-start;font-size:12px;color:var(--app-ink)}
+.check i{flex:0 0 auto;width:17px;height:17px;border-radius:5px;background:var(--amber);margin-top:1px;position:relative}
+.check i::after{content:"";position:absolute;left:5px;top:2px;width:4px;height:8px;border:solid #231B05;border-width:0 2px 2px 0;transform:rotate(42deg)}
+.check.off i{background:var(--app-surface);border:1.5px solid var(--app-line)}
+.check.off i::after{display:none}
+.stars{color:var(--amber);font-size:13px;letter-spacing:1px}
+.kpi{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kpi .card{padding:10px 12px}
+.kpi b{font-size:19px;font-weight:800;color:var(--app-ink);font-variant-numeric:tabular-nums}
+.tbl{width:100%;border-collapse:collapse;font-size:10.5px;font-variant-numeric:tabular-nums}
+.tbl th{text-align:left;color:var(--app-grey);font-weight:600;padding:3px 5px;border-bottom:1px solid var(--app-line);white-space:nowrap}
+.tbl td{padding:5px;border-bottom:1px solid var(--app-line);color:var(--app-ink);white-space:nowrap}
+.mini{display:inline-block;height:7px;border-radius:4px;background:var(--amber);vertical-align:middle}
+.tri{display:flex;gap:8px}
+.tri div{flex:1;text-align:center;border-radius:11px;padding:9px 4px 7px;font-size:11px;font-weight:700;background:var(--app-surface);border:1.5px solid var(--app-line)}
+.tri em{display:block;font-style:normal;font-size:19px;margin-bottom:1px}
+.dots{display:flex;gap:5px}
+.dots i{width:15px;height:15px;border-radius:50%;background:#E8E5DF}
+.dots i.on{background:var(--amber)}
+.seg{display:flex;border:1.5px solid var(--app-line);border-radius:9px;overflow:hidden;font-size:11.5px;font-weight:700;text-align:center}
+.seg div{flex:1;padding:7px 0;color:var(--app-grey);background:var(--app-surface)}
+.seg .on{background:var(--dark);color:#fff}
+.note-amber{background:#FFF3D9;border-radius:10px;padding:9px 12px;font-size:11px;color:var(--amber-deep);line-height:1.5}
+.note-red{background:#FCE9E2;border-radius:10px;padding:9px 12px;font-size:11px;color:var(--red);line-height:1.5}
+.divline{height:1px;background:var(--app-line);margin:2px 0}
+.gbar{display:flex;align-items:center;gap:8px}
+.gbar .prog{flex:1}
+.codebox{display:flex;gap:7px}
+.codebox b{flex:1;text-align:center;border:1.5px dashed var(--amber);border-radius:9px;padding:7px 0;font-size:11.5px;color:var(--amber-deep);background:#FFF9EC}
+.inv{width:100%;border-collapse:collapse;font-size:12.5px;margin:14px 0 4px;background:var(--panel);border:1px solid var(--line)}
+.inv th{text-align:left;font-size:11px;letter-spacing:.06em;color:var(--sub);font-weight:700;padding:8px 12px;border-bottom:1px solid var(--line)}
+.inv td{padding:7px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.inv td:first-child{font-weight:700;white-space:nowrap}
+.inv .ok{color:var(--amber-deep);font-weight:800;white-space:nowrap}
+.inv .comp{color:var(--sub);white-space:nowrap}
+.push{background:var(--app-surface);border-radius:12px;padding:9px 12px;box-shadow:0 1px 2px rgba(20,15,5,.06)}
+.push .row b{font-size:11.5px;color:var(--app-ink)}
+.push .s{display:block;margin-top:2px}
+.spec{flex:0 0 auto;width:340px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.spec h4{font-size:14px;margin:0 0 10px}
+.spec .k{font-size:11px;font-weight:800;color:var(--amber-deep);letter-spacing:.04em}
+.status-pill{font-size:9.5px;font-weight:800;border-radius:4px;padding:2px 6px;white-space:nowrap}
+.st-applied{background:#EDEBE6;color:#6E675C}
+.st-approved{background:#FFF3D9;color:var(--amber-deep)}
+.st-shipped{background:#E3EDF7;color:#2B5E8E}
+.st-received{background:#E4F3E9;color:var(--green)}
+.st-review{background:#F0E9F7;color:#6A4E8E}
+.st-noshow{background:#FCE9E2;color:var(--red)}
+footer{margin-top:64px;border-top:1px solid var(--line);padding-top:16px;font-size:12.5px;color:var(--sub)}
+</style>
+
+<div class="wrap">
+<header class="hero">
+  <div class="eyebrow">greyd 2.0 · Phase 1 · 화면 설계 v2 기반</div>
+  <h1>세 사용자, 하나의 <span class="g">검증 루프</span> —<br>인플루언서 · 브랜드 · ARBAIM 운영</h1>
+  <p class="def">"greyd — The invite-only panel where Korean brands actually read your review." 크리에이터가 수령→리뷰하고, 브랜드가 평가하고, ARBAIM이 그 사이 모든 이행을 굴린다. 세 퍼널이 맞물려야 루프가 닫힌다. 근거: <b>2026-08-10-greyd-phase1-v2-design.md</b></p>
+  <div class="meta">
+    <span>북극성 <b>루프 완료율 70%</b></span>
+    <span>3개월 <b>완료 300건 · 브랜드 5곳</b></span>
+    <span>서체 <b>Pretendard</b></span>
+    <span>브랜드 컬러 <b>#FFB731</b></span>
+  </div>
+</header>
+
+<!-- ══════════════ PART 1 인플루언서 ══════════════ -->
+<div class="part">
+  <div class="part-head"><span class="role">FUNNEL 1</span><h2>인플루언서</h2><span class="who">초대받은 크리에이터 · 모바일 4탭 (홈·체험·활동·마이)</span></div>
+  <div class="flow">
+    <span>① 코드 입력</span><i>→</i><span>② 온보딩·프로필</span><i>→</i><span>③ 캠페인 신청</span><i>→</i><span>④ 주소 입력</span><i>→</i><span>⑤ 배송·수령 확인</span><i>→</i><span class="hot">⑥ D+14 업로드</span><i>→</i><span class="hot">⑦ 브랜드 평가 수신</span><i>→</i><span>⑧ 추천 코드 3장</span>
+  </div>
+  <table class="inv">
+    <tr><th>화면 (21)</th><th>내용</th><th>상태</th></tr>
+    <tr><td>1 소셜 로그인</td><td>Google · Kakao · Apple — 여정 ② 첫 관문</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>2 초대 게이트 (= 온보딩 1장)</td><td>자격 카피 + 6자리 코드 · 유효 7일</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>3 게이트 스텝 2</td><td>국가 · 닉네임 (필수 3개 이하)</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>4 온보딩 2장 (구조)</td><td>"한국에서 실제 제품이 배송됩니다"</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>5 온보딩 3장 (검증 루프)</td><td>"브랜드가 직접 평가합니다"</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>6 온보딩 4장 (첫 행동)</td><td>"이번 주 12자리 남음" + 시작 CTA</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>7 프로필 폼</td><td>핸들·팔로워 밴드·카테고리·3문항</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>8 홈 (피드)</td><td>세로 스와이프 리뷰 피드 — 기존 유지</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>9 체험 (Try)</td><td>Open/Curated 2-트랙 + 잠금 + 개인화 P</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>10 캠페인 상세 + 신청 시트</td><td>서약 체크박스 · 어필 · 선착순</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>11 신청 완료</td><td>applied 확인 · 승인 타임라인 안내</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>12 주소 입력 모달</td><td>48h 데드라인 · 로컬 저장</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>13 활동 (진행)</td><td>상태 카드 · 수령 버튼 · D-day · Strike</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>14 활동 (빈 상태)</td><td>진행 0건 → 체험 유도</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>15 업로드</td><td>링크 · 형식 · 해시태그 · 필수 포인트</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>16 완주 보상 (done)</td><td>포인트 · 피드백 카드 · G · 코드 3장</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>17 추천 코드 공유 시트</td><td>각인 카드 + OS 공유</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>18 마이</td><td>G-스코어 · 포인트 · 코드 · 주소 · About</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>19 배송지 관리</td><td>저장된 주소 · 수정 · 기본 지정</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>20 About · 사업자 정보</td><td>§7-5 신뢰 장치 — 주소·이메일 명기</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>21 리마인더 노티</td><td>D+7 / D-3 / D-1 / 마감 / 평가 도착</td><td class="ok">명세 ↓</td></tr>
+  </table>
+
+  <section>
+    <div class="sec-head"><h3>진입 — 게이트 · 온보딩</h3><span class="ref">여정 ①②③ · 작업 #2 #4</span></div>
+    <p class="sec-note">초대 코드가 곧 포지셔닝이다. 온보딩 4장은 카피(§7-1)만으로 구조를 설명하고, 프로필 폼은 FGI 데이터 스키마(§6 creator)를 그대로 수집한다.</p>
+    <div class="rail">
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>&#9679;&#9679;&#9679;</span></div>
+        <div class="body" style="justify-content:center;gap:12px">
+          <div style="text-align:center;margin-bottom:8px">
+            <div style="font-size:30px;font-weight:900;color:var(--app-ink)">greyd<span style="color:var(--amber)">.</span></div>
+            <div class="s" style="margin-top:8px">한국 브랜드가 당신의 리뷰를<br>직접 읽는, 초대제 패널.</div>
+          </div>
+          <a class="btn ghost" style="font-size:12.5px">G &middot; Google로 계속하기</a>
+          <a class="btn" style="background:#FEE500;font-size:12.5px">&#128172; Kakao로 계속하기</a>
+          <a class="btn" style="background:#171717;color:#fff;font-size:12.5px">&#63743; Apple로 계속하기</a>
+          <div class="xs" style="text-align:center;margin-top:6px">가입에는 초대 코드가 필요해요.<br>코드가 없다면 초대를 기다려주세요.</div>
+        </div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>1 &middot; 소셜 로그인</h4><p><span class="tag">#2</span>여정 ②의 첫 관문. 게스트 진입 없음 — 코드 없는 유저는 여기서 끝, 대기자 명단은 2단계.</p></div></div>
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>&#9679;&#9679;&#9679;</span></div>
+        <div class="body" style="justify-content:center;gap:14px">
+          <div style="text-align:center">
+            <div style="font-size:26px;font-weight:900;color:var(--app-ink);letter-spacing:-.02em">greyd<span style="color:var(--amber)">.</span></div>
+            <div style="font-size:16px;font-weight:800;color:var(--app-ink);margin-top:16px;line-height:1.35">당신이 초대된 데는<br>이유가 있습니다.</div>
+            <div class="s" style="margin-top:6px">You were invited for a reason.</div>
+          </div>
+          <div class="code-row"><b class="f">G</b><b class="f">R</b><b class="f">4</b><b>·</b><b>·</b><b>·</b></div>
+          <div class="xs" style="text-align:center">코드 유효기간 7일 · 1회 사용</div>
+          <a class="btn">코드 입력하고 캠페인 열기</a>
+          <div class="xs" style="text-align:center">코드가 만료됐나요? 초대해 준 사람에게 다시 요청하세요.</div>
+        </div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>2 · 초대 게이트 (= 온보딩 1장)</h4><p><span class="tag">#2</span>6자리 코드 + 유효 7일. role 판별(influencer/brand) → 탭 분기.</p></div></div>
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div class="body" style="justify-content:center;gap:13px">
+          <div>
+            <div class="xs" style="color:var(--amber-deep);font-weight:700">코드 확인 완료 ✓</div>
+            <div style="font-size:18px;font-weight:800;color:var(--app-ink);margin-top:6px;line-height:1.4">거의 다 왔어요.<br>두 가지만 알려주세요.</div>
+          </div>
+          <div class="lab">활동 국가</div>
+          <div class="field"><b>🇯🇵 Japan</b></div>
+          <div class="lab">닉네임</div>
+          <div class="field"><b>mia_beauty</b></div>
+          <div class="xs">닉네임은 브랜드 리포트와 추천 코드에 표시돼요.</div>
+          <div class="grow" style="max-height:60px"></div>
+          <a class="btn">시작하기</a>
+        </div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>3 · 게이트 스텝 2</h4><p><span class="tag">#2</span>국가(ISO)·닉네임 — 필수 입력 3개 이하 원칙. 국가는 §6 creator 스키마와 캠페인 target_countries 매칭에 사용.</p></div></div>
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div class="body" style="justify-content:center;gap:16px">
+          <div class="card" style="padding:22px 18px;text-align:center">
+            <div class="badge b-amber" style="display:inline-block">3 / 4 · 검증 루프</div>
+            <div style="font-size:17px;font-weight:800;color:var(--app-ink);margin-top:12px;line-height:1.4">당신의 솔직한 반응을<br>브랜드가 직접 평가합니다.</div>
+            <div class="s" style="margin-top:8px">greyd의 'grade'죠.</div>
+            <div class="divline" style="margin:14px 0"></div>
+            <div class="xs">"Your honest take gets graded by the brand —<br>that's the 'grade' in greyd."</div>
+          </div>
+          <div class="dots" style="justify-content:center"><i></i><i></i><i class="on"></i><i></i></div>
+          <div class="row" style="justify-content:space-between">
+            <span class="s">건너뛰기</span><a class="btn" style="padding:10px 26px">다음</a>
+          </div>
+        </div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>5 · 온보딩 3장 (검증 루프)</h4><p><span class="tag">#4</span>스킵 허용, 스킵 시 신청 잠김. 완료 +50P.</p></div></div>
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>&#9679;&#9679;&#9679;</span></div>
+        <div class="body" style="justify-content:center;gap:16px">
+          <div class="card" style="padding:22px 18px;text-align:center">
+            <div class="badge b-amber" style="display:inline-block">2 / 4 &middot; 구조</div>
+            <div style="font-size:30px;margin-top:12px">&#128230;</div>
+            <div style="font-size:17px;font-weight:800;color:var(--app-ink);margin-top:8px;line-height:1.4">한국에서 실제 제품이<br>배송됩니다. 전 과정 추적.</div>
+            <div class="divline" style="margin:14px 0"></div>
+            <div class="xs">"Real products from Korea.<br>Shipped to your door, tracked."<br>Ships from Seoul in 3&ndash;5 days. Tracking included.</div>
+          </div>
+          <div class="dots" style="justify-content:center"><i></i><i class="on"></i><i></i><i></i></div>
+          <div class="row" style="justify-content:space-between"><span class="s">건너뛰기</span><a class="btn" style="padding:10px 26px">다음</a></div>
+        </div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>4 &middot; 온보딩 2장 (구조)</h4><p><span class="tag">#4</span>배송 신뢰가 글로벌 유저의 1차 의심 — 숫자·기한을 박는 카피 원칙(§7-2) 적용.</p></div></div>
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>&#9679;&#9679;&#9679;</span></div>
+        <div class="body" style="justify-content:center;gap:16px">
+          <div class="card" style="padding:22px 18px;text-align:center">
+            <div class="badge b-amber" style="display:inline-block">4 / 4 &middot; 첫 행동</div>
+            <div style="font-size:17px;font-weight:800;color:var(--app-ink);margin-top:12px;line-height:1.4">첫 캠페인을 고르세요.</div>
+            <div style="font-size:14px;font-weight:800;color:var(--amber-deep);margin-top:6px">이번 주 12자리 남음</div>
+            <div class="divline" style="margin:14px 0"></div>
+            <div class="xs">"Pick your first campaign.<br>12 spots left this week."</div>
+          </div>
+          <div class="dots" style="justify-content:center"><i></i><i></i><i></i><i class="on"></i></div>
+          <a class="btn">프로필 완성하고 시작 &middot; +50P</a>
+        </div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>6 &middot; 온보딩 4장 (첫 행동)</h4><p><span class="tag">#4</span>희소성(잔여 자리)을 구체 숫자로 — 프로필 폼으로 직결되는 CTA.</p></div></div>
+
+      <div class="spec">
+        <h4>온보딩 4장 — §7-1 확정 카피 전문</h4>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div><span class="k">1 자격</span><div class="s" style="color:var(--ink)">당신이 초대된 데는 이유가 있습니다.</div><div class="s">You were invited for a reason.</div></div>
+          <div><span class="k">2 구조</span><div class="s" style="color:var(--ink)">한국에서 실제 제품이 배송됩니다. 전 과정 추적.</div><div class="s">Real products from Korea. Shipped to your door, tracked.</div></div>
+          <div><span class="k">3 검증 루프</span><div class="s" style="color:var(--ink)">당신의 솔직한 반응을 브랜드가 직접 평가합니다. greyd의 'grade'죠.</div><div class="s">Your honest take gets graded by the brand.</div></div>
+          <div><span class="k">4 첫 행동</span><div class="s" style="color:var(--ink)">첫 캠페인을 고르세요. 이번 주 12자리 남음.</div><div class="s">Pick your first campaign. 12 spots left this week.</div></div>
+        </div>
+        <div class="s" style="margin-top:12px;border-top:1px solid var(--line);padding-top:9px">카피 원칙(§7-2): 2인칭 동사 · 행동+결과 · 숫자와 기한을 박는다. 유명인 언급 전면 금지(§7-3).</div>
+      </div>
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div class="body" style="gap:9px">
+          <div class="h-title" style="font-size:17px">크리에이터 프로필</div>
+          <div class="xs" style="margin-top:-6px">완료하면 <b style="color:var(--amber-deep)">+50P</b> · 신청에 꼭 필요해요</div>
+          <div class="lab">SNS 핸들</div>
+          <div class="field"><b>instagram.com/</b>mia_beauty</div>
+          <div class="lab">팔로워 규모 (자가신고)</div>
+          <div class="chips"><span>~1K</span><span class="sel">1K–10K</span><span>10K–100K</span><span>100K+</span></div>
+          <div class="lab">주력 카테고리</div>
+          <div class="chips"><span class="sel">스킨케어</span><span class="sel">메이크업</span><span>헤어</span><span>푸드</span><span>패션</span></div>
+          <div class="lab">피부 타입</div>
+          <div class="chips"><span>건성</span><span class="sel">복합성</span><span>지성</span><span>민감성</span></div>
+          <div class="row"><div class="grow"><div class="lab">연령대</div><div class="field" style="margin-top:5px"><b>25–34</b></div></div>
+          <div class="grow"><div class="lab">성별 (선택)</div><div class="field" style="margin-top:5px">응답 안 함</div></div></div>
+          <div class="grow"></div>
+          <a class="btn">저장하고 캠페인 보기</a>
+        </div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>7 · 프로필 폼</h4><p><span class="tag">#4</span>§6 creator 스키마: 핸들·팔로워 밴드·카테고리·인구통계/피부타입 3문항. mock 저장.</p></div></div>
+
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h3>탭 홈 — 피드 · 빈 상태 · 마이</h3><span class="ref">작업 #3 #13 · 4탭 상시 화면</span></div>
+    <p class="sec-note">홈 피드는 기존 세로 스와이프 리뷰 피드를 유지한다(Buy 제거·탭 5→4가 작업 #3의 전부). 마이는 G-스코어의 집이고, 빈 상태는 첫 신청으로 밀어넣는 전환 장치다.</p>
+    <div class="rail">
+
+      <div class="shot"><div class="phone">
+        <div class="sb" style="color:#fff;position:relative;z-index:2"><span>9:41</span><span>●●●</span></div>
+        <div class="body" style="padding:0;gap:0;position:relative;margin-top:-30px">
+          <div class="thumb" style="position:absolute;inset:0;border-radius:0"></div>
+          <div style="position:absolute;top:36px;left:16px;right:16px;display:flex;align-items:center;gap:8px">
+            <b style="color:#fff;font-size:17px;font-weight:900">greyd</b>
+            <span style="background:var(--amber);border-radius:999px;padding:3px 12px;font-size:11px;font-weight:800;color:#231B05">Review</span>
+            <span style="background:rgba(255,255,255,.25);border-radius:999px;padding:3px 12px;font-size:11px;font-weight:700;color:#fff">ALL</span>
+            <div class="grow"></div><span style="color:#fff">🔔</span><span style="color:#fff">🔎</span>
+          </div>
+          <div style="position:absolute;left:16px;right:60px;bottom:18px;color:#fff">
+            <span class="badge b-amber">✓ 7.6</span>
+            <div style="font-size:15.5px;font-weight:800;margin-top:7px;text-shadow:0 1px 4px rgba(0,0,0,.4)">세이지 카밍 세럼 2주 사용기</div>
+            <div style="font-size:11px;opacity:.9;margin-top:3px;text-shadow:0 1px 4px rgba(0,0,0,.4)">@rin_skin · 조회 2,671 · Sponsored</div>
+            <div style="font-size:10.5px;opacity:.75;margin-top:6px">위아래로 스와이프해 다음 리뷰 보기</div>
+          </div>
+          <div style="position:absolute;right:14px;bottom:24px;display:flex;flex-direction:column;gap:12px;align-items:center;color:#fff;font-size:10px;text-align:center">
+            <div><div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.9);margin-bottom:2px"></div></div>
+            <div>♥<br>24</div><div>💬<br>7</div><div>⤴</div>
+          </div>
+        </div>
+        <div class="tabs" style="position:relative;z-index:2"><div class="on"><i></i>홈</div><div><i></i>체험</div><div><i></i>활동</div><div><i></i>마이</div></div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>8 · 홈 (리뷰 피드)</h4><p><span class="tag">#3</span>기존 세로 스와이프 피드 유지 — Buy 버튼 제거, 커머스 OFF. 피드는 캠페인 결과물의 쇼윈도 역할.</p></div></div>
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div class="body" style="gap:9px">
+          <div class="row"><div class="h-title">활동</div><div class="grow"></div><span class="badge b-amber">50P</span></div>
+          <div class="grow" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px">
+            <div style="font-size:34px">📦</div>
+            <b style="font-size:14.5px;color:var(--app-ink)">아직 진행 중인 체험이 없어요</b>
+            <div class="s" style="text-align:center">이번 주 Open 캠페인 2개가 열려 있어요.<br>선착순이라 빨리 닫혀요.</div>
+            <a class="btn" style="padding:11px 28px">체험 보러 가기</a>
+          </div>
+          <div class="note-amber">프로필을 완성하면 +50P — 신청에도 꼭 필요해요.</div>
+        </div>
+        <div class="tabs"><div><i></i>홈</div><div><i></i>체험</div><div class="on"><i></i>활동</div><div><i></i>마이</div></div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>14 · 활동 빈 상태</h4><p>첫 루프 진입 전환 장치 — 남은 자리 수·프로필 완성 유도를 함께. "죽은 앱" 인상을 주지 않도록 열린 캠페인 수를 구체적으로 표기.</p></div></div>
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div class="body" style="gap:9px">
+          <div class="row"><div class="h-title">마이</div><div class="grow"></div><span class="xs">⚙️</span></div>
+          <div class="card" style="text-align:center;padding:16px">
+            <div class="row" style="justify-content:center;gap:10px">
+              <div style="width:44px;height:44px;border-radius:50%;background:var(--amber)"></div>
+              <div style="text-align:left"><b style="font-size:14px;color:var(--app-ink)">mia_beauty</b><div class="xs">🇯🇵 · 스킨케어 · 1K–10K</div></div>
+            </div>
+            <div style="font-size:30px;font-weight:900;color:var(--app-ink);margin-top:10px">G57</div>
+            <div class="prog" style="margin-top:7px"><i style="width:90%"></i></div>
+            <div class="xs" style="margin-top:5px">다음 해제 G60 — Curated 신청 · 완주 1회 남음</div>
+            <div class="row" style="margin-top:10px;justify-content:center;gap:16px">
+              <span class="xs">완주 <b style="color:var(--app-ink)">1</b></span>
+              <span class="xs">Strike <b style="color:var(--green)">0</b></span>
+              <span class="xs">동시 한도 <b style="color:var(--app-ink)">2건</b></span>
+            </div>
+          </div>
+          <div class="card"><div class="row"><h5 style="font-size:12.5px">포인트</h5><div class="grow"></div><b style="font-size:14px;color:var(--amber-deep)">1,550P</b></div>
+          <div class="xs" style="margin-top:3px">현금 인출·제품 구매 2026 Q4 오픈 예정</div></div>
+          <div class="card"><div class="row"><h5 style="font-size:12.5px">추천 코드</h5><div class="grow"></div><span class="xs">2장 남음</span></div>
+          <div class="codebox" style="margin-top:7px"><b>GRD-M2B</b><b>GRD-M3C</b></div></div>
+          <div class="card"><div class="row"><h5 style="font-size:12.5px">배송지 관리</h5><div class="grow"></div><span class="xs">›</span></div></div>
+          <div class="card"><div class="row"><h5 style="font-size:12.5px">About · 사업자 정보</h5><div class="grow"></div><span class="xs">ARBAIM INC. ›</span></div></div>
+        </div>
+        <div class="tabs"><div><i></i>홈</div><div><i></i>체험</div><div><i></i>활동</div><div class="on"><i></i>마이</div></div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>18 · 마이</h4><p><span class="tag">#8 #13</span>G-스코어의 집: 진행바+다음 해제, 완주·Strike·동시 한도. 포인트(Q4 예고), 추천 코드 잔여, 주소 재사용, About 사업자 정보(§7-5 신뢰 장치).</p></div></div>
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>&#9679;&#9679;&#9679;</span></div>
+        <div class="body" style="gap:9px">
+          <div class="row"><span class="s">&#8249;</span><div class="h-title" style="font-size:17px">배송지 관리</div></div>
+          <div class="card" style="border:1.5px solid var(--amber)">
+            <div class="row"><h5 style="font-size:13px">기본 배송지</h5><div class="grow"></div><span class="badge b-amber">기본</span></div>
+            <div class="s" style="margin-top:5px;color:var(--app-ink)">Mia Tanaka &middot; +81 &bull;&bull;&bull;</div>
+            <div class="s">2-4-1 Shibuya, Tokyo 150-0002 &middot; &#127471;&#127477;</div>
+            <div class="row" style="margin-top:9px;gap:7px">
+              <a class="btn ghost grow" style="padding:8px;font-size:11.5px">수정</a>
+              <a class="btn ghost grow" style="padding:8px;font-size:11.5px">삭제</a>
+            </div>
+          </div>
+          <a class="btn ghost">+ 새 배송지 추가</a>
+          <div class="note-amber">승인 후 48시간 안에 주소가 있어야 발송돼요. 저장해두면 다음 캠페인에서 자동 입력됩니다.</div>
+          <div class="grow"></div>
+        </div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>19 &middot; 배송지 관리</h4><p><span class="tag">#7</span>주소 모달과 같은 데이터(로컬 저장). 기본 지정 &rarr; approved 시 자동 채움으로 48h 리스크 축소.</p></div></div>
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>&#9679;&#9679;&#9679;</span></div>
+        <div class="body" style="gap:9px">
+          <div class="row"><span class="s">&#8249;</span><div class="h-title" style="font-size:17px">About</div></div>
+          <div class="card" style="text-align:center;padding:18px">
+            <div style="font-size:22px;font-weight:900;color:var(--app-ink)">greyd<span style="color:var(--amber)">.</span></div>
+            <div class="xs" style="margin-top:4px">K-Product 검증 플랫폼 &middot; by ARBAIM INC.</div>
+          </div>
+          <div class="card">
+            <div class="xs" style="font-weight:700;margin-bottom:5px">사업자 정보</div>
+            <div class="s" style="color:var(--app-ink);line-height:1.7">ARBAIM INC. &middot; 대표 &#9675;&#9675;&#9675;<br>사업자등록번호 000-00-00000<br>서울특별시 &#9675;&#9675;구 &#9675;&#9675;로 00, 0층<br>hello@greyd.app</div>
+          </div>
+          <div class="card"><div class="row"><h5 style="font-size:12.5px">이용약관</h5><div class="grow"></div><span class="xs">&#8250;</span></div></div>
+          <div class="card"><div class="row"><h5 style="font-size:12.5px">개인정보 처리방침</h5><div class="grow"></div><span class="xs">&#8250;</span></div></div>
+          <div class="card"><div class="row"><h5 style="font-size:12.5px">문의하기</h5><div class="grow"></div><span class="xs">hello@greyd.app &#8250;</span></div></div>
+          <div class="xs" style="text-align:center;margin-top:4px">v2.0.0 (Phase 1)</div>
+        </div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>20 &middot; About &middot; 사업자 정보</h4><p><span class="tag">#13</span>§7-5 신뢰 장치 — 실제 주소·이메일 명기. 글로벌 유저의 "실체 있는 회사인가" 의심을 화면 하나로 끊는다.</p></div></div>
+
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h3>신청 — Try 2-트랙 · 신청 시트 · 주소</h3><span class="ref">여정 ④⑤ · 작업 #5 #7</span></div>
+    <p class="sec-note">Open은 문턱을 없애 첫 참여를 만들고, Curated는 잠금을 숨기지 않고 보여줘 G-스코어를 올릴 이유를 만든다. 포인트는 "지금 등급 기준 얼마, 다음 등급이면 얼마"로 개인화.</p>
+    <div class="rail">
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div class="body" style="gap:9px">
+          <div class="row"><div class="h-title">체험</div><div class="grow"></div><span class="badge b-amber">G57</span></div>
+          <div class="card">
+            <div class="row"><span class="badge b-open">Open · 선착순 8개 남음</span><div class="grow"></div><span class="xs">평균 승인 2일</span></div>
+            <div class="row" style="margin-top:9px;gap:11px">
+              <div class="thumb" style="width:52px;height:52px"></div>
+              <div class="grow"><h5>세이지 카밍 세럼 1종</h5>
+              <div class="xs" style="margin-top:2px">15초 언박싱 · D+14 업로드 · 🇰🇷→🇺🇸🇮🇩🇯🇵</div></div>
+            </div>
+            <div class="row" style="margin-top:9px"><span class="badge b-amber">200P</span><span class="xs">기본 지급 · 품질 보너스 +20%</span></div>
+          </div>
+          <div class="card">
+            <div class="row"><span class="badge b-cur">Curated</span><div class="grow"></div><span class="xs">🔒 G60 달성 시 신청 가능</span></div>
+            <div class="row" style="margin-top:9px;gap:11px;opacity:.55">
+              <div class="thumb t2" style="width:52px;height:52px"></div>
+              <div class="grow"><h5>퍼밍 3종 세트 60초 리뷰</h5>
+              <div class="xs" style="margin-top:2px">60초 이상 · D+14 · 🇰🇷→🇺🇸🇻🇳</div></div>
+            </div>
+            <div class="row" style="margin-top:9px"><span class="badge b-amber">기본 400P</span><span class="xs">G80 달성 시 <b style="color:var(--amber-deep)">500P</b></span></div>
+            <div class="prog" style="margin-top:9px"><i style="width:80%"></i></div>
+            <div class="xs" style="margin-top:4px">G57 → G60까지 완주 1회</div>
+          </div>
+          <div class="card" style="opacity:.8">
+            <div class="row"><span class="badge b-open">Open · 마감 D-2</span></div>
+            <div class="row" style="margin-top:9px;gap:11px">
+              <div class="thumb t3" style="width:52px;height:52px"></div>
+              <div class="grow"><h5>립 세라마이드 밤</h5><div class="xs" style="margin-top:2px">15초 · D+14 · 🇰🇷→🇯🇵🇹🇭</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="tabs"><div><i></i>홈</div><div class="on"><i></i>체험</div><div><i></i>활동</div><div><i></i>마이</div></div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>9 · Try 목록 — 2-트랙</h4><p><span class="tag">#5</span>Open 초록 배지+선착순 카운트, Curated는 잠가서 보여준다. 등급 배수 개인화 + 다음 해제 진행바. 동시 진행 한도: 이력 0회 1건 / G50~79 2건 / G80+ 3건.</p></div></div>
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div class="body" style="gap:8px">
+          <div class="thumb" style="height:120px;margin:-6px -16px 0;border-radius:0"></div>
+          <div class="row"><span class="badge b-open">Open</span><span class="badge b-amber">200P</span><div class="grow"></div><span class="xs">선착순 8개 남음</span></div>
+          <h5 style="font-size:16px">세이지 카밍 세럼 1종</h5>
+          <div class="s">업로드 조건: 15초 이상 · 필수 언급 2개 · 수령 후 14일</div>
+          <div class="sheet">
+            <div class="grab"></div>
+            <div style="font-size:14.5px;font-weight:800;color:var(--app-ink);margin-bottom:10px">신청하기</div>
+            <div class="lab">한 줄 어필 (선택)</div>
+            <div class="field" style="margin:6px 0 10px">민감성 피부 팔로워가 많아요. 진정 라인 리뷰 경험 3회.</div>
+            <div class="check"><i></i><span><b>업로드 서약</b> — 제품 수령 후 14일 안에 리뷰를 올릴게요. 미이행 시 G-스코어가 내려가요.</span></div>
+            <a class="btn" style="margin-top:12px">신청 제출 · 평균 승인 2일</a>
+          </div>
+        </div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>10 · 캠페인 상세 + 신청 시트</h4><p><span class="tag">#5</span>서약 체크박스 1개(마찰 최소), 어필은 선택. 조건·기한·잔여 수량 상단 고정.</p></div></div>
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>&#9679;&#9679;&#9679;</span></div>
+        <div class="body" style="justify-content:center;gap:13px">
+          <div style="text-align:center">
+            <div style="font-size:34px">&#128588;</div>
+            <div style="font-size:19px;font-weight:900;color:var(--app-ink);margin-top:6px">신청 완료!</div>
+            <div class="s" style="margin-top:4px">세이지 카밍 세럼 &middot; Open 트랙</div>
+          </div>
+          <div class="card">
+            <div class="row"><span class="status-pill st-applied">applied</span><span class="xs">지금</span></div>
+            <div class="divline" style="margin:8px 0"></div>
+            <div class="row"><span class="status-pill st-approved">approved</span><span class="xs">평균 2일 — 승인되면 주소를 물어볼게요</span></div>
+            <div class="divline" style="margin:8px 0"></div>
+            <div class="row"><span class="status-pill st-shipped">shipped</span><span class="xs">서울 출고 3&ndash;5일 &middot; 운송장 제공</span></div>
+          </div>
+          <div class="note-amber">동시 진행 한도 2건 중 <b>1건</b> 사용 중이에요.</div>
+          <a class="btn ghost">다른 캠페인 더 보기</a>
+        </div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>11 &middot; 신청 완료</h4><p><span class="tag">#5 #6</span>applied 직후 다음 단계 타임라인을 미리 보여줘 "사기 같다" 인상을 차단(가드레일: 앱스토어 평점). 동시 한도 잔여 표시.</p></div></div>
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div class="body" style="gap:8px">
+          <div style="opacity:.35">
+            <div class="h-title">활동</div>
+            <div class="card" style="margin-top:8px"><h5>세이지 카밍 세럼</h5><div class="xs">승인됨</div></div>
+          </div>
+          <div class="sheet" style="margin-top:auto">
+            <div class="grab"></div>
+            <div class="row"><div style="font-size:14.5px;font-weight:800;color:var(--app-ink)">배송지를 입력해주세요</div><div class="grow"></div><span class="badge b-red">48시간</span></div>
+            <div class="xs" style="margin:6px 0 10px">선정 축하해요 🎉 48시간 안에 입력하지 않으면 자동 취소돼요. 페널티는 없어요.</div>
+            <div class="lab">받는 사람</div><div class="field" style="margin:5px 0 8px"><b>Mia Tanaka</b></div>
+            <div class="lab">주소</div><div class="field" style="margin:5px 0 8px">2-4-1 Shibuya, Tokyo · 150-0002</div>
+            <div class="row">
+              <div class="grow"><div class="lab">국가</div><div class="field" style="margin-top:5px"><b>🇯🇵 Japan</b></div></div>
+              <div class="grow"><div class="lab">전화</div><div class="field" style="margin-top:5px">+81 •••</div></div>
+            </div>
+            <a class="btn" style="margin-top:12px">저장 — 다음부터 자동 입력</a>
+          </div>
+        </div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>12 · 주소 입력 모달</h4><p><span class="tag">#7</span>approved 진입 시 노출. 48h는 문구만(집행 운영 수동). 로컬 저장·재사용.</p></div></div>
+
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h3>수행 — 상태머신 · 업로드 · 보상</h3><span class="ref">여정 ⑥⑦⑧ · 작업 #6 #8 #9 #13</span></div>
+    <p class="sec-note">북극성 분모는 <b>수령 확인(received)</b>. 수령 버튼이 D+14 타이머의 기점이고, D-3 적색 뱃지 + 무료 연장 1회가 이탈을 막는다. 완주 화면은 "브랜드가 진짜 읽는다"를 증명하는 순간이다.</p>
+    <div class="rail">
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div class="body" style="gap:9px">
+          <div class="row"><div class="h-title">활동</div><div class="grow"></div><span class="badge b-amber">1,550P</span></div>
+          <div class="card">
+            <div class="row"><h5>세이지 카밍 세럼</h5><div class="grow"></div><span class="badge b-amber">배송 중</span></div>
+            <div class="xs" style="margin-top:5px">운송장 CJ 6482-1130-52 · 서울 출고 3–5일</div>
+            <a class="btn" style="margin-top:10px;padding:10px">📦 제품 받았어요</a>
+            <div class="xs" style="margin-top:6px">발송 후 21일이 지나면 수령한 것으로 봐요.</div>
+          </div>
+          <div class="card">
+            <div class="row"><h5>어성초 토너 패드</h5><div class="grow"></div><span class="badge b-red">D-3</span></div>
+            <div class="xs" style="margin-top:5px">수령 확인 6/21 · 업로드 기한 7/5</div>
+            <div class="prog" style="margin-top:8px"><i style="width:78%;background:var(--red)"></i></div>
+            <div class="row" style="margin-top:9px;gap:7px">
+              <a class="btn ghost grow" style="padding:9px;font-size:12px"># 해시태그 복사</a>
+              <a class="btn ghost grow" style="padding:9px;font-size:12px">+7일 연장 (무료 1회)</a>
+            </div>
+            <div class="xs" style="margin-top:6px">15초 언박싱도 OK — 완벽할 필요 없어요.</div>
+          </div>
+          <div class="note-red"><b>Strike 1</b> · 립밤 캠페인 미업로드 — G-스코어 −10, 30일간 Curated 잠금. 연속 3회 완주하면 사라져요. (나에게만 보임)</div>
+        </div>
+        <div class="tabs"><div><i></i>홈</div><div><i></i>체험</div><div class="on"><i></i>활동</div><div><i></i>마이</div></div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>13 · 활동 — 진행 카드</h4><p><span class="tag">#6 #9</span>shipped(운송장) → 수령 버튼 → D-day(D-3 적색) → 연장·해시태그. Strike 경고는 본인만. 리마인더: D+7/D-3/D-1/마감/유예 로컬 노티.</p></div></div>
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div class="body" style="gap:9px">
+          <div class="row"><div class="h-title" style="font-size:17px">리뷰 업로드</div><div class="grow"></div><span class="badge b-red">D-3</span></div>
+          <div class="card" style="padding:10px 12px">
+            <div class="row" style="gap:10px"><div class="thumb" style="width:40px;height:40px"></div>
+            <div class="grow"><h5 style="font-size:12.5px">어성초 토너 패드</h5><div class="xs">필수 언급: ① 진정 효과 ② 패드 질감</div></div></div>
+          </div>
+          <div class="lab">리뷰 링크</div>
+          <div class="field"><b>instagram.com/reel/</b>C8fk2…</div>
+          <div class="lab">형식</div>
+          <div class="seg"><div class="on">숏폼</div><div>롱폼</div><div>이미지</div><div>스토리</div></div>
+          <div class="lab">해시태그</div>
+          <div class="chips"><span class="sel">#greyd</span><span class="sel">#어성초패드</span><span class="sel">#ad</span><span>복사 ⧉</span></div>
+          <div class="check"><i></i><span>필수 포인트 2개를 영상에서 언급했어요</span></div>
+          <div class="check off"><i></i><span>브랜드 계정을 태그했어요 (선택)</span></div>
+          <div class="grow"></div>
+          <div class="xs" style="text-align:center">제출하면 브랜드 확인이 시작돼요 · 평가는 7일 안에 도착</div>
+          <a class="btn">업로드 완료</a>
+        </div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>15 · 업로드 화면</h4><p><span class="tag">#6</span>§6 review 스키마 수집: platform_url + format 4종. 제출 → reviewing 전환, uploaded_at 기록. D-14~16 유예 구간은 ×0.7 감액 안내.</p></div></div>
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div class="body" style="gap:11px;justify-content:center">
+          <div style="text-align:center">
+            <div style="font-size:38px">🎉</div>
+            <div style="font-size:24px;font-weight:900;color:var(--app-ink);margin-top:4px">+240P</div>
+            <div class="xs" style="margin-top:3px">기본 200P × 품질 보너스 1.2</div>
+            <div class="xs" style="margin-top:1px;color:var(--amber-deep)">포인트는 영상 완성도로만 계산돼요. 솔직한 평가는 점수에 영향이 없어요.</div>
+          </div>
+          <div class="card">
+            <div class="row"><span class="badge b-amber">브랜드 피드백</span><div class="grow"></div><span class="xs">SonPlan이 3일 전 열람 ✓</span></div>
+            <div class="row" style="margin-top:8px"><span class="stars">★★★★☆</span><span class="xs">콘텐츠 품질 4/5</span></div>
+            <div class="s" style="margin-top:5px;color:var(--app-ink)">"발림성 표현이 정확해요. 다음 캠페인에서 또 뵙고 싶어요."</div>
+          </div>
+          <div class="card">
+            <div class="gbar"><b style="font-size:13px;color:var(--app-ink)">G57 → G60</b><div class="prog"><i style="width:90%"></i></div></div>
+            <div class="xs" style="margin-top:5px">완주 +3 · 다음 해제: G60 (Curated 신청)</div>
+          </div>
+          <div class="card">
+            <div class="row"><h5 style="font-size:12.5px">추천 코드 3장이 열렸어요</h5><div class="grow"></div><span class="xs">Invited by @mia</span></div>
+            <div class="codebox" style="margin-top:8px"><b>GRD-M1A</b><b>GRD-M2B</b><b>GRD-M3C</b></div>
+          </div>
+          <div class="note-amber">포인트 현금 인출·제품 구매 — <b>2026 Q4 오픈 예정</b></div>
+        </div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>16 · 완주 보상 (done)</h4><p><span class="tag">#8 #13</span>포인트 연출 + 브랜드 피드백 카드(열람 타임스탬프) + G-스코어 상승 + 추천 코드 3장(D6 — 첫 루프 완료 조건) + Q4 예고(D7) + 같은 카테고리 추천 2개.</p></div></div>
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>&#9679;&#9679;&#9679;</span></div>
+        <div class="body" style="gap:8px">
+          <div style="opacity:.35">
+            <div class="h-title" style="font-size:17px">완주 보상</div>
+            <div class="card" style="margin-top:8px"><h5>+240P</h5></div>
+          </div>
+          <div class="sheet" style="margin-top:auto">
+            <div class="grab"></div>
+            <div style="font-size:14.5px;font-weight:800;color:var(--app-ink)">친구에게 자리 1장 보내기</div>
+            <div class="card" style="background:#FFF9EC;border:1.5px dashed var(--amber);margin-top:10px;text-align:center">
+              <div style="font-size:17px;font-weight:900;color:var(--amber-deep);letter-spacing:.06em">GRD-M1A</div>
+              <div class="xs" style="margin-top:3px">Invited by @mia_beauty &middot; 유효 7일</div>
+            </div>
+            <div class="s" style="margin:10px 0 4px;color:var(--app-ink)">"한국 브랜드가 리뷰를 직접 읽는 패널이야. 내 이름으로 초대할게."</div>
+            <div class="row" style="gap:7px;margin-top:8px">
+              <a class="btn grow" style="padding:10px;font-size:12px">코드 복사</a>
+              <a class="btn ghost grow" style="padding:10px;font-size:12px">공유하기</a>
+            </div>
+            <div class="xs" style="margin-top:8px;text-align:center">사용되면 알려드려요 — 남은 코드 2장</div>
+          </div>
+        </div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>17 &middot; 추천 코드 공유 시트</h4><p><span class="tag">#13</span>각인("Invited by @mia")이 보증 구조(D6). 공유 문구 프리셋 제공, OS 공유 시트 연동. 사용 검증은 운영 수동.</p></div></div>
+
+      <div class="spec">
+        <h4>21 · 리마인더 노티 시퀀스 (로컬)</h4>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="push"><div class="row"><b>greyd</b><div class="grow"></div><span class="xs">수령 D+7</span></div><span class="s">토너 패드, 절반 왔어요. 15초 언박싱이면 충분해요.</span></div>
+          <div class="push"><div class="row"><b>greyd</b><div class="grow"></div><span class="xs">D-3</span></div><span class="s">업로드까지 3일. 무료 연장 +7일이 아직 남아 있어요.</span></div>
+          <div class="push"><div class="row"><b>greyd</b><div class="grow"></div><span class="xs">D-1</span></div><span class="s">내일 마감이에요. 링크만 붙여넣으면 끝나요.</span></div>
+          <div class="push" style="border-left:3px solid var(--red)"><div class="row"><b>greyd</b><div class="grow"></div><span class="xs">마감일</span></div><span class="s">오늘까지 올리면 100% 지급. 이후 이틀은 70%예요.</span></div>
+          <div class="push" style="border-left:3px solid var(--amber)"><div class="row"><b>greyd</b><div class="grow"></div><span class="xs">평가 도착</span></div><span class="s">SonPlan이 당신의 리뷰를 평가했어요. 지금 확인 →</span></div>
+        </div>
+        <div class="s" style="margin-top:11px;border-top:1px solid var(--line);padding-top:9px">전부 로컬 노티(작업 #9). 평가 도착 푸시는 내용 숨김 — 열어보게 만드는 것이 재방문 장치다. 카피는 §7-2 원칙(행동+결과, 숫자 명시).</div>
+      </div>
+
+    </div>
+  </section>
+</div>
+
+<!-- ══════════════ PART 2 브랜드 ══════════════ -->
+<div class="part">
+  <div class="part-head"><span class="role">FUNNEL 2</span><h2>브랜드</h2><span class="who">K-뷰티 브랜드 담당자 · 모바일 3탭 (대시보드·리뷰 평가·마이) — D9 역할 분기</span></div>
+  <div class="flow">
+    <span>① 코드 입력 (role=brand)</span><i>→</i><span>② 온보딩 1장</span><i>→</i><span class="hot">③ 대시보드 모니터링</span><i>→</i><span class="hot">④ 트리아지 → 루브릭 평가</span><i>→</i><span>⑤ 리포트 · 2차 견적 CTA</span>
+  </div>
+  <table class="inv">
+    <tr><th>화면 (7)</th><th>내용</th><th>상태</th></tr>
+    <tr><td>1 초대 게이트</td><td>인플루언서와 동일 화면 — role=brand 분기</td><td class="comp">공용 (F1-1 재사용)</td></tr>
+    <tr><td>2 브랜드 온보딩 1장</td><td>"개설·운영은 ARBAIM, 평가만 하세요" + 담당자</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>3 대시보드 (홈)</td><td>요약 4장 · 위클리 발견 · 국가 테이블 · 2차 CTA</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>4 대시보드 (빈 상태)</td><td>업로드 0건 — 시딩 진행 안내</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>5 트리아지</td><td>👍👌👎 + 스킵 사유 · 100건 10분</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>6 루브릭 + 완료 요약</td><td>4항목 × 5점 + 재협업 Y/N → 세션 요약</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>7 마이</td><td>캠페인 목록 · 담당자 연락 · 리포트 · About</td><td class="ok">목업 ↓</td></tr>
+  </table>
+
+  <section>
+    <div class="sec-head"><h3>브랜드 = 관전자 + 평가자</h3><span class="ref">§5 · 작업 #10 #11 #14</span></div>
+    <p class="sec-note">쓰기 권한은 평가와 2차 CTA 클릭 둘뿐, 나머지 전부 읽기 전용 — 대행 가치가 화면 구조로 드러난다. 홈이 곧 대시보드다. 평가는 트리아지 100건 10분 → 👍 상위 20%만 정량 루브릭.</p>
+    <div class="rail">
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div class="body" style="justify-content:center;gap:16px">
+          <div class="card" style="padding:24px 18px;text-align:center">
+            <div style="font-size:26px">🤝</div>
+            <div style="font-size:16.5px;font-weight:800;color:var(--app-ink);margin-top:10px;line-height:1.45">캠페인은 ARBAIM이<br>개설하고 운영합니다.</div>
+            <div class="s" style="margin-top:8px">결과를 보고, 평가만 하세요.<br>크리에이터 관리·배송·CS 전부 저희 몫입니다.</div>
+          </div>
+          <div class="card" style="padding:12px 14px">
+            <div class="xs">담당 애널리스트</div>
+            <div class="row" style="margin-top:5px"><div style="width:28px;height:28px;border-radius:50%;background:var(--amber)"></div><b style="font-size:13px;color:var(--app-ink)">김소연 · ARBAIM</b><div class="grow"></div><span class="xs">평가 응답 ≤ 7일</span></div>
+          </div>
+          <a class="btn">대시보드 열기</a>
+        </div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>2 · 브랜드 온보딩 1장</h4><p><span class="tag">#14</span>역할 기대치를 한 장으로: "개설·운영은 ARBAIM, 브랜드는 평가만". 담당 애널리스트 노출로 대행 신뢰 형성.</p></div></div>
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div class="body" style="gap:9px">
+          <div class="h-title" style="font-size:17px">세이지 카밍 세럼 캠페인</div>
+          <div class="kpi">
+            <div class="card"><div class="xs">총 업로드</div><b>47</b></div>
+            <div class="card"><div class="xs">총 도달 <i style="font-style:normal">· 8/9 수집</i></div><b>182K</b></div>
+            <div class="card"><div class="xs">평균 루브릭</div><b>4.2</b></div>
+            <div class="card"><div class="xs">참여 국가</div><b>6</b></div>
+          </div>
+          <div class="card" style="border-left:3px solid var(--amber)">
+            <div class="xs" style="font-weight:700;color:var(--amber-deep)">이번 주 발견</div>
+            <div class="s" style="color:var(--app-ink);margin-top:3px">🇮🇩 예상 밖 25–34 남성 반응 — '쿨링' 언급 12건. 남성 그루밍 앵글 검토 가치.</div>
+          </div>
+          <div class="card">
+            <div class="xs" style="font-weight:700;margin-bottom:5px">국가 스코어보드</div>
+            <table class="tbl">
+              <tr><th>국가</th><th>이행률</th><th>평점</th><th>도달</th></tr>
+              <tr><td>🇮🇩 ID</td><td><span class="mini" style="width:46px"></span> 92%</td><td>4.4</td><td>61K</td></tr>
+              <tr><td>🇯🇵 JP</td><td><span class="mini" style="width:42px"></span> 84%</td><td>4.1</td><td>48K</td></tr>
+              <tr><td>🇺🇸 US</td><td><span class="mini" style="width:35px"></span> 71%</td><td>3.9</td><td>44K</td></tr>
+            </table>
+          </div>
+          <a class="btn" style="font-size:12px">이행률 92% 인도네시아 — 2차 공구 견적 보기</a>
+        </div>
+        <div class="tabs"><div class="on"><i></i>대시보드</div><div><i></i>리뷰 평가</div><div><i></i>마이</div></div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>3 · 대시보드 (브랜드 홈)</h4><p><span class="tag">#11 #14</span>임원 보고 순서: 요약 4장 → 위클리 발견(애널리스트 텍스트) → 국가 테이블 → 2차 CTA(클릭 = 세일즈 리드 이벤트). 리포트 다운로드 배너 포함.</p></div></div>
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div class="body" style="gap:10px">
+          <div class="row"><div class="h-title" style="font-size:17px">리뷰 평가</div><div class="grow"></div><span class="xs">34 / 100</span></div>
+          <div class="prog"><i style="width:34%"></i></div>
+          <div class="card" style="padding:0;overflow:hidden">
+            <div class="thumb" style="height:230px;border-radius:0"></div>
+            <div style="padding:11px 13px">
+              <div class="row"><h5>@rin_skin · 🇯🇵</h5><div class="grow"></div><span class="xs">15초 · 언박싱</span></div>
+              <div class="xs" style="margin-top:3px">팔로워 1K–10K · 복합성 · 필수 포인트 2/2 언급</div>
+            </div>
+          </div>
+          <div class="tri">
+            <div style="border-color:var(--green);color:var(--green)"><em>👍</em>후보</div>
+            <div><em>👌</em>보통</div>
+            <div><em>👎</em>스킵</div>
+          </div>
+          <div class="chips"><span>저품질</span><span>가이드 위반</span><span>판단 불가</span></div>
+          <div class="xs" style="text-align:center">👎 선택 시 사유 1개 · 100건 10분 목표</div>
+        </div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>5 · 트리아지 (1차)</h4><p><span class="tag">#10</span>카드 스와이프 + 3버튼, 스킵 사유 enum. 일괄 평가 기능은 만들지 않는다(D3).</p></div></div>
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div class="body" style="gap:9px">
+          <div class="row"><div class="h-title" style="font-size:17px">정량 평가</div><div class="grow"></div><span class="badge b-open">👍 후보 7건</span></div>
+          <div class="note-amber">20건만 평가해도 리포트 정확도는 충분해요.</div>
+          <div class="card"><div class="row"><h5 style="font-size:12.5px">진정성</h5><div class="grow"></div><div class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div></div></div>
+          <div class="card"><div class="row"><h5 style="font-size:12.5px">제품 전달력</h5><div class="grow"></div><div class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div></div><div class="xs" style="margin-top:4px">필수 포인트 2/2 전달 기준</div></div>
+          <div class="card"><div class="row"><h5 style="font-size:12.5px">콘텐츠 품질</h5><div class="grow"></div><div class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div></div><div class="xs" style="margin-top:4px">4점↑ = 크리에이터 품질 보너스 +20%</div></div>
+          <div class="card"><div class="row"><h5 style="font-size:12.5px">시장 반응 시그널</h5><div class="grow"></div><div class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div></div></div>
+          <div class="card"><div class="row"><h5 style="font-size:12.5px">이 크리에이터와 다시 협업?</h5><div class="grow"></div><div class="seg" style="width:96px"><div class="on">Y</div><div>N</div></div></div></div>
+          <div class="field">코멘트 (선택) — 크리에이터에게 전달돼요</div>
+          <a class="btn" style="padding:10px">저장하고 다음 후보</a>
+        </div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>6 · 루브릭 (2차 · 후보만)</h4><p><span class="tag">#10</span>4항목 × 5점 + 재협업 Y/N(척도 분리 — D3) + 선택 코멘트 → 크리에이터 피드백 카드로 흐른다.</p></div></div>
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div class="body" style="gap:9px">
+          <div class="h-title" style="font-size:17px">세이지 카밍 세럼 캠페인</div>
+          <div class="kpi">
+            <div class="card"><div class="xs">총 업로드</div><b>0</b></div>
+            <div class="card"><div class="xs">총 도달</div><b>—</b></div>
+            <div class="card"><div class="xs">평균 루브릭</div><b>—</b></div>
+            <div class="card"><div class="xs">참여 국가</div><b>6</b></div>
+          </div>
+          <div class="grow" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px">
+            <div style="font-size:32px">🚚</div>
+            <b style="font-size:14px;color:var(--app-ink)">지금은 배송·제작 기간이에요</b>
+            <div class="s" style="text-align:center">크리에이터 20명이 선정됐고 제품이 이동 중입니다.<br>첫 리뷰는 보통 발송 후 2–3주에 도착해요.</div>
+            <div class="row" style="gap:6px"><span class="status-pill st-approved">선정 20</span><span class="status-pill st-shipped">발송 14</span><span class="status-pill st-received">수령 6</span></div>
+          </div>
+          <div class="note-amber">진행 상황은 담당 애널리스트가 매주 요약해 드려요.</div>
+        </div>
+        <div class="tabs"><div class="on"><i></i>대시보드</div><div><i></i>리뷰 평가</div><div><i></i>마이</div></div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>4 · 대시보드 빈 상태</h4><p>업로드 0건 구간(발송~수령)에 "죽은 화면"을 막는 장치 — 시딩 퍼널 숫자로 진행감을 보여준다. 가짜 실시간 연출 금지 원칙(B) 준수.</p></div></div>
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div class="body" style="gap:11px;justify-content:center">
+          <div style="text-align:center">
+            <div style="font-size:34px">✅</div>
+            <div style="font-size:20px;font-weight:900;color:var(--app-ink);margin-top:6px">오늘 34건 평가 완료</div>
+            <div class="s" style="margin-top:4px">👍 후보 7 · 👌 보통 21 · 👎 스킵 6</div>
+          </div>
+          <div class="card">
+            <div class="row"><h5 style="font-size:12.5px">정량 평가 진행</h5><div class="grow"></div><span class="xs">7건 중 5건</span></div>
+            <div class="prog" style="margin-top:7px"><i style="width:71%"></i></div>
+            <div class="xs" style="margin-top:5px">20건만 평가해도 리포트 정확도는 충분해요.</div>
+          </div>
+          <div class="card">
+            <div class="row"><h5 style="font-size:12.5px">평가는 크리에이터에게 전달돼요</h5></div>
+            <div class="xs" style="margin-top:4px">응답 목표 ≤ 7일 — 현재 3일째 · 코멘트 5건 작성됨</div>
+          </div>
+          <a class="btn">남은 후보 2건 마저 평가</a>
+          <a class="btn ghost">대시보드로</a>
+        </div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>6b · 평가 세션 요약</h4><p>트리아지 종료 시점의 성취 화면 — 가드레일 "평가 응답 ≤7일"을 브랜드 쪽에서 밀어붙이는 장치. 남은 후보 카운트로 완주 유도.</p></div></div>
+
+      <div class="shot"><div class="phone">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div class="body" style="gap:9px">
+          <div class="h-title">마이</div>
+          <div class="card">
+            <div class="row"><div style="width:38px;height:38px;border-radius:9px;background:var(--dark)"></div>
+            <div><b style="font-size:13.5px;color:var(--app-ink)">SonPlan</b><div class="xs">브랜드 계정 · 담당 김소연</div></div></div>
+          </div>
+          <div class="card"><div class="row"><h5 style="font-size:12.5px">진행 중 캠페인</h5><div class="grow"></div><span class="badge b-open">1</span></div>
+          <div class="s" style="margin-top:5px;color:var(--app-ink)">세이지 카밍 세럼 · 업로드 47 · 평가 34/47</div></div>
+          <div class="card"><div class="row"><h5 style="font-size:12.5px">지난 캠페인</h5><div class="grow"></div><span class="xs">1건 ›</span></div></div>
+          <div class="card"><div class="row"><h5 style="font-size:12.5px">FGI 리포트</h5><div class="grow"></div><span class="xs">PDF 1건 ›</span></div>
+          <div class="xs" style="margin-top:3px">애널리스트가 수동 제작 — 요청 후 5영업일</div></div>
+          <div class="card"><div class="row"><h5 style="font-size:12.5px">담당 애널리스트에게 문의</h5><div class="grow"></div><span class="xs">✉️ ›</span></div></div>
+          <div class="card"><div class="row"><h5 style="font-size:12.5px">About · 사업자 정보</h5><div class="grow"></div><span class="xs">ARBAIM INC. ›</span></div></div>
+          <div class="note-amber">2차 공구 캠페인이 궁금하세요? 대시보드의 견적 보기에서 시작하세요.</div>
+        </div>
+        <div class="tabs"><div><i></i>대시보드</div><div><i></i>리뷰 평가</div><div class="on"><i></i>마이</div></div>
+        <div class="home-bar"></div>
+      </div>
+      <div class="cap"><h4>7 · 브랜드 마이</h4><p><span class="tag">#14</span>캠페인 목록·리포트 보관함·담당자 문의 채널·About. 읽기 전용 원칙 유지 — 설정할 것이 거의 없는 게 정상이다.</p></div></div>
+
+    </div>
+  </section>
+</div>
+
+<!-- ══════════════ PART 3 ARBAIM 운영 ══════════════ -->
+<div class="part">
+  <div class="part-head"><span class="role">FUNNEL 3</span><h2>ARBAIM 운영 콘솔</h2><span class="who">운영자·애널리스트 · 웹 (데스크톱)</span></div>
+  <div class="flow">
+    <span>① 캠페인 개설</span><i>→</i><span>② 신청 승인 (Curated 수동)</span><i>→</i><span>③ 발송·운송장 입력</span><i>→</i><span class="hot">④ 이행 추적 · Strike 집행</span><i>→</i><span>⑤ 지표 수동 입력 · 위클리 카드</span><i>→</i><span>⑥ 코드 발급 · 리포트</span>
+  </div>
+  <table class="inv">
+    <tr><th>화면 (6)</th><th>내용</th><th>상태</th></tr>
+    <tr><td>1 운영 대시보드</td><td>북극성·가드레일 지표 모니터</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>2 캠페인 개설 폼</td><td>트랙 비율 · Base P · 필수 언급 · 국가 쿼터</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>3 캠페인 · 승인 큐</td><td>Open 자동 / Curated 수동 심사</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>4 이행 추적 보드</td><td>상태 8종 · 운송장 · Strike 집행</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>5 검수 · 지표 · 리포트</td><td>메트릭 수동 입력 · 위클리 카드 · PDF</td><td class="ok">목업 ↓</td></tr>
+    <tr><td>6 초대 코드 관리</td><td>발급 · 사용률 추적 · 역할 지정</td><td class="ok">목업 ↓</td></tr>
+  </table>
+
+  <section>
+    <div class="sec-head"><h3>수동 운영을 화면으로</h3><span class="ref">§8 비고 — "운영자 수동 + 앱은 UI 완성"</span></div>
+    <p class="sec-note">기획서상 1단계 운영은 "mock 데이터 직접 수정 + 수동"이며 앱 화면은 명시적 스코프 밖이다. 아래 콘솔은 그 수동 작업의 <b>운영 프로세스 명세</b>다 — 1단계는 스프레드시트/데이터 편집으로 수행하고, 물량이 늘면 이 화면대로 2단계 운영툴을 만든다.</p>
+    <div class="rail">
+
+      <div class="shot wide"><div class="desk">
+        <div class="desk-top"><i></i><i></i><i></i><span class="url">ops.greyd.app / 운영 대시보드</span></div>
+        <div class="desk-body">
+          <div class="row"><b style="font-size:15px;color:var(--app-ink)">이번 분기 — 검증 루프</b><div class="grow"></div><span class="xs">목표: 3개월 완료 300건 · 브랜드 5곳</span></div>
+          <div class="row" style="gap:8px">
+            <div class="card grow" style="padding:10px 12px"><div class="xs">루프 완료율 (북극성)</div><b style="font-size:21px;color:var(--amber-deep)">68%</b><div class="prog" style="margin-top:5px"><i style="width:68%"></i></div><div class="xs" style="margin-top:3px">목표 70%</div></div>
+            <div class="card grow" style="padding:10px 12px"><div class="xs">완료 루프 누적</div><b style="font-size:21px;color:var(--app-ink)">147</b><div class="xs" style="margin-top:3px">/ 300건</div></div>
+            <div class="card grow" style="padding:10px 12px"><div class="xs">참여 브랜드</div><b style="font-size:21px;color:var(--app-ink)">3</b><div class="xs" style="margin-top:3px">/ 5곳</div></div>
+          </div>
+          <div class="card" style="padding:9px 11px;flex:1">
+            <div class="xs" style="font-weight:700;margin-bottom:4px">가드레일 지표</div>
+            <table class="tbl">
+              <tr><th>지표</th><th>목표</th><th>현재</th><th>상태</th></tr>
+              <tr><td>수령→업로드 중앙값</td><td>≤ 14일</td><td>11일</td><td><span class="status-pill st-received">양호</span></td></tr>
+              <tr><td>30일 재참여율</td><td>≥ 40%</td><td>44%</td><td><span class="status-pill st-received">양호</span></td></tr>
+              <tr><td>브랜드 평가 응답</td><td>≤ 7일</td><td>8.5일 ⚠</td><td><span class="status-pill st-noshow">브랜드 리마인드 필요</span></td></tr>
+              <tr><td>초대 코드 사용률</td><td>≥ 50%</td><td>57%</td><td><span class="status-pill st-received">양호</span></td></tr>
+              <tr><td>앱스토어 평점</td><td>≥ 4.3</td><td>4.5</td><td><span class="status-pill st-received">양호</span></td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="cap"><h4>1 · 운영 대시보드</h4><p><span class="tag op">§1</span>북극성 + 가드레일 5종이 운영의 매일 아침 화면. 미달 지표는 다음 액션(브랜드 리마인드 등)을 직접 가리킨다. 1단계 수동 집계.</p></div></div>
+
+      <div class="shot wide"><div class="desk">
+        <div class="desk-top"><i></i><i></i><i></i><span class="url">ops.greyd.app / 캠페인 개설</span></div>
+        <div class="desk-body">
+          <div class="row"><b style="font-size:15px;color:var(--app-ink)">새 캠페인</b><div class="grow"></div><span class="xs">§6 campaign 스키마</span></div>
+          <div class="row" style="gap:9px;align-items:stretch">
+            <div class="grow" style="display:flex;flex-direction:column;gap:7px">
+              <div class="lab">제품명 · 카테고리</div>
+              <div class="field"><b>세이지 카밍 세럼</b> · 스킨케어</div>
+              <div class="lab">tier · 트랙 비율</div>
+              <div class="row" style="gap:6px"><span class="badge b-amber">FGI</span><div class="field grow">Open 30% · Curated 70%</div></div>
+              <div class="lab">대상 국가 · 국가별 쿼터</div>
+              <div class="field">🇺🇸 8 · 🇮🇩 6 · 🇯🇵 6</div>
+            </div>
+            <div class="grow" style="display:flex;flex-direction:column;gap:7px">
+              <div class="lab">Base 포인트 · 업로드 기한</div>
+              <div class="field"><b>200P</b> · 수령 후 <b>14일</b></div>
+              <div class="lab">필수 언급 포인트 (content_guide)</div>
+              <div class="field">① 진정 효과 ② 흡수감</div>
+              <div class="lab">원가·배송비 (브랜드 비노출)</div>
+              <div class="field">12,000 · 8,500 (내부용)</div>
+            </div>
+          </div>
+          <div class="row" style="gap:8px;margin-top:2px">
+            <a class="btn sm">개설 → Try 탭 게시</a>
+            <span class="xs">신청 마감 시 자동 잠금 없음 — 잔여 0이면 수동 마감(1단계)</span>
+          </div>
+        </div>
+      </div>
+      <div class="cap"><h4>2 · 캠페인 개설 폼</h4><p><span class="tag op">운영①</span>§6 campaign 필드 전부: 트랙 비율·Base P·국가 쿼터·필수 언급·내부 원가. 개설 즉시 인플루언서 Try 탭에 노출.</p></div></div>
+
+      <div class="shot wide"><div class="desk">
+        <div class="desk-top"><i></i><i></i><i></i><span class="url">ops.greyd.app / 캠페인 · 승인</span></div>
+        <div class="desk-body">
+          <div class="row"><b style="font-size:15px;color:var(--app-ink)">세이지 카밍 세럼</b><span class="badge b-open">Open 30%</span><span class="badge b-cur">Curated 70%</span><div class="grow"></div><span class="xs">잔여 8 / 20 · 마감 D-2</span><a class="btn sm">+ 캠페인 개설</a></div>
+          <div class="row" style="gap:6px"><span class="xs">Base 200P · D+14 · 필수 언급 2개 · 대상 🇺🇸🇮🇩🇯🇵</span></div>
+          <div class="card" style="padding:9px 11px;flex:1;overflow:hidden">
+            <div class="xs" style="font-weight:700;margin-bottom:4px">신청 승인 큐 — 12건 대기</div>
+            <table class="tbl">
+              <tr><th>크리에이터</th><th>G</th><th>국가</th><th>팔로워</th><th>트랙</th><th>서약</th><th>어필</th><th></th></tr>
+              <tr><td>@rin_skin</td><td>G72</td><td>🇯🇵</td><td>1K–10K</td><td>Curated</td><td>✓</td><td>"진정 라인 리뷰 3회…"</td><td><a class="btn sm">승인</a> <a class="btn sm ghost">보류</a></td></tr>
+              <tr><td>@mia_beauty</td><td>G57</td><td>🇯🇵</td><td>1K–10K</td><td>Open</td><td>✓</td><td>—</td><td><span class="status-pill st-approved">자동승인</span></td></tr>
+              <tr><td>@glow_ha</td><td>G50</td><td>🇮🇩</td><td>~1K</td><td>Open</td><td>✓</td><td>"첫 참여, 성실히…"</td><td><span class="status-pill st-approved">자동승인</span></td></tr>
+              <tr><td>@beautyj_us</td><td>G44 ⚠</td><td>🇺🇸</td><td>10K–100K</td><td>Curated</td><td>✓</td><td>"메가 뷰티 계정 운영"</td><td><a class="btn sm ghost">G60 미달 — 반려</a></td></tr>
+            </table>
+            <div class="xs" style="margin-top:6px">Open = 선착순 자동(카운트만 확인) · Curated = 수동 심사. 동시 진행 한도 초과 시 자동 경고.</div>
+          </div>
+        </div>
+      </div>
+      <div class="cap"><h4>3 · 캠페인 · 신청 승인</h4><p><span class="tag op">운영①②</span>캠페인 개설(트랙 비율·Base P·필수 언급 설정) + 승인 큐. Open 자동/Curated 수동, G60 미달 자동 표시, 어필 문구 노출.</p></div></div>
+
+      <div class="shot wide"><div class="desk">
+        <div class="desk-top"><i></i><i></i><i></i><span class="url">ops.greyd.app / 이행 추적</span></div>
+        <div class="desk-body">
+          <div class="row">
+            <b style="font-size:15px;color:var(--app-ink)">이행 보드</b>
+            <div class="grow"></div>
+            <span class="xs">루프 완료율 <b style="color:var(--amber-deep)">68%</b> · 목표 70%</span>
+          </div>
+          <div class="row" style="gap:6px">
+            <span class="status-pill st-applied">applied 12</span><span class="status-pill st-approved">approved 6</span><span class="status-pill st-shipped">shipped 9</span><span class="status-pill st-received">received 14</span><span class="status-pill st-review">reviewing 8</span><span class="status-pill st-noshow">no_show 2</span>
+          </div>
+          <div class="card" style="padding:9px 11px;flex:1;overflow:hidden">
+            <table class="tbl">
+              <tr><th>크리에이터</th><th>상태</th><th>운송장</th><th>수령</th><th>D-day</th><th>액션</th></tr>
+              <tr><td>@mia_beauty</td><td><span class="status-pill st-approved">approved</span></td><td><span style="color:var(--app-grey)">입력 —</span></td><td>—</td><td>주소 D-1</td><td><a class="btn sm">운송장 입력 → shipped</a></td></tr>
+              <tr><td>@rin_skin</td><td><span class="status-pill st-shipped">shipped</span></td><td>CJ 6482-1130</td><td>발송 +18일 ⚠</td><td>—</td><td><a class="btn sm ghost">21일 시 수령 간주</a></td></tr>
+              <tr><td>@glow_ha</td><td><span class="status-pill st-received">received</span></td><td>EMS 8830</td><td>6/21</td><td><b style="color:var(--red)">D-3</b></td><td><a class="btn sm ghost">리마인더 확인</a></td></tr>
+              <tr><td>@beam_th</td><td><span class="status-pill st-noshow">no_show</span></td><td>EMS 8811</td><td>6/12</td><td>D+16 경과</td><td><a class="btn sm">Strike 1 부여 · G−10</a></td></tr>
+            </table>
+            <div class="xs" style="margin-top:6px">유예(D+14~16) 업로드 = ×0.7 자동 표시 · Strike 2회 = 영구 차단(수동 집행) · cancelled는 무페널티.</div>
+          </div>
+        </div>
+      </div>
+      <div class="cap"><h4>4 · 이행 추적 보드</h4><p><span class="tag op">운영③④</span>상태머신 8종(§3-2) 전체가 한 테이블. 운송장 입력(shipped 전환), 21일 수령 간주, no_show Strike 집행 — 북극성 분모·가드레일 지표가 여기서 나온다.</p></div></div>
+
+      <div class="shot wide"><div class="desk">
+        <div class="desk-top"><i></i><i></i><i></i><span class="url">ops.greyd.app / 검수 · 리포트</span></div>
+        <div class="desk-body">
+          <div class="row"><b style="font-size:15px;color:var(--app-ink)">리뷰 검수 · 지표 입력</b><div class="grow"></div><span class="xs">metrics_source: manual · captured_at 필수</span></div>
+          <div class="card" style="padding:9px 11px">
+            <table class="tbl">
+              <tr><th>리뷰</th><th>형식</th><th>스타일 태깅</th><th>조회 @7d</th><th>좋아요</th><th>수집일</th></tr>
+              <tr><td>@rin_skin reel</td><td>short</td><td><span class="badge b-cur">unboxing</span></td><td><b>12,400</b></td><td>860</td><td>8/09</td></tr>
+              <tr><td>@glow_ha reel</td><td>short</td><td><span class="badge b-cur">demo</span></td><td><span style="color:var(--app-grey)">입력…</span></td><td><span style="color:var(--app-grey)">입력…</span></td><td>—</td></tr>
+            </table>
+          </div>
+          <div class="row" style="gap:9px;align-items:stretch">
+            <div class="card grow" style="padding:10px 12px;border-left:3px solid var(--amber)">
+              <div class="xs" style="font-weight:700;color:var(--amber-deep)">위클리 발견 카드 작성 → 브랜드 대시보드 게시</div>
+              <div class="field" style="margin-top:6px;font-size:11px">🇮🇩 예상 밖 25–34 남성 반응, '쿨링' 언급 12건…</div>
+            </div>
+            <div class="card" style="padding:10px 12px;width:200px">
+              <div class="xs" style="font-weight:700">추천 코드 발급</div>
+              <div class="xs" style="margin-top:4px">@mia_beauty 첫 루프 완료 ✓</div>
+              <a class="btn sm" style="margin-top:6px">코드 3장 발급</a>
+            </div>
+          </div>
+          <div class="row" style="gap:9px">
+            <a class="btn sm ghost grow" style="text-align:center">FGI 리포트 PDF 업로드 (애널리스트 수동 제작)</a>
+            <a class="btn sm ghost grow" style="text-align:center">주간 요약 이메일 발송 체크리스트</a>
+          </div>
+        </div>
+      </div>
+      <div class="cap"><h4>5 · 검수 · 지표 · 리포트</h4><p><span class="tag op">운영⑤⑥</span>SNS 지표 수동 입력(§6 review — manual + captured_at), 제작 스타일 태깅, 위클리 카드 작성, 첫 루프 완료자 코드 3장 발급, PDF 리포트·주간 이메일.</p></div></div>
+
+      <div class="shot wide"><div class="desk">
+        <div class="desk-top"><i></i><i></i><i></i><span class="url">ops.greyd.app / 초대 코드</span></div>
+        <div class="desk-body">
+          <div class="row"><b style="font-size:15px;color:var(--app-ink)">초대 코드 관리</b><div class="grow"></div><span class="xs">사용률 57% · 가드레일 ≥50% ✓</span><a class="btn sm">+ 코드 발급</a></div>
+          <div class="row" style="gap:6px">
+            <span class="badge b-amber">발급 42</span><span class="badge b-open">사용 24</span><span class="badge b-cur">만료 6</span><span class="badge b-red">잔여 12</span>
+          </div>
+          <div class="card" style="padding:9px 11px;flex:1;overflow:hidden">
+            <table class="tbl">
+              <tr><th>코드</th><th>역할</th><th>발급 경로</th><th>각인</th><th>유효</th><th>상태</th></tr>
+              <tr><td>GRD-K71</td><td>influencer</td><td>운영 직접</td><td>—</td><td>D-2</td><td><span class="status-pill st-approved">미사용</span></td></tr>
+              <tr><td>GRD-M1A</td><td>influencer</td><td>추천 (@mia_beauty 루프 완료)</td><td>Invited by @mia</td><td>D-6</td><td><span class="status-pill st-received">사용됨 → @yuna_j</span></td></tr>
+              <tr><td>GRD-B02</td><td><b>brand</b></td><td>세일즈 (SonPlan)</td><td>—</td><td>D-5</td><td><span class="status-pill st-received">사용됨</span></td></tr>
+              <tr><td>GRD-K58</td><td>influencer</td><td>운영 직접</td><td>—</td><td>만료</td><td><span class="status-pill st-noshow">만료 — 재발급?</span></td></tr>
+            </table>
+            <div class="xs" style="margin-top:6px">추천 코드는 첫 루프 완료자에게 3장 자동 제안(발급 확정은 수동 — D6). 역할(influencer/brand)은 발급 시 지정, 코드가 게이트 분기를 결정.</div>
+          </div>
+        </div>
+      </div>
+      <div class="cap"><h4>6 · 초대 코드 관리</h4><p><span class="tag op">운영⑥</span>발급·역할 지정·유효 7일·사용 추적. 추천 코드 각인("Invited by @mia")이 보증 구조를 만든다. 사용률 가드레일(≥50%) 모니터 겸용.</p></div></div>
+
+    </div>
+  </section>
+</div>
+
+<footer>
+  세 퍼널의 접점: 인플루언서 업로드 → 운영 검수·지표 입력 → 브랜드 트리아지·루브릭 → 크리에이터 피드백 카드 — 이 사이클이 북극성 "루프 완료율"이다.
+  Phase 1 스코프 밖(2단계): 딥링크·대기자 명단·SNS OAuth·정기 드롭·포인트 사용처·하이라이트 릴·히트맵·자동 PDF·운영툴 실서버.
+  앱 서체는 Pretendard — 이 페이지는 시스템 서체로 대체 표시될 수 있다.
+</footer>
+</div>
