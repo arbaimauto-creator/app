@@ -169,9 +169,9 @@ function MainDrawerNavigator({ route, navigation }) {
 
   return (
     <Stack.Navigator
-      initialRouteName={isOnboarded && isOnboarded !== '' ? 'NotSignedIn' : 'Onboarding'}
-      // initialRouteName={'NotSignedIn'}
-      // initialRouteName={'Onboarding'}
+      // v2 화면 인벤토리 1번 = 소셜 로그인이 첫 화면 (프리로그인 인트로 제외).
+      // §7-1 온보딩 4장은 게이트 이후 CreatorOnboarding이 담당 — 중복 인트로는 플로우에서 뺀다.
+      initialRouteName={'NotSignedIn'}
       screenOptions={horizontalAnimation}
     >
       <Stack.Screen
