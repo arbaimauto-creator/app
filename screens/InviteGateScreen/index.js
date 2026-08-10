@@ -78,6 +78,11 @@ export default function InviteGateScreen({ navigation }) {
       return;
     }
     setFailCount(0);
+    // D26: 브랜드는 웹 리포트 전용 — 앱 진입 차단 (역할 저장 전에 안내로 종료)
+    if (result.role === 'brand' && !FEATURES.BRAND_APP) {
+      setError(Strings.INVITE_BRAND_WEB_ONLY);
+      return;
+    }
     await Preference.set('inviteRole', result.role);
     await Preference.set('inviteCode', code.trim().toUpperCase());
     await Preference.set('creatorCountry', country);

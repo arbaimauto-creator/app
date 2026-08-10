@@ -1898,6 +1898,9 @@ export default {
   // 브랜드 웰컴 (v2 §5-1)
   BRAND_WELCOME_TITLE: '캠페인은 ARBAIM이\n개설하고 운영합니다.',
   BRAND_WELCOME_SUB: '결과를 보고, 평가만 하세요.\n크리에이터 관리·배송·CS 전부 저희 몫입니다.',
+  BRAND_WEB_SUB:
+    '브랜드 대시보드는 웹에서 제공돼요.\n담당 애널리스트가 이메일로 평가·리포트 링크를 보내드립니다.',
+  BRAND_WEB_CTA: '담당자에게 문의하기',
   BRAND_ANALYST_LABEL: '담당 애널리스트',
   BRAND_ANALYST_NAME: '김소연 · ARBAIM',
   BRAND_ANALYST_SLA: '평가 응답 ≤ 7일',

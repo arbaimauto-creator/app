@@ -1,13 +1,16 @@
 import React from 'react';
-import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { Linking, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { CommonActions } from '@react-navigation/native';
 import T from '../../Components/Constants/DesignTokens';
 import { Card, Btn } from '../../Components/UI';
 import Strings from '../../Components/Strings';
+import FEATURES from '../../Components/Constants/Features';
 
 const { COLORS, FONT } = T;
 
-// v2 §5-1: 브랜드 입장 온보딩 1장 — "관전자+평가자" 역할 기대치 세팅.
+// v2 §5-1: 브랜드 입장 안내 1장.
+// D26: 브랜드 퍼널은 앱에서 제외 — 평가·리포트는 웹(담당 애널리스트가 링크 발송).
+// BRAND_APP 플래그 복원 시 기존 앱 진입(MainBottom)으로 되돌아간다.
 export default function BrandWelcome({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
@@ -15,7 +18,9 @@ export default function BrandWelcome({ navigation }) {
         <Card style={styles.heroCard}>
           <Text style={styles.emoji}>🤝</Text>
           <Text style={styles.title}>{Strings.BRAND_WELCOME_TITLE}</Text>
-          <Text style={styles.sub}>{Strings.BRAND_WELCOME_SUB}</Text>
+          <Text style={styles.sub}>
+            {FEATURES.BRAND_APP ? Strings.BRAND_WELCOME_SUB : Strings.BRAND_WEB_SUB}
+          </Text>
         </Card>
 
         <Card style={styles.analystCard}>
@@ -28,13 +33,21 @@ export default function BrandWelcome({ navigation }) {
         </Card>
       </View>
 
-      <Btn
-        title={Strings.BRAND_WELCOME_CTA}
-        onPress={() =>
-          navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'MainBottom' }] }))
-        }
-        style={{ marginBottom: 12 }}
-      />
+      {FEATURES.BRAND_APP ? (
+        <Btn
+          title={Strings.BRAND_WELCOME_CTA}
+          onPress={() =>
+            navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'MainBottom' }] }))
+          }
+          style={{ marginBottom: 12 }}
+        />
+      ) : (
+        <Btn
+          title={Strings.BRAND_WEB_CTA}
+          onPress={() => Linking.openURL('mailto:hello@greyd.app')}
+          style={{ marginBottom: 12 }}
+        />
+      )}
     </SafeAreaView>
   );
 }

@@ -1980,6 +1980,9 @@ export default {
   BRAND_WELCOME_TITLE: 'ARBAIM sets up and runs\nevery campaign.',
   BRAND_WELCOME_SUB:
     'Just watch the results and score.\nCreator management, shipping, CS — all on us.',
+  BRAND_WEB_SUB:
+    'The brand dashboard lives on the web.\nYour analyst will email you the review & report links.',
+  BRAND_WEB_CTA: 'Contact your analyst',
   BRAND_ANALYST_LABEL: 'Your analyst',
   BRAND_ANALYST_NAME: 'Soyeon Kim · ARBAIM',
   BRAND_ANALYST_SLA: 'Review response ≤ 7 days',
