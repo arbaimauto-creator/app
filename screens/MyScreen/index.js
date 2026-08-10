@@ -88,19 +88,25 @@ export default function MyScreen({ navigation }) {
           <Text style={[styles.xs, styles.mt4]}>{Strings.POINT_CASHOUT_NOTE}</Text>
         </Card>
 
-        {/* 추천 코드 카드 */}
+        {/* 추천 코드 카드 — D6: 첫 루프 완주 시 3장 발급 (완주 전엔 잠금 힌트) */}
         <Card>
           <View style={styles.row}>
             <Text style={styles.rowTitle}>{Strings.MY_REFERRAL_CODES}</Text>
-            <Text style={styles.xs}>{Strings.MY_REFERRAL_CODES_COUNT}</Text>
+            <Text style={styles.xs}>
+              {completedCount > 0 ? Strings.MY_REFERRAL_CODES_COUNT : '🔒'}
+            </Text>
           </View>
-          <View style={styles.codeRow}>
-            {codes.map((code) => (
-              <View key={code} style={styles.codeBox}>
-                <Text style={styles.codeText}>{code}</Text>
-              </View>
-            ))}
-          </View>
+          {completedCount > 0 ? (
+            <View style={styles.codeRow}>
+              {codes.map((code) => (
+                <View key={code} style={styles.codeBox}>
+                  <Text style={styles.codeText}>{code}</Text>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <Text style={[styles.xs, styles.mt4]}>{Strings.MY_REFERRAL_LOCKED_HINT}</Text>
+          )}
         </Card>
 
         {/* 행 카드 3개 */}

@@ -19,6 +19,7 @@ import Strings from '../../Components/Strings';
 import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
 import { fetchCampaignReviews } from '../../api/reviews';
 import { getEvaluations, saveEvaluation, TRIAGE, SKIP_REASONS } from '../../api/evaluations';
+import { logEvent } from '../../api/common/analytics';
 
 const { COLORS, FONT } = T;
 
@@ -94,6 +95,7 @@ export default function BrandReview({ navigation }) {
             const all = await saveEvaluation(reviewId, { triage, skipReason: reason });
             setEvaluations({ ...all });
             bumpSession(triage);
+            logEvent('eval_triage', { campaign_id: campaignId, triage, skip_reason: reason });
           },
         })),
         { cancelable: true },
@@ -103,6 +105,8 @@ export default function BrandReview({ navigation }) {
     const all = await saveEvaluation(reviewId, { triage });
     setEvaluations({ ...all });
     bumpSession(triage);
+    // 이벤트 맵: 브랜드 평가 실행률 — 리포트 신뢰도의 분모 (리뷰 내용은 보내지 않음)
+    logEvent('eval_triage', { campaign_id: campaignId, triage });
     if (triage === TRIAGE.PICK) {
       setExpanded(reviewId);
     }
@@ -125,6 +129,11 @@ export default function BrandReview({ navigation }) {
       comment: (d.comment || '').trim(),
     });
     setEvaluations({ ...all });
+    logEvent('eval_rubric_submit', {
+      campaign_id: campaignId,
+      rebook: d.rebook,
+      comment_len: (d.comment || '').trim().length,
+    });
     // '저장하고 다음 후보' — 다음 미채점 후보를 자동으로 연다
     const next = reviews.find(
       (r) => r.id !== reviewId && all[r.id]?.triage === TRIAGE.PICK && !all[r.id]?.scores,

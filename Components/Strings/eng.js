@@ -1859,6 +1859,7 @@ export default {
   MY_POINTS: 'Points',
   MY_REFERRAL_CODES: 'Invite codes',
   MY_REFERRAL_CODES_COUNT: '3 codes',
+  MY_REFERRAL_LOCKED_HINT: 'Finish your first campaign to unlock 3 invites in your name',
   MY_ABOUT_ROW: 'About · Company info',
   // Address book (design 19)
   ADDR_MANAGE_TITLE: 'Shipping addresses',

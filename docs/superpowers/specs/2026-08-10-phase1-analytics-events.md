@@ -57,7 +57,10 @@ logEvent(name, params) → firebase.analytics().logEvent(name, {role, country, g
 | `hashtag_copy` | — | 업로드 보조 도구 사용률 |
 | `cancel_confirm` | `status_at_cancel` | 취소 발생 지점 |
 | `upload_view` | `dday_remaining` | 마감 임박도별 업로드 착수 |
-| `upload_submit` | `format`, `grace`(bool), `days_since_received` | **북극성 분자 · 수령→업로드 중앙값** |
+| `upload_submit` | `format`, `grace`(bool), `days_since_received` | **북극성 분자 · 수령→업로드 중앙값** (구현: `review_link_submit`로 계측 — 링크 제출 방식) |
+| `fgi_start` / `fgi_submit` | `campaign_id`, (`extra_count`) | FGI 설문 이탈률 = 마찰 측정. 응답 내용은 미전송 |
+| `eval_triage` | `campaign_id`, `triage`, (`skip_reason`) | 브랜드 평가 실행률 — 리포트 신뢰도의 분모 |
+| `eval_rubric_submit` | `campaign_id`, `rebook`, `comment_len` | 루브릭 완료·재협업 의향률 |
 
 ### 보상·재참여
 

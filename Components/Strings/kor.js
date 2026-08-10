@@ -1781,6 +1781,7 @@ export default {
   MY_POINTS: '포인트',
   MY_REFERRAL_CODES: '추천 코드',
   MY_REFERRAL_CODES_COUNT: '3장',
+  MY_REFERRAL_LOCKED_HINT: '첫 캠페인을 완주하면 내 이름으로 된 초대장 3장이 열려요',
   MY_ABOUT_ROW: 'About · 사업자 정보',
   // 배송지 관리 (시안 19)
   ADDR_MANAGE_TITLE: '배송지 관리',

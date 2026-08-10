@@ -15,6 +15,7 @@ import Strings from '../../Components/Strings';
 import T from '../../Components/Constants/DesignTokens';
 import { Card } from '../../Components/UI';
 import { upsertSeeding } from '../../api/seedings';
+import { logEvent } from '../../api/common/analytics';
 
 // 계획서 TSK-007: 신청→승인→[FGI 설문]→UGC 업로드.
 // 리포트 1·2섹션(종합점수·구매의향 %·가격 반응)의 데이터 원천 — 업로드 전에 반드시 작성.
@@ -43,6 +44,12 @@ function Scale({ value, onChange }) {
 export default function FgiSurvey({ route, navigation }) {
   const { campaign } = route.params;
   const [scores, setScores] = useState({});
+
+  // 설문 퍼널: fgi_start → fgi_submit (이탈률 = FGI 마찰 측정, 응답 내용은 보내지 않음)
+  React.useEffect(() => {
+    logEvent('fgi_start', { campaign_id: campaign.id });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [fairPrice, setFairPrice] = useState('');
   const [pros, setPros] = useState('');
   const [cons, setCons] = useState('');
@@ -73,6 +80,10 @@ export default function FgiSurvey({ route, navigation }) {
         extraAnswers,
         submittedAt: new Date().toISOString(),
       },
+    });
+    logEvent('fgi_submit', {
+      campaign_id: campaign.id,
+      extra_count: extraQuestions.length,
     });
     Alert.alert(Strings.FGI_DONE_TITLE, Strings.FGI_DONE_BODY, [
       {
