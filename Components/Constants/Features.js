@@ -29,6 +29,9 @@ const FEATURES = {
 
   // 좋아요(하트)·좋아요 목록 등 소셜 장식 (회의: "라이크 등 소셜 장식 제거" — 데이터는 유지, UI만 숨김)
   SOCIAL_LIKES: false,
+
+  // ops 실연동 (Phase 1.5 롤아웃 1단계 — 캠페인 읽기). OFF면 전면 mock (현행 동일)
+  LIVE_OPS_API: false,
 };
 
 export default FEATURES;

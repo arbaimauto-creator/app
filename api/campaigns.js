@@ -3,12 +3,16 @@
 // 신청 유형은 applyMode('open'|'curated'). 필드명은 greyd-ops Prisma와 일치시킨다.
 // 캠페인 식별자는 앱 전역 컨벤션에 맞춰 서버 연동 시 _id로 매핑한다.
 
+import FEATURES from '../Components/Constants/Features';
+import { opsGet } from './opsClient';
+
 // FGI 설문 공통 문항 (계획서 TSK-001: 정량 구매의향/가격적정성/경쟁력 + 정성)
 // 캠페인별 커스텀 문항은 campaign.fgiExtraQuestions로 확장한다.
 export const FGI_QUANT_ITEMS = [
   { key: 'purchaseIntent', type: 'quant' },
   { key: 'priceFairness', type: 'quant' },
   { key: 'competitiveness', type: 'quant' },
+  { key: 'recommend', type: 'quant' }, // D27 추가 — 추천 의향
 ];
 const MOCK_CAMPAIGNS = [
   {
@@ -28,7 +32,11 @@ const MOCK_CAMPAIGNS = [
     applyMode: 'open',
     uploadDays: 14,
     contentGuide: ['타임 슬립 성분 언급', '눈가 사용 장면', '#sonplan 해시태그'],
-    fgiExtraQuestions: ['향에 대한 인상은 어땠나요?', '민감성 피부에도 괜찮았나요?'],
+    // D27: 문자열=주관식, 객체=선택형 — 브랜드가 A/B로 궁금한 것
+    fgiExtraQuestions: [
+      '향에 대한 인상은 어땠나요?',
+      { q: '주로 언제 사용하셨나요?', type: 'choice', options: ['아침', '저녁', '아침저녁 모두'] },
+    ],
     status: 'open',
   },
   {
@@ -71,8 +79,21 @@ const MOCK_CAMPAIGNS = [
   },
 ];
 
-export function fetchCampaignList() {
-  return Promise.resolve(MOCK_CAMPAIGNS);
+export async function fetchCampaignList() {
+  if (FEATURES.LIVE_OPS_API) {
+    try {
+      const res = await opsGet('/campaigns');
+      if (Array.isArray(res?.campaigns) && res.campaigns.length > 0) {
+        return res.campaigns;
+      }
+    } catch (e) {
+      // 실패 시 mock 폴백 (27번 설계 §10) — 조용히 폴백하되 dev에선 로그
+      if (__DEV__) {
+        console.log('ops campaigns fetch failed, fallback to mock', e?.message);
+      }
+    }
+  }
+  return MOCK_CAMPAIGNS;
 }
 
 export function applyCampaign(_campaignId, _userId) {
