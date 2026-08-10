@@ -95,9 +95,15 @@ const btnText = {
 };
 
 const styles = StyleSheet.create({
-  kakaoContainer: { ...btnBase, backgroundColor: '#fee500' },
+  // 카카오도 고스트로 통일 — 브랜드 식별은 말풍선 글리프가 담당 (원색 노랑이 앰버 포인트와 충돌)
+  kakaoContainer: {
+    ...btnBase,
+    backgroundColor: T.COLORS.SURFACE,
+    borderWidth: 1,
+    borderColor: T.COLORS.LINE,
+  },
   kakaoLogo: { position: 'absolute', left: 20, width: 20, height: 18, marginRight: 10 },
-  kakaoLoginText: { ...btnText, color: 'rgba(0, 0, 0, .85)' },
+  kakaoLoginText: { ...btnText, color: T.COLORS.DARK },
   // FB 파랑이 화면에서 과하게 튀어 고스트로 톤다운 — 로고 색으로만 브랜드 식별
   fbContainer: {
     ...btnBase,
