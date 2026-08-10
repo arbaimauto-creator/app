@@ -15,6 +15,7 @@ import Preference from 'react-native-default-preference';
 import T from '../../Components/Constants/DesignTokens';
 import Strings from '../../Components/Strings';
 import { Btn, Chips, Wordmark } from '../../Components/UI';
+import FEATURES from '../../Components/Constants/Features';
 import { verifyInviteCode } from '../../api/invites';
 import { logEvent, resetAnalyticsContext } from '../../api/common/analytics';
 

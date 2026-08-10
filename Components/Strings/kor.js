@@ -1576,6 +1576,10 @@ export default {
   INVITE_CODE_FORMAT_ERROR: '6자리 초대 코드를 입력해주세요',
   INVITE_CODE_INVALID: '유효하지 않은 코드예요. 초대해 준 사람에게 코드를 다시 요청해주세요.',
   INVITE_THROTTLED: (sec) => `시도가 너무 많았어요. ${sec}초 후에 다시 시도해주세요.`,
+  INVITE_BRAND_WEB_ONLY:
+    '브랜드 파트너는 웹 대시보드를 이용해주세요. 담당 애널리스트가 이메일로 링크를 보내드립니다.',
+  INVITE_BRAND_WEB_ONLY:
+    '브랜드 리포트는 웹에서 확인하실 수 있어요. 담당 애널리스트가 보내드린 링크로 접속해주세요.',
   INVITE_COUNTRY_LABEL: '활동 국가',
   INVITE_COUNTRY_REQUIRED: '활동 국가를 선택해주세요',
   INVITE_SUBMIT: '입장하기',

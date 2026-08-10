@@ -1641,6 +1641,8 @@ export default {
   INVITE_CODE_FORMAT_ERROR: 'Enter your 6-digit invite code',
   INVITE_CODE_INVALID: "That code doesn't work. Ask the person who invited you for a new one.",
   INVITE_THROTTLED: (sec) => `Too many attempts. Try again in ${sec} seconds.`,
+  INVITE_BRAND_WEB_ONLY:
+    'Brand partners use the web dashboard. Your analyst will email you the link.',
   INVITE_COUNTRY_LABEL: 'Where do you create?',
   INVITE_COUNTRY_REQUIRED: 'Pick your country',
   INVITE_SUBMIT: 'Enter greyd',
