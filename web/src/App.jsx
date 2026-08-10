@@ -102,7 +102,8 @@ function GaugeCard({ score }) {
 }
 
 function Dashboard({ brand }) {
-  const campaigns = CAMPAIGNS.filter((c) => c.brandId === brand.brandId || true); // mock: 전체 노출
+  // 브랜드 격리 — 자기 캠페인만 (서버 연동 시 서버 필터로 대체)
+  const campaigns = CAMPAIGNS.filter((c) => c.brandId === brand.brandId);
   const [campaignId, setCampaignId] = useState(campaigns[0]?.id);
   const fgi = FGI_STATS[campaignId];
   const countries = COUNTRY_STATS[campaignId] || [];

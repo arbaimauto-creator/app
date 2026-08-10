@@ -6,6 +6,7 @@ const GREYD_LOCAL_KEYS = [
   'savedAddressV2', // 배송 주소·전화 (PII)
   'seedingsV2', // 시딩 상태 + 주소 사본 (PII)
   'creatorProfileV2', // 핸들·G-스코어·인구통계
+  'offersV2', // 제안형 시딩 응답 기록 (D25)
   'inviteRole',
   'inviteBrandName',
   'onboardingBonusGranted',
