@@ -13,17 +13,23 @@ import {
 } from 'react-native';
 import Strings from '../../Components/Strings';
 import T from '../../Components/Constants/DesignTokens';
-import { Card } from '../../Components/UI';
-import { upsertSeeding } from '../../api/seedings';
-import { logEvent } from '../../api/common/analytics';
+import { Card, Chips, Badge } from '../../Components/UI';
+import { getSeedings, upsertSeeding } from '../../api/seedings';
+import { getCreatorProfile } from '../../api/creators';
+import { logEvent, toGBand } from '../../api/common/analytics';
 
 // 계획서 TSK-007: 신청→승인→[FGI 설문]→UGC 업로드.
 // 리포트 1·2섹션(종합점수·구매의향 %·가격 반응)의 데이터 원천 — 업로드 전에 반드시 작성.
+// D27 고도화: 추천 의향 추가, 가격 상한(간이 PSM), 경쟁 제품 앵커, 사용 일수·프로필 스냅샷
+// (세그먼트 집계용), 정성 최소 길이. 첫인상 설문(수령 직후)은 FirstImpression이 담당.
 const QUANT = [
   { key: 'purchaseIntent', label: () => Strings.FGI_PURCHASE_INTENT },
   { key: 'priceFairness', label: () => Strings.FGI_PRICE_FAIRNESS },
   { key: 'competitiveness', label: () => Strings.FGI_COMPETITIVENESS },
+  { key: 'recommend', label: () => Strings.FGI_RECOMMEND },
 ];
+
+const MIN_TEXT_LEN = 20; // 장·단점 최소 글자 수 — 성의 없는 응답 방지 (리포트 인용 가능 수준)
 
 function Scale({ value, onChange }) {
   return (
@@ -44,46 +50,77 @@ function Scale({ value, onChange }) {
 export default function FgiSurvey({ route, navigation }) {
   const { campaign } = route.params;
   const [scores, setScores] = useState({});
+  const [usageDays, setUsageDays] = useState(null);
 
   // 설문 퍼널: fgi_start → fgi_submit (이탈률 = FGI 마찰 측정, 응답 내용은 보내지 않음)
   React.useEffect(() => {
     logEvent('fgi_start', { campaign_id: campaign.id });
+    // 사용 일수 = 수령 확인 기준 — 응답의 시점 맥락 (첫인상 vs 2주 사용 후를 구분하는 축)
+    getSeedings().then((all) => {
+      const receivedAt = all[campaign.id]?.receivedAt;
+      if (receivedAt) {
+        setUsageDays(Math.max(0, Math.round((Date.now() - new Date(receivedAt)) / 86400000)));
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [fairPrice, setFairPrice] = useState('');
+  const [priceCeiling, setPriceCeiling] = useState('');
+  const [competitorName, setCompetitorName] = useState('');
   const [pros, setPros] = useState('');
   const [cons, setCons] = useState('');
-  // 캠페인별 커스텀 질문 (Admin에서 설정 — 브랜드가 진짜 궁금한 것)
-  const extraQuestions = Array.isArray(campaign.fgiExtraQuestions)
-    ? campaign.fgiExtraQuestions
-    : [];
+  // 캠페인별 커스텀 질문 — 문자열(주관식) 또는 {q, type:'choice', options} (D27)
+  const extraQuestions = (
+    Array.isArray(campaign.fgiExtraQuestions) ? campaign.fgiExtraQuestions : []
+  ).map((q) => (typeof q === 'string' ? { q, type: 'text' } : q));
   const [extraAnswers, setExtraAnswers] = useState({});
 
   const complete =
     QUANT.every((q) => scores[q.key]) &&
     fairPrice.trim() &&
+    competitorName.trim() &&
     pros.trim() &&
     cons.trim() &&
-    extraQuestions.every((q) => (extraAnswers[q] || '').trim());
+    extraQuestions.every((q) => (extraAnswers[q.q] || '').trim());
 
   const onSubmit = async () => {
     if (!complete) {
       Alert.alert(Strings.FGI_INCOMPLETE);
       return;
     }
+    // 응답 품질 최소선 — 한 단어 답변은 리포트 재료가 안 된다
+    if (pros.trim().length < MIN_TEXT_LEN || cons.trim().length < MIN_TEXT_LEN) {
+      Alert.alert(Strings.FGI_MIN_TEXT(MIN_TEXT_LEN));
+      return;
+    }
+    // 세그먼트 집계용 프로필 스냅샷 — 제출 시점 값 고정 (이후 프로필 변경과 무관하게 보존)
+    const profile = await getCreatorProfile();
     await upsertSeeding(campaign.id, {
       fgiSurvey: {
         ...scores,
         fairPriceUsd: Number(fairPrice) || fairPrice.trim(),
+        priceCeilingUsd: priceCeiling.trim() ? Number(priceCeiling) || priceCeiling.trim() : null,
+        competitorName: competitorName.trim(),
         pros: pros.trim(),
         cons: cons.trim(),
         extraAnswers,
+        usageDays,
+        profileSnapshot: profile
+          ? {
+              country: profile.country,
+              gBand: toGBand(profile.gScore ?? 50),
+              skinType: profile.skinType,
+              ageBand: profile.ageBand,
+              followerBand: profile.followerBand,
+            }
+          : null,
         submittedAt: new Date().toISOString(),
       },
     });
     logEvent('fgi_submit', {
       campaign_id: campaign.id,
       extra_count: extraQuestions.length,
+      usage_days: usageDays ?? -1,
     });
     Alert.alert(Strings.FGI_DONE_TITLE, Strings.FGI_DONE_BODY, [
       {
@@ -108,6 +145,9 @@ export default function FgiSurvey({ route, navigation }) {
         </View>
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
           <Text style={styles.subtitle}>{Strings.FGI_SUBTITLE(campaign.brand)}</Text>
+          {usageDays != null ? (
+            <Badge tone="amber" text={Strings.FGI_DAYS_USED(usageDays)} style={styles.daysBadge} />
+          ) : null}
 
           {QUANT.map((q) => (
             <Card key={q.key} style={styles.block}>
@@ -125,6 +165,28 @@ export default function FgiSurvey({ route, navigation }) {
               keyboardType="numeric"
               value={fairPrice}
               onChangeText={setFairPrice}
+            />
+            {/* 간이 PSM 상한 — 적정가와 함께 수용 가격 범위를 만든다 (선택) */}
+            <Text style={[styles.label, styles.labelGap]}>{Strings.FGI_PRICE_CEILING}</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="USD"
+              placeholderTextColor={T.COLORS.GREY}
+              keyboardType="numeric"
+              value={priceCeiling}
+              onChangeText={setPriceCeiling}
+            />
+          </Card>
+
+          {/* 경쟁 비교 앵커 — competitiveness 점수의 기준점을 명시화 */}
+          <Card style={styles.block}>
+            <Text style={styles.label}>{Strings.FGI_COMPETITOR}</Text>
+            <TextInput
+              style={styles.input}
+              placeholder={Strings.FGI_COMPETITOR_PH}
+              placeholderTextColor={T.COLORS.GREY}
+              value={competitorName}
+              onChangeText={setCompetitorName}
             />
           </Card>
 
@@ -152,17 +214,26 @@ export default function FgiSurvey({ route, navigation }) {
             />
           </Card>
 
-          {extraQuestions.map((q) => (
-            <Card key={q} style={styles.block}>
-              <Text style={styles.label}>{q}</Text>
-              <TextInput
-                style={[styles.input, styles.multiline]}
-                multiline
-                placeholder={Strings.FGI_TEXT_PLACEHOLDER}
-                placeholderTextColor={T.COLORS.GREY}
-                value={extraAnswers[q] || ''}
-                onChangeText={(v) => setExtraAnswers({ ...extraAnswers, [q]: v })}
-              />
+          {extraQuestions.map((item) => (
+            <Card key={item.q} style={styles.block}>
+              <Text style={styles.label}>{item.q}</Text>
+              {item.type === 'choice' && Array.isArray(item.options) ? (
+                <Chips
+                  items={item.options.map((o) => ({ key: o, label: o }))}
+                  selected={extraAnswers[item.q] || null}
+                  onSelect={(k) => setExtraAnswers({ ...extraAnswers, [item.q]: k })}
+                  style={styles.choiceRow}
+                />
+              ) : (
+                <TextInput
+                  style={[styles.input, styles.multiline]}
+                  multiline
+                  placeholder={Strings.FGI_TEXT_PLACEHOLDER}
+                  placeholderTextColor={T.COLORS.GREY}
+                  value={extraAnswers[item.q] || ''}
+                  onChangeText={(v) => setExtraAnswers({ ...extraAnswers, [item.q]: v })}
+                />
+              )}
             </Card>
           ))}
 
@@ -198,6 +269,9 @@ const styles = StyleSheet.create({
   },
   headerTitle: { fontSize: 17, fontFamily: T.FONT.ExtraBold, color: T.COLORS.INK },
   subtitle: { ...T.TYPE.SUB, marginBottom: 2 },
+  daysBadge: { alignSelf: 'flex-start', marginTop: 6 },
+  labelGap: { marginTop: 14 },
+  choiceRow: { justifyContent: 'flex-start', marginTop: 4 },
   block: { marginTop: 12 },
   label: {
     fontSize: 12.5,

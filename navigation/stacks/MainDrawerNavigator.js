@@ -78,6 +78,7 @@ import AboutScreen from '../../screens/MyScreen/AboutScreen';
 import GreydSettingsScreen from '../../screens/MyScreen/SettingsScreen';
 import ApplyDone from '../../screens/TryScreen/ApplyDone';
 import MissionDone from '../../screens/ActivityScreen/MissionDone';
+import FirstImpression from '../../screens/ActivityScreen/FirstImpression';
 
 const Stack = createStackNavigator();
 
@@ -252,6 +253,12 @@ function MainDrawerNavigator({ route, navigation }) {
       />
       {/* FGI 설문 — 업로드 전 필수 단계 (계획서 TSK-007) */}
       <Stack.Screen name="FgiSurvey" component={FgiSurvey} options={{ headerShown: false }} />
+      {/* D27: 첫인상 30초 — 수령 확인 직후 (스킵 가능) */}
+      <Stack.Screen
+        name="FirstImpression"
+        component={FirstImpression}
+        options={{ headerShown: false }}
+      />
       {/* 시안 15: 미션 리뷰는 링크 제출 — 피드 업로더(AddingNewVideo)와 별개 */}
       <Stack.Screen
         name="ReviewLinkSubmit"

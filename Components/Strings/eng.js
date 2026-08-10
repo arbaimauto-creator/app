@@ -1691,6 +1691,23 @@ export default {
   FGI_CONS: 'What fell short? (be honest!)',
   FGI_TEXT_PLACEHOLDER: 'Write freely',
   FGI_INCOMPLETE: 'Please fill in every item',
+  // FGI upgrades (D27)
+  FGI_RECOMMEND: 'Would you recommend it to a friend?',
+  FGI_PRICE_CEILING: "Above this price I wouldn't buy it (USD, optional)",
+  FGI_COMPETITOR: 'What similar product do you use now?',
+  FGI_COMPETITOR_PH: 'Product name (or "none")',
+  FGI_DAYS_USED: (n) => `Day ${n} of use`,
+  FGI_MIN_TEXT: (n) =>
+    `Please write at least ${n} characters each for pros & cons. Specific answers count toward your quality bonus.`,
+  // First impression (D27 — right after delivery)
+  FI_TITLE: '30-second first impression',
+  FI_SUB: (brand) => `Just opened it? This exact moment is what ${brand} values most.`,
+  FI_UNBOXING: 'Unboxing (packaging & contents)',
+  FI_FIRST_USE: 'First feel in use',
+  FI_NOTE_LABEL: 'One line (optional)',
+  FI_NOTE_PH: 'e.g. The scent was subtler than I expected',
+  FI_SUBMIT: 'Save',
+  FI_SKIP: 'Maybe later',
   FGI_SUBMIT: 'Submit survey',
   FGI_DONE_TITLE: 'Survey done!',
   FGI_DONE_BODY: 'Now upload your review video',

@@ -138,6 +138,11 @@ export default function ActivityScreen({ navigation }) {
       }
     }
     reload();
+    // D27: 개봉 직후에만 잡히는 데이터 — 첫인상 30초 설문 (스킵 가능)
+    const campaign = campaignById[campaignId];
+    if (campaign) {
+      navigation.navigate('FirstImpression', { campaign });
+    }
   };
 
   // 시안 23: 발송 전(applied/approved) 무페널티 취소
