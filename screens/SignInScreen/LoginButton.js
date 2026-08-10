@@ -23,6 +23,7 @@ const LoginButtons = (props) => {
         <FastImage
           source={require('../../Resources/img/icLoginFacebook30.png')}
           style={styles.fbLogo}
+          tintColor={'#1877F2'}
         />
         <Text style={styles.fbLoginText}>{Strings.SIGN_IN_WITH_FACEBOOK}</Text>
       </View>
@@ -97,9 +98,23 @@ const styles = StyleSheet.create({
   kakaoContainer: { ...btnBase, backgroundColor: '#fee500' },
   kakaoLogo: { position: 'absolute', left: 20, width: 20, height: 18, marginRight: 10 },
   kakaoLoginText: { ...btnText, color: 'rgba(0, 0, 0, .85)' },
-  fbContainer: { ...btnBase, backgroundColor: '#1877F2' },
-  fbLogo: { position: 'absolute', left: 20, width: 20, height: 20, marginRight: 10 },
-  fbLoginText: { ...btnText, color: 'white' },
+  // FB 파랑이 화면에서 과하게 튀어 고스트로 톤다운 — 로고 색으로만 브랜드 식별
+  fbContainer: {
+    ...btnBase,
+    backgroundColor: T.COLORS.SURFACE,
+    borderWidth: 1,
+    borderColor: T.COLORS.LINE,
+  },
+  // 원본 로고가 흰색이라 고스트 배경에선 FB 브랜드 파랑으로 틴트
+  fbLogo: {
+    position: 'absolute',
+    left: 20,
+    width: 20,
+    height: 20,
+    marginRight: 10,
+    tintColor: '#1877F2',
+  },
+  fbLoginText: { ...btnText, color: T.COLORS.DARK },
   googleContainer: {
     ...btnBase,
     backgroundColor: T.COLORS.SURFACE,
