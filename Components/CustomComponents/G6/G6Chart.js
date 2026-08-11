@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import T from '../../Constants/DesignTokens';
 import { View } from 'react-native';
 import { VictoryArea, VictoryChart, VictoryGroup, VictoryPolarAxis } from 'victory-native';
 import Constants from '../../Constants';
@@ -37,7 +38,7 @@ function G6Chart({ innerData, innerMaxima, isVideoPage }) {
             domain={{ y: [0, 1] }}
           >
             <VictoryGroup
-              colorScale={[Constants.TIER_COLORS.GIVER, 'none']}
+              colorScale={[T.COLORS.AMBER, 'none']}
               style={{
                 data: {
                   fillOpacity: 0.4,
@@ -67,7 +68,7 @@ function G6Chart({ innerData, innerMaxima, isVideoPage }) {
                     axis: { stroke: 'none' },
                     grid: { stroke: 'none' },
                     tickLabels: {
-                      fill: isVideoPage ? Constants.TIER_COLORS.OPERATOR : 'transparent',
+                      fill: isVideoPage ? T.COLORS.GREY : 'transparent',
                       fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
                       fontSize: moderateScale(14),
                       padding: 15,
@@ -85,11 +86,11 @@ function G6Chart({ innerData, innerMaxima, isVideoPage }) {
           <VictoryGroup
             colorScale={[
               // Constants.COLOR_MAIN,
-              Constants.TIER_COLORS.OPERATOR,
-              Constants.TIER_COLORS.OPERATOR,
-              Constants.TIER_COLORS.OPERATOR,
-              Constants.TIER_COLORS.OPERATOR,
-              Constants.TIER_COLORS.OPERATOR,
+              T.COLORS.GREY,
+              T.COLORS.GREY,
+              T.COLORS.GREY,
+              T.COLORS.GREY,
+              T.COLORS.GREY,
             ]}
           >
             {outData.map((data, i) => {

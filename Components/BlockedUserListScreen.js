@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import T from './Constants/DesignTokens';
 import { StyleSheet, SafeAreaView } from 'react-native';
 
 import BlockedUserItemView from './BlockedUserItemView';
@@ -44,7 +45,7 @@ function BlockedUserListScreen(props) {
     props.navigation.setOptions({
       title: Strings.BLOCKED_ACCOUNT,
       headerLeft: () => HeaderLeftBackButton({ navigation: props.navigation }),
-      headerTintColor: Constants.TIER_COLORS.ARTISAN,
+      headerTintColor: T.COLORS.INK,
       headerTitleStyle: {
         fontSize: moderateScale(20),
         fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
@@ -90,13 +91,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tabLabelStyle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
   },
   header: {
     padding: 5,
   },
   tabBarLabelFocused: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 21,
     fontWeight: 'bold',
   },
@@ -107,7 +108,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 0,
-    backgroundColor: Constants.TIER_COLORS.STRIVER,
+    backgroundColor: T.COLORS.GREY,
     marginTop: 10,
   },
 });

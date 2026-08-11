@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import T from './Constants/DesignTokens';
 import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import Constants from './Constants';
 import HeaderLeftBackButton from './CustomComponents/headerBackButton/headerLeftBackButton';
@@ -17,7 +18,7 @@ export default class HelpScreen extends Component {
     navigation.setOptions({
       title: Strings.HELP,
       headerLeft: () => HeaderLeftBackButton({ navigation }),
-      headerTintColor: Constants.TIER_COLORS.ARTISAN,
+      headerTintColor: T.COLORS.INK,
       headerTitleStyle: {
         fontSize: moderateScale(20),
         fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
@@ -66,10 +67,10 @@ const styles = StyleSheet.create({
   itemTitle: {
     width: 100,
     fontWeight: '600',
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
   },
   itemValue: {
     flex: 1,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
   },
 });

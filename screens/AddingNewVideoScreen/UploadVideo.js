@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import T from '../../Components/Constants/DesignTokens';
 import {
   Alert,
   BackHandler,
@@ -200,7 +201,7 @@ export default function UploadVideo({ context }) {
           style={{
             borderRadius: 14,
             borderWidth: 1,
-            borderColor: 'rgba(255,255,255,0.1)',
+            borderColor: T.COLORS.LINE,
           }}
         >
           <VideoView context={context} />

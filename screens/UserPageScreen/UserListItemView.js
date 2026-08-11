@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react';
+import T from '../../Components/Constants/DesignTokens';
 import { StyleSheet, Text, TouchableNativeFeedback, View } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Constants from '../../Components/Constants';
@@ -16,7 +17,7 @@ function FollowButton({ onPress, isFollowing }) {
       <View style={isFollowing ? styles.followingButton : styles.followButton}>
         <Text
           style={{
-            color: isFollowing ? Constants.TIER_COLORS.ARTISAN : 'white',
+            color: isFollowing ? T.COLORS.INK : 'white',
             fontWeight: '600',
           }}
         >
@@ -233,7 +234,7 @@ const styles = StyleSheet.create({
     height: Constants.PRODUCT_GRID_LIST_ITEM_VIEW_WIDTH - 10,
   },
   userName: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     // fontSize: 15,
     fontSize: 16,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.MEDIUM,
@@ -245,7 +246,7 @@ const styles = StyleSheet.create({
   userFollower: {
     // color: '#666',
     // color: '#999',
-    color: Constants.TIER_COLORS.OPERATOR,
+    color: T.COLORS.GREY,
     fontSize: 14,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
   },
@@ -253,7 +254,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 18,
     fontWeight: 'bold',
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
   },
   followButton: {
     flexDirection: 'row',

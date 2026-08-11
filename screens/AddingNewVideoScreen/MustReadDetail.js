@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import T from '../../Components/Constants/DesignTokens';
 import { Text, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import Constants from '../../Components/Constants';
@@ -28,7 +29,7 @@ export default function MustReadDetail({ navigation, route }) {
   useEffect(() => {
     navigation.setOptions({
       title: MustRead(),
-      headerTintColor: Constants.TIER_COLORS.ARTISAN,
+      headerTintColor: T.COLORS.INK,
       headerTitleStyle: {
         fontSize: moderateScale(20),
         fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,

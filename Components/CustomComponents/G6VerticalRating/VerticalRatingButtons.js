@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import T from '../../Constants/DesignTokens';
 import { View, Text, TouchableNativeFeedback } from 'react-native';
 import Strings, { getLanguage } from '../../Strings';
 import Constants from '../../Constants';
@@ -20,7 +21,7 @@ export default function VerticalRatingButtons({ scoreTitle, scoreValue, onPress 
             <View
               style={{
                 backgroundColor:
-                  value === score ? Constants.TIER_COLORS.GIVER : Constants.TIER_COLORS.PIONEER,
+                  value === score ? T.COLORS.AMBER : Constants.TIER_COLORS.PIONEER,
                 borderRadius: 16,
                 marginBottom: 4,
                 height: 30,

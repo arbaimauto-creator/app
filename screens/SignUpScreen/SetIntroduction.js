@@ -1,4 +1,5 @@
 import React from 'react';
+import T from '../../Components/Constants/DesignTokens';
 import { View, Text, TextInput } from 'react-native';
 import Constants from '../../Components/Constants';
 import Strings from '../../Components/Strings';
@@ -17,7 +18,7 @@ export default function SetIntroduction({ context }) {
         multiline
         style={styles.textInput}
         placeholder={Strings.ADD_PROFILE_DESCRIPTION}
-        placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+        placeholderTextColor={T.COLORS.GREY}
         onChangeText={(introduction) => context.setState({ introduction })}
         value={context.state.introduction}
         maxLength={Constants.MAX_LENGTH_USER_INTRODUCTION}

@@ -1,4 +1,5 @@
 import { StackActions } from '@react-navigation/native';
+import T from './Constants/DesignTokens';
 import React from 'react';
 import { Alert, Linking, Platform, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
 import Preference from 'react-native-default-preference';
@@ -81,7 +82,7 @@ export default class PayScreen extends React.Component {
       title: Strings.MAKE_ORDER,
       headerLeft: () => HeaderLeftBackButton({ navigation }),
       headerRight: () => HeaderRight({ navigation, checkOrder: () => this.checkOrder() }),
-      headerTintColor: Constants.TIER_COLORS.ARTISAN,
+      headerTintColor: T.COLORS.INK,
       headerTitleStyle: {
         fontSize: moderateScale(20),
         fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,

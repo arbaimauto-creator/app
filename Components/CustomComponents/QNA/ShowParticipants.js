@@ -1,4 +1,5 @@
 import React from 'react';
+import T from '../../Constants/DesignTokens';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import IconAntDesign from 'react-native-vector-icons/AntDesign';
 import { styles } from '../../../screens/ChatView/styles';
@@ -37,7 +38,7 @@ export default function ShowParticipants({
         )}
       />
       <TouchableOpacity style={{ marginTop: 5 }} onPress={() => setShowParticipants(false)}>
-        <IconAntDesign name="close" color={Constants.TIER_COLORS.ARTISAN} size={30} />
+        <IconAntDesign name="close" color={T.COLORS.INK} size={30} />
       </TouchableOpacity>
     </View>
   );
@@ -49,11 +50,11 @@ const style = StyleSheet.create({
     top: '10%',
     left: '10%',
     position: 'absolute',
-    backgroundColor: Constants.TIER_COLORS.STRIVER,
+    backgroundColor: T.COLORS.GREY,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 14,
-    borderColor: Constants.TIER_COLORS.ARTISAN,
+    borderColor: T.COLORS.INK,
     borderWidth: 6,
     maxHeight: 200,
     zIndex: 1,

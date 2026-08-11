@@ -1,4 +1,5 @@
 import { CommonActions } from '@react-navigation/native';
+import T from '../../Constants/DesignTokens';
 import React from 'react';
 import {
   Dimensions,
@@ -106,7 +107,7 @@ export default class InitialGuideScreen extends React.Component {
               style={{
                 fontFamily: Constants.CUSTOM_FONTS.SUIT.MEDIUM,
                 fontSize: 24,
-                color: Constants.TIER_COLORS.ARTISAN,
+                color: T.COLORS.INK,
               }}
             >
               {Strings.INITIAL_GUIDE_BUTTON}

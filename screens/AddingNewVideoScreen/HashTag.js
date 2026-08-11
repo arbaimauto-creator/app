@@ -1,4 +1,5 @@
 import React from 'react';
+import T from '../../Components/Constants/DesignTokens';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import Constants from '../../Components/Constants';
@@ -15,7 +16,7 @@ export default function HashTags({ context }) {
         style={{ ...styles.textInput, ...styles.hashTagTextInput }}
         borderRadius={10}
         placeholder={Strings.HASH_TAG_PLACE_HOLDER}
-        placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+        placeholderTextColor={T.COLORS.GREY}
         onChange={(event) => {
           const { text } = event.nativeEvent;
 

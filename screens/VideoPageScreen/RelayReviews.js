@@ -1,4 +1,5 @@
 import React from 'react';
+import T from '../../Components/Constants/DesignTokens';
 import { StyleSheet, Text, TouchableNativeFeedback, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { FlatList as GestureHandlerFlatList } from 'react-native-gesture-handler';
@@ -103,7 +104,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 19,
     fontWeight: '600',
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     marginRight: 6,
   },
   sectionTitleMoreIcon: {
@@ -112,14 +113,17 @@ const styles = StyleSheet.create({
   },
   addRelayButton: {
     marginBottom: 53,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    // 밝은 상세 영역 위에 놓이므로 반투명 흰색 대신 흰 카드 + 경계선으로 보이게 한다.
+    backgroundColor: T.COLORS.SURFACE,
+    borderWidth: 1,
+    borderColor: T.COLORS.LINE,
     paddingVertical: 16,
     marginHorizontal: 20,
-    borderRadius: 14,
+    borderRadius: T.RADIUS.CARD,
     alignItems: 'center',
   },
   addRelayButtonLabel: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 17,
     fontWeight: '600',
   },

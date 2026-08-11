@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import T from '../../Components/Constants/DesignTokens';
 import { Platform, StyleSheet, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { useSelector } from 'react-redux';
@@ -12,10 +13,10 @@ import Constants from '../../Components/Constants';
 
 export function setStatusColor(routeName) {
   if (routeName === 'MainBottom' || routeName === 'VideoPage') {
-    StatusBar.setBackgroundColor(Constants.TIER_COLORS.ARTISAN);
+    StatusBar.setBackgroundColor(T.COLORS.INK);
     StatusBar.setBarStyle('default', true);
   } else {
-    StatusBar.setBackgroundColor(Constants.TIER_COLORS.GIVER);
+    StatusBar.setBackgroundColor(T.COLORS.AMBER);
     StatusBar.setBarStyle('default', true);
   }
 }

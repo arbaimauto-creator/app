@@ -1,4 +1,5 @@
 import React from 'react';
+import T from '../../Components/Constants/DesignTokens';
 import { View, Text, TextInput } from 'react-native';
 import Strings from '../../Components/Strings';
 import utils from '../../Components/utils';
@@ -26,7 +27,7 @@ export default function SetEmail({ context }) {
         autoComplete={'email'}
         style={styles.textInput}
         placeholder={Strings.CONDITION_USER_EMAIL}
-        placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+        placeholderTextColor={T.COLORS.GREY}
         onChangeText={(email) => {
           context.setState({ email });
           if (context.state.warningEmail) {

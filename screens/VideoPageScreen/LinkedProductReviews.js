@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import T from '../../Components/Constants/DesignTokens';
 import { StyleSheet, Text, TouchableNativeFeedback, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import Constants from '../../Components/Constants';
@@ -110,7 +111,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 19,
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     marginRight: 6,
   },
   sectionTitleMoreIcon: {

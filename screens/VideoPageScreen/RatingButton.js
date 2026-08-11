@@ -1,4 +1,5 @@
 import React from 'react';
+import T from '../../Components/Constants/DesignTokens';
 import { Alert, LayoutAnimation, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import FastImage from 'react-native-fast-image';
@@ -74,9 +75,13 @@ function RatingButton({ context }) {
         {context.state.video.myG6Rating ? null : (
           <Text
             style={{
-              color: Constants.TIER_COLORS.ARTISAN,
+              // 영상 위에 얹히는 라벨 — 밝은 장면에서도 읽히도록 흰 글자 + 그림자
+              color: '#FFFFFF',
               fontSize: 16,
-              fontFamily: 'S-CoreDream-5Medium',
+              fontFamily: T.FONT.SemiBold,
+              textShadowColor: 'rgba(0,0,0,0.55)',
+              textShadowOffset: { width: 0, height: 1 },
+              textShadowRadius: 3,
               marginTop: 10,
             }}
           >
@@ -91,7 +96,7 @@ function RatingButton({ context }) {
 
 const styles = StyleSheet.create({
   ratingButtonContainer: (_rate) => ({
-    backgroundColor: Constants.TIER_COLORS.GIVER,
+    backgroundColor: T.COLORS.AMBER,
     borderRadius: 60,
     width: 60 * 1.25,
     height: 60 * 1.25,

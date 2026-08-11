@@ -1,4 +1,5 @@
 import React from 'react';
+import T from '../../Components/Constants/DesignTokens';
 import { Text, TextInput, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import IconFeather from 'react-native-vector-icons/Feather';
@@ -32,7 +33,7 @@ export default function SetName({ context }) {
       <TextInput
         style={styles.textInput}
         placeholder={Strings.CONDITION_USER_ID}
-        placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+        placeholderTextColor={T.COLORS.GREY}
         onChangeText={(name) => {
           context.setState({ name });
           if (context.state.warningUserId) {

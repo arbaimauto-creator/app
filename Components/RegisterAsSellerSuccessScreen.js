@@ -1,4 +1,5 @@
 import { StackActions } from '@react-navigation/native';
+import T from './Constants/DesignTokens';
 import React from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableNativeFeedback, View } from 'react-native';
 import Strings from './Strings';
@@ -62,7 +63,7 @@ const styles = StyleSheet.create({
     height: 44,
   },
   buttonLabel: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 16,
     fontWeight: 'bold',
   },

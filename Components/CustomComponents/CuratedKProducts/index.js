@@ -1,4 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
+import T from '../../Constants/DesignTokens';
 import dayjs from 'dayjs';
 import React, { useContext, useEffect, useState } from 'react';
 import {
@@ -57,7 +58,7 @@ export default function CuratedKProducts() {
       <Animated.FlatList
         refreshControl={
           <RefreshControl
-            tintColor={Constants.TIER_COLORS.ARTISAN}
+            tintColor={T.COLORS.INK}
             refreshing={isRefreshing}
             onRefresh={() => {
               fetchData();
@@ -187,7 +188,7 @@ export default function CuratedKProducts() {
                                       style={{
                                         fontSize: 10,
                                         fontFamily: Constants.CUSTOM_FONTS.PRETENDARD.SemiBold,
-                                        color: Constants.TIER_COLORS.OPERATOR,
+                                        color: T.COLORS.GREY,
                                       }}
                                     >
                                       Ship To: {nationalities[shipTo][getLanguage()]}
@@ -206,7 +207,7 @@ export default function CuratedKProducts() {
                                       style={{
                                         fontSize: 11,
                                         fontFamily: Constants.CUSTOM_FONTS.PRETENDARD.Regular,
-                                        color: Constants.TIER_COLORS.ARTISAN,
+                                        color: T.COLORS.INK,
                                         textDecorationLine: 'line-through',
                                       }}
                                     >
@@ -221,7 +222,7 @@ export default function CuratedKProducts() {
                                       style={{
                                         fontSize: 11,
                                         fontFamily: Constants.CUSTOM_FONTS.PRETENDARD.Regular,
-                                        color: Constants.TIER_COLORS.ARTISAN,
+                                        color: T.COLORS.INK,
                                         textDecorationLine: 'line-through',
                                       }}
                                     />
@@ -325,7 +326,7 @@ export default function CuratedKProducts() {
                                       style={{
                                         fontSize: 11,
                                         fontFamily: Constants.CUSTOM_FONTS.PRETENDARD.Bold,
-                                        color: Constants.TIER_COLORS.ARTISAN,
+                                        color: T.COLORS.INK,
                                       }}
                                     >
                                       {curatedKProduct.author.name}
@@ -378,7 +379,7 @@ export default function CuratedKProducts() {
         style={{
           fontFamily: Constants.CUSTOM_FONTS.PRETENDARD.Medium,
           fontSize: 16,
-          color: Constants.TIER_COLORS.ARTISAN,
+          color: T.COLORS.INK,
           textAlign: 'center',
         }}
       >

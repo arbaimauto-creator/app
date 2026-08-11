@@ -1,4 +1,5 @@
 import * as React from 'react';
+import T from './Constants/DesignTokens';
 import {
   Alert,
   Button,
@@ -192,7 +193,7 @@ export default class ModalMenuButton extends React.Component {
 const styles = StyleSheet.create({
   divider: {
     height: 1,
-    backgroundColor: Constants.TIER_COLORS.STRIVER,
+    backgroundColor: T.COLORS.GREY,
   },
   itemMenuItem: {
     flexDirection: 'row',

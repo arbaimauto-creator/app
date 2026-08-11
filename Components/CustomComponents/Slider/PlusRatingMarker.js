@@ -1,4 +1,5 @@
 import React, { Component, useEffect, useState } from 'react';
+import T from '../../Constants/DesignTokens';
 import { StyleSheet, TouchableOpacity, View, Text } from 'react-native';
 import { horizontalScale, moderateScale } from '../../utils/scailing';
 import { Icon } from 'react-native-elements';
@@ -47,7 +48,7 @@ const PlusRatingMarker = ({ labelText = 'Type', value = '0', plusClick, minusCli
         onPressOut={handleMinusPressOut}
       >
         {/* <Text style={styles.plusbuttonText}>{'-'}</Text> */}
-        <Icon type="entypo" name="minus" color={Constants.TIER_COLORS.ARTISAN} size={24} />
+        <Icon type="entypo" name="minus" color={T.COLORS.INK} size={24} />
       </TouchableOpacity>
       <View style={styles.textContainer}>
         <Text style={styles.containText1}>{labelText}</Text>
@@ -60,7 +61,7 @@ const PlusRatingMarker = ({ labelText = 'Type', value = '0', plusClick, minusCli
         onPressOut={handlePlusPressOut}
       >
         {/* <Text style={styles.plusbuttonText}>{'+'}</Text> */}
-        <Icon type="entypo" name="plus" color={Constants.TIER_COLORS.ARTISAN} size={24} />
+        <Icon type="entypo" name="plus" color={T.COLORS.INK} size={24} />
       </TouchableOpacity>
     </View>
   );
@@ -87,7 +88,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignContent: 'center',
     borderRadius: horizontalScale(18),
-    // backgroundColor: Constants.TIER_COLORS.STRIVER,
+    // backgroundColor: T.COLORS.GREY,
   },
   plusbuttonText: {
     fontSize: moderateScale(26),
@@ -105,12 +106,12 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   containText: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: moderateScale(18),
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
   },
   containText1: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: moderateScale(14),
     // marginRight: horizontalScale(16),
     width: horizontalScale(80),

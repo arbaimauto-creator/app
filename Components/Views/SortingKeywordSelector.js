@@ -1,4 +1,5 @@
 import React from 'react';
+import T from '../Constants/DesignTokens';
 import { Text, View } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Constants from '../Constants';
@@ -56,7 +57,7 @@ export default function SortingKeywordSelector({
         <View
           style={{
             borderWidth: 0.5,
-            borderColor: Constants.TIER_COLORS.ARTISAN,
+            borderColor: T.COLORS.INK,
             borderRadius: 5,
             backgroundColor: 'white',
             paddingRight: 20,
@@ -81,7 +82,7 @@ export default function SortingKeywordSelector({
                     fontSize: 15,
                     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
                     color:
-                      activeItem === item ? Constants.COLOR_MAIN : Constants.TIER_COLORS.ARTISAN,
+                      activeItem === item ? Constants.COLOR_MAIN : T.COLORS.INK,
                   }}
                 >
                   {item}

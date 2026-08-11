@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react';
+import T from './Constants/DesignTokens';
 import {
   Alert,
   Keyboard,
@@ -53,14 +54,14 @@ function ReasonDescription({ context }) {
           flex: 1,
           fontSize: 14,
           borderWidth: 1,
-          borderColor: Constants.TIER_COLORS.OPERATOR,
+          borderColor: T.COLORS.GREY,
           minHeight: 100,
         }}
         borderRadius={5}
         multiline={true}
         scrollEnabled={false}
         placeholder={Strings.PURCHASE_CANCELLATION_PLACEHOLDER}
-        placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+        placeholderTextColor={T.COLORS.GREY}
         onChangeText={(description) => context.setState({ description })}
         value={context.state.description}
         maxLength={Constants.MAX_LENGTH_REVIEW_DESCRIPTION}
@@ -101,7 +102,7 @@ export default class PurchaseCancellationPage extends PureComponent {
     };
     props.navigation.setOptions({
       headerLeft: () => HeaderLeftBackButton({ navigation: props.navigation }),
-      headerTintColor: Constants.TIER_COLORS.ARTISAN,
+      headerTintColor: T.COLORS.INK,
       headerTitleStyle: {
         fontSize: moderateScale(20),
         fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
@@ -246,17 +247,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionTitle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 16,
   },
   dataLength: {
     marginLeft: 6,
     fontSize: 12,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
   },
   textInput: {
     paddingHorizontal: 10,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 18,
     marginHorizontal: 20,
   },

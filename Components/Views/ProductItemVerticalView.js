@@ -1,4 +1,5 @@
 import React, { Component, useContext } from 'react';
+import T from '../Constants/DesignTokens';
 import { StyleSheet, Text, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { Context } from '../../Contexts';
@@ -248,7 +249,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     fontSize: 13, //15
     lineHeight: 19,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
   },
   priceContainerInRow: {
@@ -280,7 +281,7 @@ const styles = StyleSheet.create({
   originalPrice: {
     marginTop: 4,
     fontSize: 10, //14,
-    color: Constants.TIER_COLORS.OPERATOR,
+    color: T.COLORS.GREY,
     textDecorationLine: 'line-through',
     fontFamily: Constants.CUSTOM_FONTS.SUIT.MEDIUM,
   },
@@ -365,7 +366,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
     fontSize: getLanguage() === 'ko' ? 14 : 11,
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
-    // color: Constants.TIER_COLORS.GIVER,
+    // color: T.COLORS.AMBER,
     color: Constants.COLOR_POINT_BLUE,
   },
 });

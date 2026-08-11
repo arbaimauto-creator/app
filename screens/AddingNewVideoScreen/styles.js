@@ -1,10 +1,12 @@
 import { Dimensions, StyleSheet } from 'react-native';
-import Constants from '../../Components/Constants';
+import T from '../../Components/Constants/DesignTokens';
+
+const { COLORS, RADIUS, FONT } = T;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Constants.COLOR_BACKGROUND_DARK,
+    backgroundColor: COLORS.BG,
   },
   addVideoButtonContainer: {
     width: (Dimensions.get('window').width / 16) * 9,
@@ -12,8 +14,10 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgb(31, 31, 31)',
-    borderRadius: 14,
+    backgroundColor: COLORS.SURFACE,
+    borderWidth: 1,
+    borderColor: COLORS.LINE,
+    borderRadius: RADIUS.CARD,
   },
   addVideoButtonImage: {
     width: 34,
@@ -21,9 +25,9 @@ const styles = StyleSheet.create({
     margin: 20,
   },
   uploadVideoTitle: {
-    color: Constants.COLOR_BACKGROUND_DARK,
+    color: COLORS.INK,
     fontSize: 15,
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
+    fontFamily: FONT.Regular,
     alignSelf: 'center',
   },
   sectionContainer: {
@@ -37,23 +41,24 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionTitle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: COLORS.INK,
     fontSize: 16,
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
+    fontFamily: FONT.SemiBold,
   },
   dataLength: {
     marginLeft: 6,
     fontSize: 12,
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
-    color: Constants.TIER_COLORS.ARTISAN,
+    fontFamily: FONT.Regular,
+    color: COLORS.GREY,
   },
+  // 영상 재생 영역만 어둡게 유지한다 — 밝은 배경 위에서 레터박스가 튀지 않게.
   mediaPlayer: {
     position: 'absolute',
     top: 0,
     left: 0,
     bottom: 0,
     right: 0,
-    backgroundColor: Constants.COLOR_BACKGROUND_DARK,
+    backgroundColor: '#000000',
   },
   productRatingContainer: {
     marginHorizontal: 20,
@@ -65,8 +70,8 @@ const styles = StyleSheet.create({
   performanceRating: {
     flex: 3,
     textAlign: 'left',
-   paddingHorizontal: 10,
-   fontSize: 14,
+    paddingHorizontal: 10,
+    fontSize: 14,
   },
   ratingElement: {
     flex: 2,
@@ -74,12 +79,11 @@ const styles = StyleSheet.create({
   },
   productRating: {
     flex: 1,
-    color: Constants.TIER_COLORS.STRIVER,
+    color: COLORS.GREY,
     fontSize: 14,
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
+    fontFamily: FONT.Regular,
     textAlign: 'right',
     marginRight: 10,
-    
   },
   moveButtonContainer: {
     flexDirection: 'row',
@@ -91,15 +95,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   textInput: {
-    paddingHorizontal: 10,
-    color: Constants.TIER_COLORS.ARTISAN,
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
+    paddingHorizontal: 12,
+    color: COLORS.INK,
+    fontFamily: FONT.Regular,
     marginHorizontal: 20,
     flex: 1,
     fontSize: 14,
     borderWidth: 1,
-    borderColor: Constants.TIER_COLORS.STRIVER,
-    paddingVertical: 6,
+    borderColor: COLORS.LINE,
+    borderRadius: RADIUS.FIELD,
+    backgroundColor: COLORS.SURFACE,
+    paddingVertical: 10,
   },
   attachmentContainer: {
     marginLeft: 20,
@@ -108,9 +114,10 @@ const styles = StyleSheet.create({
   addImageAttachmentButton: {
     width: 100,
     height: 100,
-    borderRadius: 14,
-    borderColor: Constants.TIER_COLORS.STRIVER,
+    borderRadius: RADIUS.CARD,
+    borderColor: COLORS.LINE,
     borderWidth: 1,
+    backgroundColor: COLORS.SURFACE,
     marginRight: 10,
     alignItems: 'center',
     justifyContent: 'center',
@@ -127,8 +134,8 @@ const styles = StyleSheet.create({
   attachmentImage: {
     width: 100,
     height: 100,
-    borderRadius: 14,
-    borderColor: Constants.TIER_COLORS.OPERATOR,
+    borderRadius: RADIUS.CARD,
+    borderColor: COLORS.LINE,
     borderWidth: 1,
   },
   removeAttachmentButton: {
@@ -163,13 +170,13 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: Constants.TIER_COLORS.STRIVER,
+    backgroundColor: COLORS.LINE,
     marginHorizontal: 20,
   },
   fieldTitleError: {
-    color: 'rgba(255, 0, 0, 0.8)',
+    color: COLORS.RED,
     fontSize: 14,
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
+    fontFamily: FONT.Regular,
     lineHeight: 18,
     paddingHorizontal: 20,
     alignSelf: 'center',
@@ -179,23 +186,25 @@ const styles = StyleSheet.create({
     width: 1,
     marginLeft: -4,
     marginRight: 6,
-    backgroundColor: Constants.TIER_COLORS.STRIVER,
+    backgroundColor: COLORS.LINE,
   },
   headerTextRightButton: {
     marginRight: 20,
-    textDecorationLine: 'underline',
-    // color: '#888888',
-    color: Constants.COLOR_POINT_BLUE,
+    color: COLORS.AMBER_DEEP,
     fontSize: 14,
-    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
+    fontFamily: FONT.SemiBold,
   },
   hashTagTextInput: {
     flex: 1,
     fontSize: 14,
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
+    color: COLORS.INK,
+    fontFamily: FONT.Regular,
     borderWidth: 1,
-    borderColor: Constants.TIER_COLORS.STRIVER,
-    paddingVertical: 6,
+    borderColor: COLORS.LINE,
+    borderRadius: RADIUS.FIELD,
+    backgroundColor: COLORS.SURFACE,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
   hashTagListContainer: {
     flexDirection: 'row',
@@ -206,14 +215,15 @@ const styles = StyleSheet.create({
   hashTagList: {
     borderWidth: 1,
     borderRadius: 20,
-    borderColor: Constants.TIER_COLORS.ARTISAN,
+    borderColor: COLORS.LINE,
+    backgroundColor: COLORS.SURFACE,
     marginRight: 10,
-    paddingVertical: 4,
-    paddingHorizontal: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 11,
     flexDirection: 'row',
     marginBottom: 5,
   },
-  hashTagItem: { fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR, color: Constants.TIER_COLORS.ARTISAN },
+  hashTagItem: { fontFamily: FONT.Medium, fontSize: 12.5, color: COLORS.INK },
 });
 
 export default styles;

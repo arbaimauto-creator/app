@@ -1,4 +1,5 @@
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import T from './Constants/DesignTokens';
 import { logout as KakaoLogout } from '@react-native-seoul/kakao-login';
 import { CommonActions } from '@react-navigation/routers';
 import React, { PureComponent } from 'react';
@@ -58,14 +59,14 @@ function WithdrawalDescription({ context }) {
           flex: 1,
           fontSize: 14,
           borderWidth: 1,
-          borderColor: Constants.TIER_COLORS.STRIVER,
+          borderColor: T.COLORS.GREY,
           minHeight: 100,
         }}
         borderRadius={5}
         multiline={true}
         scrollEnabled={false}
         placeholder={Strings.CANCEL_MEMBERSHIP_REASON_SECTION_PLACEHOLDER}
-        placeholderTextColor={Constants.TIER_COLORS.OPERATOR}
+        placeholderTextColor={T.COLORS.GREY}
         onChangeText={(description) => context.setState({ description })}
         value={context.state.description}
         maxLength={Constants.MAX_LENGTH_REVIEW_DESCRIPTION}
@@ -112,7 +113,7 @@ export default class MembershipWithdrawalPage extends PureComponent {
     navigation.setOptions({
       title: Strings.CANCEL_MEMBERSHIP_REASON_PAGE_TITLE,
       headerLeft: () => HeaderLeftBackButton({ navigation }),
-      headerTintColor: Constants.TIER_COLORS.ARTISAN,
+      headerTintColor: T.COLORS.INK,
       headerTitleStyle: {
         fontSize: moderateScale(20),
         fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
@@ -268,7 +269,7 @@ export default class MembershipWithdrawalPage extends PureComponent {
           fadeOutDuration={1900}
           position={'bottom'}
           style={{
-            backgroundColor: Constants.TIER_COLORS.ARTISAN,
+            backgroundColor: T.COLORS.INK,
             borderRadius: 20,
             paddingHorizontal: 20,
             bottom: getStatusBarHeight(),
@@ -295,17 +296,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionTitle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 16,
   },
   dataLength: {
     marginLeft: 6,
     fontSize: 12,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
   },
   textInput: {
     paddingHorizontal: 10,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 18,
     marginHorizontal: 20,
   },

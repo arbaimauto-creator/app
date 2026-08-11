@@ -1,4 +1,5 @@
 import { useRoute } from '@react-navigation/native';
+import T from './Constants/DesignTokens';
 import dayjs from 'dayjs';
 import React, { PureComponent, useContext } from 'react';
 import {
@@ -131,7 +132,7 @@ function ProductDescription({ product, KRWPerUSD = 1300 }) {
                 style={{
                   fontSize: 10,
                   fontFamily: Constants.CUSTOM_FONTS.SCDREAM.LIGHT_3,
-                  color: Constants.COLOR_RED,
+                  color: T.COLORS.RED,
                 }}
               >
                 {Strings.SIGN_IN_AND_CHECK_LOWEST_PRICE}
@@ -707,7 +708,7 @@ export default class VideoListItemView extends PureComponent {
                   {this.props.showDescription && (
                     <Text
                       numberOfLines={4}
-                      style={{ color: Constants.TIER_COLORS.ARTISAN, fontWeight: 'bold' }}
+                      style={{ color: T.COLORS.INK, fontWeight: 'bold' }}
                     >
                       {this.props.data.description}
                     </Text>
@@ -731,9 +732,9 @@ export default class VideoListItemView extends PureComponent {
                       <IconEntypo
                         name="check"
                         size={14}
-                        style={{ color: Constants.TIER_COLORS.ARTISAN, marginRight: 4 }}
+                        style={{ color: T.COLORS.INK, marginRight: 4 }}
                       />
-                      <Text style={{ color: Constants.TIER_COLORS.ARTISAN, fontSize: 12 }}>
+                      <Text style={{ color: T.COLORS.INK, fontSize: 12 }}>
                         {this.props.data.ratingCount !== 0 ? this.props.data.ratingScore : '-'}
                       </Text>
                     </View>
@@ -797,7 +798,7 @@ export default class VideoListItemView extends PureComponent {
                   {this.props.showDescription && (
                     <Text
                       numberOfLines={4}
-                      style={{ color: Constants.TIER_COLORS.ARTISAN, fontWeight: 'bold' }}
+                      style={{ color: T.COLORS.INK, fontWeight: 'bold' }}
                     >
                       {this.props.data.description}
                     </Text>
@@ -821,9 +822,9 @@ export default class VideoListItemView extends PureComponent {
                       <IconEntypo
                         name="check"
                         size={14}
-                        style={{ color: Constants.TIER_COLORS.ARTISAN, marginRight: 4 }}
+                        style={{ color: T.COLORS.INK, marginRight: 4 }}
                       />
-                      <Text style={{ color: Constants.TIER_COLORS.ARTISAN, fontSize: 12 }}>
+                      <Text style={{ color: T.COLORS.INK, fontSize: 12 }}>
                         {this.props.data.ratingCount !== 0 ? this.props.data.ratingScore : '-'}
                       </Text>
                     </View>
@@ -844,7 +845,7 @@ const styles = StyleSheet.create({
   itemDuration: {
     fontSize: 10,
     opacity: 0.5,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontWeight: 'bold',
     alignSelf: 'flex-start',
     textAlign: 'center',
@@ -901,18 +902,18 @@ const styles = StyleSheet.create({
     marginTop: moderateScale(15),
   },
   reviewRating: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 13,
     fontWeight: 'bold',
   },
   linkedProductContainer: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255,255,255,0.5)', //Constants.TIER_COLORS.EXPLORER,
+    backgroundColor: 'rgba(255,255,255,0.5)', //T.COLORS.LINE,
     borderRadius: 4,
   },
   linkedProductContainerForBlackBackground: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255,255,255,0.5)', //Constants.TIER_COLORS.EXPLORER,
+    backgroundColor: 'rgba(255,255,255,0.5)', //T.COLORS.LINE,
     borderRadius: 4,
   },
   linkedProductThumbnail: {
@@ -931,12 +932,12 @@ const styles = StyleSheet.create({
   },
   linkedProductTitle: {
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontWeight: '600',
     fontSize: 12,
   },
   linkedProductDiscountRate: {
-    color: Constants.COLOR_RED,
+    color: T.COLORS.RED,
     fontSize: 12,
     marginRight: 4,
   },
@@ -947,9 +948,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   reviewTitle: {
-    // color: Constants.TIER_COLORS.ARTISAN,
+    // color: T.COLORS.INK,
     // color: '#e6e6e6',
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     // fontSize: 15,
     fontSize: 14,
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
@@ -972,14 +973,14 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     // color: 'rgb(128, 128, 128)',
     // color: '#999',
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     // fontSize: 13,
     fontSize: 14,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.MEDIUM,
   },
   reviewFooterInfoViewCount: {
     // color: 'rgb(128, 128, 128)',
-    color: Constants.TIER_COLORS.OPERATOR,
+    color: T.COLORS.GREY,
     // fontSize: 13,
     fontSize: 12,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
@@ -1011,19 +1012,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 9,
-    backgroundColor: Constants.TIER_COLORS.GIVER,
+    backgroundColor: T.COLORS.AMBER,
   },
   participateEventText: {
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
     paddingVertical: 5,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
   },
   exporedEventBox: {
     marginTop: -5,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 9,
-    backgroundColor: Constants.TIER_COLORS.STRIVER,
+    backgroundColor: T.COLORS.GREY,
   },
   exporedEventText: {
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,

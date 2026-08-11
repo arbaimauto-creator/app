@@ -67,7 +67,7 @@
 //     <View style={style}>
 //       <Video
 //         {...props}
-//         videoStyle={{ backgroundColor: Constants.TIER_COLORS.ARTISAN }}
+//         videoStyle={{ backgroundColor: T.COLORS.INK }}
 //         ref={(videoPlayerRef) => {
 //           // videoPlayer = videoPlayerRef;
 //           setVideoPlayer(videoPlayerRef);
@@ -150,6 +150,7 @@
 // });
 
 import * as React from 'react';
+import T from './Constants/DesignTokens';
 import {
   Dimensions,
   LayoutAnimation,
@@ -237,7 +238,7 @@ export default function VideoPlayerView({
     <View style={style}>
       <Video
         {...props}
-        videoStyle={{ backgroundColor: Constants.TIER_COLORS.ARTISAN }}
+        videoStyle={{ backgroundColor: T.COLORS.INK }}
         ref={(playerRef) => {
           // 파라미터 이름을 다르게 변경
           // console.log('Video ref callback called:', playerRef);

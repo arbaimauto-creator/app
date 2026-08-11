@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import T from '../../Components/Constants/DesignTokens';
 import { Platform, Pressable, Text, View } from 'react-native';
 import CountryPicker, { DEFAULT_THEME } from 'react-native-country-picker-modal';
 import FastImage from 'react-native-fast-image';
@@ -36,7 +37,7 @@ export default function Country({ context }) {
             }}
           >
             <View style={styles.selectButtonContainer}>
-              <Text style={{ color: Constants.TIER_COLORS.STRIVER, fontSize: 16 }}>
+              <Text style={{ color: T.COLORS.GREY, fontSize: 16 }}>
                 {Strings.USER_ORIGIN_SELECTION}
               </Text>
               <FastImage

@@ -1,4 +1,5 @@
 import React from 'react';
+import T from '../../Constants/DesignTokens';
 import { SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
 import IconFontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { VictoryArea, VictoryChart, VictoryGroup, VictoryPolarAxis } from 'victory-native';
@@ -27,7 +28,7 @@ export default function G6UserChart(props) {
           <Text
             style={{
               textAlign: 'center',
-              color: Constants.TIER_COLORS.ARTISAN,
+              color: T.COLORS.INK,
               fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
               fontSize: 20,
             }}
@@ -51,7 +52,7 @@ export default function G6UserChart(props) {
       >
         <Text
           style={{
-            color: Constants.TIER_COLORS.ARTISAN,
+            color: T.COLORS.INK,
             fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
             fontSize: 18,
             marginRight: 5,
@@ -63,7 +64,7 @@ export default function G6UserChart(props) {
         <IconFontAwesome5
           name={'question-circle'}
           size={18}
-          color={Constants.TIER_COLORS.STRIVER}
+          color={T.COLORS.GREY}
         />
       </TouchableOpacity>
 
@@ -122,7 +123,7 @@ export default function G6UserChart(props) {
                     axis: { stroke: 'none' },
                     grid: { stroke: 'none' },
                     tickLabels: {
-                      fill: Constants.TIER_COLORS.ARTISAN,
+                      fill: T.COLORS.INK,
                       fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
                       fontWeight: '600',
                       fontSize: moderateScale(14),

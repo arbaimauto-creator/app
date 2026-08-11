@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import T from '../Constants/DesignTokens';
 import {
   Alert,
   Dimensions,
@@ -21,7 +22,7 @@ function BottomButton({ title, onButtonPress, disabled = true }) {
       <View style={disabled ? styles.bottomDisabledButtonContainer : styles.bottomButtonContainer}>
         <Text
           style={{
-            color: Constants.TIER_COLORS.ARTISAN,
+            color: T.COLORS.INK,
             fontSize: 18,
             fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
           }}
@@ -165,7 +166,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   modalTitle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     paddingHorizontal: 25,
     fontSize: 20,
     lineHeight: 33,

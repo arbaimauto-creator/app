@@ -1,4 +1,5 @@
 import React from 'react';
+import T from './Constants/DesignTokens';
 import {
   Alert,
   Modal,
@@ -53,7 +54,7 @@ export default class AgreementToSignUpScreen extends React.Component {
 
     props.navigation.setOptions({
       title: Strings.SIGN_UP,
-      headerTintColor: Constants.TIER_COLORS.ARTISAN,
+      headerTintColor: T.COLORS.INK,
       headerTitleStyle: {
         fontSize: moderateScale(20),
         fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
@@ -363,7 +364,7 @@ const styles = StyleSheet.create({
   },
   descriptionTitle: {
     fontSize: 14,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     padding: 20,
   },
   agreeItemContainer: {
@@ -382,7 +383,7 @@ const styles = StyleSheet.create({
   agreeItemTitle: {
     flex: 1,
     fontSize: 17,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     marginLeft: 10,
   },
   centeredView: {
@@ -405,7 +406,7 @@ const styles = StyleSheet.create({
     height: 22,
   },
   textStyle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontWeight: 'bold',
     textAlign: 'center',
   },
@@ -418,12 +419,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 17,
     lineHeight: 26,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     marginVertical: 20,
   },
   modalText: {
     marginBottom: 15,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 14,
     lineHeight: 20,
   },
@@ -439,7 +440,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: Constants.TIER_COLORS.STRIVER,
+    backgroundColor: T.COLORS.GREY,
     marginBottom: 10,
     marginHorizontal: 20,
   },

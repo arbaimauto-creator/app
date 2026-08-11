@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import T from '../../Constants/DesignTokens';
 import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { styles } from '../../../screens/ChatView/styles';
 import APIprovider from '../../APIprovider';
@@ -45,9 +46,9 @@ export default function InputNewQnaHashtag({ host, selectedHastag, context, hash
       <View style={[styles.mainContainer, { paddingLeft: 20 }]}>
         <View style={styles.cellContainer}>
           <TextInput
-            style={[styles.countText, { color: Constants.TIER_COLORS.ARTISAN, width: '80%' }]}
+            style={[styles.countText, { color: T.COLORS.INK, width: '80%' }]}
             placeholder={Strings.NEW_HASHTAG_PLACE_HOLDER}
-            placeholderTextColor={Constants.TIER_COLORS.ARTISAN}
+            placeholderTextColor={T.COLORS.INK}
             value={text}
             onChangeText={(value) => {
               setText(value);
@@ -63,7 +64,7 @@ export default function InputNewQnaHashtag({ host, selectedHastag, context, hash
             }}
             onPress={() => handlePressAddQna()}
           >
-            <Text style={[styles.countText, { color: Constants.TIER_COLORS.ARTISAN }]}>
+            <Text style={[styles.countText, { color: T.COLORS.INK }]}>
               {Strings.NEW_HASHTAG_CHAT_SEND}
             </Text>
           </TouchableOpacity>

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import T from '../../Components/Constants/DesignTokens';
 import { StyleSheet, View } from 'react-native';
 import { ClipPath, Defs, Path, Svg, Image as SvgImage } from 'react-native-svg';
 
@@ -15,7 +16,7 @@ export default function UserProfilePicViewUpdate({
   ratingCount,
   ...props
 }) {
-  let classColor = Constants.TIER_COLORS.ARTISAN;
+  let classColor = T.COLORS.INK;
   switch (userClass) {
     case 1:
       classColor = Constants.COLOR_USER_CLASS_1;

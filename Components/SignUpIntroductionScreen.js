@@ -1,4 +1,5 @@
 import { CommonActions } from '@react-navigation/native';
+import T from './Constants/DesignTokens';
 import React from 'react';
 import {
   Alert,
@@ -160,7 +161,7 @@ const styles = StyleSheet.create({
   },
   textInput: {
     flex: 1,
-    backgroundColor: Constants.TIER_COLORS.ARTISAN,
+    backgroundColor: T.COLORS.INK,
     borderRadius: 10,
     padding: 10,
     marginHorizontal: 40,

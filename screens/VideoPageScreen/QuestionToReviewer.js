@@ -1,4 +1,5 @@
 import React from 'react';
+import T from '../../Components/Constants/DesignTokens';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import Constants from '../../Components/Constants';
@@ -40,7 +41,7 @@ const styles = StyleSheet.create({
   },
   buttonIcon: { width: 30, height: 30 },
   buttonText: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 18,
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
   },

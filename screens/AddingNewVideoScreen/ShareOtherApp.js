@@ -1,4 +1,5 @@
 import React from 'react';
+import T from '../../Components/Constants/DesignTokens';
 import { View, Text, Switch, Alert } from 'react-native';
 import Constants from '../../Components/Constants';
 import Strings from '../../Components/Strings';
@@ -24,15 +25,15 @@ export default function ShareOtherApp({ context }) {
             </Text>
             <Switch
               trackColor={{
-                false: Constants.TIER_COLORS.ARTISAN,
+                false: T.COLORS.INK,
                 true: Constants.COLOR_POINT_BLUE,
               }}
               thumbColor={
                 context.state.shareToInstagram
                   ? Constants.TIER_COLORS.PIONEER
-                  : Constants.TIER_COLORS.EXPLORER
+                  : T.COLORS.LINE
               }
-              ios_backgroundColor={Constants.TIER_COLORS.ARTISAN}
+              ios_backgroundColor={T.COLORS.INK}
               onValueChange={(isShareToInstagram) => {
                 if (isShareToInstagram) {
                   context.setState({ shareToInstagram: true });
@@ -55,15 +56,15 @@ export default function ShareOtherApp({ context }) {
             </Text>
             <Switch
               trackColor={{
-                false: Constants.TIER_COLORS.ARTISAN,
+                false: T.COLORS.INK,
                 true: Constants.COLOR_POINT_BLUE,
               }}
               thumbColor={
                 context.state.shareToTiktok
                   ? Constants.TIER_COLORS.PIONEER
-                  : Constants.TIER_COLORS.EXPLORER
+                  : T.COLORS.LINE
               }
-              ios_backgroundColor={Constants.TIER_COLORS.ARTISAN}
+              ios_backgroundColor={T.COLORS.INK}
               onValueChange={(isShareToTiktok) => {
                 if (isShareToTiktok) {
                   context.setState({ shareToTiktok: true });

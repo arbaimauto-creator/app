@@ -1,4 +1,5 @@
 import { CommonActions } from '@react-navigation/native';
+import T from '../../Components/Constants/DesignTokens';
 import React from 'react';
 import {
   Alert,
@@ -60,7 +61,7 @@ export default class SignUpScreen extends React.Component {
 
     props.navigation.setOptions({
       title: Strings.SET_PROFILE,
-      headerTintColor: Constants.TIER_COLORS.ARTISAN,
+      headerTintColor: T.COLORS.INK,
       headerTitleStyle: {
         fontSize: moderateScale(20),
         fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,

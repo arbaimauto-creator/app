@@ -1,4 +1,5 @@
 import * as React from 'react';
+import T from './Constants/DesignTokens';
 import { Text, View, StyleSheet, Dimensions } from 'react-native';
 
 import { TabBar, TabView } from 'react-native-tab-view';
@@ -124,9 +125,9 @@ export default function BookmarkListTabView(props) {
           {...props}
           {...Constants.TAB_VIEW_STYLE_PROPS}
           tabStyle={{ width: 'auto', margin: -10 }}
-          style={{ backgroundColor: Constants.TIER_COLORS.EXPLORER }}
-          indicatorStyle={{ backgroundColor: Constants.TIER_COLORS.EXPLORER }}
-          indicatorContainerStyle={{ borderBottomColor: Constants.TIER_COLORS.EXPLORER }}
+          style={{ backgroundColor: T.COLORS.LINE }}
+          indicatorStyle={{ backgroundColor: T.COLORS.LINE }}
+          indicatorContainerStyle={{ borderBottomColor: T.COLORS.LINE }}
           renderLabel={({ route, focused }) => {
             switch (route.key) {
               case 'video':
@@ -167,17 +168,17 @@ const styles = StyleSheet.create({
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
   },
   tabBarLabel: {
-    color: Constants.TIER_COLORS.OPERATOR,
+    color: T.COLORS.GREY,
     fontSize: moderateScale(16),
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
   },
   divider: {
     height: 0,
-    backgroundColor: Constants.TIER_COLORS.OPERATOR,
+    backgroundColor: T.COLORS.GREY,
     marginTop: 10,
   },
   tabBarLabelContainer: (focused) => ({
-    backgroundColor: focused ? Constants.COLOR_POINT_BLUE : Constants.TIER_COLORS.EXPLORER,
+    backgroundColor: focused ? Constants.COLOR_POINT_BLUE : T.COLORS.LINE,
     width: focused ? '150%' : '100%',
     paddingVertical: 10,
     paddingHorizontal: 20,

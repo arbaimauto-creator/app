@@ -1,4 +1,5 @@
 import React from 'react';
+import T from './Constants/DesignTokens';
 import {
   Alert,
   Pressable,
@@ -107,7 +108,7 @@ function HeaderTitle(navigation) {
       <Text
         style={{
           ...styles.headerTitle,
-          color: Constants.TIER_COLORS.ARTISAN,
+          color: T.COLORS.INK,
           fontSize: moderateScale(20),
           fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
           marginRight: moderateScale(5),
@@ -137,7 +138,7 @@ function HeaderTitle(navigation) {
           <IconFontAwesome5
             name={'question-circle'}
             size={20}
-            color={Constants.TIER_COLORS.GIVER}
+            color={T.COLORS.AMBER}
             style={{ marginBottom: 2 }}
           />
         </TouchableOpacity>
@@ -463,7 +464,7 @@ class RewardListScreen extends React.Component {
         <Animated.FlatList
           refreshControl={
             <RefreshControl
-              tintColor={Constants.TIER_COLORS.ARTISAN}
+              tintColor={T.COLORS.INK}
               refreshing={isRefreshing}
               onRefresh={() => {
                 this.fetchRevenueByRevenueType(sortType);
@@ -579,7 +580,7 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   totalAmountTitle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 15,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
     marginRight: 6,
@@ -593,7 +594,7 @@ const styles = StyleSheet.create({
     height: 1,
     marginHorizontal: 20,
     marginVertical: 10,
-    backgroundColor: Constants.TIER_COLORS.OPERATOR,
+    backgroundColor: T.COLORS.GREY,
   },
 });
 

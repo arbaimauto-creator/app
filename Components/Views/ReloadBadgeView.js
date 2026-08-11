@@ -1,11 +1,12 @@
 import React from 'react';
+import T from '../Constants/DesignTokens';
 import { StyleSheet, View } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Constants from '../Constants';
 
 export default function ReloadBadgeView({ size = 22, containerStyle = {} }) {
   const icReload = (
-    <Icon name={'refresh-outline'} size={size} color={Constants.TIER_COLORS.ARTISAN} />
+    <Icon name={'refresh-outline'} size={size} color={T.COLORS.INK} />
   );
 
   return <View style={[styles.cancelIconContainer, containerStyle]}>{icReload}</View>;

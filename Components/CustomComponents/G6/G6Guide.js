@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import T from '../../Constants/DesignTokens';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Constants from '../../Constants';
 import Strings, { getLanguage } from '../../Strings';
@@ -26,7 +27,7 @@ function G6ItemButtion({ text, top, left, onPress, currentState }) {
         ...styles.G6TextContainer,
         top: top,
         left: left,
-        borderColor: currentState === text ? Constants.COLOR_MAIN : Constants.TIER_COLORS.ARTISAN,
+        borderColor: currentState === text ? Constants.COLOR_MAIN : T.COLORS.INK,
       }}
     >
       <Text style={styles.G6Text}>{text}</Text>
@@ -40,7 +41,7 @@ function HeaderTitle() {
       {getLanguage() === 'en' ? (
         <>
           <Text style={{ ...styles.headerTitle, color: Constants.COLOR_MAIN }}> </Text>
-          <Text style={{ ...styles.headerTitle, color: Constants.TIER_COLORS.ARTISAN }}>
+          <Text style={{ ...styles.headerTitle, color: T.COLORS.INK }}>
             What Is <Text style={{ ...styles.headerTitle, color: Constants.COLOR_MAIN }}>G6 </Text>(
             {Strings.GREYD_SIX}) ?
           </Text>
@@ -48,7 +49,7 @@ function HeaderTitle() {
       ) : (
         <>
           <Text style={{ ...styles.headerTitle, color: Constants.COLOR_MAIN }}>G6</Text>
-          <Text style={{ ...styles.headerTitle, color: Constants.TIER_COLORS.ARTISAN }}>
+          <Text style={{ ...styles.headerTitle, color: T.COLORS.INK }}>
             ({Strings.GREYD_SIX})란?
           </Text>
         </>
@@ -191,12 +192,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     borderRadius: 14,
     borderWidth: 0.5,
-    borderColor: Constants.TIER_COLORS.ARTISAN,
+    borderColor: T.COLORS.INK,
     paddingVertical: 2,
     alignItems: 'center',
   },
   G6Text: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
     fontSize: 12,
   },

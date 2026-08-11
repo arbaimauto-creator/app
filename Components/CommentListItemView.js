@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react';
+import T from './Constants/DesignTokens';
 import { Alert, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
 import Preference from 'react-native-default-preference';
 import { Button } from 'react-native-elements';
@@ -275,7 +276,7 @@ export default class CommentListItemView extends PureComponent {
               <Text
                 style={{
                   ...styles.commentText,
-                  color: Constants.TIER_COLORS.STRIVER,
+                  color: T.COLORS.GREY,
                   paddingTop: 5,
                   fontSize: 14,
                 }}
@@ -353,7 +354,7 @@ const styles = StyleSheet.create({
   },
   commentText: {
     flex: 1,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.MEDIUM,
     fontSize: 14,
   },

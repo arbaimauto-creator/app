@@ -1,4 +1,5 @@
 import React from 'react';
+import T from './Constants/DesignTokens';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -206,7 +207,7 @@ export default class SearchProductScreen extends React.Component {
                 placeholder={Strings.PRODUCT_SEARCH_GUIDE}
                 searchIcon={{
                   icon: 'search',
-                  color: Constants.TIER_COLORS.ARTISAN,
+                  color: T.COLORS.INK,
                   size: 20,
                   style: {
                     marginLeft: 10,
@@ -215,7 +216,7 @@ export default class SearchProductScreen extends React.Component {
                 }}
                 cancelIcon={{
                   iconProps: {
-                    color: Constants.TIER_COLORS.ARTISAN,
+                    color: T.COLORS.INK,
                   },
                 }}
                 cancelButtonProps={{
@@ -228,7 +229,7 @@ export default class SearchProductScreen extends React.Component {
                   width: '100%',
                   backgroundColor: Constants.COLOR_BACKGROUND_DARK,
                   borderWidth: 1,
-                  borderColor: Constants.TIER_COLORS.ARTISAN,
+                  borderColor: T.COLORS.INK,
                   borderRadius: 8,
                   paddingHorizontal: 8,
                   height: 36,
@@ -256,7 +257,7 @@ export default class SearchProductScreen extends React.Component {
                     : {}),
                 }}
                 inputStyle={{
-                  color: Constants.TIER_COLORS.ARTISAN,
+                  color: T.COLORS.INK,
                   fontSize: 14,
                   height: 36,
                   textAlignVertical: 'center',
@@ -385,7 +386,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   noResultMessage: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 18,
     lineHeight: 24,
     textAlign: 'center',
@@ -404,7 +405,7 @@ const styles = StyleSheet.create({
     marginTop: -5,
     borderRadius: 5,
     borderWidth: 1,
-    borderColor: Constants.TIER_COLORS.STRIVER,
+    borderColor: T.COLORS.GREY,
     paddingVertical: 5,
     paddingHorizontal: 15,
     marginHorizontal: 20,
@@ -414,7 +415,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   guideText: {
-    color: Constants.TIER_COLORS.OPERATOR,
+    color: T.COLORS.GREY,
     fontSize: 14,
     flexDirection: 'column',
   },

@@ -1,4 +1,5 @@
 import React from 'react';
+import T from '../../Constants/DesignTokens';
 import { StyleSheet, Text, View } from 'react-native';
 import Constants from '../../Constants';
 import Strings, { getLanguage } from '../../Strings';
@@ -13,7 +14,7 @@ function G6DescriptionText() {
         <Text
           style={{
             fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-            color: Constants.TIER_COLORS.ARTISAN,
+            color: T.COLORS.INK,
           }}
         >
           greyd
@@ -93,7 +94,7 @@ function G6Description({ tierState }) {
 
 const styles = StyleSheet.create({
   G6DescriptionTitle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: moderateScale(20),
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
     marginTop: moderateScale(5),
@@ -101,7 +102,7 @@ const styles = StyleSheet.create({
   },
   G6DescriptionContent: {
     // lineHeight: moderateScale(18),
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: moderateScale(13),
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.LIGHT_3,
     marginBottom: moderateScale(10),

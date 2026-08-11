@@ -1,4 +1,5 @@
 import React from 'react';
+import T from '../../Constants/DesignTokens';
 import { Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import Constants from '../../Constants';
@@ -114,7 +115,7 @@ const styles = StyleSheet.create({
     height: width / 3 - 12,
     width: width / 3 - 12,
     resizeMode: 'stretch',
-    backgroundColor: Constants.TIER_COLORS.OPERATOR,
+    backgroundColor: T.COLORS.GREY,
     alignSelf: 'flex-start',
     justifyContent: 'flex-start',
   },
@@ -122,7 +123,7 @@ const styles = StyleSheet.create({
     height: width * 0.6 + 8,
     width: width * 0.6 + 8,
     marginLeft: 0,
-    backgroundColor: Constants.TIER_COLORS.STRIVER,
+    backgroundColor: T.COLORS.GREY,
     resizeMode: 'stretch',
     alignSelf: 'flex-start',
     justifyContent: 'flex-start',

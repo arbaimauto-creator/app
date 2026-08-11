@@ -1,4 +1,5 @@
 import * as React from 'react';
+import T from './Constants/DesignTokens';
 import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { SectionGrid } from 'react-native-super-grid';
@@ -84,15 +85,15 @@ export default function ReviewsTabView(props) {
             }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={{ color: Constants.TIER_COLORS.ARTISAN, fontSize: 15, marginLeft: 5 }}>
+              <Text style={{ color: T.COLORS.INK, fontSize: 15, marginLeft: 5 }}>
                 {`${reviewCount[index]}`}
               </Text>
-              <Text style={{ color: Constants.TIER_COLORS.ARTISAN, fontSize: 15, marginLeft: 2 }}>
+              <Text style={{ color: T.COLORS.INK, fontSize: 15, marginLeft: 2 }}>
                 {'+'}
               </Text>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={{ color: Constants.TIER_COLORS.ARTISAN, fontSize: 15 }}>
+              <Text style={{ color: T.COLORS.INK, fontSize: 15 }}>
                 {Strings.LATEST_ORDER}
               </Text>
               <FastImage source={require('../Resources/img/iconRenewal/icSortDown22.png')} />

@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import T from '../../Constants/DesignTokens';
 import React from 'react';
 import { ActivityIndicator, Dimensions, RefreshControl, View } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -82,7 +83,7 @@ const InstaGrid = ({ columns, navigation }) => {
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
-              tintColor={Constants.TIER_COLORS.ARTISAN}
+              tintColor={T.COLORS.INK}
               refreshing={isRefreshing}
               onRefresh={() => {
                 fetchData();

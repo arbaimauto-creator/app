@@ -1,4 +1,5 @@
 import { useRoute } from '@react-navigation/native';
+import T from './Constants/DesignTokens';
 import dayjs from 'dayjs';
 import { PureComponent, useContext } from 'react';
 import {
@@ -362,7 +363,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     fontSize: 15,
     lineHeight: 19,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
   },
   priceContainerInRow: {
     flexDirection: 'row',
@@ -383,12 +384,12 @@ const styles = StyleSheet.create({
   },
   discountPrice: {
     fontSize: 15,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     marginRight: 10,
   },
   originalPrice: {
     fontSize: 13,
-    color: Constants.TIER_COLORS.OPERATOR,
+    color: T.COLORS.GREY,
     textDecorationLine: 'line-through',
   },
   price: {

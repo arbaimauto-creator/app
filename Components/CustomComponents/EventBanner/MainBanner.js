@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import T from '../../Constants/DesignTokens';
 import { Dimensions, Linking, StyleSheet, Text, TouchableNativeFeedback, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import LinearGradient from 'react-native-linear-gradient';
@@ -20,7 +21,7 @@ export default function MainBanner({ navigation, eventBanner }) {
       <ShimmerPlaceholder
         style={{
           ...styles.container,
-          backgroundColor: Constants.TIER_COLORS.EXPLORER,
+          backgroundColor: T.COLORS.LINE,
           width,
         }}
       />

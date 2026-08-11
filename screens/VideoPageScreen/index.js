@@ -1,4 +1,5 @@
 import { CommonActions, useIsFocused } from '@react-navigation/native';
+import T from '../../Components/Constants/DesignTokens';
 import * as Sentry from '@sentry/react-native';
 import React, { useContext, useState } from 'react';
 import {
@@ -265,7 +266,7 @@ class VideoPageScreen extends React.PureComponent {
 
   componentDidMount() {
     if (Platform.OS !== 'ios') {
-      StatusBar.setBackgroundColor(Constants.TIER_COLORS.ARTISAN);
+      StatusBar.setBackgroundColor(T.COLORS.INK);
       StatusBar.setBarStyle('default', true);
     }
 
@@ -1958,7 +1959,7 @@ function PurchasePopup({ context }) {
                 <Text
                   style={{
                     fontSize: 13,
-                    color: Constants.COLOR_RED,
+                    color: T.COLORS.RED,
                   }}
                 >{` (${Strings.REMAINING_QUANTITY(product.availableNumberToSale)})`}</Text>
               )}
@@ -1979,7 +1980,7 @@ function PurchasePopup({ context }) {
                 borderBottomRightRadius: 0,
                 borderTopRightRadius: 0,
               }}
-              titleStyle={{ color: Constants.TIER_COLORS.ARTISAN }}
+              titleStyle={{ color: T.COLORS.INK }}
               type={'outline'}
               icon={
                 <FastImage
@@ -2005,7 +2006,7 @@ function PurchasePopup({ context }) {
                 justifyContent: 'center',
               }}
             >
-              <Text style={{ color: Constants.TIER_COLORS.ARTISAN, fontSize: 13 }}>
+              <Text style={{ color: T.COLORS.INK, fontSize: 13 }}>
                 {context.state.buyNumber}
               </Text>
             </View>
@@ -2022,7 +2023,7 @@ function PurchasePopup({ context }) {
                 borderBottomLeftRadius: 0,
                 borderTopLeftRadius: 0,
               }}
-              titleStyle={{ color: Constants.TIER_COLORS.ARTISAN }}
+              titleStyle={{ color: T.COLORS.INK }}
               type={'outline'}
               icon={
                 <FastImage
@@ -2256,7 +2257,7 @@ export const styles = StyleSheet.create({
   },
   purchasePopupModalContainer: {
     borderTopWidth: 0.5,
-    borderTopColor: Constants.TIER_COLORS.EXPLORER,
+    borderTopColor: T.COLORS.LINE,
     backgroundColor: Constants.COLOR_BACKGROUND_DARK,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
@@ -2271,23 +2272,23 @@ export const styles = StyleSheet.create({
   },
   purchasePopupModalHeaderTitle: {
     fontWeight: '500',
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 20,
   },
   purchasePopupModalfieldTitle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 15,
     textAlign: 'center',
   },
   purchasePopupModalOptionTitle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 15,
     // marginBottom: 5,
     textAlign: 'center',
   },
   delieverElapsedDay: {
     fontSize: 13,
-    color: Constants.TIER_COLORS.OPERATOR,
+    color: T.COLORS.GREY,
     marginTop: 6,
   },
   productNumberContainer: {
@@ -2299,7 +2300,7 @@ export const styles = StyleSheet.create({
   },
   numberControllerContainer: {
     borderRadius: 4,
-    borderColor: Constants.TIER_COLORS.STRIVER,
+    borderColor: T.COLORS.GREY,
     borderWidth: 1,
     flexDirection: 'row',
   },
@@ -2313,7 +2314,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   optionPrice: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 15,
     fontWeight: '500',
   },
@@ -2326,7 +2327,7 @@ export const styles = StyleSheet.create({
   expectedPrice: {
     fontSize: 18,
     fontWeight: '500',
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
   },
   shadow: {
     ...Platform.select({
@@ -2383,7 +2384,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 20,
     fontSize: 16,
     lineHeight: 26,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
   },
   relatedInfoContainer: {
     paddingBottom: 60,

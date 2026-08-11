@@ -1,4 +1,5 @@
 import React from 'react';
+import T from '../../Components/Constants/DesignTokens';
 import { Text, Vibration, View } from 'react-native';
 import Constants from '../../Components/Constants';
 import CustomRating from '../../Components/CustomComponents/CustomRating';
@@ -34,8 +35,8 @@ export default function ProductRating({ context }) {
             styles.productRating,
             {
               color: context.state.p6Score.brand
-                ? Constants.TIER_COLORS.ARTISAN
-                : Constants.TIER_COLORS.STRIVER,
+                ? T.COLORS.INK
+                : T.COLORS.GREY,
             },
           ]}
         >
@@ -63,8 +64,8 @@ export default function ProductRating({ context }) {
             styles.productRating,
             {
               color: context.state.p6Score.merchantability
-                ? Constants.TIER_COLORS.ARTISAN
-                : Constants.TIER_COLORS.STRIVER,
+                ? T.COLORS.INK
+                : T.COLORS.GREY,
             },
           ]}
         >
@@ -92,8 +93,8 @@ export default function ProductRating({ context }) {
             styles.productRating,
             {
               color: context.state.p6Score.practicality
-                ? Constants.TIER_COLORS.ARTISAN
-                : Constants.TIER_COLORS.STRIVER,
+                ? T.COLORS.INK
+                : T.COLORS.GREY,
             },
           ]}
         >
@@ -121,8 +122,8 @@ export default function ProductRating({ context }) {
             styles.productRating,
             {
               color: context.state.p6Score.convenience
-                ? Constants.TIER_COLORS.ARTISAN
-                : Constants.TIER_COLORS.STRIVER,
+                ? T.COLORS.INK
+                : T.COLORS.GREY,
             },
           ]}
         >
@@ -150,8 +151,8 @@ export default function ProductRating({ context }) {
             styles.productRating,
             {
               color: context.state.p6Score.design
-                ? Constants.TIER_COLORS.ARTISAN
-                : Constants.TIER_COLORS.STRIVER,
+                ? T.COLORS.INK
+                : T.COLORS.GREY,
             },
           ]}
         >
@@ -179,8 +180,8 @@ export default function ProductRating({ context }) {
             styles.productRating,
             {
               color: context.state.p6Score.reasonable
-                ? Constants.TIER_COLORS.ARTISAN
-                : Constants.TIER_COLORS.STRIVER,
+                ? T.COLORS.INK
+                : T.COLORS.GREY,
             },
           ]}
         >

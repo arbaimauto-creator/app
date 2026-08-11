@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import T from './Constants/DesignTokens';
 import { Platform, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import Toast from 'react-native-easy-toast';
 import RNFS from 'react-native-fs';
@@ -75,7 +76,7 @@ export default function QRScreen(props) {
   useEffect(() => {
     props.navigation.setOptions({
       title: Strings.QR_CODE,
-      headerTintColor: Constants.TIER_COLORS.ARTISAN,
+      headerTintColor: T.COLORS.INK,
       headerTitleStyle: {
         fontSize: moderateScale(20),
         fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
@@ -137,10 +138,10 @@ export default function QRScreen(props) {
               size={250}
               value={dynamicLink}
               logo={require('../Resources/img/icBadgeGreydOn42_3x.png')}
-              color={Constants.TIER_COLORS.ARTISAN}
+              color={T.COLORS.INK}
               logoBorderRadius={50}
               logoMargin={10}
-              logoBackgroundColor={Constants.TIER_COLORS.ARTISAN}
+              logoBackgroundColor={T.COLORS.INK}
               getRef={(reference) => setRef(reference)}
             />
             <Text
@@ -169,7 +170,7 @@ export default function QRScreen(props) {
           >
             <Text
               style={{
-                color: Constants.TIER_COLORS.ARTISAN,
+                color: T.COLORS.INK,
                 fontSize: 20,
                 marginTop: 40,
                 fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
@@ -190,7 +191,7 @@ export default function QRScreen(props) {
         position={'bottom'}
         positionValue={Platform.OS === 'ios' ? 300 : 120}
         style={{
-          backgroundColor: Constants.TIER_COLORS.ARTISAN,
+          backgroundColor: T.COLORS.INK,
           borderRadius: 20,
           paddingHorizontal: 20,
           bottom: getStatusBarHeight(),
@@ -213,7 +214,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   border: {
-    backgroundColor: Constants.TIER_COLORS.ARTISAN,
+    backgroundColor: T.COLORS.INK,
     padding: 20,
     borderRadius: 10,
     paddingBottom: 13,

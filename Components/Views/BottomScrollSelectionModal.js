@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import T from '../Constants/DesignTokens';
 import { StyleSheet, Dimensions, TouchableWithoutFeedback, Modal, Text, View } from 'react-native';
 import { isIphoneX, getBottomSpace } from 'react-native-iphone-x-helper';
 import SmoothPicker from 'react-native-smooth-picker';
@@ -113,7 +114,7 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   bottomModalHeaderTitle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 20,
   },
   bottomModalHeaderButton: {
@@ -128,7 +129,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   selectModalText: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     textAlign: 'center',
     fontSize: 20,
     lineHeight: 22,

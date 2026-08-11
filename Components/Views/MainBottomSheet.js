@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import T from '../Constants/DesignTokens';
 import {
   Dimensions,
   RefreshControl,
@@ -107,7 +108,7 @@ function BottomSheetContent({
                       style={{
                         borderRadius: 14,
                         borderWidth: reviewCategory === category.key ? 0.5 : 0,
-                        borderColor: Constants.TIER_COLORS.STRIVER,
+                        borderColor: T.COLORS.GREY,
                         justifyContent: 'center',
                         width: 54,
                         height: 54,
@@ -149,7 +150,7 @@ function BottomSheetContent({
           <View
             style={{
               width: '100%',
-              backgroundColor: Constants.TIER_COLORS.ARTISAN,
+              backgroundColor: T.COLORS.INK,
               height: 0.5,
               marginBottom: 20,
             }}
@@ -165,7 +166,7 @@ function BottomSheetContent({
               style={{
                 fontSize: 20,
                 fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-                color: Constants.TIER_COLORS.ARTISAN,
+                color: T.COLORS.INK,
               }}
             >
               {reviewCategory === ''
@@ -190,7 +191,7 @@ function BottomSheetContent({
                 <Text
                   style={{
                     fontSize: 15,
-                    color: Constants.TIER_COLORS.ARTISAN,
+                    color: T.COLORS.INK,
                     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
                   }}
                 >
@@ -245,7 +246,7 @@ function BottomSheetContent({
           refreshControl={
             <RefreshControl
               refreshing={isReviewsRefreshing}
-              tintColor={Constants.TIER_COLORS.ARTISAN}
+              tintColor={T.COLORS.INK}
               onRefresh={async () => {
                 await onChangeCategory(reviewCategory);
               }}
@@ -454,7 +455,7 @@ export default function MainBottomSheet({ navigation, setSheetOpened, logonUserI
   //             style={{
   //               width: horizontalScale(50),
   //               height: verticalScale(5),
-  //               backgroundColor: Constants.TIER_COLORS.GIVER,
+  //               backgroundColor: T.COLORS.AMBER,
   //               borderRadius: 10,
   //               top: 2,
   //             }}

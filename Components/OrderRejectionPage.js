@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react';
+import T from './Constants/DesignTokens';
 import {
   Alert,
   Keyboard,
@@ -58,7 +59,7 @@ function ReasonDescription({ context }) {
         multiline={true}
         scrollEnabled={false}
         placeholder={Strings.ORDER_REJECTION_PLACEHOLDER}
-        placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+        placeholderTextColor={T.COLORS.GREY}
         onChangeText={(description) => context.setState({ description })}
         value={context.state.description}
         maxLength={Constants.MAX_LENGTH_REVIEW_DESCRIPTION}
@@ -237,17 +238,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionTitle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 16,
   },
   dataLength: {
     marginLeft: 6,
     fontSize: 12,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
   },
   textInput: {
     paddingHorizontal: 10,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 18,
     marginHorizontal: 20,
   },

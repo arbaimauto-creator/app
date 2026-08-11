@@ -22,6 +22,7 @@ import IconFeather from 'react-native-vector-icons/Feather';
 import UserProfilePicView from '../screens/UserPageScreen/UserProfilePicView';
 import APIprovider from './APIprovider';
 import Constants from './Constants';
+import T from './Constants/DesignTokens';
 import HeaderLeftBackButton from './CustomComponents/headerBackButton/headerLeftBackButton';
 import Strings from './Strings';
 import { getLanguage } from './Strings/index';
@@ -65,7 +66,7 @@ function UserId({ context }) {
       <Text style={styles.fieldTitleGuidelines}>{Strings.ID_GUIDELINES}</Text>
       {context.state.warningUserId && (
         <Text style={styles.fieldTitleError}>
-          <IconFeather name={'alert-circle'} size={14} color={'#a00'} />
+          <IconFeather name={'alert-circle'} size={14} color={T.COLORS.RED} />
           <Text />
           <Text>{context.state.wrongIdReason}</Text>
         </Text>
@@ -73,7 +74,7 @@ function UserId({ context }) {
       <TextInput
         style={styles.textInput}
         placeholder={Strings.CONDITION_USER_ID}
-        placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+        placeholderTextColor={T.COLORS.GREY}
         onChangeText={(name) => {
           context.setState({ name });
           if (context.state.warningUserId) {
@@ -125,7 +126,7 @@ function Introduction({ context }) {
         multiline
         style={styles.textInput}
         placeholder={Strings.ADD_PROFILE_DESCRIPTION}
-        placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+        placeholderTextColor={T.COLORS.GREY}
         onChangeText={(introduction) => context.setState({ introduction })}
         value={context.state.introduction}
         maxLength={Constants.MAX_LENGTH_USER_INTRODUCTION}
@@ -143,7 +144,7 @@ function Email({ context }) {
       <Text style={styles.fieldTitleGuidelines}>{Strings.EMAIL_GUIDELINES}</Text>
       {context.state.warningEmail && (
         <Text style={styles.fieldTitleError}>
-          <IconFeather name={'alert-circle'} size={14} color={'#a00'} />
+          <IconFeather name={'alert-circle'} size={14} color={T.COLORS.RED} />
           <Text />
           <Text>{Strings.CHECK_USER_EMAIL}</Text>
         </Text>
@@ -154,7 +155,7 @@ function Email({ context }) {
         autoComplete={'email'}
         style={styles.textInput}
         placeholder={Strings.CONDITION_USER_EMAIL}
-        placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+        placeholderTextColor={T.COLORS.GREY}
         onChangeText={(email) => {
           context.setState({ email });
           if (context.state.warningEmail) {
@@ -190,7 +191,7 @@ function Phone({ context }) {
       <Text style={styles.fieldTitleGuidelines}>{Strings.PHONE_GUIDELINES}</Text>
       {context.state.warningPhone && (
         <Text style={styles.fieldTitleError}>
-          <IconFeather name={'alert-circle'} size={14} color={'#a00'} />
+          <IconFeather name={'alert-circle'} size={14} color={T.COLORS.RED} />
           <Text />
           <Text>{Strings.CHECK_USER_PHONE}</Text>
         </Text>
@@ -200,7 +201,7 @@ function Phone({ context }) {
         textContentType={'telephoneNumber'}
         style={styles.textInput}
         placeholder={Strings.CONDITION_USER_PHONE}
-        placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+        placeholderTextColor={T.COLORS.GREY}
         onChangeText={(phone) => {
           context.setState({ phone });
           if (context.state.warningPhone) {
@@ -284,7 +285,7 @@ function Country({ context }) {
             }}
           >
             <View style={styles.selectButtonContainer}>
-              <Text style={{ color: Constants.TIER_COLORS.ARTISAN, fontSize: 16 }}>
+              <Text style={{ color: T.COLORS.INK, fontSize: 16 }}>
                 {Strings.USER_ORIGIN_SELECTION}
               </Text>
               <FastImage
@@ -296,7 +297,7 @@ function Country({ context }) {
         ) : (
           <CountryPicker
             filterProps={{
-              style: { marginVertical: 3, color: Constants.TIER_COLORS.ARTISAN },
+              style: { marginVertical: 3, color: T.COLORS.INK },
               placeholder: Strings.ENTER_USER_ORIGIN,
             }}
             containerButtonStyle={styles.textInput}
@@ -342,7 +343,7 @@ function UserInstagramId({ context }) {
       <TextInput
         style={styles.textInput}
         placeholder={Strings.CONDITION_USER_INSTAGRAM_ID}
-        placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+        placeholderTextColor={T.COLORS.GREY}
         onChangeText={(value) => {
           context.setState({ instagramId: value });
         }}
@@ -380,15 +381,15 @@ function SelectExposeContribution({ context }) {
         </Text>
         <Switch
           trackColor={{
-            false: Constants.TIER_COLORS.ARTISAN,
-            true: Constants.COLOR_POINT_BLUE,
+            false: T.COLORS.TRACK,
+            true: T.COLORS.AMBER,
           }}
           thumbColor={
             context.state.isHideContributionRevenue
-              ? Constants.TIER_COLORS.PIONEER
-              : Constants.TIER_COLORS.EXPLORER
+              ? '#FFFFFF'
+              : T.COLORS.TRACK
           }
-          ios_backgroundColor={Constants.TIER_COLORS.ARTISAN}
+          ios_backgroundColor={T.COLORS.INK}
           onValueChange={(isExpose) => {
             if (isExpose) {
               context.setState({ isHideContributionRevenue: true });
@@ -407,7 +408,7 @@ function SubmitButton({ isShowActivityIndicator, onPressSubmitButton }) {
   return (
     <Button
       title={Strings.OK}
-      titleStyle={{ color: Constants.COLOR_POINT_BLUE }}
+      titleStyle={{ color: T.COLORS.AMBER_DEEP }}
       type="clear"
       containerStyle={{ marginRight: 10 }}
       disabled={isShowActivityIndicator}
@@ -445,10 +446,10 @@ export default class EditProfileScreen extends React.Component {
     navigation.setOptions({
       title: Strings.EDIT_PROFILE,
       headerLeft: () => HeaderLeftBackButton({ navigation }),
-      headerTintColor: Constants.TIER_COLORS.ARTISAN,
+      headerTintColor: T.COLORS.INK,
       headerTitleStyle: {
         fontSize: moderateScale(20),
-        fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
+        fontFamily: T.FONT.Bold,
       },
       headerRight: () =>
         SubmitButton({
@@ -602,7 +603,7 @@ export default class EditProfileScreen extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Constants.COLOR_BACKGROUND_DARK,
+    backgroundColor: T.COLORS.BG,
   },
   fieldContainer: {
     marginTop: 20,
@@ -614,33 +615,33 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   fieldTitle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 15,
     lineHeight: 18,
     marginRight: 6,
     fontWeight: 'bold',
   },
   fieldTitleGuidelines: {
-    color: Constants.TIER_COLORS.OPERATOR,
+    color: T.COLORS.GREY,
     fontSize: 14,
     lineHeight: 18,
     marginTop: 3,
     paddingHorizontal: 20,
   },
   fieldTitleError: {
-    color: Constants.COLOR_RED,
+    color: T.COLORS.RED,
     fontSize: 14,
     lineHeight: 18,
     marginTop: 3,
     paddingHorizontal: 20,
   },
   textInput: {
-    color: 'black',
+    color: T.COLORS.INK,
     fontSize: 16,
     marginHorizontal: 20,
   },
   textPressible: {
-    color: Constants.COLOR_MAIN,
+    color: T.COLORS.AMBER_DEEP,
     fontSize: 16,
     marginHorizontal: 20,
   },
@@ -651,14 +652,14 @@ const styles = StyleSheet.create({
     borderRadius: 120,
   },
   profilePicTitle: {
-    color: Constants.COLOR_POINT_BLUE,
+    color: T.COLORS.AMBER_DEEP,
     fontSize: 15,
     alignSelf: 'center',
     marginTop: 10,
   },
   count: {
     fontSize: 15,
-    color: Constants.TIER_COLORS.OPERATOR,
+    color: T.COLORS.GREY,
   },
   requiredIcon: {
     width: 8,
@@ -667,7 +668,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: Constants.TIER_COLORS.STRIVER,
+    backgroundColor: T.COLORS.GREY,
     marginHorizontal: 20,
   },
   selectButtonContainer: {
@@ -684,7 +685,7 @@ const styles = StyleSheet.create({
   },
   contributionTextInput: {
     paddingHorizontal: 10,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 18,
     marginHorizontal: 20,
   },

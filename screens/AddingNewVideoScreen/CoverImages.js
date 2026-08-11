@@ -1,4 +1,5 @@
 import React from 'react';
+import T from '../../Components/Constants/DesignTokens';
 import {
   LayoutAnimation,
   ScrollView,
@@ -93,7 +94,7 @@ export default function CoverImages({ context }) {
                       color:
                         context.state.attachmentList.length <= Constants.MAX_NUMBER_REVIEW_IMAGE
                           ? 'rgb(136, 136, 136)'
-                          : Constants.COLOR_RED,
+                          : T.COLORS.RED,
                     },
                   ]}
                 >
@@ -166,7 +167,7 @@ export default function CoverImages({ context }) {
                       color:
                         context.state.attachmentList.length <= Constants.MAX_NUMBER_REVIEW_IMAGE
                           ? 'rgb(136, 136, 136)'
-                          : Constants.COLOR_RED,
+                          : T.COLORS.RED,
                     },
                   ]}
                 >

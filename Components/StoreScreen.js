@@ -1,4 +1,5 @@
 import { useRoute, useScrollToTop } from '@react-navigation/native';
+import T from './Constants/DesignTokens';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   RefreshControl,
@@ -120,7 +121,7 @@ function StoreMainHeaderCategories({ productMain, navigation, logonUserId }) {
               <Text
                 style={{
                   textAlign: 'center',
-                  color: Constants.TIER_COLORS.ARTISAN,
+                  color: T.COLORS.INK,
                   fontSize: moderateScale(13),
                   fontFamily: Constants.CUSTOM_FONTS.SCDREAM.LIGHT_3,
                   // paddingTop: 5,
@@ -169,7 +170,7 @@ function StoreMainProductBoxMoreButton({ listTitle, setIndex }) {
           style={{
             fontSize: moderateScale(16),
             fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-            color: Constants.TIER_COLORS.ARTISAN,
+            color: T.COLORS.INK,
           }}
         >
           {Strings.MORE}
@@ -231,7 +232,7 @@ function StoreMainProductBox({
                   style={{
                     fontSize: moderateScale(20),
                     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-                    color: Constants.TIER_COLORS.ARTISAN,
+                    color: T.COLORS.INK,
                   }}
                 >
                   {listTitle}
@@ -312,7 +313,7 @@ const StoreHome = ({ route }) => {
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
-            tintColor={Constants.TIER_COLORS.ARTISAN}
+            tintColor={T.COLORS.INK}
             refreshing={productMain.loading}
             onRefresh={() => {
               dispatch(fetchStoreMain());
@@ -561,7 +562,7 @@ const SortedProduct = ({
         ref={sectionGridRef}
         refreshControl={
           <RefreshControl
-            tintColor={Constants.TIER_COLORS.ARTISAN}
+            tintColor={T.COLORS.INK}
             refreshing={isRefresh}
             onRefresh={() => {
               _fetchData({ _sortType: sortType });
@@ -602,7 +603,7 @@ const SortedProduct = ({
                   style={{
                     fontSize: moderateScale(20),
                     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-                    color: Constants.TIER_COLORS.ARTISAN,
+                    color: T.COLORS.INK,
                   }}
                 >
                   {listTitle}
@@ -902,7 +903,7 @@ function NewStoreScreen(props) {
   }, [productMain.loading, productMain.data]);
 
   return (
-    <SafeAreaView style={{ ...styles.container, backgroundColor: Constants.TIER_COLORS.GIVER }}>
+    <SafeAreaView style={{ ...styles.container, backgroundColor: T.COLORS.AMBER }}>
       <View style={styles.container}>
         <Header
           navigation={props.navigation}
@@ -919,9 +920,9 @@ function NewStoreScreen(props) {
               scrollEnabled
               {...tabBarProps}
               tabStyle={{ width: 'auto', margin: -10 }}
-              style={{ backgroundColor: Constants.TIER_COLORS.EXPLORER }}
-              indicatorStyle={{ backgroundColor: Constants.TIER_COLORS.EXPLORER }}
-              indicatorContainerStyle={{ borderBottomColor: Constants.TIER_COLORS.EXPLORER }}
+              style={{ backgroundColor: T.COLORS.LINE }}
+              indicatorStyle={{ backgroundColor: T.COLORS.LINE }}
+              indicatorContainerStyle={{ borderBottomColor: T.COLORS.LINE }}
             />
           )}
           commonOptions={{
@@ -1006,17 +1007,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   tabBarLabelFocused: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: moderateScale(14),
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
   },
   tabBarLabel: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: moderateScale(14),
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
   },
   tabBarLabelContainer: (focused) => ({
-    backgroundColor: focused ? Constants.COLOR_POINT_BLUE : Constants.COLOR_BACKGROUND_DARK, //Constants.TIER_COLORS.EXPLORER,
+    backgroundColor: focused ? Constants.COLOR_POINT_BLUE : Constants.COLOR_BACKGROUND_DARK, //T.COLORS.LINE,
     width: focused ? '150%' : '100%',
     paddingVertical: 7.5,
     paddingHorizontal: 20,

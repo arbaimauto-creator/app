@@ -1,4 +1,5 @@
 import { useScrollToTop } from '@react-navigation/native';
+import T from '../Constants/DesignTokens';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -60,7 +61,7 @@ function GreydTierIntro({ tierState, setTierState }) {
         <HexagonWithText
           grade={Strings.GREYD_TIER_GIVER}
           textColor={'#3a3a3a'}
-          fillColor={Constants.TIER_COLORS.GIVER}
+          fillColor={T.COLORS.AMBER}
           opacity={!tierState ? 1 : tierState === Strings.GREYD_TIER_GIVER ? 1 : 0.4}
           tierState={tierState}
         />
@@ -77,7 +78,7 @@ function GreydTierIntro({ tierState, setTierState }) {
         <HexagonWithText
           grade={Strings.GREYD_TIER_ARTISAN}
           textColor={'white'}
-          fillColor={Constants.TIER_COLORS.ARTISAN}
+          fillColor={T.COLORS.INK}
           opacity={!tierState ? 1 : tierState === Strings.GREYD_TIER_ARTISAN ? 1 : 0.4}
           tierState={tierState}
         />
@@ -94,7 +95,7 @@ function GreydTierIntro({ tierState, setTierState }) {
         <HexagonWithText
           grade={Strings.GREYD_TIER_OPERATOR}
           textColor={'white'}
-          fillColor={Constants.TIER_COLORS.OPERATOR}
+          fillColor={T.COLORS.GREY}
           opacity={!tierState ? 1 : tierState === Strings.GREYD_TIER_OPERATOR ? 1 : 0.4}
           tierState={tierState}
         />
@@ -111,7 +112,7 @@ function GreydTierIntro({ tierState, setTierState }) {
         <HexagonWithText
           grade={Strings.GREYD_TIER_STRIVER}
           textColor={'#1a1a1a'}
-          fillColor={Constants.TIER_COLORS.STRIVER}
+          fillColor={T.COLORS.GREY}
           opacity={!tierState ? 1 : tierState === Strings.GREYD_TIER_STRIVER ? 1 : 0.4}
           tierState={tierState}
         />
@@ -128,7 +129,7 @@ function GreydTierIntro({ tierState, setTierState }) {
         <HexagonWithText
           grade={Strings.GREYD_TIER_EXPLORER}
           textColor={'#2a2a2a'}
-          fillColor={Constants.TIER_COLORS.EXPLORER}
+          fillColor={T.COLORS.LINE}
           opacity={!tierState ? 1 : tierState === Strings.GREYD_TIER_EXPLORER ? 1 : 0.4}
           tierState={tierState}
         />
@@ -160,7 +161,7 @@ function GreydTierDescriptionText() {
     <View>
       <Text
         style={{
-          color: Constants.TIER_COLORS.ARTISAN,
+          color: T.COLORS.INK,
           fontSize: moderateScale(16),
           fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
           marginBottom: moderateScale(10),
@@ -171,7 +172,7 @@ function GreydTierDescriptionText() {
       <Text
         style={{
           lineHeight: moderateScale(18),
-          color: Constants.TIER_COLORS.OPERATOR,
+          color: T.COLORS.GREY,
           fontSize: moderateScale(13),
           fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
           marginBottom: moderateScale(10),
@@ -182,7 +183,7 @@ function GreydTierDescriptionText() {
       <Text
         style={{
           lineHeight: moderateScale(18),
-          color: Constants.TIER_COLORS.OPERATOR,
+          color: T.COLORS.GREY,
           fontSize: moderateScale(13),
           fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
         }}
@@ -198,7 +199,7 @@ function GiverDescriptionText() {
     <>
       <Text
         style={{
-          color: Constants.TIER_COLORS.ARTISAN,
+          color: T.COLORS.INK,
           fontSize: moderateScale(16),
           fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
           marginBottom: moderateScale(10),
@@ -209,7 +210,7 @@ function GiverDescriptionText() {
       <Text
         style={{
           lineHeight: moderateScale(18),
-          color: Constants.TIER_COLORS.ARTISAN,
+          color: T.COLORS.INK,
           fontSize: moderateScale(12),
           fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
           marginBottom: moderateScale(5),
@@ -231,7 +232,7 @@ function GiverDescriptionText() {
       <Text
         style={{
           lineHeight: moderateScale(18),
-          color: Constants.TIER_COLORS.OPERATOR,
+          color: T.COLORS.GREY,
           fontSize: moderateScale(12),
           fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
         }}
@@ -258,7 +259,7 @@ function ArtisanDescriptionText() {
     <>
       <Text
         style={{
-          color: Constants.TIER_COLORS.ARTISAN,
+          color: T.COLORS.INK,
           fontSize: moderateScale(16),
           fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
           marginBottom: moderateScale(10),
@@ -269,7 +270,7 @@ function ArtisanDescriptionText() {
       <Text
         style={{
           lineHeight: moderateScale(18),
-          color: Constants.TIER_COLORS.ARTISAN,
+          color: T.COLORS.INK,
           fontSize: moderateScale(12),
           fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
           marginBottom: moderateScale(5),
@@ -285,7 +286,7 @@ function ArtisanDescriptionText() {
       <Text
         style={{
           lineHeight: moderateScale(18),
-          color: Constants.TIER_COLORS.OPERATOR,
+          color: T.COLORS.GREY,
           fontSize: moderateScale(12),
           fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
         }}
@@ -295,7 +296,7 @@ function ArtisanDescriptionText() {
           style={{
             fontSize: moderateScale(12),
             fontFamily: Constants.CUSTOM_FONTS.SUIT.EXTRABOLD,
-            color: Constants.TIER_COLORS.ARTISAN,
+            color: T.COLORS.INK,
           }}
         >
           {' '}
@@ -312,7 +313,7 @@ function OperatorDescriptionText() {
     <>
       <Text
         style={{
-          color: Constants.TIER_COLORS.ARTISAN,
+          color: T.COLORS.INK,
           fontSize: moderateScale(16),
           fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
           marginBottom: moderateScale(10),
@@ -323,7 +324,7 @@ function OperatorDescriptionText() {
       <Text
         style={{
           lineHeight: moderateScale(18),
-          color: Constants.TIER_COLORS.ARTISAN,
+          color: T.COLORS.INK,
           fontSize: moderateScale(12),
           fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
           marginBottom: moderateScale(5),
@@ -339,7 +340,7 @@ function OperatorDescriptionText() {
       <Text
         style={{
           lineHeight: moderateScale(18),
-          color: Constants.TIER_COLORS.OPERATOR,
+          color: T.COLORS.GREY,
           fontSize: moderateScale(12),
           fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
         }}
@@ -349,7 +350,7 @@ function OperatorDescriptionText() {
           style={{
             fontSize: moderateScale(12),
             fontFamily: Constants.CUSTOM_FONTS.SUIT.EXTRABOLD,
-            color: Constants.TIER_COLORS.ARTISAN,
+            color: T.COLORS.INK,
           }}
         >
           {' '}
@@ -366,7 +367,7 @@ function StriverDescriptionText() {
     <>
       <Text
         style={{
-          color: Constants.TIER_COLORS.ARTISAN,
+          color: T.COLORS.INK,
           fontSize: moderateScale(16),
           fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
           marginBottom: moderateScale(10),
@@ -377,7 +378,7 @@ function StriverDescriptionText() {
       <Text
         style={{
           lineHeight: moderateScale(18),
-          color: Constants.TIER_COLORS.ARTISAN,
+          color: T.COLORS.INK,
           fontSize: moderateScale(12),
           fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
           marginBottom: moderateScale(5),
@@ -393,7 +394,7 @@ function StriverDescriptionText() {
       <Text
         style={{
           lineHeight: moderateScale(18),
-          color: Constants.TIER_COLORS.OPERATOR,
+          color: T.COLORS.GREY,
           fontSize: moderateScale(12),
           fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
         }}
@@ -403,7 +404,7 @@ function StriverDescriptionText() {
           style={{
             fontSize: moderateScale(12),
             fontFamily: Constants.CUSTOM_FONTS.SUIT.EXTRABOLD,
-            color: Constants.TIER_COLORS.ARTISAN,
+            color: T.COLORS.INK,
           }}
         >
           {' '}
@@ -420,7 +421,7 @@ function ExplorerDescriptionText() {
     <>
       <Text
         style={{
-          color: Constants.TIER_COLORS.ARTISAN,
+          color: T.COLORS.INK,
           fontSize: moderateScale(16),
           fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
           marginBottom: moderateScale(10),
@@ -431,7 +432,7 @@ function ExplorerDescriptionText() {
       <Text
         style={{
           lineHeight: moderateScale(18),
-          color: Constants.TIER_COLORS.ARTISAN,
+          color: T.COLORS.INK,
           fontSize: moderateScale(12),
           fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
           marginBottom: moderateScale(5),
@@ -447,7 +448,7 @@ function ExplorerDescriptionText() {
       <Text
         style={{
           lineHeight: moderateScale(18),
-          color: Constants.TIER_COLORS.OPERATOR,
+          color: T.COLORS.GREY,
           fontSize: moderateScale(12),
           fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
         }}
@@ -457,7 +458,7 @@ function ExplorerDescriptionText() {
           style={{
             fontSize: moderateScale(12),
             fontFamily: Constants.CUSTOM_FONTS.SUIT.EXTRABOLD,
-            color: Constants.TIER_COLORS.ARTISAN,
+            color: T.COLORS.INK,
           }}
         >
           {' '}
@@ -474,7 +475,7 @@ function PioneerDescriptionText() {
     <>
       <Text
         style={{
-          color: Constants.TIER_COLORS.ARTISAN,
+          color: T.COLORS.INK,
           fontSize: moderateScale(16),
           fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
           marginBottom: moderateScale(10),
@@ -485,7 +486,7 @@ function PioneerDescriptionText() {
       <Text
         style={{
           lineHeight: moderateScale(18),
-          color: Constants.TIER_COLORS.ARTISAN,
+          color: T.COLORS.INK,
           fontSize: moderateScale(12),
           fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
           marginBottom: moderateScale(5),
@@ -501,7 +502,7 @@ function PioneerDescriptionText() {
       <Text
         style={{
           lineHeight: moderateScale(18),
-          color: Constants.TIER_COLORS.OPERATOR,
+          color: T.COLORS.GREY,
           fontSize: moderateScale(12),
           fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
         }}
@@ -511,7 +512,7 @@ function PioneerDescriptionText() {
           style={{
             fontSize: moderateScale(12),
             fontFamily: Constants.CUSTOM_FONTS.SUIT.EXTRABOLD,
-            color: Constants.TIER_COLORS.ARTISAN,
+            color: T.COLORS.INK,
           }}
         >
           {' '}
@@ -612,7 +613,7 @@ function TierConditions({ tierState }) {
       >
         <Text
           style={{
-            color: Constants.TIER_COLORS.OPERATOR,
+            color: T.COLORS.GREY,
             fontSize: moderateScale(14),
             fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
           }}
@@ -621,7 +622,7 @@ function TierConditions({ tierState }) {
         </Text>
         <Text
           style={{
-            color: Constants.TIER_COLORS.OPERATOR,
+            color: T.COLORS.GREY,
             fontSize: moderateScale(14),
             fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
           }}
@@ -630,7 +631,7 @@ function TierConditions({ tierState }) {
         </Text>
         <Text
           style={{
-            color: Constants.TIER_COLORS.OPERATOR,
+            color: T.COLORS.GREY,
             fontSize: moderateScale(14),
             fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
           }}
@@ -640,7 +641,7 @@ function TierConditions({ tierState }) {
       </View>
       <View
         style={{
-          backgroundColor: Constants.TIER_COLORS.OPERATOR,
+          backgroundColor: T.COLORS.GREY,
           height: 0.5,
           marginBottom: moderateScale(10),
         }}
@@ -659,16 +660,16 @@ function TierConditions({ tierState }) {
         tierName={Strings.GREYD_TIER_ARTISAN}
         description={Strings.ARTISAN_CONDITION}
         profit={'8%'}
-        tierNameColor={Constants.TIER_COLORS.OPERATOR}
+        tierNameColor={T.COLORS.GREY}
         descriptionColor={
           tierState === Strings.GREYD_TIER_ARTISAN
-            ? Constants.TIER_COLORS.ARTISAN
-            : Constants.TIER_COLORS.OPERATOR
+            ? T.COLORS.INK
+            : T.COLORS.GREY
         }
         profitColor={
           tierState === Strings.GREYD_TIER_ARTISAN
-            ? Constants.TIER_COLORS.ARTISAN
-            : Constants.TIER_COLORS.OPERATOR
+            ? T.COLORS.INK
+            : T.COLORS.GREY
         }
         opacity={!tierState ? 1 : tierState === Strings.GREYD_TIER_ARTISAN ? 1 : 0.4}
       />
@@ -676,16 +677,16 @@ function TierConditions({ tierState }) {
         tierName={Strings.GREYD_TIER_OPERATOR}
         description={Strings.OPERATOR_CONDITION}
         profit={'6%'}
-        tierNameColor={Constants.TIER_COLORS.OPERATOR}
+        tierNameColor={T.COLORS.GREY}
         descriptionColor={
           tierState === Strings.GREYD_TIER_OPERATOR
-            ? Constants.TIER_COLORS.ARTISAN
-            : Constants.TIER_COLORS.OPERATOR
+            ? T.COLORS.INK
+            : T.COLORS.GREY
         }
         profitColor={
           tierState === Strings.GREYD_TIER_OPERATOR
-            ? Constants.TIER_COLORS.ARTISAN
-            : Constants.TIER_COLORS.OPERATOR
+            ? T.COLORS.INK
+            : T.COLORS.GREY
         }
         opacity={!tierState ? 1 : tierState === Strings.GREYD_TIER_OPERATOR ? 1 : 0.4}
       />
@@ -693,16 +694,16 @@ function TierConditions({ tierState }) {
         tierName={Strings.GREYD_TIER_STRIVER}
         description={Strings.STRIVER_CONDITION}
         profit={'4%'}
-        tierNameColor={Constants.TIER_COLORS.OPERATOR}
+        tierNameColor={T.COLORS.GREY}
         descriptionColor={
           tierState === Strings.GREYD_TIER_STRIVER
-            ? Constants.TIER_COLORS.ARTISAN
-            : Constants.TIER_COLORS.OPERATOR
+            ? T.COLORS.INK
+            : T.COLORS.GREY
         }
         profitColor={
           tierState === Strings.GREYD_TIER_STRIVER
-            ? Constants.TIER_COLORS.ARTISAN
-            : Constants.TIER_COLORS.OPERATOR
+            ? T.COLORS.INK
+            : T.COLORS.GREY
         }
         opacity={!tierState ? 1 : tierState === Strings.GREYD_TIER_STRIVER ? 1 : 0.4}
       />
@@ -710,16 +711,16 @@ function TierConditions({ tierState }) {
         tierName={Strings.GREYD_TIER_EXPLORER}
         description={Strings.EXPLORER_CONDITION}
         profit={'2%'}
-        tierNameColor={Constants.TIER_COLORS.OPERATOR}
+        tierNameColor={T.COLORS.GREY}
         descriptionColor={
           tierState === Strings.GREYD_TIER_EXPLORER
-            ? Constants.TIER_COLORS.ARTISAN
-            : Constants.TIER_COLORS.OPERATOR
+            ? T.COLORS.INK
+            : T.COLORS.GREY
         }
         profitColor={
           tierState === Strings.GREYD_TIER_EXPLORER
-            ? Constants.TIER_COLORS.ARTISAN
-            : Constants.TIER_COLORS.OPERATOR
+            ? T.COLORS.INK
+            : T.COLORS.GREY
         }
         opacity={!tierState ? 1 : tierState === Strings.GREYD_TIER_EXPLORER ? 1 : 0.4}
       />
@@ -727,16 +728,16 @@ function TierConditions({ tierState }) {
         tierName={Strings.GREYD_TIER_PIONEER}
         description={Strings.PIONEER_CONDITION}
         profit={'0%'}
-        tierNameColor={Constants.TIER_COLORS.OPERATOR}
+        tierNameColor={T.COLORS.GREY}
         descriptionColor={
           tierState === Strings.GREYD_TIER_PIONEER
-            ? Constants.TIER_COLORS.ARTISAN
-            : Constants.TIER_COLORS.OPERATOR
+            ? T.COLORS.INK
+            : T.COLORS.GREY
         } //#7a7a7a
         profitColor={
           tierState === Strings.GREYD_TIER_PIONEER
-            ? Constants.TIER_COLORS.ARTISAN
-            : Constants.TIER_COLORS.OPERATOR
+            ? T.COLORS.INK
+            : T.COLORS.GREY
         }
         opacity={!tierState ? 1 : tierState === Strings.GREYD_TIER_PIONEER ? 1 : 0.4}
       />
@@ -755,7 +756,7 @@ function UserPageScreen({ route, navigation }) {
         borderBottomColor: Constants.COLOR_BACKGROUND_DARK,
       },
       headerLeft: () => HeaderLeftBackButton({ navigation }),
-      headerTintColor: Constants.TIER_COLORS.ARTISAN,
+      headerTintColor: T.COLORS.INK,
       headerTitleStyle: {
         fontSize: moderateScale(20),
         fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,

@@ -1,4 +1,5 @@
 import React from 'react';
+import T from './Constants/DesignTokens';
 import { SafeAreaView, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
 import IconFeather from 'react-native-vector-icons/Feather';
 import Constants from './Constants';
@@ -97,7 +98,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 0,
-    backgroundColor: Constants.TIER_COLORS.ARTISAN,
+    backgroundColor: T.COLORS.INK,
   },
   keypad: {
     flex: 1,

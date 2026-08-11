@@ -1,4 +1,5 @@
 import React from 'react';
+import T from './Constants/DesignTokens';
 import {
   Alert,
   Keyboard,
@@ -42,7 +43,7 @@ function UserFullName({ context }) {
         style={styles.textInput}
         borderRadius={5}
         placeholder={Strings.USER_FULLNAME_GUIDE}
-        placeholderTextColor={Constants.TIER_COLORS.OPERATOR}
+        placeholderTextColor={T.COLORS.GREY}
         onChangeText={(fullName) => context.setState({ fullName })}
         value={context.state.fullName}
         maxLength={100}
@@ -207,7 +208,7 @@ function UserContact({ context }) {
         style={styles.textInput}
         borderRadius={5}
         placeholder={Strings.INPUT_PHONE_TO_CONTRACT}
-        placeholderTextColor={Constants.TIER_COLORS.OPERATOR}
+        placeholderTextColor={T.COLORS.GREY}
         onChangeText={(phone) => context.setState({ phone })}
         value={context.state.phone}
         keyboardType={'decimal-pad'}
@@ -242,7 +243,7 @@ function BankSelector({ context }) {
           <View style={styles.backNameSelectContainer}>
             <Text
               style={{
-                color: Constants.TIER_COLORS.OPERATOR,
+                color: T.COLORS.GREY,
                 fontSize: 18,
                 fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
               }}
@@ -265,7 +266,7 @@ function BankSelector({ context }) {
           }}
           borderRadius={5}
           placeholder={Strings.INPUT_SELLER_BANK_NAME}
-          placeholderTextColor={Constants.TIER_COLORS.OPERATOR}
+          placeholderTextColor={T.COLORS.GREY}
           onChangeText={(bankName) => context.setState({ bankName })}
           value={context.state.bankName}
           maxLength={100}
@@ -289,7 +290,7 @@ function BankAccountNo({ context }) {
         style={styles.textInput}
         borderRadius={5}
         placeholder={Strings.SELLER_BANK_ACCOUNT_GUIDE}
-        placeholderTextColor={Constants.TIER_COLORS.OPERATOR}
+        placeholderTextColor={T.COLORS.GREY}
         onChangeText={(bankAccount) => context.setState({ bankAccount })}
         value={context.state.bankAccount}
         maxLength={100}
@@ -313,7 +314,7 @@ function BankAccountHolder({ context }) {
         style={styles.textInput}
         borderRadius={5}
         placeholder={Strings.SELLER_BANK_ACCOUNT_NAME_GUIDE}
-        placeholderTextColor={Constants.TIER_COLORS.OPERATOR}
+        placeholderTextColor={T.COLORS.GREY}
         onChangeText={(accountHolderName) => context.setState({ accountHolderName })}
         value={context.state.accountHolderName}
         maxLength={100}
@@ -356,12 +357,12 @@ function WithdrawalAmount({ context }) {
           marginHorizontal: 20,
           borderWidth: 1,
           borderRadius: 5,
-          borderColor: Constants.TIER_COLORS.STRIVER,
+          borderColor: T.COLORS.GREY,
         }}
       >
         <Text
           style={{
-            color: Constants.TIER_COLORS.ARTISAN,
+            color: T.COLORS.INK,
             fontSize: 17,
             paddingLeft: 10,
             fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
@@ -376,7 +377,7 @@ function WithdrawalAmount({ context }) {
             paddingVertical: 5,
           }}
           placeholder="0"
-          placeholderTextColor={Constants.TIER_COLORS.OPERATOR}
+          placeholderTextColor={T.COLORS.GREY}
           onChangeText={(price) => context.setState({ withdrawalAmount: price })}
           value={context.state.withdrawalAmount}
           keyboardType={'decimal-pad'}
@@ -430,7 +431,7 @@ export default class WithdrawalRequestScreen extends React.Component {
 
     props.navigation.setOptions({
       title: Strings.REWARD_SETTLEMENT,
-      headerTintColor: Constants.TIER_COLORS.ARTISAN,
+      headerTintColor: T.COLORS.INK,
       headerTitleStyle: {
         fontSize: moderateScale(20),
         fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
@@ -659,7 +660,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionTitle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 16,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
   },
@@ -672,7 +673,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
     borderWidth: 1,
-    borderColor: Constants.TIER_COLORS.STRIVER,
+    borderColor: T.COLORS.GREY,
     paddingVertical: 6,
   },
   bottomButtonContainer: {
@@ -688,7 +689,7 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     marginHorizontal: 20,
-    backgroundColor: Constants.TIER_COLORS.OPERATOR,
+    backgroundColor: T.COLORS.GREY,
   },
   totalAmountContainer: {
     flexDirection: 'row',
@@ -697,7 +698,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   totalAmountTitle: {
-    // color: Constants.TIER_COLORS.ARTISAN,
+    // color: T.COLORS.INK,
     fontSize: 18,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
     marginRight: 6,
@@ -714,7 +715,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
     alignItems: 'center',
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
   },
   requiredIcon: {
     width: 8,
@@ -728,7 +729,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
   costTextInput: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 16,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
   },
@@ -737,7 +738,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 4,
-    borderColor: Constants.TIER_COLORS.STRIVER,
+    borderColor: T.COLORS.GREY,
     borderWidth: 1,
     marginTop: 6,
     marginRight: 6,
@@ -758,7 +759,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 14,
-    borderColor: Constants.TIER_COLORS.OPERATOR,
+    borderColor: T.COLORS.GREY,
     borderWidth: 1,
   },
   removeAttachmentButton: {

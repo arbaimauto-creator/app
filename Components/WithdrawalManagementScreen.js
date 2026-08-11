@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
+import T from './Constants/DesignTokens';
 import {
   Alert,
   Dimensions,
@@ -129,7 +130,7 @@ function WithdrawalItem({ item }) {
       <Text
         style={{
           ...styles.defaultMessage,
-          color: Constants.TIER_COLORS.OPERATOR,
+          color: T.COLORS.GREY,
         }}
       >{`${Strings.SETTLEMENT_ACCOUNT(item.accountHolderName)} (${item.bankName}, ${
         item.bankAccount
@@ -153,7 +154,7 @@ function WithdrawalManagementScreen(props) {
 
     props.navigation.setOptions({
       title: Strings.REWARD_SETTLEMENT,
-      headerTintColor: Constants.TIER_COLORS.ARTISAN,
+      headerTintColor: T.COLORS.INK,
       headerTitleStyle: {
         fontSize: moderateScale(20),
         fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
@@ -250,7 +251,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
     alignItems: 'center',
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     lineHeight: 17,
   },
   highlightedMessage: {
@@ -267,7 +268,7 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   totalAmountTitle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 15,
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
     marginRight: 6,

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import T from './Constants/DesignTokens';
 import { StyleSheet, Dimensions } from 'react-native';
 import { TabBar, TabView } from 'react-native-tab-view';
 
@@ -34,7 +35,7 @@ export default function CategoryTabView(props) {
             backgroundColor:
               props.theme === 'dark'
                 ? Constants.COLOR_BACKGROUND_DARK
-                : Constants.TIER_COLORS.ARTISAN,
+                : T.COLORS.INK,
           }}
           tabStyle={{ width: 'auto' }}
           scrollEnabled={true}
@@ -42,14 +43,14 @@ export default function CategoryTabView(props) {
           labelStyle={{
             color:
               props.theme === 'dark'
-                ? Constants.TIER_COLORS.ARTISAN
+                ? T.COLORS.INK
                 : Constants.COLOR_BACKGROUND_DARK,
           }}
           indicatorContainerStyle={{
             backgroundColor:
               props.theme === 'dark'
                 ? Constants.COLOR_BACKGROUND_DARK
-                : Constants.TIER_COLORS.ARTISAN,
+                : T.COLORS.INK,
           }}
         />
       )}

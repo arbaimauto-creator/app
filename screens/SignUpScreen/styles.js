@@ -1,4 +1,5 @@
 import { Platform, StyleSheet } from 'react-native';
+import T from '../../Components/Constants/DesignTokens';
 import Constants from '../../Components/Constants';
 
 const styles = StyleSheet.create({
@@ -22,13 +23,13 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   fieldTitle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 15,
     lineHeight: 18,
     marginRight: 6,
   },
   fieldProfileGuidelines: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 15,
     lineHeight: 18,
     marginTop: 3,
@@ -43,7 +44,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   fieldTitleError: {
-    color: Constants.COLOR_RED,
+    color: T.COLORS.RED,
     fontSize: 14,
     lineHeight: 18,
     marginTop: 3,
@@ -89,7 +90,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: Constants.TIER_COLORS.STRIVER,
+    backgroundColor: T.COLORS.GREY,
     marginHorizontal: 20,
   },
   selectButtonContainer: {

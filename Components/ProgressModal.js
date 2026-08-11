@@ -1,4 +1,5 @@
 import React from 'react';
+import T from './Constants/DesignTokens';
 import { StyleSheet, View, Text } from 'react-native';
 import * as Progress from 'react-native-progress';
 
@@ -33,7 +34,7 @@ const ProgressModal = ({
               <Text
                 key={item + '_' + index}
                 style={{
-                  color: Constants.TIER_COLORS.ARTISAN, //'white',
+                  color: T.COLORS.INK, //'white',
                   fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
                   fontSize: 15,
                   marginHorizontal: 20,
@@ -55,7 +56,7 @@ const ProgressModal = ({
           />
           <Text
             style={{
-              color: Constants.TIER_COLORS.ARTISAN, // color: 'white',
+              color: T.COLORS.INK, // color: 'white',
               fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
               fontSize: 16,
               marginHorizontal: 20,

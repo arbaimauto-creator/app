@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import T from '../../Components/Constants/DesignTokens';
 import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import APIprovider from '../../Components/APIprovider';
 import Constants from '../../Components/Constants';
@@ -260,16 +261,16 @@ const styles = StyleSheet.create({
     position: 'relative',
     height: 30,
     top: 5,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
     marginLeft: 10,
   },
   regularFont: {
-    color: Constants.TIER_COLORS.OPERATOR,
+    color: T.COLORS.GREY,
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
   },
   boldFont: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
   },
   userPicture: ({ idx, length }) => ({
@@ -321,14 +322,14 @@ const styles = StyleSheet.create({
   closeButton: {
     marginTop: 20,
     padding: 10,
-    backgroundColor: Constants.TIER_COLORS.OPERATOR,
+    backgroundColor: T.COLORS.GREY,
     borderRadius: 5,
   },
   closeButtonText: {
     color: 'white',
   },
   viewAllText: {
-    color: Constants.TIER_COLORS.OPERATOR,
+    color: T.COLORS.GREY,
     marginTop: 10,
   },
 });

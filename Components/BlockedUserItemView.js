@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import T from './Constants/DesignTokens';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import APIprovider from './APIprovider';
@@ -95,7 +96,7 @@ const styles = StyleSheet.create({
   actionButtonIcon: {
     height: 30,
     borderRadius: 4,
-    backgroundColor: Constants.TIER_COLORS.ARTISAN,
+    backgroundColor: T.COLORS.INK,
     width: 105,
     color: 'black',
     flexDirection: 'row',
@@ -105,11 +106,11 @@ const styles = StyleSheet.create({
   actionButtonDisabledIcon: {
     height: 30,
     borderRadius: 4,
-    borderColor: Constants.TIER_COLORS.ARTISAN,
+    borderColor: T.COLORS.INK,
     borderWidth: 1,
     backgroundColor: Constants.COLOR_BACKGROUND_DARK,
     width: 105,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -132,7 +133,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   buttonDisableTitle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 14,
     fontWeight: 'bold',
   },
@@ -143,7 +144,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 15,
     lineHeight: 18,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
   },
 });
 

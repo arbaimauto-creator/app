@@ -1,10 +1,11 @@
 import { StyleSheet } from 'react-native';
+import T from '../../Constants/DesignTokens';
 import Constants from '../../Constants';
 import { horizontalScale, moderateScale } from '../../utils/scailing';
 const styles = StyleSheet.create({
   mainContainer: {
     borderBottomWidth: 0.3,
-    borderColor: Constants.TIER_COLORS.ARTISAN,
+    borderColor: T.COLORS.INK,
     paddingVertical: 8,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -17,7 +18,7 @@ const styles = StyleSheet.create({
   titleText: {
     fontSize: moderateScale(16),
     fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
   },
   descriptionText: {
     fontSize: moderateScale(16),

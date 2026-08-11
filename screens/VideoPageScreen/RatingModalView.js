@@ -1,4 +1,5 @@
 import React from 'react';
+import T from '../../Components/Constants/DesignTokens';
 import {
   Alert,
   LayoutAnimation,
@@ -122,7 +123,7 @@ function RatingModalView({ context }) {
                   <IconFontAwesome5
                     name={'question-circle'}
                     size={18}
-                    color={Constants.TIER_COLORS.STRIVER}
+                    color={T.COLORS.GREY}
                   />
                 </Text>
               </TouchableOpacity>
@@ -551,7 +552,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     paddingVertical: 15,
     // alignItems: 'center',
-    // borderBlockColor: Constants.TIER_COLORS.ARTISAN,
+    // borderBlockColor: T.COLORS.INK,
     // borderWidth: 0.5,
   },
   modalTitle: {
@@ -577,7 +578,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   fieldGreydGuidelines: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 11,
     // lineHeight: 18,
     marginBottom: -5,
@@ -590,7 +591,7 @@ const styles = StyleSheet.create({
   openButton: {
     width: '100%',
     borderRadius: 14,
-    borderColor: Constants.TIER_COLORS.ARTISAN,
+    borderColor: T.COLORS.INK,
     // borderWidth: 0.5,
     elevation: 2,
     paddingVertical: 16,
@@ -598,7 +599,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonTextStyle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
     fontSize: 17,
   },

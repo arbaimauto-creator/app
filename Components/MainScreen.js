@@ -158,7 +158,7 @@ export default function MainScreenWrapper(props) {
   useScrollToTop(ref);
 
   if (Platform.OS !== 'ios') {
-    StatusBar.setBackgroundColor(Constants.TIER_COLORS.ARTISAN);
+    StatusBar.setBackgroundColor(T.COLORS.INK);
     StatusBar.setBarStyle('default', true);
   }
 
@@ -913,7 +913,7 @@ function MainScreen(props) {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={{ flex: 1, backgroundColor: Constants.TIER_COLORS.GIVER }}>
+    <View style={{ flex: 1, backgroundColor: T.COLORS.AMBER }}>
       <View
         style={{
           ...styles.headerBarContainer,
@@ -1034,7 +1034,7 @@ function MainScreen(props) {
             refreshControl={
               <RefreshControl
                 refreshing={isRefreshing}
-                tintColor={Constants.TIER_COLORS.ARTISAN}
+                tintColor={T.COLORS.INK}
                 onRefresh={() => {
                   Preference.get('RecommendedListTypeIndex').then((index) => {
                     if (!index) {
@@ -1154,7 +1154,7 @@ function MainScreen(props) {
                 dotsLength={videoListRecommended.length}
                 activeDotIndex={focusedIndex}
                 dotContainerStyle={{
-                  borderColor: Constants.TIER_COLORS.ARTISAN,
+                  borderColor: T.COLORS.INK,
                   borderWidth: 1,
                   marginHorizontal: 2,
                 }}
@@ -1266,7 +1266,7 @@ const styles = StyleSheet.create({
   paginationActiveDot: {
     width: 30,
     height: 2,
-    backgroundColor: Constants.TIER_COLORS.ARTISAN,
+    backgroundColor: T.COLORS.INK,
   },
   paginationInactiveDot: {
     width: 30,
@@ -1296,7 +1296,7 @@ const styles = StyleSheet.create({
     // fontSize: 19,
     fontSize: 20,
     // fontWeight: 'bold',
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     // fontFamily: 'DancingScript-Regular',
     fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
   },
@@ -1330,7 +1330,7 @@ const styles = StyleSheet.create({
   },
   moreVideoCardTitle: {
     flexDirection: 'column',
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 14,
     alignSelf: 'center',
     fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,

@@ -151,7 +151,7 @@ function ProductDescription({ product, logonUserId }) {
             <Text style={styles.linkedProductPrice} numberOfLines={1}>
               <Text
                 style={{
-                  color: Constants.COLOR_RED,
+                  color: T.COLORS.RED,
                   fontFamily: Constants.CUSTOM_FONTS.PRETENDARD.Regular,
                   shadowOffset: {
                     x: 10,
@@ -685,7 +685,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 4,
   },
   reviewSubInfoText: {
-    color: Constants.TIER_COLORS.EXPLORER,
+    color: T.COLORS.LINE,
     fontSize: 14,
     marginTop: 3,
     fontFamily: Constants.CUSTOM_FONTS.PRETENDARD.Regular,
@@ -712,20 +712,20 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   linkedProductTitle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 13,
     alignSelf: 'flex-start',
     marginBottom: 4,
     fontFamily: Constants.CUSTOM_FONTS.PRETENDARD.Regular,
   },
   linkedProductDiscountRate: {
-    color: Constants.COLOR_RED,
+    color: T.COLORS.RED,
     fontSize: 14,
     marginRight: 4,
     fontFamily: Constants.CUSTOM_FONTS.PRETENDARD.Bold,
   },
   linkedProductPrice: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 14,
     fontFamily: Constants.CUSTOM_FONTS.PRETENDARD.ExtraBold,
   },

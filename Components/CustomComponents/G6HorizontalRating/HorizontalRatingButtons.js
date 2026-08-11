@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import T from '../../Constants/DesignTokens';
 import { Text, TouchableNativeFeedback, View } from 'react-native';
 import Constants from '../../Constants';
 import Strings from '../../Strings';
@@ -14,7 +15,7 @@ export default function HorizontalRatingButtons({ scoreTitle, scoreValue, onPres
           fontFamily: Constants.CUSTOM_FONTS.PRETENDARD.Bold,
           marginHorizontal: 20,
           marginBottom: 5,
-          color: 'black', //Constants.TIER_COLORS.ARTISAN,
+          color: 'black', //T.COLORS.INK,
           opacity: 1,
 
           // textShadowColor: 'rgba(0, 0, 0, 1)',
@@ -43,7 +44,7 @@ export default function HorizontalRatingButtons({ scoreTitle, scoreValue, onPres
             <View
               style={{
                 backgroundColor:
-                  value === score ? Constants.TIER_COLORS.GIVER : Constants.TIER_COLORS.PIONEER,
+                  value === score ? T.COLORS.AMBER : Constants.TIER_COLORS.PIONEER,
                 borderRadius: 16,
                 marginBottom: idx === 5 ? 0 : 10,
                 height: 25,

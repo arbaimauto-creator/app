@@ -1,4 +1,5 @@
 import React, { Component, useContext } from 'react';
+import T from '../Constants/DesignTokens';
 import { StyleSheet, Text, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { Context } from '../../Contexts';
@@ -208,7 +209,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     fontSize: 15,
     lineHeight: 19,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
   },
   priceContainerInRow: {
     flexDirection: 'row',
@@ -236,7 +237,7 @@ const styles = StyleSheet.create({
   originalPrice: {
     marginTop: 4,
     fontSize: 13,
-    color: Constants.TIER_COLORS.OPERATOR,
+    color: T.COLORS.GREY,
     textDecorationLine: 'line-through',
   },
   price: {

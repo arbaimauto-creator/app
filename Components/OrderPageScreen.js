@@ -1,4 +1,5 @@
 import Clipboard from '@react-native-clipboard/clipboard';
+import T from './Constants/DesignTokens';
 import React, { useContext } from 'react';
 import { Alert, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Toast from 'react-native-easy-toast';
@@ -227,7 +228,7 @@ function Revenue({ order, viewMode, KRWPerUSD }) {
       </View>
       <View style={styles.infoItemContainer}>
         <Text style={styles.infoItemTitle}>{Strings.REVENUE}</Text>
-        <Text style={[styles.infoItemValue, { color: Constants.COLOR_RED }]}>
+        <Text style={[styles.infoItemValue, { color: T.COLORS.RED }]}>
           {Utils.displayPrice(order.revenue, global?.state?.region, KRWPerUSD)}
         </Text>
       </View>
@@ -296,7 +297,7 @@ export default class OrderPageScreen extends React.Component {
 
     navigation.setOptions({
       title: Strings.ORDER_DETAIL,
-      headerTintColor: Constants.TIER_COLORS.ARTISAN,
+      headerTintColor: T.COLORS.INK,
       headerTitleStyle: {
         fontSize: moderateScale(20),
         fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
@@ -366,7 +367,7 @@ export default class OrderPageScreen extends React.Component {
           fadeOutDuration={1900}
           position={'bottom'}
           style={{
-            backgroundColor: Constants.TIER_COLORS.ARTISAN,
+            backgroundColor: T.COLORS.INK,
             borderRadius: 20,
             paddingHorizontal: 20,
             bottom: getStatusBarHeight(),
@@ -388,12 +389,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   topItemTitle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 15,
     width: 90,
   },
   topItemValue: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 15,
     fontWeight: 'bold',
   },
@@ -409,13 +410,13 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   infoItemTitle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 13,
     width: 120,
   },
   infoItemValue: {
     flex: 1,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 13,
     lineHeight: 16,
     fontWeight: '500',

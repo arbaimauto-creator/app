@@ -1,4 +1,5 @@
 import React from 'react';
+import T from './Constants/DesignTokens';
 import { StyleSheet, View, Text } from 'react-native';
 import Constants from './Constants';
 import { CommonButtonModal } from './Views/CommonButtonModal';
@@ -72,7 +73,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   guideTitle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     paddingHorizontal: 25,
     fontSize: 20,
     lineHeight: 33,
@@ -103,7 +104,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   guideMessage: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 14,
     lineHeight: 20,
   },

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import T from '../Constants/DesignTokens';
 import { Text, View } from 'react-native';
 import Constants from '../Constants';
 import { StyleSheet } from 'react-native';
@@ -122,7 +123,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sponsoredText: {
-    color: Constants.TIER_COLORS.GIVER,
+    color: T.COLORS.AMBER,
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.BOLD_7,
     fontSize: 9,
   },

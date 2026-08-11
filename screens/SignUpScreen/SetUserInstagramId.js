@@ -1,4 +1,5 @@
 import React from 'react';
+import T from '../../Components/Constants/DesignTokens';
 import { Text, TextInput, View } from 'react-native';
 import Strings from '../../Components/Strings';
 import styles from './styles';
@@ -14,7 +15,7 @@ export default function SetUserInstagramId({ context }) {
       <TextInput
         style={styles.textInput}
         placeholder={Strings.CONDITION_USER_INSTAGRAM_ID}
-        placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+        placeholderTextColor={T.COLORS.GREY}
         onChangeText={(value) => {
           context.setState({ instagramId: value });
         }}

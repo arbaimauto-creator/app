@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import T from './Constants/DesignTokens';
 import { StyleSheet, SafeAreaView, Alert } from 'react-native';
 
 import Constants from './Constants';
@@ -28,7 +29,7 @@ export default class FollowListScreen extends Component {
         fontSize: moderateScale(20),
         fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
       },
-      headerTintColor: Constants.TIER_COLORS.ARTISAN,
+      headerTintColor: T.COLORS.INK,
       headerLeft: () => HeaderLeftBackButton({ navigation }),
     });
 

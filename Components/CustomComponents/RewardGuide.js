@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import T from '../Constants/DesignTokens';
 import { useNavigation } from '@react-navigation/native';
 import { useEffect } from 'react';
 import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
@@ -23,7 +24,7 @@ export default function RewardGuide() {
     navigation.setOptions({
       title: Strings.REWARD_GUIDE,
       headerLeft: () => HeaderLeftBackButton({ navigation }),
-      headerTintColor: Constants.TIER_COLORS.ARTISAN,
+      headerTintColor: T.COLORS.INK,
       headerTitleStyle: {
         fontSize: moderateScale(20),
         fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
@@ -61,7 +62,7 @@ export default function RewardGuide() {
           {Strings.REWARD_GUIDE_INTRO_BODY_PRE}
           <Text style={{ ...styles.rewardText, fontSize: 14 }}>
             {rewardTypes.MAX}
-            <Text style={{ color: Constants.TIER_COLORS.ARTISAN }}>R</Text>
+            <Text style={{ color: T.COLORS.INK }}>R</Text>
           </Text>
           {Strings.REWARD_GUIDE_INTRO_BODY_POST}
         </Text>
@@ -71,7 +72,7 @@ export default function RewardGuide() {
           {Strings.REWARD_GUIDE_SECTION_1_TITLE_PRE}
           <Text style={styles.rewardText}>
             {rewardTypes.ATTENDANCE}
-            <Text style={{ color: Constants.TIER_COLORS.ARTISAN }}>R</Text>
+            <Text style={{ color: T.COLORS.INK }}>R</Text>
           </Text>
           {Strings.REWARD_GUIDE_TITLE_POST}
         </Text>
@@ -84,7 +85,7 @@ export default function RewardGuide() {
           {Strings.REWARD_GUIDE_SECTION_2_TITLE_PRE}
           <Text style={styles.rewardText}>
             {rewardTypes.EVENT_REVIEW ? rewardTypes.EVENT_REVIEW : rewardTypes.REVIEW}
-            <Text style={{ color: Constants.TIER_COLORS.ARTISAN }}>R</Text>
+            <Text style={{ color: T.COLORS.INK }}>R</Text>
           </Text>
           {Strings.REWARD_GUIDE_TITLE_POST}
         </Text>
@@ -99,7 +100,7 @@ export default function RewardGuide() {
           {Strings.REWARD_GUIDE_SECTION_3_TITLE_PRE}
           <Text style={styles.rewardText}>
             {rewardTypes.GRADE}
-            <Text style={{ color: Constants.TIER_COLORS.ARTISAN }}>R</Text>
+            <Text style={{ color: T.COLORS.INK }}>R</Text>
           </Text>
           {Strings.REWARD_GUIDE_TITLE_POST}
         </Text>
@@ -112,7 +113,7 @@ export default function RewardGuide() {
           {Strings.REWARD_GUIDE_SECTION_4_TITLE_PRE}
           <Text style={styles.rewardText}>
             {rewardTypes.COMMENT}
-            <Text style={{ color: Constants.TIER_COLORS.ARTISAN }}>R</Text>
+            <Text style={{ color: T.COLORS.INK }}>R</Text>
           </Text>
           {Strings.REWARD_GUIDE_TITLE_POST}
         </Text>
@@ -138,16 +139,16 @@ const styles = StyleSheet.create({
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
     fontSize: 16,
     marginBottom: 10,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
   },
   textContent: {
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
     fontSize: 12,
     marginLeft: 20,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
   },
   rewardText: {
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
-    color: Constants.TIER_COLORS.GIVER,
+    color: T.COLORS.AMBER,
   },
 });

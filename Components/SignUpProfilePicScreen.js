@@ -1,4 +1,5 @@
 import React from 'react';
+import T from './Constants/DesignTokens';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -108,7 +109,7 @@ export default class SignUpProfilePicScreen extends React.Component {
             />
             {!this.state.profilePicUri && (
               <View style={styles.plusProfilePic}>
-                <IconAntDesign name={'plus'} size={16} color={Constants.TIER_COLORS.ARTISAN} />
+                <IconAntDesign name={'plus'} size={16} color={T.COLORS.INK} />
               </View>
             )}
           </TouchableOpacity>
@@ -158,7 +159,7 @@ const styles = StyleSheet.create({
   },
   textInput: {
     flex: 1,
-    backgroundColor: Constants.TIER_COLORS.ARTISAN,
+    backgroundColor: T.COLORS.INK,
     borderRadius: 10,
     padding: 10,
     marginHorizontal: 40,

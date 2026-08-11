@@ -1,4 +1,5 @@
 import React from 'react';
+import T from '../Constants/DesignTokens';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import Constants from '../Constants';
 import Strings from '../Strings';
@@ -14,7 +15,7 @@ export default function LoadingView({ message = Strings.LOADING, opacity = 1 }) 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Constants.TIER_COLORS.ARTISAN,
+    backgroundColor: T.COLORS.INK,
     position: 'absolute',
     width: '100%',
     height: '100%',

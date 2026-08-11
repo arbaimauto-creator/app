@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import T from '../Constants/DesignTokens';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import Constants from '../Constants';
@@ -49,7 +50,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     // borderWidth: 0.5,
-    borderColor: Constants.TIER_COLORS.ARTISAN,
+    borderColor: T.COLORS.INK,
     backgroundColor: 'rgba(255, 255, 255, 0.5)',
   },
   myRewardContent: {

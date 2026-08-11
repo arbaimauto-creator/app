@@ -79,7 +79,7 @@ function VideoTitle({ context }) {
         style={styles.textInput}
         borderRadius={10}
         placeholder={Strings.INPUT_REVIEW_TITLE}
-        placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+        placeholderTextColor={T.COLORS.GREY}
         onChangeText={(title) => context.setState({ title })}
         value={context.state.title}
         maxLength={Constants.MAX_LENGTH_REVIEW_TITLE}
@@ -112,7 +112,7 @@ function VideoDescription({ context }) {
         multiline={true}
         scrollEnabled={false}
         placeholder={Strings.INPUT_REVIEW_DESCRIPTION}
-        placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+        placeholderTextColor={T.COLORS.GREY}
         onChangeText={(description) => context.setState({ description })}
         value={context.state.description}
         maxLength={Constants.MAX_LENGTH_REVIEW_DESCRIPTION}
@@ -159,7 +159,7 @@ function SponsoredReview({ context }) {
           value={context.state.isSponsored}
           style={{ marginRight: 8 }}
         />
-        <Text style={{ color: Constants.TIER_COLORS.ARTISAN }}>{Strings.SPONSORED_REVIEW}</Text>
+        <Text style={{ color: T.COLORS.INK }}>{Strings.SPONSORED_REVIEW}</Text>
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <CheckBox
@@ -170,7 +170,7 @@ function SponsoredReview({ context }) {
           value={!context.state.isSponsored}
           style={{ marginRight: 8 }}
         />
-        <Text style={{ color: Constants.TIER_COLORS.ARTISAN }}>{Strings.GENERAL_REVIEW}</Text>
+        <Text style={{ color: T.COLORS.INK }}>{Strings.GENERAL_REVIEW}</Text>
       </View>
     </View>
   );
@@ -357,7 +357,7 @@ class AddingNewVideoScreen extends Component {
       headerLeft: CloseButton.bind(this),
       headerRight: HelpButton.bind(this),
       title: this.props.route.params.isRelay ? this.props.route.params.title : '',
-      headerTintColor: Constants.TIER_COLORS.ARTISAN,
+      headerTintColor: T.COLORS.INK,
       headerTitleStyle: {
         fontSize: moderateScale(20),
         fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
@@ -1015,14 +1015,16 @@ class AddingNewVideoScreen extends Component {
           (isIphoneX() ? getBottomSpace() : 0),
         alignSelf: 'center',
         justifyContent: 'center',
-        backgroundColor: Constants.COLOR_BACKGROUND_DARK,
+        backgroundColor: '#000000',
       };
     } else {
       return {
         width: (Dimensions.get('window').width / 16) * 9,
         height: (Dimensions.get('window').width / 16) * 9,
-        backgroundColor: 'rgb(31, 31, 31)',
-        borderRadius: 14,
+        backgroundColor: T.COLORS.SURFACE,
+        borderWidth: 1,
+        borderColor: T.COLORS.LINE,
+        borderRadius: T.RADIUS.CARD,
       };
     }
   };
@@ -1175,7 +1177,7 @@ class AddingNewVideoScreen extends Component {
             fadeOutDuration={1900}
             position={'bottom'}
             style={{
-              backgroundColor: 'rgba(255,255,255,0.3)',
+              backgroundColor: 'rgba(23,23,23,0.86)',
               borderRadius: 20,
               paddingHorizontal: 20,
               bottom: getStatusBarHeight(),

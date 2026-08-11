@@ -1,4 +1,5 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
+import T from '../../Constants/DesignTokens';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, TouchableNativeFeedback, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
@@ -24,7 +25,7 @@ export default function NoticeList() {
       headerTitleStyle: {
         fontSize: moderateScale(20),
         fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
-        color: Constants.TIER_COLORS.ARTISAN,
+        color: T.COLORS.INK,
       },
     });
   }, [navigation]);

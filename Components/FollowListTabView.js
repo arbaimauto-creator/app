@@ -1,4 +1,5 @@
 import * as React from 'react';
+import T from './Constants/DesignTokens';
 import { Dimensions, StyleSheet, Text } from 'react-native';
 
 import { View } from 'react-native';
@@ -78,9 +79,9 @@ export default function FollowListTabView(props) {
           {...props}
           {...Constants.TAB_VIEW_STYLE_PROPS}
           tabStyle={{ width: 'auto', margin: -10 }}
-          style={{ backgroundColor: Constants.TIER_COLORS.EXPLORER }}
-          indicatorStyle={{ backgroundColor: Constants.TIER_COLORS.EXPLORER }}
-          indicatorContainerStyle={{ borderBottomColor: Constants.TIER_COLORS.EXPLORER }}
+          style={{ backgroundColor: T.COLORS.LINE }}
+          indicatorStyle={{ backgroundColor: T.COLORS.LINE }}
+          indicatorContainerStyle={{ borderBottomColor: T.COLORS.LINE }}
           renderLabel={({ route, focused }) => {
             switch (route.key) {
               case 'follower':
@@ -116,7 +117,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tabLabelStyle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
   },
   tabBarLabelFocused: {
     color: Constants.COLOR_BACKGROUND_DARK,
@@ -124,12 +125,12 @@ const styles = StyleSheet.create({
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
   },
   tabBarLabel: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: moderateScale(16),
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
   },
   tabBarLabelContainer: (focused) => ({
-    backgroundColor: focused ? Constants.COLOR_POINT_BLUE : Constants.TIER_COLORS.EXPLORER,
+    backgroundColor: focused ? Constants.COLOR_POINT_BLUE : T.COLORS.LINE,
     width: focused ? '110%' : '100%',
     paddingVertical: 10,
     paddingHorizontal: 20,

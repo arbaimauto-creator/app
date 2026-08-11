@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import T from './Constants/DesignTokens';
 import { StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import Constants from './Constants';
@@ -153,7 +154,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   profitAmount: {
-    color: Constants.COLOR_RED,
+    color: T.COLORS.RED,
     fontSize: 15,
   },
   headerContainer: {

@@ -1,4 +1,5 @@
 import { useRoute, useScrollToTop } from '@react-navigation/native';
+import T from './Constants/DesignTokens';
 import * as React from 'react';
 import { Alert, Dimensions, StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -416,9 +417,9 @@ export default function SearchResultTabView(props) {
           {...Constants.TAB_VIEW_STYLE_PROPS}
           scrollEnabled={true}
           tabStyle={{ width: 'auto', margin: -10 }}
-          style={{ backgroundColor: Constants.TIER_COLORS.EXPLORER }}
-          indicatorStyle={{ backgroundColor: Constants.TIER_COLORS.EXPLORER }}
-          indicatorContainerStyle={{ borderBottomColor: Constants.TIER_COLORS.EXPLORER }}
+          style={{ backgroundColor: T.COLORS.LINE }}
+          indicatorStyle={{ backgroundColor: T.COLORS.LINE }}
+          indicatorContainerStyle={{ borderBottomColor: T.COLORS.LINE }}
           renderLabel={({ route, focused }) => (
             <View style={styles.tabBarLabelContainer(focused)}>
               <Text style={focused ? styles.tabBarLabelFocused : styles.tabBarLabel}>
@@ -449,7 +450,7 @@ const styles = StyleSheet.create({
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
   },
   tabBarLabel: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: moderateScale(16),
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
   },
@@ -460,11 +461,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   emptyMessage: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 18,
   },
   tabBarLabelContainer: (focused) => ({
-    backgroundColor: focused ? Constants.COLOR_POINT_BLUE : Constants.TIER_COLORS.EXPLORER,
+    backgroundColor: focused ? Constants.COLOR_POINT_BLUE : T.COLORS.LINE,
     width: focused ? '110%' : '100%',
     paddingVertical: 10,
     paddingHorizontal: 20,

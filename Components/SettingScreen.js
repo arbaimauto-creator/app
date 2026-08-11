@@ -9,6 +9,8 @@ import Toast from 'react-native-easy-toast';
 import { getStatusBarHeight } from 'react-native-safearea-height';
 import APIprovider from './APIprovider';
 import Constants from './Constants';
+import T from './Constants/DesignTokens';
+import FEATURES from './Constants/Features';
 import HeaderLeftBackButton from './CustomComponents/headerBackButton/headerLeftBackButton';
 import Strings from './Strings';
 import { menuLogout } from './utils/index';
@@ -63,10 +65,10 @@ export default class SettingScreen extends React.Component {
 
     navigation.setOptions({
       title: Strings.SETTINGS,
-      headerTintColor: Constants.TIER_COLORS.ARTISAN,
+      headerTintColor: T.COLORS.INK,
       headerTitleStyle: {
         fontSize: moderateScale(20),
-        fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
+        fontFamily: T.FONT.Bold,
       },
       headerLeft: () => HeaderLeftBackButton({ navigation }),
     });
@@ -107,12 +109,14 @@ export default class SettingScreen extends React.Component {
     //   title: Strings.QR_CODE,
     //   onPress: this.menuQRCode.bind(this),
     // });
-    list.push({
-      title: Strings.MY_ORDER_LIST,
-      //      icon: <IconFontAwesome5 size={18} name={"user-edit"} color={'#000'} style={{}} />,
-      onPress: this.menuOrderList.bind(this),
-    });
-    if (this.state.isSeller === 'false') {
+    // 커머스 숨김(v2 §D5): 주문 내역·셀러 등록은 플래그가 꺼지면 메뉴에서 제외한다.
+    if (FEATURES.COMMERCE) {
+      list.push({
+        title: Strings.MY_ORDER_LIST,
+        onPress: this.menuOrderList.bind(this),
+      });
+    }
+    if (FEATURES.COMMERCE && this.state.isSeller === 'false') {
       list.push({
         title: Strings.REGISTER_SELLER,
         //        icon: <IconFontAwesome5 size={20} name="user-tie" color="#000" style={{marginRight:4}}/>,
@@ -136,7 +140,7 @@ export default class SettingScreen extends React.Component {
     });
     list.push({
       title: Strings.LOGOUT,
-      color: Constants.COLOR_POINT_BLUE,
+      color: T.COLORS.AMBER_DEEP,
       //      icon: <IconMaterialCommunityIcons size={22} name={"logout"} color={'#000'} style={{}} />,
       // onPress: this.menuLogout.bind(this),
       onPress: () => menuLogout(this.props),
@@ -154,7 +158,7 @@ export default class SettingScreen extends React.Component {
                 <Text
                   style={[
                     styles.itemLabel,
-                    { color: item.color ? item.color : Constants.TIER_COLORS.ARTISAN },
+                    { color: item.color ? item.color : T.COLORS.INK },
                   ]}
                 >
                   {item.title}
@@ -173,7 +177,7 @@ export default class SettingScreen extends React.Component {
           position={'bottom'}
           positionValue={Platform.OS === 'ios' ? 200 : 150}
           style={{
-            backgroundColor: Constants.TIER_COLORS.ARTISAN,
+            backgroundColor: T.COLORS.INK,
             borderRadius: 20,
             paddingHorizontal: 20,
             bottom: getStatusBarHeight(),
@@ -189,18 +193,18 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
     height: '100%',
-    backgroundColor: Constants.COLOR_BACKGROUND_DARK,
+    backgroundColor: T.COLORS.BG,
   },
   itemContainer: {
     paddingVertical: 18,
   },
   itemLabel: {
-    color: Constants.TIER_COLORS.ARTISAN,
-    fontSize: 18,
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
+    color: T.COLORS.INK,
+    fontSize: 15.5,
+    fontFamily: T.FONT.Medium,
   },
   divider: {
     height: 1,
-    backgroundColor: Constants.TIER_COLORS.STRIVER,
+    backgroundColor: T.COLORS.LINE,
   },
 });

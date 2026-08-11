@@ -1,4 +1,5 @@
 import React from 'react';
+import T from '../Constants/DesignTokens';
 import { StyleSheet, Text, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import Constants from '../Constants';
@@ -21,7 +22,7 @@ export default function ProductGradeBadgeView({
             {availableNumberToSale && availableNumberToSale > 0 ? (
               <Text
                 style={{
-                  color: Constants.TIER_COLORS.ARTISAN,
+                  color: T.COLORS.INK,
                   fontSize: 12,
                   fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
                 }}
@@ -101,7 +102,7 @@ const styles = StyleSheet.create({
     height: isVertical ? (isRefundable ? '35%' : '18%') : '100%',
   }),
   reviewCount: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.MEDIUM,
     fontSize: 13,
   },
@@ -111,7 +112,7 @@ const styles = StyleSheet.create({
     marginRight: 2,
   },
   ratingScore: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 14,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.EXTRABOLD,
   },

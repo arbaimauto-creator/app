@@ -1,4 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
+import T from '../../Components/Constants/DesignTokens';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -38,7 +39,7 @@ export default function RatingList({
   useEffect(() => {
     navigation.setOptions({
       title: `${Strings.AVERAGE_GRADE} ${video.g6AvgRatingScore}`, //Strings.SIGN_UP,
-      headerTintColor: Constants.TIER_COLORS.ARTISAN,
+      headerTintColor: T.COLORS.INK,
       headerTitleStyle: {
         fontSize: moderateScale(20),
         fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
@@ -87,7 +88,7 @@ export default function RatingList({
               <IconFontAwesome5
                 name={'question-circle'}
                 size={18}
-                color={Constants.TIER_COLORS.STRIVER}
+                color={T.COLORS.GREY}
               />
             </TouchableOpacity>
             <LazyG6Chart innerData={innerData} innerMaxima={innerMaxima} isVideoPage />
@@ -103,7 +104,7 @@ export default function RatingList({
                     style={{
                       fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
                       fontSize: 16,
-                      color: Constants.TIER_COLORS.ARTISAN,
+                      color: T.COLORS.INK,
                       marginBottom: 20,
                     }}
                   >
@@ -195,22 +196,22 @@ const styles = StyleSheet.create({
     paddingRight: 20,
   },
   userG6: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
     fontSize: 18,
     marginRight: 5,
   },
-  divider: { marginHorizontal: 20, height: 1, backgroundColor: 'black' },
+  divider: { marginHorizontal: 20, height: 1, backgroundColor: T.COLORS.LINE },
   alignCenter: { marginVertical: 20, marginHorizontal: 20, alignItems: 'center' },
   subTitleText: {
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
     fontSize: 16,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
   },
   scoreContainer: { flexDirection: 'row', width: '100%', justifyContent: 'space-around' },
   scoreBox: {
     borderWidth: 0.5,
-    borderColor: Constants.TIER_COLORS.ARTISAN,
+    borderColor: T.COLORS.INK,
     borderRadius: 100,
     backgroundColor: Constants.TIER_COLORS.PIONEER,
     justifyContent: 'center',

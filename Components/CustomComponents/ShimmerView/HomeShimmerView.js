@@ -1,4 +1,5 @@
 import React from 'react';
+import T from '../../Constants/DesignTokens';
 import { createShimmerPlaceholder } from 'react-native-shimmer-placeholder';
 import LinearGradient from 'react-native-linear-gradient';
 import { StyleSheet, Text, View } from 'react-native';
@@ -56,7 +57,7 @@ const HomeShimmerView = () => {
           style={{
             fontSize: moderateScale(16),
             fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-            color: Constants.TIER_COLORS.ARTISAN,
+            color: T.COLORS.INK,
           }}
         >
           {Strings.MORE}

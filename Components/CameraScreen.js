@@ -1,5 +1,6 @@
 'use strict';
 import React from 'react';
+import T from './Constants/DesignTokens';
 import { StyleSheet, TouchableHighlight, View } from 'react-native';
 // import { RNCamera } from 'react-native-camera';
 import ImagePicker from 'react-native-image-crop-picker';
@@ -216,7 +217,7 @@ export default class CameraScreen extends React.Component {
     //             marginHorizontal: 4,
     //           }}
     //         >
-    //           <IconIonicons name={'arrow-back'} size={30} color={Constants.TIER_COLORS.ARTISAN} />
+    //           <IconIonicons name={'arrow-back'} size={30} color={T.COLORS.INK} />
     //         </Text>
     //       </TouchableOpacity>
 
@@ -239,7 +240,7 @@ export default class CameraScreen extends React.Component {
     //             marginHorizontal: 4,
     //           }}
     //         >
-    //           <IconIonicons name={'camera-reverse-outline'} size={30} color={Constants.TIER_COLORS.ARTISAN} />
+    //           <IconIonicons name={'camera-reverse-outline'} size={30} color={T.COLORS.INK} />
     //         </Text>
     //       </TouchableOpacity>
     //     </View>
@@ -300,7 +301,7 @@ export default class CameraScreen extends React.Component {
     //             }}
     //             source={{ uri: this.state.galleryThumbnailUri }}
     //           />
-    //           <Text style={{ fontSize: 14, color: Constants.TIER_COLORS.ARTISAN }}> {'Gallery'} </Text>
+    //           <Text style={{ fontSize: 14, color: T.COLORS.INK }}> {'Gallery'} </Text>
     //         </View>
     //       </TouchableOpacity>
     //     </View>

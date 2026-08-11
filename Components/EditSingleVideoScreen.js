@@ -1,4 +1,5 @@
 import React from 'react';
+import T from './Constants/DesignTokens';
 import {
   StyleSheet,
   Text,
@@ -58,7 +59,7 @@ export default class EditSingleVideoScreen extends React.Component {
         fontFamily: Constants.CUSTOM_FONTS.PRETENDARD.SemiBold,
       },
       headerStyle: {
-        backgroundColor: Constants.TIER_COLORS.GIVER,
+        backgroundColor: T.COLORS.AMBER,
       },
       headerRight: () => (
         <Button

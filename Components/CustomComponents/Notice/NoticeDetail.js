@@ -1,4 +1,5 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
+import T from '../../Constants/DesignTokens';
 import React, { useEffect, useState } from 'react';
 import {
   Button,
@@ -45,7 +46,7 @@ export default function NoticeDetail({ title = '' }) {
       headerTitleStyle: {
         fontSize: moderateScale(20),
         fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
-        color: Constants.TIER_COLORS.ARTISAN,
+        color: T.COLORS.INK,
       },
       headerRight: () => ShareButton(eventShareWithDynamicLink),
     });
@@ -105,7 +106,7 @@ export default function NoticeDetail({ title = '' }) {
             style={{
               position: 'absolute',
               width: width * 0.8,
-              backgroundColor: Constants.TIER_COLORS.GIVER,
+              backgroundColor: T.COLORS.AMBER,
               justifyContent: 'center',
               alignItems: 'center',
               paddingVertical: 10,
@@ -139,7 +140,7 @@ export default function NoticeDetail({ title = '' }) {
             style={{
               position: 'absolute',
               width: width * 0.8,
-              backgroundColor: Constants.TIER_COLORS.GIVER,
+              backgroundColor: T.COLORS.AMBER,
               justifyContent: 'center',
               alignItems: 'center',
               paddingVertical: 10,

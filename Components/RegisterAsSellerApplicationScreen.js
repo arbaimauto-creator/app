@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import T from './Constants/DesignTokens';
 import {
   Alert,
   Dimensions,
@@ -46,7 +47,7 @@ function BankSelector({ context }) {
         menu={context.bankList}
         buttonView={
           <View style={styles.backNameSelectContainer}>
-            <Text style={{ color: Constants.TIER_COLORS.ARTISAN, fontSize: 18 }}>
+            <Text style={{ color: T.COLORS.INK, fontSize: 18 }}>
               {context.state.bankCode ? bankName : Strings.SELECT_BANK}
             </Text>
             <FastImage
@@ -70,7 +71,7 @@ function BankSelector({ context }) {
           }}
           borderRadius={5}
           placeholder={Strings.INPUT_SELLER_BANK_NAME}
-          placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+          placeholderTextColor={T.COLORS.GREY}
           onChangeText={(bankName) => context.setState({ bankName })}
           value={context.state.bankName}
           maxLength={100}
@@ -101,7 +102,7 @@ function CertificationNo({ context }) {
         }}
         borderRadius={5}
         placeholder={'ex) 123-45-67890'}
-        placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+        placeholderTextColor={T.COLORS.GREY}
         onChangeText={(certificationNo) => context.setState({ certificationNo })}
         onFocus={() => {
           const certificationNo = context.state.certificationNo;
@@ -217,7 +218,7 @@ function BankAccountNo({ context }) {
         }}
         borderRadius={5}
         placeholder={Strings.SELLER_BANK_ACCOUNT_GUIDE}
-        placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+        placeholderTextColor={T.COLORS.GREY}
         onChangeText={(bankAccount) => context.setState({ bankAccount })}
         value={context.state.bankAccount}
         maxLength={100}
@@ -248,7 +249,7 @@ function BankAccountHolder({ context }) {
         }}
         borderRadius={5}
         placeholder={Strings.SELLER_BANK_ACCOUNT_NAME_GUIDE}
-        placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+        placeholderTextColor={T.COLORS.GREY}
         onChangeText={(bankAccountHolder) => context.setState({ bankAccountHolder })}
         value={context.state.bankAccountHolder}
         maxLength={100}
@@ -278,7 +279,7 @@ function SellerEmail({ context }) {
         }}
         borderRadius={5}
         placeholder={Strings.SELLER_EMAIL_GUIDE}
-        placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+        placeholderTextColor={T.COLORS.GREY}
         onChangeText={(value) => context.setState({ sellerEmail: value })}
         value={context.state.sellerEmail}
         keyboardType={'email-address'}
@@ -308,7 +309,7 @@ function SellerPhone({ context }) {
         }}
         borderRadius={5}
         placeholder={Strings.SELLER_PHONE_GUIDE}
-        placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+        placeholderTextColor={T.COLORS.GREY}
         onChangeText={(value) => context.setState({ sellerPhone: value })}
         onFocus={() => {
           const phone = context.state.sellerPhone;
@@ -361,7 +362,7 @@ function SellerInputForm({ title, placeholder, required, handleChangeValue, valu
           }}
           borderRadius={5}
           placeholder={placeholder}
-          placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+          placeholderTextColor={T.COLORS.GREY}
           onChangeText={(value) => {
             if (handleChangeValue) {
               handleChangeValue(value);
@@ -615,7 +616,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionTitle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 16,
   },
   requiredIcon: {
@@ -640,7 +641,7 @@ const styles = StyleSheet.create({
   },
   textInput: {
     paddingHorizontal: 10,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 18,
     marginHorizontal: 20,
   },

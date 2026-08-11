@@ -1,4 +1,5 @@
 import { useRoute } from '@react-navigation/native';
+import T from '../Constants/DesignTokens';
 import React from 'react';
 import {
   Platform,
@@ -74,7 +75,7 @@ const styles = StyleSheet.create({
     // padding: 20,
     paddingBottom: 7,
     alignItems: 'center',
-    backgroundColor: Constants.TIER_COLORS.GIVER,
+    backgroundColor: T.COLORS.AMBER,
   },
   headerTitle: {
     fontSize: moderateScale(24),

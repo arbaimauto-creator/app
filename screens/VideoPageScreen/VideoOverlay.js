@@ -1,4 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
+import T from '../../Components/Constants/DesignTokens';
 import React from 'react';
 import { Alert, LayoutAnimation, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import * as Animatable from 'react-native-animatable';
@@ -222,7 +223,7 @@ function VideoOverlay({ context }) {
           </Text>
           <Text style={styles.authorSubText}>{` ・ ${Strings.VIEW_COUNT(review.viewCount)}`}</Text>
           {review?.isSponsored ? (
-            <Text style={[styles.authorSubText, { color: Constants.TIER_COLORS.GIVER }]}>
+            <Text style={[styles.authorSubText, { color: T.COLORS.AMBER }]}>
               {` ・ ${Strings.SPONSORED}`}
             </Text>
           ) : null}
@@ -366,7 +367,7 @@ const styles = StyleSheet.create({
     fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
   },
   productDiscount: {
-    color: Constants.COLOR_RED,
+    color: T.COLORS.RED,
     fontSize: 14,
     fontWeight: 'bold',
     marginTop: 3,

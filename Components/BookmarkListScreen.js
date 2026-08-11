@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import T from './Constants/DesignTokens';
 import { StyleSheet, SafeAreaView, Alert } from 'react-native';
 
 import Constants from './Constants';
@@ -24,7 +25,7 @@ export default class BookmarkListScreen extends Component {
 
     navigation.setOptions({
       title: Strings.BOOKMARKS,
-      headerTintColor: Constants.TIER_COLORS.ARTISAN,
+      headerTintColor: T.COLORS.INK,
       headerTitleStyle: {
         fontSize: moderateScale(20),
         fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,

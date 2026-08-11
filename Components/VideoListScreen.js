@@ -1,4 +1,5 @@
 import React from 'react';
+import T from './Constants/DesignTokens';
 import {
   Alert,
   LayoutAnimation,
@@ -120,7 +121,7 @@ export default class VideoListScreen extends React.PureComponent {
         shadowOpacity: 0,
       },
       title: title,
-      headerTintColor: Constants.TIER_COLORS.ARTISAN,
+      headerTintColor: T.COLORS.INK,
       headerTitleStyle: {
         fontSize: moderateScale(20),
         fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
@@ -273,7 +274,7 @@ export default class VideoListScreen extends React.PureComponent {
                     justifyContent: 'space-between',
                   }}
                 >
-                  <Text style={{ fontSize: 15, color: Constants.TIER_COLORS.ARTISAN }}>
+                  <Text style={{ fontSize: 15, color: T.COLORS.INK }}>
                     {Strings.DisplayEntireReviewCount(this.state.videoEntireCount)}
                   </Text>
                   <TouchableOpacity
@@ -284,7 +285,7 @@ export default class VideoListScreen extends React.PureComponent {
                     }}
                   >
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <Text style={{ fontSize: 15, color: Constants.TIER_COLORS.ARTISAN }}>
+                      <Text style={{ fontSize: 15, color: T.COLORS.INK }}>
                         {this.state.activeSortingItem}
                       </Text>
                       <FastImage

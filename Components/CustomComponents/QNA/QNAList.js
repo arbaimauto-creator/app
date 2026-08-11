@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import T from '../../Constants/DesignTokens';
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
@@ -120,7 +121,7 @@ export default function QNAList({ context, scrollRef, navigation }) {
         <Text
           style={{
             fontSize: 12,
-            color: !item?.selected ? Constants.TIER_COLORS.ARTISAN : '#535353',
+            color: !item?.selected ? T.COLORS.INK : '#535353',
           }}
         >
           {'#' + item?.hashtag}
@@ -231,7 +232,7 @@ export default function QNAList({ context, scrollRef, navigation }) {
               <Text
                 style={{
                   fontSize: 12,
-                  color: !tag?.selected ? Constants.TIER_COLORS.ARTISAN : '#535353',
+                  color: !tag?.selected ? T.COLORS.INK : '#535353',
                 }}
               >
                 {'#' + tag?.hashtag}
@@ -284,7 +285,7 @@ const style = StyleSheet.create({
   },
   hashTagItem: {
     fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
   },
   hashTagBorder: (item) => ({
     margin: 4,
@@ -294,7 +295,7 @@ const style = StyleSheet.create({
     borderWidth: 1,
     // flex: 0.2,
     backgroundColor: !item?.selected ? 'transparent' : Constants.COLOR_MAIN,
-    borderColor: Constants.TIER_COLORS.ARTISAN,
+    borderColor: T.COLORS.INK,
   }),
   findContainer: {
     flex: 1,
@@ -309,7 +310,7 @@ const style = StyleSheet.create({
     justifyContent: 'space-between',
   },
   findTextInput: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 12,
     flex: 0.8,
     marginHorizontal: 8,
@@ -326,7 +327,7 @@ const style = StyleSheet.create({
   },
   myQuestionText: {
     marginTop: 10,
-    color: Constants.TIER_COLORS.OPERATOR,
+    color: T.COLORS.GREY,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
     fontSize: 13,
   },
@@ -334,7 +335,7 @@ const style = StyleSheet.create({
     paddingHorizontal: 2,
     paddingVertical: 4,
     textAlign: 'left',
-    color: Constants.TIER_COLORS.OPERATOR,
+    color: T.COLORS.GREY,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
     fontSize: 13,
   },

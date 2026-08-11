@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import T from '../Constants/DesignTokens';
 import { Platform, Pressable, StatusBar, StyleSheet, Text, View } from 'react-native';
 import Constants from '../Constants';
 import { moderateScale } from '../utils/scailing';
@@ -22,7 +23,7 @@ export default function ToggleTextButton({ screenType, setScreenType }) {
           {
             backgroundColor:
               screenType === MAIN_SCREEN_TAB_INDEX.MAIN
-                ? Constants.TIER_COLORS.GIVER
+                ? T.COLORS.AMBER
                 : Constants.COLOR_BACKGROUND_DARK,
             zIndex: screenType === MAIN_SCREEN_TAB_INDEX.MAIN ? 1 : 0,
             borderRadius: screenType === MAIN_SCREEN_TAB_INDEX.MAIN ? 20 : 0,
@@ -32,7 +33,7 @@ export default function ToggleTextButton({ screenType, setScreenType }) {
           // setFocusedTab(MAIN_SCREEN_TAB_INDEX.MAIN);
           setScreenType(MAIN_SCREEN_TAB_INDEX.MAIN);
           if (Platform.OS !== 'ios') {
-            StatusBar.setBackgroundColor(Constants.TIER_COLORS.ARTISAN);
+            StatusBar.setBackgroundColor(T.COLORS.INK);
             StatusBar.setBarStyle('default', true);
           }
           dispatch(setMainScreenType({ screenType: MAIN_SCREEN_TAB_INDEX.MAIN }));
@@ -42,10 +43,10 @@ export default function ToggleTextButton({ screenType, setScreenType }) {
           style={[
             styles.tabTextstyle,
             {
-              color: Constants.TIER_COLORS.ARTISAN,
+              color: T.COLORS.INK,
               // screenType === MAIN_SCREEN_TAB_INDEX.MAIN
               //   ? Constants.COLOR_BACKGROUND_DARK
-              //   : Constants.TIER_COLORS.ARTISAN,
+              //   : T.COLORS.INK,
             },
           ]}
         >
@@ -57,7 +58,7 @@ export default function ToggleTextButton({ screenType, setScreenType }) {
           // setFocusedTab(MAIN_SCREEN_TAB_INDEX.REVIEW);
           setScreenType(MAIN_SCREEN_TAB_INDEX.REVIEW);
           if (Platform.OS !== 'ios') {
-            StatusBar.setBackgroundColor(Constants.TIER_COLORS.GIVER);
+            StatusBar.setBackgroundColor(T.COLORS.AMBER);
             StatusBar.setBarStyle('default', true);
           }
           dispatch(setMainScreenType({ screenType: MAIN_SCREEN_TAB_INDEX.REVIEW }));
@@ -67,7 +68,7 @@ export default function ToggleTextButton({ screenType, setScreenType }) {
           {
             backgroundColor:
               screenType === MAIN_SCREEN_TAB_INDEX.REVIEW
-                ? Constants.TIER_COLORS.GIVER
+                ? T.COLORS.AMBER
                 : Constants.COLOR_BACKGROUND_DARK,
             zIndex: screenType === MAIN_SCREEN_TAB_INDEX.REVIEW ? 1 : 0,
             borderRadius: screenType === MAIN_SCREEN_TAB_INDEX.REVIEW ? 20 : 0,
@@ -78,10 +79,10 @@ export default function ToggleTextButton({ screenType, setScreenType }) {
           style={[
             styles.tabTextstyle,
             {
-              color: Constants.TIER_COLORS.ARTISAN,
+              color: T.COLORS.INK,
               // screenType === MAIN_SCREEN_TAB_INDEX.REVIEW
               //   ? Constants.COLOR_BACKGROUND_DARK
-              //   : Constants.TIER_COLORS.ARTISAN,
+              //   : T.COLORS.INK,
             },
           ]}
         >

@@ -1174,7 +1174,7 @@ function NewBlockButton() {
         <View>
           <Text
             style={{
-              color: Constants.TIER_COLORS.ARTISAN,
+              color: T.COLORS.INK,
               fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
             }}
           >
@@ -1347,7 +1347,7 @@ export function VideoPageFollowButton({ user, context, setRatingList }) {
       >
         <Text
           style={{
-            color: user.isFollowing ? Constants.TIER_COLORS.ARTISAN : 'white',
+            color: user.isFollowing ? T.COLORS.INK : 'white',
             fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
           }}
         >
@@ -1368,13 +1368,13 @@ function GradeTier({ context, user }) {
             user={user}
             context={context}
             profilePicUrl={user.profilePicUrl}
-            borderColor={Constants.TIER_COLORS.GIVER}
+            borderColor={T.COLORS.AMBER}
           />
         ) : (
           <HexagonWithText
             grade={Strings.GREYD_TIER_GIVER}
             textColor={'#3a3a3a'}
-            fillColor={Constants.TIER_COLORS.GIVER}
+            fillColor={T.COLORS.AMBER}
           />
         )}
       </View>
@@ -1384,13 +1384,13 @@ function GradeTier({ context, user }) {
             user={user}
             context={context}
             profilePicUrl={user.profilePicUrl}
-            borderColor={Constants.TIER_COLORS.ARTISAN}
+            borderColor={T.COLORS.INK}
           />
         ) : (
           <HexagonWithText
             grade={Strings.GREYD_TIER_ARTISAN}
             textColor={'white'}
-            fillColor={Constants.TIER_COLORS.ARTISAN}
+            fillColor={T.COLORS.INK}
           />
         )}
       </View>
@@ -1400,13 +1400,13 @@ function GradeTier({ context, user }) {
             user={user}
             context={context}
             profilePicUrl={user.profilePicUrl}
-            borderColor={Constants.TIER_COLORS.OPERATOR}
+            borderColor={T.COLORS.GREY}
           />
         ) : (
           <HexagonWithText
             grade={Strings.GREYD_TIER_OPERATOR}
             textColor={'white'}
-            fillColor={Constants.TIER_COLORS.OPERATOR}
+            fillColor={T.COLORS.GREY}
           />
         )}
       </View>
@@ -1416,13 +1416,13 @@ function GradeTier({ context, user }) {
             user={user}
             context={context}
             profilePicUrl={user.profilePicUrl}
-            borderColor={Constants.TIER_COLORS.STRIVER}
+            borderColor={T.COLORS.GREY}
           />
         ) : (
           <HexagonWithText
             grade={Strings.GREYD_TIER_STRIVER}
             textColor={'#1a1a1a'}
-            fillColor={Constants.TIER_COLORS.STRIVER}
+            fillColor={T.COLORS.GREY}
           />
         )}
       </View>
@@ -1432,13 +1432,13 @@ function GradeTier({ context, user }) {
             user={user}
             context={context}
             profilePicUrl={user.profilePicUrl}
-            borderColor={Constants.TIER_COLORS.EXPLORER}
+            borderColor={T.COLORS.LINE}
           />
         ) : (
           <HexagonWithText
             grade={Strings.GREYD_TIER_EXPLORER}
             textColor={'#2a2a2a'}
-            fillColor={Constants.TIER_COLORS.EXPLORER}
+            fillColor={T.COLORS.LINE}
           />
         )}
       </View>
@@ -1538,7 +1538,7 @@ function GradeCount({ user }) {
       >
         <Text
           style={{
-            color: Constants.TIER_COLORS.ARTISAN,
+            color: T.COLORS.INK,
             fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
             fontSize: moderateScale(20),
           }}
@@ -1548,7 +1548,7 @@ function GradeCount({ user }) {
       </View>
       <Text
         style={{
-          color: Constants.TIER_COLORS.ARTISAN,
+          color: T.COLORS.INK,
           fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
           fontSize: moderateScale(14),
           marginTop: verticalScale(5),
@@ -2785,10 +2785,10 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     width: horizontalScale(70),
     borderRadius: 14,
-    backgroundColor: Constants.TIER_COLORS.GIVER,
+    backgroundColor: T.COLORS.AMBER,
 
     paddingVertical: 2,
-    borderColor: Constants.TIER_COLORS.ARTISAN,
+    borderColor: T.COLORS.INK,
     borderWidth: 1,
     marginLeft: 14,
   },

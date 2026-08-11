@@ -1,4 +1,5 @@
 import React from 'react';
+import T from './Constants/DesignTokens';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import Animated from 'react-native-reanimated';
@@ -192,7 +193,7 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   totalAmountTitle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 15,
     marginRight: 6,
   },
@@ -205,6 +206,6 @@ const styles = StyleSheet.create({
     height: 1,
     marginHorizontal: 20,
     marginVertical: 10,
-    backgroundColor: Constants.TIER_COLORS.STRIVER,
+    backgroundColor: T.COLORS.GREY,
   },
 });

@@ -1,4 +1,5 @@
 import React from 'react';
+import T from './Constants/DesignTokens';
 import {
   Alert,
   LayoutAnimation,
@@ -231,7 +232,7 @@ export default class ProductListScreen extends React.Component {
         shadowOpacity: 0,
       },
       title: this.state.title,
-      headerTintColor: Constants.TIER_COLORS.ARTISAN,
+      headerTintColor: T.COLORS.INK,
       headerTitleStyle: {
         fontSize: moderateScale(20),
         fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
@@ -389,7 +390,7 @@ export default class ProductListScreen extends React.Component {
                       justifyContent: 'space-between',
                     }}
                   >
-                    <Text style={{ fontSize: 15, color: Constants.TIER_COLORS.OPERATOR }}>
+                    <Text style={{ fontSize: 15, color: T.COLORS.GREY }}>
                       {Strings.DisplayEntireProductCount(this.state.productEntireCount)}
                     </Text>
                     <TouchableOpacity

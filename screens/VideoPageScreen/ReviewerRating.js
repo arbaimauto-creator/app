@@ -1,4 +1,5 @@
 import React from 'react';
+import T from '../../Components/Constants/DesignTokens';
 import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import Constants from '../../Components/Constants';
 import CustomRating from '../../Components/CustomComponents/CustomRating';
@@ -22,7 +23,7 @@ const RatingSection = React.memo(({ label, ratingScore, selectedIcon, emptyIcon 
       style={[
         styles.reviewerRating,
         {
-          color: ratingScore ? Constants.TIER_COLORS.ARTISAN : Constants.TIER_COLORS.STRIVER,
+          color: ratingScore ? T.COLORS.INK : T.COLORS.GREY,
         },
       ]}
     >
@@ -112,7 +113,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     width: getLanguage() === 'ko' ? '15%' : '30%',
     fontSize: 16,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontFamily: Constants.CUSTOM_FONTS.PRETENDARD.Medium,
   },
   ratingContainer: {
@@ -120,7 +121,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   reviewerRating: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontFamily: Constants.CUSTOM_FONTS.PRETENDARD.Medium,
     fontSize: 16,
     marginLeft: 8,

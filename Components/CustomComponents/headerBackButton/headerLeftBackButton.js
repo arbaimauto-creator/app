@@ -1,4 +1,5 @@
 import React from 'react';
+import T from '../../Constants/DesignTokens';
 import { StatusBar } from 'react-native';
 import { Platform, Pressable } from 'react-native';
 import FastImage from 'react-native-fast-image';
@@ -9,7 +10,7 @@ export default function HeaderLeftBackButton({ navigation }) {
     <Pressable
       onPress={() => {
         if (Platform.OS !== 'ios') {
-          StatusBar.setBackgroundColor(Constants.TIER_COLORS.ARTISAN);
+          StatusBar.setBackgroundColor(T.COLORS.INK);
           StatusBar.setBarStyle('default', true);
         }
 

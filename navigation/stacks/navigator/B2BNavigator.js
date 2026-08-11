@@ -1,4 +1,5 @@
 import React from 'react';
+import T from '../../../Components/Constants/DesignTokens';
 import { createStackNavigator } from '@react-navigation/stack';
 import { horizontalAnimation } from '../../../Components/CustomComponents/horizontalAnimation';
 import {
@@ -55,7 +56,7 @@ function B2BNavigator({ route, navigation }) {
             fontSize: 20,
             fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
           },
-          headerTintColor: Constants.TIER_COLORS.ARTISAN,
+          headerTintColor: T.COLORS.INK,
         }}
       />
     </Stack.Navigator>

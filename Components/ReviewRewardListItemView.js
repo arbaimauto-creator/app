@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import T from './Constants/DesignTokens';
 import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import Constants from './Constants';
 import Strings, { getLanguage } from './Strings';
@@ -208,13 +209,13 @@ const styles = StyleSheet.create({
   },
   rewardedDateTitle: {
     paddingVertical: 5,
-    // color: Constants.TIER_COLORS.ARTISAN,
+    // color: T.COLORS.INK,
     fontSize: 15,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
   },
   reviewTitle: {
     flex: 1,
-    // color: Constants.TIER_COLORS.ARTISAN,
+    // color: T.COLORS.INK,
     fontSize: 15,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
   },
@@ -225,14 +226,14 @@ const styles = StyleSheet.create({
   },
   amountTitle: {
     flex: 1,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 15,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
     width: 120,
   },
   amountValue: {
     flex: 1,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 15,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
   },

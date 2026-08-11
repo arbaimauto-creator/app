@@ -1,4 +1,5 @@
 import React from 'react';
+import T from '../../Components/Constants/DesignTokens';
 import { View, Text, TextInput } from 'react-native';
 import Strings from '../../Components/Strings';
 import IconFeather from 'react-native-vector-icons/Feather';
@@ -25,7 +26,7 @@ export default function SetPhone({ context }) {
         textContentType={'telephoneNumber'}
         style={styles.textInput}
         placeholder={Strings.CONDITION_USER_PHONE}
-        placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+        placeholderTextColor={T.COLORS.GREY}
         onChangeText={(phone) => {
           context.setState({ phone });
           if (context.state.warningPhone) {

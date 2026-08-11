@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   arbaim: {
-    color: Constants.TIER_COLORS.OPERATOR,
+    color: T.COLORS.GREY,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.MEDIUM,
     fontSize: 14,
     alignSelf: 'center',

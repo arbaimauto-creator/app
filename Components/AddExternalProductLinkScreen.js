@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import T from './Constants/DesignTokens';
 import {
   Alert,
   Keyboard,
@@ -46,7 +47,7 @@ function ProductTitle({ context }) {
           style={styles.textInput}
           borderRadius={5}
           placeholder={Strings.INPUT_PRODUCT_NAME}
-          placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+          placeholderTextColor={T.COLORS.GREY}
           onChangeText={(title) => context.setState({ title })}
           value={context.state.title}
           maxLength={Constants.MAX_LENGTH_PRODUCT_TITLE}
@@ -72,7 +73,7 @@ function ProductExternalLink({ context }) {
           style={styles.textInput}
           borderRadius={5}
           placeholder={Strings.INPUT_PRODUCT_INFO_URL}
-          placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+          placeholderTextColor={T.COLORS.GREY}
           onChangeText={(externalLink) => context.setState({ externalLink })}
           value={context.state.externalLink}
         />
@@ -108,8 +109,8 @@ function ProductCategory({ context }) {
             <Text
               style={{
                 color: !context.state.categoryCode
-                  ? Constants.TIER_COLORS.STRIVER
-                  : Constants.TIER_COLORS.ARTISAN,
+                  ? T.COLORS.GREY
+                  : T.COLORS.INK,
                 fontSize: 18,
               }}
             >
@@ -154,7 +155,7 @@ function ProductCountry({ context }) {
           }}
         >
           <View style={styles.categorySelectContainer}>
-            <Text style={{ color: Constants.TIER_COLORS.STRIVER, fontSize: 18 }}>
+            <Text style={{ color: T.COLORS.GREY, fontSize: 18 }}>
               {Strings.PRODUCT_ORIGIN_SELECTION}
             </Text>
             <FastImage
@@ -324,12 +325,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   fieldTitle: {
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 16,
   },
   divider: {
     height: 1,
-    backgroundColor: Constants.TIER_COLORS.STRIVER,
+    backgroundColor: T.COLORS.GREY,
     marginHorizontal: 20,
   },
   count: {
@@ -338,12 +339,12 @@ const styles = StyleSheet.create({
   },
   textInput: {
     paddingHorizontal: 10,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: T.COLORS.INK,
     fontSize: 14,
     marginHorizontal: 20,
     flex: 1,
     borderWidth: 1,
-    borderColor: Constants.TIER_COLORS.ARTISAN,
+    borderColor: T.COLORS.INK,
     paddingVertical: 6,
   },
   categorySelectContainer: {
