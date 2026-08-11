@@ -1,7 +1,6 @@
 // greyd Phase 1 디자인 시스템 토큰 — 화면 설계 v2 시안(artifact 69ef62ce) 확정값.
 // 앱 화면 리스타일의 단일 소스. 웹(web/src/styles.css)과 값이 일치해야 한다.
 import { Platform, StatusBar } from 'react-native';
-import Style from './Style';
 
 // 상태바 겹침 방지용 상단 인셋 — 자체 헤더를 그리는 화면의 루트 paddingTop에 사용
 // iOS는 각 화면의 SafeAreaView가 노치 인셋을 처리하므로 여백만 더한다
@@ -61,7 +60,19 @@ const RADIUS = {
   SHEET: 18,
 };
 
-const FONT = Style.CUSTOM_FONTS.PRETENDARD;
+// Pretendard 패밀리명을 직접 정의한다 — Style.js를 import하면 Constants 순환 참조에
+// 새 진입점이 생겨 로드 순서에 따라 초기화 실패가 난다 (릴리스 흰 화면 원인이었음).
+const FONT = {
+  Black: 'Pretendard-Black',
+  Bold: 'Pretendard-Bold',
+  ExtraBold: 'Pretendard-ExtraBold',
+  ExtraLight: 'Pretendard-ExtraLight',
+  Light: 'Pretendard-Light',
+  Medium: 'Pretendard-Medium',
+  Regular: 'Pretendard-Regular',
+  SemiBold: 'Pretendard-SemiBold',
+  Thin: 'Pretendard-Thin',
+};
 
 const TYPE = {
   H_TITLE: { fontFamily: FONT.ExtraBold, fontSize: 20, color: COLORS.INK, letterSpacing: -0.2 },

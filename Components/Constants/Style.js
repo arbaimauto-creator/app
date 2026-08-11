@@ -1,6 +1,8 @@
 import { Dimensions, Platform, StyleSheet } from 'react-native';
 import Strings from '../Strings';
-import Constants from '.';
+// 주의: 여기서 './index'(Constants)를 import하면 순환 참조가 된다.
+// index.js가 이 파일을 `...Style`로 펼쳐 쓰므로, 로드 순서에 따라 Constants가
+// 빈 객체가 되어 `Constants.TIER_COLORS.X` 접근이 릴리스에서 터진다.
 
 const COLOR_MAIN = '#FFB731';
 //const COLOR_MAIN_DARK = '#B07003'
@@ -80,7 +82,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 0,
     borderBottomWidth: 0,
     marginVertical: 0,
-    marginRight: 20
+    marginRight: 20,
   },
   searchBarInputContainer: {
     backgroundColor: COLOR_BACKGROUND_DARK,
