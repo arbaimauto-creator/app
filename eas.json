@@ -10,13 +10,15 @@
         "SENTRY_DISABLE_AUTO_UPLOAD": "true"
       },
       "ios": {
-        "resourceClass": "m-medium"
+        "resourceClass": "m-medium",
+        "image": "latest"
       }
     },
     "preview": {
       "distribution": "internal",
       "ios": {
-        "resourceClass": "m-medium"
+        "resourceClass": "m-medium",
+        "image": "latest"
       },
       "env": {
         "SENTRY_DISABLE_AUTO_UPLOAD": "true"
@@ -29,7 +31,9 @@
   },
   "submit": {
     "production": {
-      "ios": {}
+      "ios": {
+        "ascAppId": "1526096078"
+      }
     }
   }
 }
