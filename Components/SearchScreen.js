@@ -125,9 +125,9 @@ class SearchScreen extends React.Component {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          {Platform.OS === 'ios' ? (
-            <HeaderLeftBackButton navigation={this.props.navigation} />
-          ) : null}
+          {/* 안드로이드도 화면 내 뒤로가기를 노출한다 — 하드웨어 back만 남으면
+              검색에서 홈/마이로 돌아갈 수단이 화면에 보이지 않는다 */}
+          <HeaderLeftBackButton navigation={this.props.navigation} />
           <SearchBar
             {...Constants.SEARCH_BAR_COMMON_PROPS}
             showCancel={false}

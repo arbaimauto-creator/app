@@ -1,0 +1,9 @@
+# 빌드 산출물·의존성 — 린트 대상이 아니다.
+# (web/dist가 잡히면서 미니파이 번들에서 646건의 가짜 에러가 나던 것을 막는다)
+node_modules/
+web/node_modules/
+web/dist/
+android/
+ios/
+coverage/
+*.bundle
