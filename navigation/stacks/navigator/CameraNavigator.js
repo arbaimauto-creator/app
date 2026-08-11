@@ -1,7 +1,8 @@
 import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
-import { CameraScreen } from '../../../Components/index';
-import AddingNewVideoScreen from '../../../Components/index';
+// Components/index.js는 default export가 없다. default로 받으면 undefined가 되어
+// Stack.Screen의 component prop이 깨지므로 named import로 받아야 한다.
+import { AddingNewVideoScreen, CameraScreen } from '../../../Components/index';
 
 const Stack = createStackNavigator();
 

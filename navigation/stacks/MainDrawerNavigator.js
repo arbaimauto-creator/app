@@ -10,7 +10,6 @@ import {
   AddExternalProductLinkScreen,
   AddingNewProductScreen,
   AddingNewVideoScreen,
-  AddressSearchScreen,
   AgreementToWithdrawalScreen,
   BlockedUserListScreen,
   BookmarkListScreen,

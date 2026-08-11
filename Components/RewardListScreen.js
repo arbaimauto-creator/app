@@ -26,7 +26,6 @@ import SortingKeywordSelector, {
 } from './Views/SortingKeywordSelector.js';
 import Utils from './utils';
 import { moderateScale } from './utils/scailing.js';
-import { REWARD_GUIDE_BANNER } from './Constants/index';
 
 function TotalContributedSales({ amount, region, currencyRate }) {
   return (

@@ -21,7 +21,6 @@ import { Button } from 'react-native-elements';
 import FastImage from 'react-native-fast-image';
 import ImagePicker from 'react-native-image-crop-picker';
 import { KeyboardAwareScrollView as KeyboardAvoidingView } from 'react-native-keyboard-aware-scroll-view';
-import ProductIsPromition from '../screens/AddingNewProductScreen/ProductIsPromition';
 import APIprovider from './APIprovider';
 import Constants from './Constants';
 import HeaderLeftBackButton from './CustomComponents/headerBackButton/headerLeftBackButton';
