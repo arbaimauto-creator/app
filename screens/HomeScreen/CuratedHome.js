@@ -147,6 +147,20 @@ export default function CuratedHome({ navigation }) {
   const openCampaign = (campaign) =>
     navigation.navigate('Try', { screen: 'CampaignDetail', params: { campaign } });
 
+  // 피드는 화면을 갈아타는 곳이 아니라 이어서 넘겨 보는 곳이다.
+  // 예전에는 홈 → HomeFeed(미리보기) → VideoPage로 두 단계를 거쳤고, 미리보기에서
+  // 영상을 누르면 또 다른 화면이 열려 흐름이 끊겼다. 이제 누른 영상에서 바로
+  // 세로 페이저(VideoPage)를 열고, 거기서 위아래로 자유롭게 넘긴다.
+  // mock 데이터는 재생할 실제 영상이 없으므로 기존 미리보기 피드로 보낸다.
+  const openFeed = (item) => {
+    const playable = (videos || []).filter((v) => !v.isMock);
+    if (!item || item.isMock || playable.length === 0) {
+      navigation.navigate('HomeFeed');
+      return;
+    }
+    navigation.navigate('VideoPage', { videoList: playable, videoId: item._id });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -256,7 +270,7 @@ export default function CuratedHome({ navigation }) {
           <>
             <View style={styles.sectionRow}>
               <Text style={styles.sectionTitle}>{Strings.HOME_TRENDING}</Text>
-              <TouchableOpacity onPress={() => navigation.navigate('HomeFeed')} hitSlop={HIT_SLOP}>
+              <TouchableOpacity onPress={() => openFeed(videos[0])} hitSlop={HIT_SLOP}>
                 <Text style={styles.sectionLink}>{Strings.HOME_GO_FEED} ▶</Text>
               </TouchableOpacity>
             </View>
@@ -269,11 +283,7 @@ export default function CuratedHome({ navigation }) {
                     key={item._id}
                     style={styles.gridItem}
                     activeOpacity={0.85}
-                    onPress={() =>
-                      item.isMock
-                        ? navigation.navigate('HomeFeed')
-                        : navigation.navigate('VideoPage', { videoList: videos, videoId: item._id })
-                    }
+                    onPress={() => openFeed(item)}
                   >
                     <View style={[styles.gridThumbWrap, { height: GRID_HEIGHTS[index % 4] }]}>
                       <FastImage source={{ uri: gridThumbUrl(item) }} style={styles.gridThumb} />

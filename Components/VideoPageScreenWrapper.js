@@ -266,8 +266,10 @@ export default function VideoPageScreenWrapper(props) {
         style={styles.pager}
         orientation="vertical"
         initialPage={Math.max(0, index)}
-        offscreenPageLimit={1}
-        overdrag={false}
+        // 다음/이전 영상을 미리 붙여둬야 스와이프가 끊기지 않고 이어진다
+        offscreenPageLimit={2}
+        // 끝에서 살짝 딸려오는 저항감 — 화면 전환이 아니라 연속된 피드로 느껴지게 한다
+        overdrag={true}
         scrollEnabled={isPagerScrollEnabled}
         onPageSelected={onPageSelected}
       >

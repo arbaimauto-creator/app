@@ -1529,6 +1529,16 @@ class VideoPageScreen extends React.PureComponent {
     }
   };
 
+  // 인스타그램 릴스식 탭 토글 — 영상 빈 곳을 누르면 오버레이가 사라지고, 다시 누르면 나온다.
+  // 숨김은 사용자가 명시적으로 선택한 상태이므로 자동 복귀 타이머를 걸지 않는다.
+  toggleVideoInfo = () => {
+    if (!this._isMounted) {
+      return;
+    }
+    this.clearVideoInfoTimer();
+    this.setState((prev) => ({ isShowingVideoInfo: prev.isShowingVideoInfo === false }));
+  };
+
   componentDidUpdate(prevProps) {
     // 페이지를 벗어났다 돌아오면 상세 스크롤 위치는 그대로 남아 있으므로 잠금 상태를 다시 알려준다.
     if (!prevProps.route.params.isFocused && this.props.route.params.isFocused) {

@@ -1,7 +1,16 @@
 import { useNavigation } from '@react-navigation/native';
 import T from '../../Components/Constants/DesignTokens';
-import React from 'react';
-import { Alert, LayoutAnimation, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  Alert,
+  Animated,
+  LayoutAnimation,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import FastImage from 'react-native-fast-image';
 import IconMaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -192,12 +201,38 @@ function ProductCard({ context }) {
 function VideoOverlay({ context }) {
   const review = context.state.video;
   const title = (review.titleByCountry || review.title || '').trim();
+  // 인스타그램 릴스식: 영상을 탭하면 오버레이가 통째로 사라졌다 다시 나타난다.
+  // 캡션은 기본 2줄로 접고, 캡션만 따로 탭하면 펼쳐진다 (오버레이는 유지).
+  const visible = context.state.isShowingVideoInfo !== false;
+  const [captionExpanded, setCaptionExpanded] = useState(false);
+  const fade = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.timing(fade, {
+      toValue: visible ? 1 : 0,
+      duration: 180,
+      useNativeDriver: true,
+    }).start();
+    if (!visible) {
+      setCaptionExpanded(false);
+    }
+  }, [visible, fade]);
 
   return (
     <View style={styles.overlayContainer} pointerEvents="box-none">
-      <ActionRail context={context} />
+      {/* 영상 탭 영역 — 오버레이 뒤에 깔려 빈 곳을 누르면 토글된다.
+          레일·캡션 등 실제 컨트롤은 이 위에 있으므로 각자의 onPress가 우선한다. */}
+      <TouchableWithoutFeedback onPress={() => context.toggleVideoInfo?.()}>
+        <View style={StyleSheet.absoluteFill} />
+      </TouchableWithoutFeedback>
 
-      <View style={styles.bottomContainer} pointerEvents="box-none">
+      <Animated.View
+        style={[styles.overlayFade, { opacity: fade }]}
+        pointerEvents={visible ? 'box-none' : 'none'}
+      >
+        <ActionRail context={context} />
+
+        <View style={styles.bottomContainer} pointerEvents="box-none">
         {review.g6RatingCount > 0 ? (
           <View style={{ alignSelf: 'flex-start', marginBottom: 8 }}>
             <ReviewGradeBadgeView
@@ -229,37 +264,53 @@ function VideoOverlay({ context }) {
           ) : null}
         </View>
 
-        {title !== '' ? (
-          <Text style={styles.caption} numberOfLines={2} onPress={() => context.openDetails()}>
-            {title}
-          </Text>
-        ) : null}
+          {title !== '' ? (
+            <Text
+              style={styles.caption}
+              numberOfLines={captionExpanded ? 8 : 2}
+              onPress={() => {
+                LayoutAnimation.easeInEaseOut();
+                setCaptionExpanded((v) => !v);
+              }}
+            >
+              {title}
+            </Text>
+          ) : null}
 
-        {/* 해시태그 줄 제거 — 상세(리뷰)에서 확인 가능. 오버레이는 3줄 이내 유지 */}
+          {/* 해시태그 줄 제거 — 상세(리뷰)에서 확인 가능. 오버레이는 3줄 이내 유지 */}
 
-        <ProductCard context={context} />
+          <ProductCard context={context} />
 
-        <TouchableOpacity
-          style={styles.detailHandle}
-          activeOpacity={0.7}
-          onPress={() => context.openDetails()}
-        >
-          <IconMaterialIcons name="keyboard-arrow-up" size={22} color="#fff" />
-          <Text style={styles.detailHandleText}>{Strings.REVIEW}</Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            style={styles.detailHandle}
+            activeOpacity={0.7}
+            onPress={() => context.openDetails()}
+          >
+            <IconMaterialIcons name="keyboard-arrow-up" size={22} color="#fff" />
+            <Text style={styles.detailHandleText}>{Strings.REVIEW}</Text>
+          </TouchableOpacity>
+        </View>
+      </Animated.View>
     </View>
   );
 }
+
+// 피드는 하단 탭 네비게이터 안에서 열린다 — 탭바 높이만큼 오버레이를 올린다.
+const TAB_BAR_INSET = 76;
 
 const styles = StyleSheet.create({
   overlayContainer: {
     ...StyleSheet.absoluteFillObject,
   },
+  // 탭 토글 시 레일·캡션이 함께 페이드되는 레이어
+  overlayFade: {
+    ...StyleSheet.absoluteFillObject,
+  },
   rail: {
     position: 'absolute',
     right: 8,
-    bottom: 96,
+    // 하단 탭바(약 76) 위로 띄운다 — 피드는 탭 안에서 열리므로 탭바가 계속 보인다
+    bottom: 96 + TAB_BAR_INSET,
     alignItems: 'center',
   },
   railProfile: {
@@ -299,7 +350,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 16,
     right: 72,
-    bottom: 18,
+    // 캡션·상세 핸들이 탭바에 가리지 않도록
+    bottom: 18 + TAB_BAR_INSET,
   },
   authorRow: {
     flexDirection: 'row',
