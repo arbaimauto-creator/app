@@ -61,7 +61,8 @@ export default function InviteGateScreen({ navigation }) {
       return;
     }
     setIsVerifying(true);
-    const result = await verifyInviteCode(code);
+    // 국가는 게이트 입력분을 그대로 ops 골든 레코드에 실어 보낸다 (핸들은 온보딩에서 갱신)
+    const result = await verifyInviteCode(code, { country });
     setIsVerifying(false);
     if (!result.success) {
       logEvent('gate_code_submit', { result: result.reason === 'expired' ? 'expired' : 'invalid' });

@@ -22,7 +22,12 @@ export async function getEvaluations() {
 
 export async function saveEvaluation(reviewId, patch) {
   const all = await getEvaluations();
-  all[reviewId] = { reviewId, ...(all[reviewId] || {}), ...patch, updatedAt: new Date().toISOString() };
+  all[reviewId] = {
+    reviewId,
+    ...(all[reviewId] || {}),
+    ...patch,
+    updatedAt: new Date().toISOString(),
+  };
   await Preference.set(KEY, JSON.stringify(all));
   return all;
 }

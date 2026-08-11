@@ -26,7 +26,7 @@ flowchart TB
     end
 
     subgraph OPS["⚙️ greyd-ops — Next.js + Prisma (Vercel)"]
-        MAPI["/api/mobile/*<br/>campaigns ✅ 가동 · auth/apply/offers/<br/>received/upload ⏳ (2·3단계)"]
+        MAPI["/api/mobile/* ✅ 6종 완비<br/>auth(토큰) · campaigns · apply<br/>offers · received · upload"]
         CONSOLE["운영 콘솔<br/>매칭 · 배송 · 14마디 루프<br/>+ 승인 큐 · 초대 코드 관리 (백로그)"]
         MAGIC["매직링크 웹<br/>브랜드 평가(트리아지→루브릭, 백로그)<br/>· 파트너스 허브"]
         DB[("Neon DB — 정본<br/>골든 레코드 11,850 · Campaign(applyMode)<br/>Match · Influencer(greydAppId)")]
@@ -38,7 +38,7 @@ flowchart TB
     INF --> FLOW
     BRAND --> MAGIC
     OPER --> CONSOLE
-    DATA -- "1단계 실연동 (캠페인 읽기)" --> MAPI
+    DATA -- "실연동 (Bearer 토큰 · 실패 시 mock 폴백)" --> MAPI
     LOOP <-. "주간 수동 브리지 4개<br/>(신청·운송장·업로드·제안 — 실연동 완성 시 소멸)" .-> CONSOLE
     CONSOLE -- "ops 매칭 → 앱 유저면 제안 카드 (I11)" --> LOOP
 
@@ -54,8 +54,8 @@ flowchart TB
 |---|---|
 | 앱 인플루언서 퍼널 (게이트→루프 전체) | ✅ 구현·에뮬레이터 검증 완료 (D1~D28) |
 | ops 스키마 정합 (greydAppId·applyMode·GREYD_APP) | ✅ db push까지 완료 |
-| 실연동 1단계 — 캠페인 목록 | ✅ ops 라우트 가동 + 앱 플래그·폴백 준비 (켜기만 하면 됨) |
-| 실연동 2·3단계 — 신청·제안·수령·업로드·인증 | ⏳ 그때까지 주간 수동 브리지 4개 |
+| 실연동 1·2·3단계 — 캠페인·신청·수령·업로드·인증·제안 | ✅ 라우트 6종 + 앱 배선 완료 (키 설정 + `LIVE_OPS_API` ON이면 가동) |
+| 수동 브리지 4개 | 실연동 가동 시 소멸 — 미가동/전송 실패분만 주간 루틴이 백업 |
 | 브랜드 평가 웹 · 콘솔 승인 큐 · 초대 코드 관리 | ⏳ ops 백로그 (28번) |
 | 론칭 | 29번 플랜 — Wave 0(내부 QA) 대기 |
 

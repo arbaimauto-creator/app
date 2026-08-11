@@ -13,9 +13,7 @@ export async function setOpsToken(token) {
 
 async function authHeaders() {
   const token = await Preference.get('opsToken');
-  return token
-    ? { Authorization: `Bearer ${token}` }
-    : { 'x-greyd-app-key': OPS_APP_KEY };
+  return token ? { Authorization: `Bearer ${token}` } : { 'x-greyd-app-key': OPS_APP_KEY };
 }
 
 // 4xx/5xx는 status를 담아 던진다 — 호출부가 reason 분기(게이트) 또는 무시(브리지)한다

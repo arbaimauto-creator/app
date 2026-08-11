@@ -19,6 +19,7 @@ const GREYD_GATE_KEYS = [
   'inviteBrandId',
   'inviteBrandName',
   'greydAppId', // 기기 식별자 — 계정 삭제 시에만 재발급 (ops 골든 레코드 연동 키)
+  'opsToken', // ops 세션 토큰 — 게이트 재통과 시 재발급
 ];
 
 export async function clearGreydLocalData({ keepGate = false } = {}) {

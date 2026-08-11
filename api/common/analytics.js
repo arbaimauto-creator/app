@@ -16,7 +16,6 @@ function getAnalytics() {
   }
   if (!analyticsModule) {
     try {
-      // eslint-disable-next-line global-require
       analyticsModule = require('@react-native-firebase/analytics').default;
     } catch (e) {
       // 네이티브 재빌드 전(구 APK)에는 모듈이 없다 — 조용히 no-op
