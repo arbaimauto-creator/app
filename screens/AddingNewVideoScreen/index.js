@@ -30,6 +30,7 @@ import Share from 'react-native-share';
 import { connect } from 'react-redux';
 import APIprovider from '../../Components/APIprovider';
 import Constants from '../../Components/Constants';
+import FEATURES from '../../Components/Constants/Features';
 import T from '../../Components/Constants/DesignTokens';
 import Codes from '../../Components/Constants/Codes';
 import ProgressModal from '../../Components/ProgressModal';
@@ -371,8 +372,8 @@ class AddingNewVideoScreen extends Component {
 
     // 업로드 화면 자체 방어선: 게스트는 진입 즉시 로그인 유도 후 이탈
     // (호출부 가드 누락 시에도 게스트 공용 계정으로 업로드되는 일이 없도록)
-    // __DEV__: 에뮬레이터 검증용으로 개발 빌드에서만 통과 (프로덕션 무영향)
-    if (!__DEV__) {
+    // __DEV__ / TEST_GUEST_ENTRY: 개발·테스트 배포에서는 게스트도 업로드 화면을 볼 수 있게 통과
+    if (!__DEV__ && !FEATURES.TEST_GUEST_ENTRY) {
       Preference.get('userId').then((userId) => {
         if (Utils.isGuestUser(userId)) {
           Utils.LogoutAlert(this.props);

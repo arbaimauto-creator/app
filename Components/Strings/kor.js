@@ -1596,6 +1596,11 @@ export default {
   PROFILE_PLATFORM: '주력 플랫폼',
   PROFILE_HANDLE: '계정 핸들',
   PROFILE_FOLLOWERS: '팔로워 규모',
+  // D29: 3채널 수집
+  PROFILE_CHANNELS_HINT: '운영 중인 채널을 모두 알려주면 더 많은 캠페인에 매칭돼요. 주소를 붙여넣어도 돼요.',
+  PROFILE_HANDLE_PH: '@handle 또는 프로필 주소',
+  PROFILE_CH_PRIMARY: '주력 · 필수',
+  PROFILE_CH_OPTIONAL: '선택',
   PROFILE_AGE: '연령대',
   PROFILE_GENDER: '성별',
   PROFILE_CATEGORY: '주력 카테고리',
@@ -2016,4 +2021,7 @@ export default {
   HOME_TRENDING: '지금 뜨는 리뷰',
   HOME_GO_FEED: '피드로 보기',
   HOME_CATEGORY_ALL: '전체',
+  NO_CURATED_PRODUCTS_AVAILABLE: '지금은 큐레이션된 상품이 없습니다.',
+  PRODUCT_DETAILS_TO_MAKE_ORDER: '주문 상품 정보',
+  SIGN_UP_TO_GREYD: 'greyd 회원 가입',
 };

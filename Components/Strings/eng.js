@@ -1662,6 +1662,12 @@ export default {
   PROFILE_PLATFORM: 'Main platform',
   PROFILE_HANDLE: 'Handle',
   PROFILE_FOLLOWERS: 'Follower range',
+  // D29: three-channel capture
+  PROFILE_CHANNELS_HINT:
+    'Tell us every channel you run — more channels, more campaigns you match. Pasting a profile link works too.',
+  PROFILE_HANDLE_PH: '@handle or profile link',
+  PROFILE_CH_PRIMARY: 'Main · required',
+  PROFILE_CH_OPTIONAL: 'Optional',
   PROFILE_AGE: 'Age range',
   PROFILE_GENDER: 'Gender',
   PROFILE_CATEGORY: 'Main category',
@@ -2100,4 +2106,7 @@ export default {
   HOME_TRENDING: 'Trending reviews',
   HOME_GO_FEED: 'Watch feed',
   HOME_CATEGORY_ALL: 'All',
+  NO_CURATED_PRODUCTS_AVAILABLE: 'No curated products available at this time.',
+  PRODUCT_DETAILS_TO_MAKE_ORDER: 'Order details',
+  SIGN_UP_TO_GREYD: 'Sign up to greyd',
 };

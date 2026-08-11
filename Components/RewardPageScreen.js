@@ -12,14 +12,14 @@ import Utils from './utils';
 
 export default class RevenueScreen extends React.Component {
   headerMenuWidthdraw() {
-    Alert.alert(Strings.WIDTHDRAW, Strings.NOT_SUPPORTED_YET, [{ text: Strings.OK }], {
+    Alert.alert(Strings.WITHDRAW, Strings.NOT_SUPPORTED_YET, [{ text: Strings.OK }], {
       cancelable: true,
     });
   }
 
   headerMenu = [
     {
-      name: Strings.WIDTHDRAW,
+      name: Strings.WITHDRAW,
       icon: (
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <IconFontAwesome size={20} name="dollar" color="#000" />

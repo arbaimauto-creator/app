@@ -144,7 +144,7 @@ export default class VideoListScreen extends React.PureComponent {
 
   onListLoadError = function (err) {
     Alert.alert(
-      Strings.LOAD_REVIEW_LIST,
+      Strings.FAILED_TO_LOAD_REVIEW_LIST,
       err.errorMsg ? err.errorMsg : '',
       [{ text: Strings.OK }],
       { cancelable: true },

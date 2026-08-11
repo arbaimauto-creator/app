@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import FastImage from 'react-native-fast-image';
 import Preference from 'react-native-default-preference';
 import Strings from '../../Components/Strings';
+import FEATURES from '../../Components/Constants/Features';
 import T from '../../Components/Constants/DesignTokens';
 import { Card, Badge } from '../../Components/UI';
 import { applyToCampaign, selectMyApplications } from '../../slices/campaign';
@@ -51,9 +52,10 @@ export default function CampaignDetail({ route, navigation }) {
   const isCurated = campaign.applyMode === 'curated';
 
   // 게스트는 신청/업로드 불가 — 로그인 유도 (다른 업로드 진입점과 동일 정책)
-  // __DEV__: 에뮬레이터는 소셜 로그인이 불가하므로 개발 빌드에서만 가드 통과 (프로덕션 무영향)
+  // __DEV__ / TEST_GUEST_ENTRY: 개발·테스트 배포에서는 소셜 로그인 없이 전체 루프를
+  // 확인해야 하므로 가드를 통과시킨다 (스토어 배포 시 TEST_GUEST_ENTRY=false로 원복)
   const guardGuest = async () => {
-    if (__DEV__) {
+    if (__DEV__ || FEATURES.TEST_GUEST_ENTRY) {
       return false;
     }
     const userId = await Preference.get('userId');
