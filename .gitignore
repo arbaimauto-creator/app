@@ -83,3 +83,7 @@ ios/sentry.properties
 android/greyd-upload-keystore-비밀번호.txt
 
 credentials.json
+
+# 빌드 산출·로그
+android/app/src/main/assets/modules.json
+*.log
