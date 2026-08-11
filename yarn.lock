@@ -2989,6 +2989,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-firebase/analytics@npm:^20.5.0":
+  version: 20.5.0
+  resolution: "@react-native-firebase/analytics@npm:20.5.0"
+  peerDependencies:
+    "@react-native-firebase/app": 20.5.0
+  checksum: 10c0/3e79ab01d4e689efada65f8b3170aa59cca390565c565b72a583275e47237746916567688efcf3c4a0a39851f4ea04c0b6839c7627e9160c6df26e3328803738
+  languageName: node
+  linkType: hard
+
 "@react-native-firebase/app@npm:^20.4.0":
   version: 20.5.0
   resolution: "@react-native-firebase/app@npm:20.5.0"
@@ -7365,6 +7374,7 @@ __metadata:
     "@react-native-community/cli-platform-ios": "npm:^13.6.9"
     "@react-native-community/hooks": "npm:^3.0.0"
     "@react-native-community/push-notification-ios": "npm:^1.11.0"
+    "@react-native-firebase/analytics": "npm:^20.5.0"
     "@react-native-firebase/app": "npm:^20.4.0"
     "@react-native-firebase/auth": "npm:^20.4.0"
     "@react-native-firebase/dynamic-links": "npm:^20.4.0"
