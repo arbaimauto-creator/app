@@ -17,7 +17,8 @@
     "ios14p": "npm run ios -- --simulator='iPhone 14 Pro (Rosetta)'",
     "iosxm": "npm run ios -- --simulator='iPhone Xs Max'",
     "codepush-aos": "appcenter codepush release-react -a greyd/greyd_android --mandatory -d Production",
-    "codepush-ios": "appcenter codepush release-react -a greyd/greyd_ios --mandatory -d Production"
+    "codepush-ios": "appcenter codepush release-react -a greyd/greyd_ios --mandatory -d Production",
+    "eas-build-pre-install": "corepack enable"
   },
   "dependencies": {
     "@invertase/react-native-apple-authentication": "^2.3.0",
