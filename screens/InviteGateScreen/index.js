@@ -17,6 +17,7 @@ import Strings from '../../Components/Strings';
 import { Btn, Chips, Wordmark } from '../../Components/UI';
 import { verifyInviteCode } from '../../api/invites';
 import { logEvent, resetAnalyticsContext } from '../../api/common/analytics';
+import { trace } from '../../Components/bootTrace';
 
 const { COLORS, FONT } = T;
 
@@ -28,6 +29,19 @@ const COUNTRY_ITEMS = COUNTRIES.map((c) => ({ key: c, label: c }));
 // 연속 실패 시 지수 쿨다운. 서버 검증 도입 시에도 UI 스로틀로 유지.
 const THROTTLE_AFTER = 5; // 연속 실패 허용 횟수
 const COOLDOWN_BASE_SEC = 30;
+
+// 저장이 실패하거나 응답하지 않아도 게이트 통과를 막지 않는다.
+// (릴리스에서 네이티브 응답이 없으면 버튼이 '먹통'으로 보였던 원인)
+async function prefSet(key, value) {
+  try {
+    await Promise.race([
+      Preference.set(key, String(value ?? '')),
+      new Promise((resolve) => setTimeout(resolve, 2500)),
+    ]);
+  } catch (e) {
+    trace(`gate:pref-set-fail:${key}`);
+  }
+}
 
 export default function InviteGateScreen({ navigation }) {
   const [code, setCode] = useState('');
@@ -85,14 +99,29 @@ export default function InviteGateScreen({ navigation }) {
       setError(Strings.INVITE_BRAND_WEB_ONLY);
       return;
     }
-    await Preference.set('inviteRole', result.role);
-    await Preference.set('inviteCode', code.trim().toUpperCase());
-    await Preference.set('creatorCountry', country);
-    resetAnalyticsContext(); // role·country 확정 — 공통 파라미터 갱신
-    logEvent('gate_code_submit', { result: 'ok' });
+    await prefSet('inviteRole', result.role);
+    await prefSet('inviteCode', code.trim().toUpperCase());
+    await prefSet('creatorCountry', country);
+    try {
+      resetAnalyticsContext(); // role·country 확정 — 공통 파라미터 갱신
+      logEvent('gate_code_submit', { result: 'ok' });
+    } catch (e) {
+      trace('gate:analytics-fail');
+    }
     // D28: 게이트 직후 로그인 — 계정에 게이트 통과가 묶여야 기기 변경·재설치 복구가 된다.
     // 로그인 성공 시 resetToMain이 온보딩 미완이면 CreatorOnboarding으로 보낸다.
+    trace('gate:navigate-signin');
     navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'NotSignedIn' }] }));
+  };
+
+  // 어떤 이유로든 예외가 나면 버튼이 '먹통'으로 보이지 않게 화면에 원인을 띄운다.
+  const onSubmitSafe = async () => {
+    try {
+      await onSubmit();
+    } catch (e) {
+      setIsVerifying(false);
+      setError(`오류: ${e?.message || String(e)}`);
+    }
   };
 
   return (
@@ -139,7 +168,7 @@ export default function InviteGateScreen({ navigation }) {
         ) : (
           <Btn
             title={Strings.INVITE_SUBMIT}
-            onPress={onSubmit}
+            onPress={onSubmitSafe}
             disabled={!code || !country}
             style={styles.submit}
           />

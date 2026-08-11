@@ -233,8 +233,9 @@ class SignInScreen extends React.Component {
               </View>
 
               {/* Greyd 1단계: 클로즈드 앱 — 게스트 입장은 INVITE_GATE가 켜지면 숨긴다.
-                  __DEV__에서만 유지 (에뮬레이터는 소셜 로그인 불가 — 게이트 검증용 입장 경로) */}
-              {(!FEATURES.INVITE_GATE || __DEV__) && (
+                  __DEV__ 또는 TEST_GUEST_ENTRY(테스트 배포)에서만 유지 —
+                  TestFlight에서 소셜 로그인 없이 전 플로우를 확인하기 위한 경로 */}
+              {(!FEATURES.INVITE_GATE || __DEV__ || FEATURES.TEST_GUEST_ENTRY) && (
                 <View style={styles.guestButtonsContainer}>
                   <GuestLoginButton
                     onPress={() =>
