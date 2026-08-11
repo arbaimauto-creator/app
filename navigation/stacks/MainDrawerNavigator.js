@@ -1,6 +1,6 @@
 import { createStackNavigator } from '@react-navigation/stack';
-import React, { useState } from 'react';
-import { View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 import Preference from 'react-native-default-preference';
 import { useDispatch } from 'react-redux';
 import headerBackButton from '../../Components/CustomComponents/headerBackButton';
@@ -79,8 +79,59 @@ import GreydSettingsScreen from '../../screens/MyScreen/SettingsScreen';
 import ApplyDone from '../../screens/TryScreen/ApplyDone';
 import MissionDone from '../../screens/ActivityScreen/MissionDone';
 import FirstImpression from '../../screens/ActivityScreen/FirstImpression';
+import T from '../../Components/Constants/DesignTokens';
+import { trace } from '../../Components/bootTrace';
 
 const Stack = createStackNavigator();
+
+// 부팅 시 Preference 조회 최대 대기 시간. 초과하면 기본값(null)으로 진행한다.
+// (네이티브 모듈이 응답하지 않아도 흰 화면에 영구히 갇히지 않게 하는 최후 방어선)
+const PREF_TIMEOUT_MS = 2500;
+const TIMED_OUT = {};
+
+/**
+ * Preference.get 방어 래퍼: reject·동기 throw·무응답 모두 null로 수렴시킨다.
+ * 정상 경로에서는 Preference.get과 동일한 값을 그대로 돌려준다.
+ */
+function prefGet(key) {
+  let timer = null;
+  const timeout = new Promise((resolve) => {
+    timer = setTimeout(() => resolve(TIMED_OUT), PREF_TIMEOUT_MS);
+  });
+  const read = Promise.resolve()
+    .then(() => Preference.get(key))
+    .catch(() => {
+      trace('pref:error:' + key);
+      return null;
+    });
+
+  return Promise.race([read, timeout]).then((value) => {
+    if (timer) {
+      clearTimeout(timer);
+    }
+    if (value === TIMED_OUT) {
+      trace('pref:timeout:' + key);
+      return null;
+    }
+    return value;
+  });
+}
+
+// 빈 <View /> 대신 최소한의 시각적 신호(배경 + 스피너)를 남긴다.
+function BootFallback() {
+  return (
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: T.COLORS.BG,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <ActivityIndicator size="large" color={T.COLORS.AMBER} />
+    </View>
+  );
+}
 
 function MainDrawerNavigator({ route, navigation }) {
   const [logonUserId, setLogonUserId] = useState('');
@@ -97,57 +148,76 @@ function MainDrawerNavigator({ route, navigation }) {
   const [previousPage, setPreviousPage] = useState('');
   // 클로즈드 베타 게이트 (v2 §3-1): 초대 코드 통과 전엔 게이트가 최전면
   const [gatePassed, setGatePassed] = useState(null);
+  // 부팅 Preference 로드 완료 여부. 성공·실패·타임아웃 어느 경우에도 true가 되어
+  // 반드시 스택이 렌더된다(이전 구조는 응답이 없으면 영구히 <View />였다).
+  const [bootLoaded, setBootLoaded] = useState(false);
 
-  if (gatePassed === null) {
-    Preference.get('inviteRole').then((value) => {
-      setGatePassed(value ? 'yes' : 'no');
-    });
-    return <View />;
-  }
+  // 렌더 본문에서 Promise를 띄우고 setState 하던 구조를 useEffect로 이동.
+  useEffect(() => {
+    let alive = true;
+    trace('drawer:boot-start');
 
-  if (isOnboarded === false) {
-    Preference.get('isOnboarded').then((value) => {
-      setIsOnboarded(value);
-    });
+    Promise.all([
+      prefGet('inviteRole'),
+      prefGet('isOnboarded'),
+      prefGet('userId'),
+      prefGet('userName'),
+      prefGet('userProfilePicUrl'),
+      prefGet('userTokenFirebase'),
+      prefGet('userIsSeller'),
+      prefGet('KRW/USD'),
+      prefGet('previousPage'),
+    ])
+      .then(
+        ([
+          inviteRole,
+          onboarded,
+          userId,
+          userName,
+          profilePicUrl,
+          userToken,
+          userIsSeller,
+          krwPerUsd,
+          prevPage,
+        ]) => {
+          if (!alive) {
+            return;
+          }
+          setGatePassed(inviteRole ? 'yes' : 'no');
+          setIsOnboarded(onboarded);
+          setLogonUserId(userId);
+          setLogonUserName(userName);
+          setLogonUserProfilePicUrl(profilePicUrl);
+          setLogonUserToken(userToken);
+          setLogonUserIsSeller(userIsSeller);
+          if (krwPerUsd) {
+            setKRWPerUSD(krwPerUsd);
+          }
+          setPreviousPage(prevPage);
+          trace(
+            'drawer:boot-done gate=' + (inviteRole ? 'yes' : 'no') + ' uid=' + (userId ? 1 : 0),
+          );
+          setBootLoaded(true);
+        },
+      )
+      .catch(() => {
+        // prefGet이 이미 개별 방어를 하므로 도달 불가에 가깝지만, 어떤 경우에도 진행시킨다.
+        if (!alive) {
+          return;
+        }
+        trace('drawer:boot-error');
+        setGatePassed('no');
+        setBootLoaded(true);
+      });
 
-    return <View />;
-  }
+    return () => {
+      alive = false;
+    };
+  }, []);
 
-  if (logonUserId === '') {
-    Preference.get('userId').then((value) => {
-      setLogonUserId(value);
-
-      // if (!value) {
-      //   guestUser(
-      //     { navigation, route: { params: initialParams } },
-      //     (isLoggedIn) => setIsLoggingIn(isLoggedIn),
-      //     true,
-      //   );
-      //   dispatch(setGuest({ isGuest: true }));
-      // }
-      // dispatch(setGuest({ isGuest: false }));
-    });
-    Preference.get('userName').then((value) => {
-      setLogonUserName(value);
-    });
-    Preference.get('userProfilePicUrl').then((value) => {
-      setLogonUserProfilePicUrl(value);
-    });
-    Preference.get('userTokenFirebase').then((value) => {
-      setLogonUserToken(value);
-    });
-    Preference.get('userIsSeller').then((value) => {
-      setLogonUserIsSeller(value);
-    });
-    Preference.get('KRW/USD').then((value) => {
-      console.log('KRW/USD', value);
-      setKRWPerUSD(value);
-    });
-
-    Preference.get('previousPage').then((value) => {
-      console.log('previousPage', value);
-      setPreviousPage(value);
-    });
+  if (!bootLoaded) {
+    trace('drawer:boot-pending');
+    return <BootFallback />;
   }
 
   const initialParams = {
@@ -174,8 +244,11 @@ function MainDrawerNavigator({ route, navigation }) {
    */
 
   if (logonUserId === '') {
-    return <View />;
+    trace('drawer:userId-empty');
+    return <BootFallback />;
   }
+
+  trace('drawer:render-stack onboarded=' + String(isOnboarded));
 
   return (
     <Stack.Navigator

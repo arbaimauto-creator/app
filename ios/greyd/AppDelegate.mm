@@ -57,10 +57,28 @@
 //   return [self bundleURL];
 // }
 
-// ✅ 변경 후
+// ✅ RN 0.76 표준 구현.
+// 릴리스에서는 반드시 앱 번들에 동봉된 main.jsbundle을 쓴다.
+//
+// 이전 구현은 DEBUG 구분 없이 jsBundleURLForBundleRoot:를 호출했다.
+// 릴리스 빌드에서는 RCT_DEV_MENU=0이라 RCTBundleURLProvider가 "패키저가 살아있는지"
+// 확인하는 코드(isPackagerRunning)를 컴파일에서 제외한다. 따라서 NSUserDefaults에
+// RCT_jsLocation 키가 남아 있으면 릴리스 앱이 http://<host>:8081/index.bundle 을
+// 그대로 로드하려 들고, 응답이 없으므로 JS가 영원히 실행되지 않는다
+// (= 크래시·JS 예외 없는 흰 화면). Xcode 디버그 빌드가 깔려 있던 기기를
+// TestFlight로 덮어쓰면 앱 컨테이너가 유지되어 이 키가 그대로 남는다.
+- (NSURL *)bundleURL
+{
+#if DEBUG
+  return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index"];
+#else
+  return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
+#endif
+}
+
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
 {
-  return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index"];
+  return [self bundleURL];
 }
 
 // ... 나머지 메서드들은 그대로 유지

@@ -6,6 +6,12 @@ import { setGuest } from '../../slices/user';
 import APIprovider from '../APIprovider';
 import { loginWithGuest } from '../../screens/SignInScreen/commonHelperFunction';
 import Strings from '../Strings';
+import { trace } from '../bootTrace';
+
+// getInitialURL은 NavigationContainer가 자식 렌더 전에 await 한다.
+// 여기서 무응답이면 앱은 영원히 빈 화면이 되므로 반드시 상한을 둔다.
+const INITIAL_URL_TIMEOUT_MS = 3000;
+const DEFAULT_URL = 'mylinker://home';
 
 const config = {
   screens: {
@@ -53,68 +59,99 @@ const ALLOWED_LINK_PREFIXES = ['videos/', 'users/', 'notifications', 'mypage/', 
 const isAllowedLinkPath = (path) =>
   typeof path === 'string' && ALLOWED_LINK_PREFIXES.some((prefix) => path.startsWith(prefix));
 
+// 실제 초기 URL 해석. 아래 getInitialURL이 타임아웃·에러를 감싼다.
+async function resolveInitialURL() {
+  // Check if the app was opened by a deep link
+  const url = await Linking.getInitialURL();
+  trace('linking:initial-url=' + (url ? 1 : 0));
+  const dynamicLink = await dynamicLinks().getInitialLink();
+  trace('linking:dynamiclink=' + (dynamicLink ? 1 : 0));
+
+  console.log('deeplink getInitialURL', url, dynamicLink);
+
+  if (dynamicLink) {
+    const dynamicLinkParams = extractDeepLinkPath(dynamicLink.url);
+    if (!dynamicLinkParams || !isAllowedLinkPath(dynamicLinkParams)) {
+      return DEFAULT_URL;
+    }
+
+    /* 다이나믹 링크를 통해 들어왔을대 로그인 되도록 로직추가 */
+    const {
+      user: { isGuest },
+    } = store.getState();
+
+    if (isGuest && (dynamicLinkParams.startsWith('users') || dynamicLinkParams.startsWith('qnas'))) {
+      return Alert.alert(Strings.LOGIN_REQUIRED_TITLE, Strings.LOGIN_REQUIRED_TO_VIEW_PAGE);
+    }
+
+    const myUserId = await Preference.get('userId');
+    const myUserName = await Preference.get('userName');
+    const originalRequesterToken = await Preference.get('userAccessToken');
+
+    if (!myUserId || !myUserName || !originalRequesterToken) {
+      await loginWithGuest();
+      // return Alert.alert(
+      //   '로그인 필요',
+      //   '해당 페이지는 게스트모드 혹은 로그인 상태에서 확인 가능합니다.',
+      // );
+    }
+
+    if (
+      (myUserId === '640a908e092ea7d56d4a41d5' && myUserName === 'guest_arbaim') ||
+      (myUserId === '63a126963389e30449162c3b' && myUserName === 'greyd.guest')
+    ) {
+      store.dispatch(setGuest({ isGuest: true }));
+    }
+
+    if (originalRequesterToken) {
+      APIprovider.setRequester(originalRequesterToken, myUserId);
+    }
+    /* 다이나믹 링크를 통해 들어왔을대 로그인 되도록 로직추가 */
+
+    return 'greyd://' + dynamicLinkParams;
+  }
+
+  if (url) {
+    // 직접 스킴 진입도 동일 화이트리스트 적용
+    const path = extractDeepLinkPath(url);
+    return path && isAllowedLinkPath(path) ? url : DEFAULT_URL;
+  }
+  // If it was not opened by a deep link, go to the home screen
+  return DEFAULT_URL;
+}
+
 const linking = {
   prefixes: ['https://greyd.app', 'greyd://'],
   config,
   async getInitialURL() {
-    // Check if the app was opened by a deep link
-    const url = await Linking.getInitialURL();
-    const dynamicLink = await dynamicLinks().getInitialLink();
+    trace('linking:getInitialURL-start');
+    let timer = null;
+    try {
+      const timeout = new Promise((resolve) => {
+        timer = setTimeout(() => {
+          // dynamicLinks().getInitialLink()가 응답하지 않는 경우(네트워크·SDK 초기화 지연)
+          // NavigationContainer가 자식을 영원히 렌더하지 않는 것을 막는다.
+          trace('linking:dynamiclink-timeout');
+          resolve(DEFAULT_URL);
+        }, INITIAL_URL_TIMEOUT_MS);
+      });
 
-    console.log('deeplink getInitialURL', url, dynamicLink);
-
-    if (dynamicLink) {
-      const dynamicLinkParams = extractDeepLinkPath(dynamicLink.url);
-      if (!dynamicLinkParams || !isAllowedLinkPath(dynamicLinkParams)) {
-        return 'mylinker://home';
+      // 타임아웃이 먼저 이긴 뒤 뒤늦게 reject되어도 unhandled rejection이 되지 않도록 개별 catch.
+      const resolved = resolveInitialURL().catch(() => {
+        trace('linking:resolve-error');
+        return DEFAULT_URL;
+      });
+      const result = await Promise.race([resolved, timeout]);
+      trace('linking:getInitialURL-done');
+      return result;
+    } catch (e) {
+      trace('linking:getInitialURL-error');
+      return DEFAULT_URL;
+    } finally {
+      if (timer) {
+        clearTimeout(timer);
       }
-
-      /* 다이나믹 링크를 통해 들어왔을대 로그인 되도록 로직추가 */
-      const {
-        user: { isGuest },
-      } = store.getState();
-
-      if (
-        isGuest &&
-        (dynamicLinkParams.startsWith('users') || dynamicLinkParams.startsWith('qnas'))
-      ) {
-        return Alert.alert(Strings.LOGIN_REQUIRED_TITLE, Strings.LOGIN_REQUIRED_TO_VIEW_PAGE);
-      }
-
-      const myUserId = await Preference.get('userId');
-      const myUserName = await Preference.get('userName');
-      const originalRequesterToken = await Preference.get('userAccessToken');
-
-      if (!myUserId || !myUserName || !originalRequesterToken) {
-        await loginWithGuest();
-        // return Alert.alert(
-        //   '로그인 필요',
-        //   '해당 페이지는 게스트모드 혹은 로그인 상태에서 확인 가능합니다.',
-        // );
-      }
-
-      if (
-        (myUserId === '640a908e092ea7d56d4a41d5' && myUserName === 'guest_arbaim') ||
-        (myUserId === '63a126963389e30449162c3b' && myUserName === 'greyd.guest')
-      ) {
-        store.dispatch(setGuest({ isGuest: true }));
-      }
-
-      if (originalRequesterToken) {
-        APIprovider.setRequester(originalRequesterToken, myUserId);
-      }
-      /* 다이나믹 링크를 통해 들어왔을대 로그인 되도록 로직추가 */
-
-      return 'greyd://' + dynamicLinkParams;
     }
-
-    if (url) {
-      // 직접 스킴 진입도 동일 화이트리스트 적용
-      const path = extractDeepLinkPath(url);
-      return path && isAllowedLinkPath(path) ? url : 'mylinker://home';
-    }
-    // If it was not opened by a deep link, go to the home screen
-    return 'mylinker://home';
   },
   // Custom function to subscribe to incoming links
   subscribe(listener) {
