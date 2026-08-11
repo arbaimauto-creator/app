@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
-import Constants from './Constants';
 import Utils from './utils';
+import T from './Constants/DesignTokens';
+
+const { COLORS, RADIUS, FONT, TYPE } = T;
 
 function ReadingCheckCircle({ isRead }) {
   if (isRead === true) {
@@ -52,7 +54,7 @@ function NotificationItemView({ item, user = undefined, navigation }) {
   // isRead 값에 따른 연동 필요, 알림시간 랜더링 추가 필요.
   return (
     <Pressable onPress={handlePressItem} activeOpacity={0.9}>
-      <View style={styles.notiContainer}>
+      <View style={[styles.notiContainer, isRead !== true && styles.notiContainerUnread]}>
         <ReadingCheckCircle isRead={item.isRead} />
         <Pressable
           onPress={(e) => {
@@ -75,7 +77,7 @@ function NotificationItemView({ item, user = undefined, navigation }) {
         {contents.subTitle ? (
           <View style={styles.textBox}>
             <Text style={styles.title}>
-              {contents.title} <Text style={styles.subTitle}>{timeToAgo}</Text>
+              {contents.title} <Text style={styles.time}>{timeToAgo}</Text>
             </Text>
             <Text ellipsizeMode="tail" style={styles.subTitle}>
               {contents.subTitle}
@@ -84,7 +86,7 @@ function NotificationItemView({ item, user = undefined, navigation }) {
         ) : (
           <View style={styles.textBox}>
             <Text style={styles.title}>
-              {contents.title} <Text style={styles.subTitle}>{timeToAgo}</Text>
+              {contents.title} <Text style={styles.time}>{timeToAgo}</Text>
             </Text>
           </View>
         )}
@@ -96,91 +98,104 @@ function NotificationItemView({ item, user = undefined, navigation }) {
 
 const styles = StyleSheet.create({
   notiContainer: {
-    flex: 1,
-    marginBottom: 20,
+    marginBottom: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingRight: 20,
-    paddingLeft: 10,
+    backgroundColor: COLORS.SURFACE,
+    borderRadius: RADIUS.CARD,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    ...T.SHADOW_CARD,
+  },
+  notiContainerUnread: {
+    backgroundColor: COLORS.AMBER_FAINT,
   },
   textBox: {
     overflow: 'hidden',
     flex: 1,
     justifyContent: 'center',
-    paddingLeft: 12,
-    paddingRight: 12,
+    paddingLeft: 11,
+    paddingRight: 8,
+    gap: 2,
   },
   actionImageIcon: {
-    height: 50,
-    width: 50,
-    borderRadius: 4,
+    height: 46,
+    width: 46,
+    borderRadius: RADIUS.FIELD,
   },
   actionButtonIcon: {
     height: 30,
-    borderRadius: 4,
-    backgroundColor: 'white',
+    borderRadius: RADIUS.BTN_SM,
+    backgroundColor: COLORS.AMBER,
     width: 70,
-    color: 'black',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
   actionButtonDisabledIcon: {
     height: 30,
-    borderRadius: 4,
-    borderColor: 'white',
-    borderWidth: 1,
-    backgroundColor: Constants.COLOR_BACKGROUND_DARK,
+    borderRadius: RADIUS.BTN_SM,
+    borderColor: COLORS.LINE,
+    borderWidth: 1.5,
+    backgroundColor: COLORS.SURFACE,
     width: 70,
-    color: 'white',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
   roundIcon: {
-    height: 50,
-    borderRadius: 25,
+    height: 46,
+    borderRadius: 23,
     overflow: 'hidden',
-    width: 50,
+    width: 46,
+    backgroundColor: COLORS.LINE,
   },
   squareIcon: {
-    height: 50,
-    width: 50,
+    height: 46,
+    width: 46,
     overflow: 'hidden',
-    borderRadius: 4,
+    borderRadius: RADIUS.FIELD,
+    backgroundColor: COLORS.LINE,
   },
   buttonTitle: {
-    color: 'black',
-    fontSize: 14,
-    fontWeight: 'bold',
+    ...TYPE.BTN,
+    fontSize: 11.5,
   },
   buttonDisableTitle: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: 'bold',
+    fontFamily: FONT.Bold,
+    fontSize: 11.5,
+    color: COLORS.GREY,
   },
   subTitle: {
-    color: '#888',
-    fontSize: 14,
+    fontFamily: FONT.Regular,
+    fontSize: 11.5,
+    lineHeight: 16,
+    color: COLORS.GREY,
+  },
+  time: {
+    fontFamily: FONT.Regular,
+    fontSize: 11,
+    color: COLORS.GREY,
   },
   title: {
-    fontSize: 15,
+    fontFamily: FONT.Regular,
+    fontSize: 13,
     lineHeight: 18,
-    color: Constants.TIER_COLORS.ARTISAN,
+    color: COLORS.INK,
   },
   unreadCircle: {
-    width: 5,
-    height: 5,
-    borderRadius: 5 / 2,
-    backgroundColor: '#FC2A17',
-    marginRight: 10,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.AMBER,
+    marginRight: 8,
   },
   readCircle: {
-    width: 5,
-    height: 5,
-    borderRadius: 5 / 2,
-    backgroundColor: Constants.COLOR_BACKGROUND_DARK,
-    marginRight: 10,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'transparent',
+    marginRight: 8,
   },
 });
 

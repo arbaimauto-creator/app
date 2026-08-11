@@ -11,15 +11,16 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import { Button } from 'react-native-elements';
 import FastImage from 'react-native-fast-image';
 import Animated from 'react-native-reanimated';
 import IconEntypo from 'react-native-vector-icons/Entypo';
 import APIprovider from '../../Components/APIprovider';
 import CommentListItemView from '../../Components/CommentListItemView';
-import Constants from '../../Components/Constants';
+import T from '../../Components/Constants/DesignTokens';
 import Strings from '../../Components/Strings';
 import { LogoutAlert, isGuestUser } from '../../Components/utils';
+
+const { COLORS, RADIUS, FONT } = T;
 
 function ReviewComments({ context }) {
   // let isCommentSubmitting = false;
@@ -302,16 +303,7 @@ function ReviewComments({ context }) {
             style={styles.userProfilePic}
             source={{ uri: context.state.logonUserProfilePicUrl }}
           />
-          <Text
-            style={{
-              flex: 1,
-              marginRight: 4,
-              color: Constants.TIER_COLORS.ARTISAN,
-              fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-            }}
-          >
-            {Strings.INPUT_COMMENT}
-          </Text>
+          <Text style={styles.addCommentPlaceholder}>{Strings.INPUT_COMMENT}</Text>
         </View>
       </TouchableWithoutFeedback>
       {context.state.isCommentExpanded && (
@@ -327,7 +319,7 @@ function ReviewComments({ context }) {
                   videoAuthor={context.state.video.author}
                   navigation={context.props.navigation}
                   data={item}
-                  theme={'dark'}
+                  theme={'light'}
                   onItemDeleteRequested={context.onCommentDeleteRequested.bind(context)}
                   enableRecomment
                   recommentCount={item.childCount}
@@ -354,39 +346,20 @@ function ReviewComments({ context }) {
                   contextProps={context.props}
                 />
                 {recommentPosition === index && !item.parentId && (
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      marginHorizontal: 10,
-                      marginBottom: 13,
-                      paddingHorizontal: 21,
-                      paddingVertical: Platform.OS === 'ios' ? 5 : 0,
-                      alignItems: 'center',
-                      backgroundColor: Constants.TIER_COLORS.PIONEER,
-                    }}
-                  >
+                  <View style={styles.recommentRow}>
                     <FastImage
                       style={styles.userProfilePic}
                       source={{ uri: context.state.logonUserProfilePicUrl }}
                     />
-                    <View
-                      style={{
-                        flex: 1,
-                        paddingBottom: Platform.OS === 'ios' ? 3 : 0,
-                      }}
-                    >
+                    <View style={styles.recommentInputWrap}>
                       <TextInput
                         ref={recommentRef}
                         multiline
                         autoFocus
                         scrollEnabled={false}
-                        style={{
-                          color: Constants.TIER_COLORS.ARTISAN,
-                          fontSize: 13,
-                          marginLeft: -1,
-                        }}
+                        style={styles.recommentInput}
                         placeholder={Strings.ADD_RECOMMENT}
-                        placeholderTextColor={Constants.TIER_COLORS.ARTISAN}
+                        placeholderTextColor={COLORS.GREY}
                         onChangeText={(text) => {
                           if (mentionedName !== '') {
                             if (text.length < mentionedName.length + 2) {
@@ -406,14 +379,9 @@ function ReviewComments({ context }) {
                       </TextInput>
                     </View>
                     {comment !== '' ? (
-                      <Button
-                        title={Strings.POST}
-                        type="clear"
-                        titleStyle={{
-                          fontSize: 13,
-                          textDecorationLine: 'underline',
-                          color: Constants.COLOR_MAIN,
-                        }}
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        style={[styles.postButton, isCommentSubmitting && styles.buttonDisabled]}
                         onPress={() => {
                           if (mentionedId !== '') {
                             submitRecomment({
@@ -429,16 +397,13 @@ function ReviewComments({ context }) {
                           }
                         }}
                         disabled={isCommentSubmitting}
-                      />
+                      >
+                        <Text style={styles.postButtonText}>{Strings.POST}</Text>
+                      </TouchableOpacity>
                     ) : (
-                      <Button
-                        title={Strings.CLOSE}
-                        type="clear"
-                        titleStyle={{
-                          fontSize: 14,
-                          textDecorationLine: 'underline',
-                          color: Constants.COLOR_MAIN,
-                        }}
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        style={[styles.closeButton, isCommentSubmitting && styles.buttonDisabled]}
                         onPress={() => {
                           setRecommentPosition(-1);
                           context.setState({ isWritingComment: false });
@@ -447,7 +412,9 @@ function ReviewComments({ context }) {
                           setComment('');
                         }}
                         disabled={isCommentSubmitting}
-                      />
+                      >
+                        <Text style={styles.closeButtonText}>{Strings.CLOSE}</Text>
+                      </TouchableOpacity>
                     )}
                   </View>
                 )}
@@ -459,7 +426,7 @@ function ReviewComments({ context }) {
                         videoAuthor={context.state.video.author}
                         navigation={context.props.navigation}
                         data={childItem}
-                        theme={'dark'}
+                        theme={'light'}
                         onItemDeleteRequested={(res) => {
                           onRecommentDeleteRequested(res);
                         }}
@@ -492,14 +459,7 @@ function ReviewComments({ context }) {
                               }
                             }}
                           >
-                            <Text
-                              style={{
-                                marginLeft: 10,
-                                marginTop: -5,
-                                color: '#999',
-                                textDecorationLine: 'underline',
-                              }}
-                            >
+                            <Text style={styles.viewMoreRecomment}>
                               {Strings.ViewMoreRecomment(
                                 item.childCount - item.childComments.length,
                               )}
@@ -512,6 +472,13 @@ function ReviewComments({ context }) {
               </View>
             )}
             keyExtractor={(item) => item._id}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyEmoji}>💬</Text>
+                <Text style={styles.emptyTitle}>{Strings.FEED_NO_COMMENTS_TITLE}</Text>
+                <Text style={styles.emptyDesc}>{Strings.FEED_NO_COMMENTS_DESC}</Text>
+              </View>
+            }
           />
           {context.state.isEnableLoadingComment && (
             <TouchableOpacity
@@ -554,14 +521,15 @@ const styles = StyleSheet.create({
   sectionTitleContainer: {
     marginTop: 20, //34,
     marginLeft: 20,
-    marginBottom: 22,
+    marginBottom: 14,
     flexDirection: 'row',
     alignItems: 'center',
   },
   sectionTitle: {
-    fontSize: 19,
-    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-    color: Constants.TIER_COLORS.ARTISAN,
+    fontSize: 14,
+    fontFamily: FONT.ExtraBold,
+    color: COLORS.INK,
+    letterSpacing: -0.2,
     marginRight: 6,
   },
   sectionTitleMoreIcon: {
@@ -573,19 +541,106 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginHorizontal: 20,
     paddingVertical: 10,
-    paddingHorizontal: 21,
+    paddingHorizontal: 14,
     alignItems: 'center',
-    backgroundColor: Constants.TIER_COLORS.EXPLORER,
-    borderRadius: 14,
+    backgroundColor: COLORS.SURFACE,
+    borderWidth: 1.5,
+    borderColor: COLORS.LINE,
+    borderRadius: RADIUS.FIELD,
+  },
+  addCommentPlaceholder: {
+    flex: 1,
+    marginRight: 4,
+    color: COLORS.GREY,
+    fontFamily: FONT.Regular,
+    fontSize: 13,
   },
   userProfilePic: {
     width: 28,
     height: 28,
-    borderRadius: 28,
-    marginRight: 20,
+    borderRadius: 14,
+    marginRight: 10,
+    backgroundColor: COLORS.LINE,
   },
   commentContainer: {
     paddingHorizontal: 10,
+  },
+  recommentRow: {
+    flexDirection: 'row',
+    marginHorizontal: 10,
+    marginBottom: 13,
+    paddingHorizontal: 12,
+    paddingVertical: Platform.OS === 'ios' ? 8 : 4,
+    alignItems: 'center',
+    backgroundColor: COLORS.SURFACE,
+    borderWidth: 1.5,
+    borderColor: COLORS.LINE,
+    borderRadius: RADIUS.FIELD,
+  },
+  recommentInputWrap: {
+    flex: 1,
+    paddingBottom: Platform.OS === 'ios' ? 3 : 0,
+  },
+  recommentInput: {
+    color: COLORS.INK,
+    fontFamily: FONT.Regular,
+    fontSize: 13,
+    marginLeft: -1,
+    padding: 0,
+  },
+  postButton: {
+    backgroundColor: COLORS.AMBER,
+    borderRadius: RADIUS.BTN_SM,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginLeft: 8,
+  },
+  postButtonText: {
+    fontFamily: FONT.ExtraBold,
+    fontSize: 12,
+    color: COLORS.ON_AMBER,
+  },
+  closeButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    marginLeft: 8,
+  },
+  closeButtonText: {
+    fontFamily: FONT.SemiBold,
+    fontSize: 12,
+    color: COLORS.GREY,
+  },
+  buttonDisabled: {
+    opacity: 0.45,
+  },
+  viewMoreRecomment: {
+    marginLeft: 10,
+    marginTop: -5,
+    color: COLORS.GREY,
+    fontFamily: FONT.Regular,
+    fontSize: 11.5,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    paddingVertical: 34,
+    paddingHorizontal: 24,
+  },
+  emptyEmoji: {
+    fontSize: 26,
+    marginBottom: 8,
+  },
+  emptyTitle: {
+    fontFamily: FONT.Bold,
+    fontSize: 13,
+    color: COLORS.INK,
+    marginBottom: 4,
+  },
+  emptyDesc: {
+    fontFamily: FONT.Regular,
+    fontSize: 11.5,
+    color: COLORS.GREY,
+    textAlign: 'center',
+    lineHeight: 16,
   },
 });
 

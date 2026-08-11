@@ -5,6 +5,7 @@ import Preference from 'react-native-default-preference';
 import FEATURES from '../Components/Constants/Features';
 import { opsPost } from './opsClient';
 import { getCreatorProfile } from './creators';
+import { toChannelPayload } from './channels';
 
 // 기기 식별자 — 3단계에서 로그인 계정과 매핑된다 (ops Influencer.greydAppId)
 export async function getGreydAppId() {
@@ -27,6 +28,26 @@ async function safePost(path, body, tag) {
       console.log(`ops bridge ${tag} failed (local state unaffected)`, e?.message);
     }
   }
+}
+
+// D29: 온보딩 완료 → ops 골든 레코드에 채널 3종·인구통계 동기화.
+// 이게 있어야 앱 가입자가 ops 매칭 후보로 실제 계산된다 (핸들 없으면 지표 수집도 불가).
+export async function opsSyncProfile(profile) {
+  const greydAppId = await getGreydAppId();
+  await safePost(
+    '/profile',
+    {
+      greydAppId,
+      country: profile?.country ?? null,
+      primaryPlatform: profile?.primaryPlatform ?? null,
+      channels: toChannelPayload(profile?.channels),
+      ageBand: profile?.ageBand ?? null,
+      gender: profile?.gender ?? null,
+      categories: profile?.contentCategories ?? [],
+      skinType: profile?.skinType ?? null,
+    },
+    'profile',
+  );
 }
 
 // 신청 → ops Match 생성 (수동 브리지 ① 대체). 제안 수락도 autoConfirmed=true로 동일 경로.

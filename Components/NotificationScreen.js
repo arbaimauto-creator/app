@@ -5,14 +5,11 @@ import NotificationItemView from './NotificationItemView';
 import APIprovider from './APIprovider';
 import NotificationNomalizer from './utils/NotificationNomalizer';
 import Strings from './Strings';
-import Constants from './Constants';
 import HeaderLeftBackButton from './CustomComponents/headerBackButton/headerLeftBackButton';
 import Animated from 'react-native-reanimated';
-import { moderateScale } from './utils/scailing';
+import T from './Constants/DesignTokens';
 
-function Header() {
-  return <View style={styles.header} />;
-}
+const { COLORS, FONT, TYPE } = T;
 
 function NotificationListScreen(props) {
   const [notificationList, setNotificationList] = useState([]);
@@ -51,10 +48,13 @@ function NotificationListScreen(props) {
   useEffect(() => {
     props.navigation.setOptions({
       title: Strings.NOTIFICATIONS_TITLE,
-      headerTintColor: Constants.TIER_COLORS.ARTISAN,
+      headerTintColor: COLORS.INK,
+      headerStyle: { backgroundColor: COLORS.BG, elevation: 0, shadowOpacity: 0 },
       headerTitleStyle: {
-        fontSize: moderateScale(20),
-        fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
+        fontSize: 18,
+        fontFamily: FONT.ExtraBold,
+        color: COLORS.INK,
+        letterSpacing: -0.2,
       },
       headerLeft: () => HeaderLeftBackButton({ navigation: props.navigation }),
     });
@@ -92,11 +92,14 @@ function NotificationListScreen(props) {
           }}
           onEndReachedThreshold={2}
           refreshing={isRefreshing}
-          style={{ marginTop: 20 }}
+          style={styles.list}
+          contentContainerStyle={styles.listContent}
         />
       ) : (
         <View style={styles.emptyMessageContainer}>
-          <Text style={styles.emptyMessage}>{Strings.EMPTY_NOTIFICATION_MESSAGE}</Text>
+          <Text style={styles.emptyEmoji}>🔔</Text>
+          <Text style={styles.emptyTitle}>{Strings.EMPTY_NOTIFICATION_MESSAGE}</Text>
+          <Text style={styles.emptyDesc}>{Strings.NOTI_EMPTY_DESC}</Text>
         </View>
       )}
     </SafeAreaView>
@@ -108,41 +111,36 @@ export default NotificationListScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Constants.COLOR_BACKGROUND_DARK,
+    backgroundColor: COLORS.BG,
   },
-  scene: {
+  list: {
     flex: 1,
   },
-  tabLabelStyle: {
-    color: Constants.TIER_COLORS.ARTISAN,
-  },
-  header: {
-    padding: 5,
-    backgroundColor: Constants.COLOR_BACKGROUND_DARK,
-  },
-  tabBarLabelFocused: {
-    color: 'white',
-    fontSize: 21,
-    fontWeight: 'bold',
-  },
-  tabBarLabel: {
-    color: 'rgb(128, 128, 128)',
-    fontSize: 21,
-    fontWeight: 'bold',
-  },
-  divider: {
-    height: 0,
-    backgroundColor: '#ccc',
-    marginTop: 10,
+  listContent: {
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 28,
   },
   emptyMessageContainer: {
     flex: 1,
     alignItems: 'center',
-    alignSelf: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 40,
+    gap: 8,
   },
-  emptyMessage: {
-    color: Constants.TIER_COLORS.ARTISAN,
-    fontSize: 18,
+  emptyEmoji: {
+    fontSize: 34,
+  },
+  emptyTitle: {
+    fontFamily: FONT.ExtraBold,
+    fontSize: 15,
+    color: COLORS.INK,
+    letterSpacing: -0.2,
+    textAlign: 'center',
+  },
+  emptyDesc: {
+    ...TYPE.SUB,
+    textAlign: 'center',
+    lineHeight: 17,
   },
 });

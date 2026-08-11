@@ -540,6 +540,7 @@ export default {
   },
   EXCHANGE_RETURN_NOT_AVAILABLE: 'Exchange/Return is not available on this product.',
   NO_REVIEW_UPLOADED: 'No review uploaded',
+  USERPAGE_EMPTY_REVIEW_DESC: 'New reviews will show up here.',
   NO_PRODUCT_UPLOADED: 'No product registered',
   ADD_NEW_REVIEW: 'Add a new review',
   ADD_NEW_PRODUCT: 'Add a new product',
@@ -2076,6 +2077,8 @@ export default {
   SHARE_SHORT: 'Share',
   // Home feed loading/empty state
   MAIN_FEED_LOADING: 'Loading reviews…',
+  FEED_NO_COMMENTS_TITLE: 'No comments yet',
+  FEED_NO_COMMENTS_DESC: 'Be the first to let the creator know what you think.',
   // i18n batch B2 — reward guide & reward history
   REMARK: 'Note',
   REWARD_GUIDE_INTRO_TITLE: 'How to earn rewards',
@@ -2109,4 +2112,6 @@ export default {
   NO_CURATED_PRODUCTS_AVAILABLE: 'No curated products available at this time.',
   PRODUCT_DETAILS_TO_MAKE_ORDER: 'Order details',
   SIGN_UP_TO_GREYD: 'Sign up to greyd',
+  NOTI_EMPTY_DESC: 'We will let you know here when something new arrives.',
+  SEARCH_EMPTY_DESC: 'Try a creator name or a #hashtag.',
 };

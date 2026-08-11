@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import APIprovider from '../../Components/APIprovider';
-import Constants from '../../Components/Constants';
+import T from '../../Components/Constants/DesignTokens';
 import Strings from '../../Components/Strings';
 import { ReviewGradeBadgeView } from '../../Components/Views';
 import UserProfilePicView from '../UserPageScreen/UserProfilePicView';
@@ -88,7 +88,7 @@ function VideoInfo({ context }) {
               style={styles.detailsProfilePicUrl}
               source={{ uri: review.author.profilePicUrl }}
             />
-            <Text style={[styles.reviewSubInfoText, { marginLeft: 10 }]}>{review.author.name}</Text>
+            <Text style={[styles.reviewSubInfoText, styles.authorName]}>{review.author.name}</Text>
           </View>
         </TouchableNativeFeedback>
         <Text style={styles.reviewSubInfoText}>
@@ -100,7 +100,7 @@ function VideoInfo({ context }) {
         {review?.isSponsored ? (
           <>
             <Text style={styles.reviewSubInfoText}> ・ </Text>
-            <Text style={{ ...styles.reviewSubInfoText, color: Constants.TIER_COLORS.GIVER }}>
+            <Text style={[styles.reviewSubInfoText, styles.sponsoredText]}>
               {Strings.SPONSORED}
             </Text>
           </>
@@ -128,24 +128,42 @@ const styles = StyleSheet.create({
   },
   reviewTitle: {
     flex: 1,
-    fontSize: 18,
-    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-    color: Constants.COLOR_BACKGROUND_DARK,
+    fontSize: 16,
+    lineHeight: 22,
+    color: '#fff',
+    fontFamily: T.FONT.SemiBold,
+    letterSpacing: -0.2,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   reviewSubInfoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 5,
+    marginTop: 6,
   },
   detailsProfilePicUrl: {
-    width: 45,
-    height: 45,
-    borderRadius: 30,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
   },
   reviewSubInfoText: {
-    color: Constants.TIER_COLORS.PIONEER,
-    fontSize: 15,
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: 11,
+    fontFamily: T.FONT.Regular,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  authorName: {
+    marginLeft: 10,
+    fontSize: 13,
+    color: '#fff',
+    fontFamily: T.FONT.Bold,
+  },
+  sponsoredText: {
+    color: T.COLORS.AMBER,
+    fontFamily: T.FONT.Bold,
   },
 });
 

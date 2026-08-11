@@ -9,6 +9,9 @@ import InstaGrid from './CustomComponents/InstaGrid/index';
 import HeaderLeftBackButton from './CustomComponents/headerBackButton/headerLeftBackButton';
 import SearchResultTabView from './SearchResultTabView';
 import Strings from './Strings';
+import T from './Constants/DesignTokens';
+
+const { COLORS, RADIUS, FONT, TYPE } = T;
 
 export default function SearchScreenWrapper(props) {
   const ref = React.useRef(null);
@@ -100,43 +103,38 @@ class SearchScreen extends React.Component {
       );
     } else if (!this.props.route.params.isHashtagSearch) {
       return (
-        <View style={styles.emptyMessageContainer}>
+        <View style={styles.gridContainer}>
           <InstaGrid columns={3} navigation={this.props.navigation} />
         </View>
       );
     }
+    return this.renderSearchMain();
   }
 
   renderSearchMain() {
     return (
       <View style={styles.emptyMessageContainer}>
-        <Text style={styles.emptyMessage}>{Strings.INPUT_SEARCH_KEYWORD}</Text>
+        <Text style={styles.emptyEmoji}>🔍</Text>
+        <Text style={styles.emptyTitle}>{Strings.INPUT_SEARCH_KEYWORD}</Text>
+        <Text style={styles.emptyDesc}>{Strings.SEARCH_EMPTY_DESC}</Text>
       </View>
     );
   }
 
   render() {
     return (
-      <SafeAreaView
-        style={[
-          styles.container,
-          {
-            backgroundColor: Constants.COLOR_BACKGROUND_DARK,
-            paddingTop: Platform.OS === 'ios' ? 0 : 40,
-          },
-        ]}
-      >
-        <View style={{ ...styles.header, flexDirection: 'row' }}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
           {Platform.OS === 'ios' ? (
             <HeaderLeftBackButton navigation={this.props.navigation} />
           ) : null}
           <SearchBar
             {...Constants.SEARCH_BAR_COMMON_PROPS}
             showCancel={false}
-            containerStyle={{
-              width: Platform.OS === 'ios' ? '90%' : '100%',
-              backgroundColor: Constants.COLOR_BACKGROUND_DARK,
-            }}
+            containerStyle={styles.searchBarContainer}
+            inputContainerStyle={styles.searchBarInputContainer}
+            inputStyle={styles.searchBarInput}
+            placeholderTextColor={COLORS.GREY}
             placeholder={Strings.SEARCH_HASH_TAG_PLACE_HOLDER}
             ref={(search) => (this.search = search)}
             searchIcon={
@@ -147,9 +145,10 @@ class SearchScreen extends React.Component {
             }
             cancelIcon={{
               iconProps: {
-                color: Constants.TIER_COLORS.ARTISAN,
+                color: COLORS.INK,
               },
             }}
+            clearIcon={{ iconProps: { color: COLORS.GREY } }}
             onChangeText={this.onChangeText}
             value={this.state.typingSearchKeyword}
             onSubmitEditing={this.onSearchSubmit} // Trigger search when user submits
@@ -158,9 +157,7 @@ class SearchScreen extends React.Component {
             }}
           />
         </View>
-        <View style={{ flex: 1 }} contentContainerStyle={{ flex: 1 }}>
-          {this.renderSearchResult()}
-        </View>
+        <View style={styles.body}>{this.renderSearchResult()}</View>
       </SafeAreaView>
     );
   }
@@ -169,22 +166,68 @@ class SearchScreen extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Constants.COLOR_BACKGROUND_DARK,
+    backgroundColor: COLORS.BG,
+    paddingTop: T.TOP_INSET,
   },
   header: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingRight: 20,
+    paddingHorizontal: 12,
+    paddingTop: 4,
+    paddingBottom: 6,
+  },
+  headerButton: {
+    width: 18,
+    height: 18,
+  },
+  searchBarContainer: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    borderTopWidth: 0,
+    borderBottomWidth: 0,
+    paddingHorizontal: 4,
+    paddingVertical: 0,
+  },
+  searchBarInputContainer: {
+    backgroundColor: COLORS.SURFACE,
+    borderWidth: 1.5,
+    borderBottomWidth: 1.5,
+    borderColor: COLORS.LINE,
+    borderRadius: RADIUS.FIELD,
+    height: 42,
+  },
+  searchBarInput: {
+    fontFamily: FONT.Medium,
+    fontSize: 13.5,
+    color: COLORS.INK,
+  },
+  body: {
+    flex: 1,
+  },
+  gridContainer: {
+    flex: 1,
+    paddingHorizontal: 12,
   },
   emptyMessageContainer: {
-    marginHorizontal: 15,
     flex: 1,
     alignItems: 'center',
-    alignSelf: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 40,
+    gap: 8,
   },
-  emptyMessage: {
-    color: Constants.TIER_COLORS.ARTISAN,
-    fontSize: 18,
+  emptyEmoji: {
+    fontSize: 34,
+  },
+  emptyTitle: {
+    fontFamily: FONT.ExtraBold,
+    fontSize: 15,
+    color: COLORS.INK,
+    letterSpacing: -0.2,
+    textAlign: 'center',
+  },
+  emptyDesc: {
+    ...TYPE.SUB,
+    textAlign: 'center',
+    lineHeight: 17,
   },
 });

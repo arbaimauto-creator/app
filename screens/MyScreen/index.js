@@ -1,6 +1,16 @@
 // 마이 탭 (시안 화면 18) — 프로필·G-스코어·포인트·추천 코드·설정 진입점.
 import React, { useCallback, useState } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Image,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import Preference from 'react-native-default-preference';
@@ -27,6 +37,12 @@ export default function MyScreen({ navigation }) {
   useFocusEffect(
     useCallback(() => {
       reload();
+      // 밝은 배경 화면이므로 상태바 글자는 항상 어둡게. 탭 리스너가 놓치는 진입
+      // 경로(딥링크·푸시)에서도 시계·배터리가 흰색으로 보이지 않게 한다.
+      StatusBar.setBarStyle('dark-content', true);
+      if (Platform.OS === 'android') {
+        StatusBar.setBackgroundColor(COLORS.BG);
+      }
     }, [reload]),
   );
 
@@ -51,7 +67,10 @@ export default function MyScreen({ navigation }) {
             onPress={() => navigation.navigate('GreydSettings')}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Text style={styles.gear}>⚙️</Text>
+            <Image
+              source={require('../../Resources/img/icHeaderSetting24.png')}
+              style={styles.gear}
+            />
           </TouchableOpacity>
         </View>
 
@@ -148,7 +167,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 4,
   },
-  gear: { fontSize: 18 },
+  gear: { width: 22, height: 22, tintColor: COLORS.INK },
   profileCard: { alignItems: 'center', paddingVertical: 18 },
   avatar: {
     width: 44,

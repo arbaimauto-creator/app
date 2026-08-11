@@ -17,6 +17,7 @@ import { tabBarIcon, tabBarLabel } from './renderTabBar';
 import { Platform } from 'react-native';
 import { StatusBar } from 'react-native';
 import Constants from '../../../Components/Constants';
+import T from '../../../Components/Constants/DesignTokens';
 import FEATURES from '../../../Components/Constants/Features';
 import { useSelector } from 'react-redux';
 import Preference from 'react-native-default-preference';
@@ -139,10 +140,8 @@ function BottomTabNavigator({ route, navigation }) {
 
             if (Platform.OS !== 'ios') {
               console.log('screenType', screenType);
-              StatusBar.setBackgroundColor(
-                screenType === 1 ? Constants.TIER_COLORS.GIVER : Constants.TIER_COLORS.ARTISAN,
-              );
-              StatusBar.setBarStyle('default', true);
+              StatusBar.setBackgroundColor(T.COLORS.BG);
+              StatusBar.setBarStyle('dark-content', true);
             }
           },
         })}
@@ -168,8 +167,8 @@ function BottomTabNavigator({ route, navigation }) {
               FastImage.clearMemoryCache();
 
               if (Platform.OS !== 'ios') {
-                StatusBar.setBackgroundColor(Constants.TIER_COLORS.GIVER);
-                StatusBar.setBarStyle('default', true);
+                StatusBar.setBackgroundColor(T.COLORS.BG);
+                StatusBar.setBarStyle('dark-content', true);
               }
             },
           })}
@@ -183,8 +182,8 @@ function BottomTabNavigator({ route, navigation }) {
           tabPress: () => {
             FastImage.clearMemoryCache();
             if (Platform.OS !== 'ios') {
-              StatusBar.setBackgroundColor(Constants.TIER_COLORS.GIVER);
-              StatusBar.setBarStyle('default', true);
+              StatusBar.setBackgroundColor(T.COLORS.BG);
+              StatusBar.setBarStyle('dark-content', true);
             }
           },
         })}
@@ -197,8 +196,8 @@ function BottomTabNavigator({ route, navigation }) {
           tabPress: () => {
             FastImage.clearMemoryCache();
             if (Platform.OS !== 'ios') {
-              StatusBar.setBackgroundColor(Constants.TIER_COLORS.GIVER);
-              StatusBar.setBarStyle('default', true);
+              StatusBar.setBackgroundColor(T.COLORS.BG);
+              StatusBar.setBarStyle('dark-content', true);
             }
           },
         })}
@@ -212,8 +211,8 @@ function BottomTabNavigator({ route, navigation }) {
             FastImage.clearMemoryCache();
 
             if (Platform.OS !== 'ios') {
-              StatusBar.setBackgroundColor(Constants.TIER_COLORS.GIVER);
-              StatusBar.setBarStyle('default', true);
+              StatusBar.setBackgroundColor(T.COLORS.BG);
+              StatusBar.setBarStyle('dark-content', true);
             }
           },
         })}

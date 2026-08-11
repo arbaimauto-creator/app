@@ -14,6 +14,8 @@ import T from '../../Components/Constants/DesignTokens';
 import Strings from '../../Components/Strings';
 import { Badge, Btn, Card, Chips } from '../../Components/UI';
 import { saveCreatorProfile } from '../../api/creators';
+import { CHANNELS, FOLLOWER_BANDS, normalizeHandle } from '../../api/channels';
+import { opsSyncProfile } from '../../api/opsBridge';
 
 const { COLORS, FONT, RADIUS } = T;
 
@@ -28,12 +30,6 @@ const PAGES = [
 ];
 
 const PLATFORMS = ['instagram', 'tiktok', 'youtube'];
-const FOLLOWER_BANDS = [
-  { key: 'nano', label: '< 10K' },
-  { key: 'micro', label: '10K–100K' },
-  { key: 'mid', label: '100K–1M' },
-  { key: 'macro', label: '1M+' },
-];
 const AGE_BANDS = ['18-24', '25-34', '35-44', '45+'];
 const GENDERS = [
   { key: 'female', label: Strings.GENDER_FEMALE },
@@ -57,14 +53,23 @@ export default function CreatorOnboarding({ navigation }) {
   const [page, setPage] = useState(0);
 
   const [platform, setPlatform] = useState('instagram');
-  const [handle, setHandle] = useState('');
-  const [followerBand, setFollowerBand] = useState(null);
+  // D29: 3채널 수집 — 주력 채널만 필수, 나머지는 선택 (매칭 커버리지 ↑, 마찰은 최소)
+  const [channels, setChannels] = useState({
+    instagram: { handle: '', followerBand: null },
+    tiktok: { handle: '', followerBand: null },
+    youtube: { handle: '', followerBand: null },
+  });
   const [ageBand, setAgeBand] = useState(null);
   const [gender, setGender] = useState(null);
   const [category, setCategory] = useState('beauty');
   const [skinType, setSkinType] = useState(null);
 
-  const canFinish = handle.trim().length > 1 && followerBand && ageBand && gender;
+  const setChannel = (key, patch) =>
+    setChannels((prev) => ({ ...prev, [key]: { ...prev[key], ...patch } }));
+
+  const primary = channels[platform];
+  const canFinish =
+    normalizeHandle(primary.handle).length > 1 && primary.followerBand && ageBand && gender;
 
   const goTo = (idx) => {
     setPage(idx);
@@ -73,19 +78,32 @@ export default function CreatorOnboarding({ navigation }) {
 
   const onFinish = async () => {
     const country = await Preference.get('creatorCountry');
-    await saveCreatorProfile({
+    // 핸들은 정규화해 저장 (URL 붙여넣기 → 순수 핸들)
+    const normalized = {};
+    CHANNELS.forEach(({ key }) => {
+      normalized[key] = {
+        handle: normalizeHandle(channels[key].handle),
+        followerBand: channels[key].followerBand ?? null,
+      };
+    });
+    const profile = {
       country,
       primaryPlatform: platform,
-      handleUrl: handle.trim(),
-      followerBand,
+      channels: normalized,
+      // 하위 호환: 기존 화면들이 참조하는 단일 핸들·밴드는 주력 채널 값으로 유지
+      handleUrl: normalized[platform].handle,
+      followerBand: normalized[platform].followerBand,
       ageBand,
       gender,
       contentCategories: [category],
       skinType,
       onboardedAt: new Date().toISOString(),
-    });
+    };
+    await saveCreatorProfile(profile);
     // 온보딩 완료 보상 +50P (mock: 로컬 표시용)
     await Preference.set('onboardingBonusGranted', 'true');
+    // D29: ops 골든 레코드에 채널·인구통계 동기화 (실패해도 로컬 진행 무영향)
+    opsSyncProfile(profile);
     navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'MainBottom' }] }));
   };
 
@@ -120,19 +138,35 @@ export default function CreatorOnboarding({ navigation }) {
             <Text style={styles.label}>{Strings.PROFILE_PLATFORM}</Text>
             <Chips items={PLATFORM_ITEMS} selected={platform} onSelect={setPlatform} />
 
-            <Text style={styles.label}>{Strings.PROFILE_HANDLE}</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="@your_handle"
-              placeholderTextColor={COLORS.GREY}
-              autoCapitalize="none"
-              autoCorrect={false}
-              value={handle}
-              onChangeText={setHandle}
-            />
-
-            <Text style={styles.label}>{Strings.PROFILE_FOLLOWERS}</Text>
-            <Chips items={FOLLOWER_BANDS} selected={followerBand} onSelect={setFollowerBand} />
+            {/* D29: 3채널 — 주력만 필수, 나머지는 선택 (더 많은 캠페인에 매칭) */}
+            <Text style={styles.channelsHint}>{Strings.PROFILE_CHANNELS_HINT}</Text>
+            {CHANNELS.map(({ key, label }) => (
+              <View key={key} style={styles.channelBlock}>
+                <View style={styles.channelHead}>
+                  <Text style={styles.channelName}>{label}</Text>
+                  <Text style={styles.channelTag}>
+                    {key === platform ? Strings.PROFILE_CH_PRIMARY : Strings.PROFILE_CH_OPTIONAL}
+                  </Text>
+                </View>
+                <TextInput
+                  style={styles.input}
+                  placeholder={Strings.PROFILE_HANDLE_PH}
+                  placeholderTextColor={COLORS.GREY}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  value={channels[key].handle}
+                  onChangeText={(v) => setChannel(key, { handle: v })}
+                />
+                {channels[key].handle.trim() ? (
+                  <Chips
+                    items={FOLLOWER_BANDS}
+                    selected={channels[key].followerBand}
+                    onSelect={(b) => setChannel(key, { followerBand: b })}
+                    style={styles.channelBands}
+                  />
+                ) : null}
+              </View>
+            ))}
 
             <Text style={styles.label}>{Strings.PROFILE_AGE}</Text>
             <Chips items={AGE_ITEMS} selected={ageBand} onSelect={setAgeBand} />
@@ -204,6 +238,12 @@ const styles = StyleSheet.create({
   },
   formSub: { ...T.TYPE.SUB, marginTop: 6 },
   label: { ...T.TYPE.LABEL, marginTop: 18, marginBottom: 8 },
+  channelsHint: { ...T.TYPE.XS, marginTop: 16, lineHeight: 16 },
+  channelBlock: { marginTop: 12 },
+  channelHead: { flexDirection: 'row', alignItems: 'center', marginBottom: 7 },
+  channelName: { fontFamily: FONT.Bold, fontSize: 13, color: COLORS.INK, flex: 1 },
+  channelTag: { ...T.TYPE.XS, fontFamily: FONT.SemiBold },
+  channelBands: { marginTop: 8, justifyContent: 'flex-start' },
   input: {
     borderWidth: 1.5,
     borderColor: COLORS.LINE,

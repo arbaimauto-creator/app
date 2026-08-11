@@ -19,20 +19,19 @@ import {
   Vibration,
   View,
 } from 'react-native';
-import { Flag } from 'react-native-country-picker-modal';
 import Preference from 'react-native-default-preference';
 import FastImage from 'react-native-fast-image';
-import { isIphoneX } from 'react-native-iphone-x-helper';
 import { ActivityIndicator } from 'react-native-paper';
 import { Shadow } from 'react-native-shadow-2';
 import { FlatGrid } from 'react-native-super-grid';
 import { ClipPath, Defs, Path, Svg, Image as SvgImage, Text as SvgText } from 'react-native-svg';
-import IconAntDesign from 'react-native-vector-icons/AntDesign';
 import IconMaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useDispatch, useSelector } from 'react-redux';
 import { VictoryArea, VictoryChart, VictoryGroup, VictoryPolarAxis } from 'victory-native';
 import APIprovider from '../../Components/APIprovider';
 import Constants from '../../Components/Constants';
+import T from '../../Components/Constants/DesignTokens';
+import { Badge, Btn, Card } from '../../Components/UI';
 import FEATURES from '../../Components/Constants/Features';
 import Codes from '../../Components/Constants/Codes';
 import QNAList from '../../Components/CustomComponents/QNA/QNAList';
@@ -43,7 +42,6 @@ import RevenueGuideModal from '../../Components/RevenueGuideModal';
 import Strings, { getLanguage } from '../../Components/Strings';
 import { nationalities } from '../../Components/Strings/nationalities';
 import UploadingVideoListItemView from '../../Components/UploadingVideoListItemView';
-import VideoListItemView from '../../Components/VideoListItemView';
 import Utils, { changeCurrency, isGuestUser, menuLogout } from '../../Components/utils';
 import { horizontalScale, moderateScale, verticalScale } from '../../Components/utils/scailing';
 import { shareLink } from '../../Components/utils/share';
@@ -51,8 +49,33 @@ import { Context } from '../../Contexts';
 import { UPLOADING_VIDEO, USER } from '../../Contexts/actionTypes';
 import { setUser } from '../../slices/user';
 import FollowedBy from './FollowedBy';
-import UserProfilePicViewUpdate from './UserProfilePicViewUpdate';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const { COLORS, FONT, TYPE } = T;
+
+// 그리드 셀 높이 리듬 — CuratedHome 그리드와 동일 규격
+const GRID_HEIGHTS = [118, 96, 100, 132];
+
+// 리뷰 썸네일 (없으면 그리드에서 제외)
+function gridThumbUrl(item) {
+  return item.thumbnailUrl || item?.relayedVideo?.thumbnailUrl || null;
+}
+
+// 점수 없으면 배지 숨김 (✓ 0.0 노출 금지)
+function reviewScore(item) {
+  const raw = item.g6RatingCount > 0 ? item.g6AvgRatingScore : item.ratingScore;
+  const n = Number(raw || 0);
+  return n > 0 ? n.toFixed(1) : null;
+}
+
+// 원형 아바타 — 구 육각형(Hexagon) 대체
+function Avatar({ url, size = 56, style }) {
+  return (
+    <FastImage
+      style={[{ width: size, height: size, borderRadius: size / 2 }, style]}
+      source={{ uri: url && url !== '' ? url : Constants.NO_USER_URL }}
+    />
+  );
+}
 
 const USER_HISTORY_TAB_INDEX = {
   REVIEW: 0,
@@ -132,12 +155,8 @@ function HeaderRight({ context }) {
 }
 
 function OtherProfileHeader({ context }) {
-  const { top } = useSafeAreaInsets();
-
   return (
-    <View
-      style={{ ...styles.orderHeaderContainer, paddingTop: Platform.OS === 'android' ? top : 0 }}
-    >
+    <View style={styles.orderHeaderContainer}>
       <ActionButton
         renderItem={
           <FastImage
@@ -147,8 +166,8 @@ function OtherProfileHeader({ context }) {
         }
         onPress={() => {
           if (Platform.OS !== 'ios') {
-            StatusBar.setBackgroundColor(Constants.TIER_COLORS.ARTISAN);
-            StatusBar.setBarStyle('default', true);
+            StatusBar.setBackgroundColor(COLORS.BG);
+            StatusBar.setBarStyle('dark-content', true);
           }
 
           context.props.navigation.pop();
@@ -163,10 +182,8 @@ function MyProfileHeader({ navigation, user, context }) {
   const navigationState = context.props.navigation.getState();
   const isTopLevel = navigationState.index === 0;
 
-  const { top } = useSafeAreaInsets();
-
   return (
-    <View style={{ ...styles.headerContainer, paddingTop: Platform.OS === 'android' ? top : 0 }}>
+    <View style={styles.headerContainer}>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         {isTopLevel ? null : (
           <ActionButton
@@ -467,651 +484,131 @@ function GraphViewInfo({ context, state }) {
 }
 
 function ProfileInfo({ context, user }) {
+  const isMine = context.isMyUserPage();
   const tierName = Utils.getTierNameByClass(user.class);
-  const tierColor = Utils.getTierColorByTierName(tierName);
+  const countryCode = nationalities[user.countryCode]?.code ?? nationalities.KR.code;
+
+  const openEditProfile = () => {
+    context.props.navigation.navigate('EditProfile', {
+      onProfileChanged: (profile) => {
+        context.setState({
+          user: {
+            ...user,
+            ...profile,
+          },
+        });
+      },
+      profilePicPath: user.profilePicPath,
+      profilePicUrl: user.profilePicUrl,
+      introduction: user.introduction,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      countryCode: user.countryCode,
+      instagramId: user.instagramId,
+      isHideContributionRevenue: user.isHideContributionRevenue,
+    });
+  };
+
+  const openInstagram = () => {
+    if (
+      !user.instagramId ||
+      user.instagramId.toString() === 'undefined' ||
+      typeof user.instagramId === 'undefined'
+    ) {
+      return Alert.alert('Instagram', Strings.INSTAGRAM_ID_NOT_REGISTERED);
+    }
+
+    Linking.openURL(`https://instagram.com/${user.instagramId.trim()}`);
+  };
 
   return (
     <View style={styles.profileInfoContainer}>
-      <View style={{ marginTop: moderateScale(10), marginBottom: 0 }}>
-        {context.isMyUserPage() ? (
-          <View
-            style={{
-              backgroundColor: Constants.COLOR_BACKGROUND_DARK,
-            }}
-          >
-            <View style={styles.box}>
-              <View style={styles.leftBorder1} />
-              <View style={styles.rightBorder1} />
-            </View>
-            <View style={styles.box} />
-
-            <View style={{ marginHorizontal: 16, marginTop: 16, flexDirection: 'row' }}>
+      <Card style={styles.profileCard}>
+        <View style={styles.profileRow}>
+          {isMine ? (
+            <TouchableOpacity activeOpacity={0.8} onPress={openEditProfile}>
+              <Avatar url={user.profilePicUrl} />
+            </TouchableOpacity>
+          ) : (
+            <Avatar url={user.profilePicUrl} />
+          )}
+          <View style={styles.profileBody}>
+            <Text style={styles.profileName} numberOfLines={1}>
+              {user.name}
+            </Text>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() =>
+                context.props.navigation.navigate('TierGuide', {
+                  category: Strings.GREYD_GUIDE_TIER_DESCRIPTION,
+                })
+              }
+            >
+              <Text style={styles.profileMeta} numberOfLines={1}>
+                {countryCode}
+                {tierName ? ` · Lv.${Utils.capitalizeFirstLetter(tierName)}` : ''}
+              </Text>
+            </TouchableOpacity>
+            <View style={styles.profileStatRow}>
+              <Follower user={user} context={context} />
+              <Following user={user} context={context} />
               <TouchableOpacity
-                onPress={() => {
-                  context.props.navigation.navigate('EditProfile', {
-                    onProfileChanged: (profile) => {
-                      context.setState({
-                        user: {
-                          ...user,
-                          ...profile,
-                        },
-                      });
-                    },
-                    profilePicPath: user.profilePicPath,
-                    profilePicUrl: user.profilePicUrl,
-                    introduction: user.introduction,
-                    name: user.name,
-                    email: user.email,
-                    phone: user.phone,
-                    countryCode: user.countryCode,
-                    instagramId: user.instagramId,
-                    isHideContributionRevenue: user.isHideContributionRevenue,
-                  });
-                }}
+                style={styles.instagramButton}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                onPress={openInstagram}
               >
-                <UserProfilePicViewUpdate
-                  style={styles.profilePicnew}
-                  source={{ uri: user.profilePicUrl }}
-                  class={user.class}
+                <FastImage
+                  style={styles.instagramIcon}
+                  source={require('../../Resources/img/iconRenewal/instagram.png')}
                 />
               </TouchableOpacity>
-
-              <View style={{ marginHorizontal: 6 }} />
-              <View style={{ justifyContent: 'center' }}>
-                <Text
-                  style={{
-                    color: Constants.TIER_COLORS.ARTISAN,
-                    fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
-                    fontSize: 16,
-                    justifyContent: 'space-between',
-                    marginBottom: -6,
-                    lineHeight: 20,
-                  }}
-                >
-                  {user.name}
-                </Text>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    alignContent: 'center',
-                    width: '80%',
-                    justifyContent: 'space-between',
-                    marginBottom: 2,
-                  }}
-                >
-                  <Follower user={user} context={context} />
-                  <Text
-                    style={{
-                      color: Constants.TIER_COLORS.STRIVER,
-                      fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
-                      fontSize: 4,
-                      marginLeft: 4,
-                    }}
-                  >
-                    {'\u2B24'}
-                  </Text>
-                  <Following user={user} context={context} />
-                  <Text
-                    style={{
-                      color: Constants.TIER_COLORS.STRIVER,
-                      fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
-                      fontSize: 4,
-                      marginLeft: 4,
-                    }}
-                  >
-                    {'\u2B24'}
-                  </Text>
-                  <View
-                    style={{
-                      marginLeft: horizontalScale(4),
-                      alignItems: 'center',
-                    }}
-                  >
-                    <View style={{ marginRight: -14, top: 4 }}>
-                      <Flag countryCode={user.countryCode ?? 'KR'} flagSize={30} />
-                    </View>
-                    <View style={{ marginRight: -9 }}>
-                      <Text
-                        style={{
-                          color: Constants.TIER_COLORS.ARTISAN,
-                          fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
-                          fontSize: 11,
-                          bottom: 4,
-                        }}
-                      >
-                        {nationalities[user.countryCode]?.code ?? nationalities.KR.code}
-                      </Text>
-                    </View>
-                  </View>
-                  <Text
-                    style={{
-                      color: Constants.TIER_COLORS.STRIVER,
-                      fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
-                      fontSize: 4,
-                      marginLeft: 10,
-                    }}
-                  >
-                    {'\u2B24'}
-                  </Text>
-                  <TouchableOpacity
-                    style={{
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      marginLeft: horizontalScale(4),
-                    }}
-                    onPress={() => {
-                      if (
-                        !user.instagramId ||
-                        user.instagramId.toString() === 'undefined' ||
-                        typeof user.instagramId === 'undefined'
-                      ) {
-                        return Alert.alert('Instagram', Strings.INSTAGRAM_ID_NOT_REGISTERED);
-                      }
-
-                      Linking.openURL(`https://instagram.com/${user.instagramId.trim()}`);
-                    }}
-                  >
-                    <FastImage
-                      style={{ width: 22, height: 22 }}
-                      source={require('../../Resources/img/iconRenewal/instagram.png')}
-                    />
-                  </TouchableOpacity>
-                </View>
-                <View
-                  style={{ flexDirection: 'row', alignItems: 'center', alignContent: 'center' }}
-                >
-                  <Text
-                    style={{
-                      color: Constants.TIER_COLORS.ARTISAN,
-                      fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
-                      fontSize: 16,
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <Text style={{ color: Constants.TIER_COLORS.OPERATOR }}>Lv.</Text>
-                    {Utils.capitalizeFirstLetter(tierName)}
-                  </Text>
-                  <TouchableOpacity
-                    style={{ marginTop: 6 }}
-                    onPress={() =>
-                      context.props.navigation.navigate('TierGuide', {
-                        category: Strings.GREYD_GUIDE_TIER_DESCRIPTION,
-                      })
-                    }
-                  >
-                    <FastImage
-                      style={{ width: 32, height: 32 }}
-                      source={Constants.TIER_ICONS[tierName]}
-                    />
-                  </TouchableOpacity>
-                </View>
-              </View>
             </View>
           </View>
-        ) : (
-          <View
-            style={{
-              backgroundColor: Constants.COLOR_BACKGROUND_DARK,
-              borderTopLeftRadius: moderateScale(20),
-              borderTopRightRadius: moderateScale(20),
-            }}
-          >
-            <View style={styles.box}>
-              <View style={styles.leftBorder1} />
-              <View style={styles.rightBorder1} />
-            </View>
-            <View style={styles.box} />
+        </View>
 
-            <View style={{ marginHorizontal: 16, marginTop: 16, flexDirection: 'row' }}>
-              <View>
-                <UserProfilePicViewUpdate
-                  style={styles.profilePicnew}
-                  source={{ uri: user.profilePicUrl }}
-                  class={user.class}
-                />
-              </View>
-
-              <View style={{ marginHorizontal: 6 }} />
-              <View style={{ justifyContent: 'center' }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: -6 }}>
-                  <Text
-                    style={{
-                      color: Constants.TIER_COLORS.ARTISAN,
-                      fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
-                      fontSize: 16,
-                      justifyContent: 'space-between',
-                      lineHeight: 20,
-                    }}
-                  >
-                    {user.name}
-                  </Text>
-                  <NewFollowButton context={context} user={user} />
-                </View>
-
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    alignContent: 'center',
-                    width: '80%',
-                    justifyContent: 'space-between',
-                    marginBottom: 2,
-                  }}
-                >
-                  <Follower user={user} context={context} />
-                  <Text
-                    style={{
-                      color: Constants.TIER_COLORS.STRIVER,
-                      fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
-                      fontSize: 4,
-                      marginLeft: 4,
-                    }}
-                  >
-                    {'\u2B24'}
-                  </Text>
-                  <Following user={user} context={context} />
-                  <Text
-                    style={{
-                      color: Constants.TIER_COLORS.STRIVER,
-                      fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
-                      fontSize: 4,
-                      marginLeft: 4,
-                    }}
-                  >
-                    {'\u2B24'}
-                  </Text>
-                  {/* <View style={{ marginLeft: horizontalScale(4), marginRight: -14 }}> */}
-                  <View
-                    style={{
-                      marginLeft: horizontalScale(4),
-                      alignItems: 'center',
-                    }}
-                  >
-                    <View style={{ marginRight: -14, top: 4 }}>
-                      <Flag countryCode={user.countryCode ?? 'KR'} flagSize={30} />
-                    </View>
-                    <View style={{ marginRight: -9 }}>
-                      <Text
-                        style={{
-                          color: Constants.TIER_COLORS.ARTISAN,
-                          fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
-                          fontSize: 11,
-                          bottom: 4,
-                        }}
-                      >
-                        {nationalities[user.countryCode]?.code ?? nationalities.KR.code}
-                      </Text>
-                    </View>
-                  </View>
-                  <Text
-                    style={{
-                      color: Constants.TIER_COLORS.STRIVER,
-                      fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
-                      fontSize: 4,
-                      marginLeft: 10,
-                    }}
-                  >
-                    {'\u2B24'}
-                  </Text>
-                  <TouchableOpacity
-                    style={{
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      marginLeft: horizontalScale(4),
-                    }}
-                    onPress={() => {
-                      if (
-                        !user.instagramId ||
-                        user.instagramId.toString() === 'undefined' ||
-                        typeof user.instagramId === 'undefined'
-                      ) {
-                        return Alert.alert('Instagram', Strings.INSTAGRAM_ID_NOT_REGISTERED);
-                      }
-
-                      Linking.openURL(`https://instagram.com/${user.instagramId.trim()}`);
-                    }}
-                  >
-                    <FastImage
-                      style={{ width: 22, height: 22 }}
-                      source={require('../../Resources/img/iconRenewal/instagram.png')}
-                    />
-                  </TouchableOpacity>
-                </View>
-                <View
-                  style={{ flexDirection: 'row', alignItems: 'center', alignContent: 'center' }}
-                >
-                  <Text
-                    style={{
-                      color: Constants.TIER_COLORS.ARTISAN,
-                      fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
-                      fontSize: 16,
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <Text style={{ color: Constants.TIER_COLORS.OPERATOR }}>Lv.</Text>
-                    {Utils.capitalizeFirstLetter(tierName)}
-                  </Text>
-                  <TouchableOpacity
-                    // style={{ marginHorizontal: 8 }}
-                    style={{ marginTop: 6 }}
-                    onPress={() =>
-                      context.props.navigation.navigate('TierGuide', {
-                        category: Strings.GREYD_GUIDE_TIER_DESCRIPTION,
-                      })
-                    }
-                  >
-                    <FastImage
-                      style={{ width: 32, height: 32 }}
-                      source={Constants.TIER_ICONS[tierName]}
-                    />
-                    {/* <HexagonWithText
-                      grade={Strings.GREYD_TIER_GIVER}
-                      fillColor={tierColor}
-                      size={20}
-                    /> */}
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
+        {isMine ? null : (
+          <View style={styles.followButtonRow}>
+            <NewFollowButton context={context} user={user} />
           </View>
         )}
+
         <UserIntroduction user={user} />
-        {context.isMyUserPage() ? (
-          <ProfileButtons context={context} user={user} />
-        ) : (
-          <>
-            <FollowedBy
-              user={user}
-              logonUserId={context.props.route.params.logonUserId}
-              navigation={context.props.navigation}
-            />
-            <View
-              style={{ marginHorizontal: 20, width: '90%', height: 1, backgroundColor: 'grey' }}
-            />
-          </>
-        )}
-      </View>
+      </Card>
+
+      {isMine ? (
+        <ProfileButtons context={context} user={user} />
+      ) : (
+        <FollowedBy
+          user={user}
+          logonUserId={context.props.route.params.logonUserId}
+          navigation={context.props.navigation}
+        />
+      )}
     </View>
   );
 }
 
-function GuestProfileInfo({ context, onPress, navigation }) {
-  const tierName = Utils.getTierNameByClass(0);
-  const tierColor = Utils.getTierColorByTierName(tierName);
-  // 호출부가 {...props}만 전달해 context가 없다 — navigation prop으로 폴백 (티어 탭 크래시 방지)
-  const nav = context?.props?.navigation || navigation;
-
+function GuestProfileInfo({ onPress }) {
   return (
-    <View style={{ flex: 1, backgroundColor: Constants.COLOR_BACKGROUND_DARK }}>
-      <View
-        style={{
-          position: 'absolute',
-          flex: 1,
-          backgroundColor: 'rgba(255, 255, 255, .7)',
-          width: '100%',
-          height: '100%',
-          zIndex: 5,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <View />
-        <View />
-        <TouchableOpacity style={{ alignItems: 'center' }} onPress={() => onPress()}>
-          <Text
-            style={{
-              marginBottom: 10,
-              color: Constants.TIER_COLORS.ARTISAN,
-              fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-            }}
-          >
-            {Strings.PLEASE_LOGIN}
-          </Text>
-          <Text
-            style={{
-              color: Constants.COLOR_POINT_BLUE,
-              fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
-              fontSize: 20,
-            }}
-          >
-            {Strings.GUEST_USER_ALERT_TITLE}
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <View
-        style={{
-          ...styles.profileInfoContainer,
-          backgroundColor: Constants.COLOR_BACKGROUND_DARK,
-          flex: 1,
-        }}
-      >
-        <View style={{ marginTop: moderateScale(80), marginBottom: 0 }}>
-          <Shadow
-            sides={{ bottom: false }}
-            corners={{ bottomStart: false, bottomEnd: false }}
-            stretch={true}
-          >
-            <View
-              style={{
-                backgroundColor: Constants.COLOR_BACKGROUND_DARK,
-                borderTopLeftRadius: moderateScale(20),
-                borderTopRightRadius: moderateScale(20),
-              }}
-            >
-              <View style={styles.box}>
-                <View style={styles.leftBorder1} />
-                <View style={styles.rightBorder1} />
-              </View>
-              <View style={styles.box} />
-
-              <View style={{ marginHorizontal: 16, marginTop: 16, flexDirection: 'row' }}>
-                <View>
-                  <UserProfilePicViewUpdate style={styles.profilePicnew} class={0} />
-                </View>
-
-                <View style={{ marginHorizontal: 6 }} />
-                <View style={{ justifyContent: 'center' }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: -6 }}>
-                    <Text
-                      style={{
-                        color: Constants.TIER_COLORS.ARTISAN,
-                        fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
-                        fontSize: 16,
-                        justifyContent: 'space-between',
-                      }}
-                    >
-                      {'Guest'}
-                    </Text>
-                  </View>
-
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      alignContent: 'center',
-                      width: '80%',
-                      justifyContent: 'space-between',
-                      marginBottom: 2,
-                    }}
-                  >
-                    <Follower
-                      user={{
-                        userId: 'Guest',
-                        followerCount: '0',
-                      }}
-                      context={{ isMyUserPage: () => false }}
-                    />
-                    <Text
-                      style={{
-                        color: Constants.TIER_COLORS.STRIVER,
-                        fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
-                        fontSize: 4,
-                        marginLeft: 4,
-                      }}
-                    >
-                      {'\u2B24'}
-                    </Text>
-                    <Following
-                      user={{
-                        userId: 'Guest',
-                        followingCount: '0',
-                      }}
-                      context={{ isMyUserPage: () => false }}
-                    />
-                    <Text
-                      style={{
-                        color: Constants.TIER_COLORS.STRIVER,
-                        fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
-                        fontSize: 4,
-                        marginLeft: 4,
-                      }}
-                    >
-                      {'\u2B24'}
-                    </Text>
-                    <View style={{ marginLeft: horizontalScale(4), marginRight: -14 }}>
-                      <Flag countryCode={'KR'} flagSize={30} />
-                    </View>
-                    <Text
-                      style={{
-                        color: Constants.TIER_COLORS.STRIVER,
-                        fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
-                        fontSize: 4,
-                        marginLeft: 10,
-                      }}
-                    >
-                      {'\u2B24'}
-                    </Text>
-                    <TouchableOpacity
-                      style={{
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        marginLeft: horizontalScale(4),
-                      }}
-                    >
-                      <IconAntDesign
-                        name="instagram"
-                        color={Constants.TIER_COLORS.ARTISAN}
-                        size={22}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                  <View
-                    style={{ flexDirection: 'row', alignItems: 'center', alignContent: 'center' }}
-                  >
-                    <Text
-                      style={{
-                        color: Constants.TIER_COLORS.ARTISAN,
-                        fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
-                        fontSize: 16,
-                        justifyContent: 'space-between',
-                      }}
-                    >
-                      <Text style={{ color: Constants.TIER_COLORS.OPERATOR }}>Lv.</Text>
-                      {Utils.capitalizeFirstLetter('Pioneer')}
-                    </Text>
-                    <TouchableOpacity
-                      style={{ marginHorizontal: 8 }}
-                      onPress={() =>
-                        nav?.navigate('TierGuide', {
-                          category: Strings.GREYD_GUIDE_TIER_DESCRIPTION,
-                        })
-                      }
-                    >
-                      <HexagonWithText
-                        grade={Strings.GREYD_TIER_GIVER}
-                        fillColor={tierColor}
-                        size={20}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
-            </View>
-          </Shadow>
-
-          <View style={{ marginVertical: 20 }} />
-
-          <ProfileButtons
-            isGuest
-            user={{
-              g6AvgRatingScore: 0,
-              countryCode: 'KR',
-              instagramId: '',
-              class: 0,
-            }}
-            context={{
-              isMyUserPage: () => false,
-              props: {
-                navigation: nav || null,
-                currencyRate: 0,
-              },
-              state: {
-                user: {
-                  id: '',
-                  title: '',
-                  description: '',
-                  thumbnailUrl: '',
-                },
-              },
-            }}
-          />
-
-          <View style={{ marginVertical: 10 }} />
-
-          <View
-            style={{
-              backgroundColor: Constants.TIER_COLORS.PIONEER,
-              borderRadius: moderateScale(14),
-              marginHorizontal: horizontalScale(20),
-              flexDirection: 'column',
-            }}
-          >
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginHorizontal: horizontalScale(20),
-                marginVertical: verticalScale(20),
-              }}
-            >
-              <RevenueAmount
-                user={{
-                  profitAmount: 0,
-                  withdrawalAmount: 0,
-                  isHideContributionRevenue: 0,
-                  class: 0,
-                }}
-                context={{
-                  isMyUserPage: () => false,
-                  props: {
-                    navigation: null,
-                    currencyRate: 0,
-                  },
-                }}
-              />
-              <ReviewReward
-                user={{
-                  profitAmount: 0,
-                  withdrawalAmount: 0,
-                  isHideContributionRevenue: 0,
-                  class: 0,
-                }}
-                context={{
-                  isMyUserPage: () => false,
-                  props: {
-                    navigation: null,
-                    currencyRate: 0,
-                  },
-                }}
-              />
-              <GreydTierName context={context} tier={0} />
+    <SafeAreaView style={styles.container}>
+      <View style={styles.guestContainer}>
+        <Card style={styles.profileCard}>
+          <View style={styles.profileRow}>
+            <Avatar url={''} />
+            <View style={styles.profileBody}>
+              <Text style={styles.profileName}>{'Guest'}</Text>
+              <Text style={styles.profileMeta}>{Strings.PLEASE_LOGIN}</Text>
             </View>
           </View>
-        </View>
+        </Card>
+        <Btn
+          title={Strings.GUEST_USER_ALERT_TITLE}
+          onPress={() => onPress()}
+          style={styles.guestButton}
+        />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -1154,156 +651,102 @@ function SellerApprovalWaitingView({ navigation }) {
 }
 
 function UserHistoryTab({ context, user, scrollRef }) {
-  return (
-    <>
-      <View
-        style={{
-          marginBottom: 10,
-          paddingVertical: 16,
-          backgroundColor: Constants.COLOR_BACKGROUND_DARK,
-        }}
-      >
-        {user.sellerStatus === Constants.SELLER_STATUS.APPROVED ? (
-          <TouchableOpacity style={styles.circuletabview}>
-            <TouchableOpacity
-              style={[
-                styles.lefttabstyle,
-                {
-                  backgroundColor:
-                    context.state.focusedUserHistoryTab === USER_HISTORY_TAB_INDEX.REVIEW
-                      ? Constants.COLOR_POINT_BLUE
-                      : 'transparent',
-                },
-              ]}
-              onPress={() => {
-                context.setState({
-                  focusedUserHistoryTab: USER_HISTORY_TAB_INDEX.REVIEW,
-                });
-              }}
-            >
-              <Text
-                style={[
-                  styles.tabTextstyle,
-                  {
-                    color:
-                      context.state.focusedUserHistoryTab === USER_HISTORY_TAB_INDEX.REVIEW
-                        ? Constants.COLOR_BACKGROUND_DARK
-                        : Constants.TIER_COLORS.ARTISAN,
-                  },
-                ]}
-              >
-                {Strings.REVIEWER}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                context.setState({
-                  focusedUserHistoryTab: USER_HISTORY_TAB_INDEX.PRODUCT,
-                });
-              }}
-              style={[
-                styles.righttabstyle,
-                {
-                  backgroundColor:
-                    context.state.focusedUserHistoryTab === USER_HISTORY_TAB_INDEX.PRODUCT
-                      ? Constants.COLOR_POINT_BLUE
-                      : 'transparent',
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.tabTextstyle,
-                  {
-                    color:
-                      context.state.focusedUserHistoryTab === USER_HISTORY_TAB_INDEX.PRODUCT
-                        ? Constants.COLOR_BACKGROUND_DARK
-                        : Constants.TIER_COLORS.ARTISAN,
-                  },
-                ]}
-              >
-                {Strings.SELLER}
-              </Text>
-            </TouchableOpacity>
-          </TouchableOpacity>
-        ) : null}
-        <View style={{ marginVertical: horizontalScale(16) }}>
-          <UserStatBox context={context} user={user} />
-        </View>
-        <View style={styles.userHistoryTab}>
-          <TouchableWithoutFeedback
-            onPress={() => {
-              context.setState({
-                focusedTab: USER_TYPE_TAB_INDEX.REVIEWNEW,
-              });
-            }}
-          >
-            <View
-              style={{
-                ...styles.userHistoryTabButton,
-                borderBottomWidth:
-                  context.state.focusedTab === USER_TYPE_TAB_INDEX.REVIEWNEW
-                    ? horizontalScale(3)
-                    : 0,
-                borderBottomColor:
-                  context.state.focusedTab === USER_TYPE_TAB_INDEX.REVIEWNEW
-                    ? Constants.COLOR_POINT_BLUE
-                    : '',
-              }}
-            >
-              <Text
-                style={
-                  context.state.focusedTab === USER_TYPE_TAB_INDEX.REVIEWNEW
-                    ? styles.userHistoryTabNameSelected
-                    : styles.userHistoryTabName
-                }
-              >
-                {context.state.focusedUserHistoryTab === USER_HISTORY_TAB_INDEX.REVIEW
-                  ? Strings.REVIEWS
-                  : Strings.PRODUCTS}
-              </Text>
-            </View>
-          </TouchableWithoutFeedback>
-          <TouchableWithoutFeedback
-            onPress={() => {
-              context.setState({
-                focusedTab: USER_TYPE_TAB_INDEX.QA,
-              });
+  const focusedTab = context.state.focusedTab;
+  const isReviewHistory = context.state.focusedUserHistoryTab === USER_HISTORY_TAB_INDEX.REVIEW;
 
-              if (scrollRef.current) {
-                scrollRef.current.scrollToLocation({
-                  itemIndex: 1,
-                  sectionIndex: 1,
-                  viewPosition: 1,
-                });
-              }
+  return (
+    <View style={styles.historyTabWrap}>
+      {/* 기능 다이어트 (COMMERCE off): 리뷰어/셀러 역할 토글 숨김 */}
+      {FEATURES.COMMERCE && user.sellerStatus === Constants.SELLER_STATUS.APPROVED ? (
+        <View style={styles.roleToggle}>
+          <TouchableOpacity
+            style={[styles.roleToggleButton, isReviewHistory && styles.roleToggleButtonOn]}
+            onPress={() => {
+              context.setState({
+                focusedUserHistoryTab: USER_HISTORY_TAB_INDEX.REVIEW,
+              });
             }}
           >
-            <View
-              style={{
-                ...styles.userHistoryTabButton,
-                borderBottomWidth:
-                  context.state.focusedTab === USER_TYPE_TAB_INDEX.QA ? horizontalScale(3) : 0,
-                borderBottomColor:
-                  context.state.focusedTab === USER_TYPE_TAB_INDEX.QA
-                    ? Constants.COLOR_POINT_BLUE
-                    : '',
-              }}
-            >
-              <Text
-                style={
-                  context.state.focusedTab === USER_TYPE_TAB_INDEX.QA
-                    ? styles.userHistoryTabNameSelected
-                    : styles.userHistoryTabName
-                }
-              >
-                {Strings.QA}
-              </Text>
-            </View>
-          </TouchableWithoutFeedback>
+            <Text style={[styles.roleToggleText, isReviewHistory && styles.roleToggleTextOn]}>
+              {Strings.REVIEWER}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.roleToggleButton, !isReviewHistory && styles.roleToggleButtonOn]}
+            onPress={() => {
+              context.setState({
+                focusedUserHistoryTab: USER_HISTORY_TAB_INDEX.PRODUCT,
+              });
+            }}
+          >
+            <Text style={[styles.roleToggleText, !isReviewHistory && styles.roleToggleTextOn]}>
+              {Strings.SELLER}
+            </Text>
+          </TouchableOpacity>
         </View>
+      ) : null}
+
+      <UserStatBox context={context} user={user} />
+
+      <View style={styles.userHistoryTab}>
+        <TouchableWithoutFeedback
+          onPress={() => {
+            context.setState({
+              focusedTab: USER_TYPE_TAB_INDEX.REVIEWNEW,
+            });
+          }}
+        >
+          <View
+            style={[
+              styles.userHistoryTabButton,
+              focusedTab === USER_TYPE_TAB_INDEX.REVIEWNEW && styles.userHistoryTabButtonOn,
+            ]}
+          >
+            <Text
+              style={
+                focusedTab === USER_TYPE_TAB_INDEX.REVIEWNEW
+                  ? styles.userHistoryTabNameSelected
+                  : styles.userHistoryTabName
+              }
+            >
+              {isReviewHistory ? Strings.REVIEWS : Strings.PRODUCTS}
+            </Text>
+          </View>
+        </TouchableWithoutFeedback>
+        <TouchableWithoutFeedback
+          onPress={() => {
+            context.setState({
+              focusedTab: USER_TYPE_TAB_INDEX.QA,
+            });
+
+            if (scrollRef.current) {
+              scrollRef.current.scrollToLocation({
+                itemIndex: 1,
+                sectionIndex: 1,
+                viewPosition: 1,
+              });
+            }
+          }}
+        >
+          <View
+            style={[
+              styles.userHistoryTabButton,
+              focusedTab === USER_TYPE_TAB_INDEX.QA && styles.userHistoryTabButtonOn,
+            ]}
+          >
+            <Text
+              style={
+                focusedTab === USER_TYPE_TAB_INDEX.QA
+                  ? styles.userHistoryTabNameSelected
+                  : styles.userHistoryTabName
+              }
+            >
+              {Strings.QA}
+            </Text>
+          </View>
+        </TouchableWithoutFeedback>
       </View>
-    </>
+    </View>
   );
 }
 
@@ -1346,6 +789,44 @@ function AddNewProductButton({ context }) {
     </View>
   );
 }
+// 리뷰 썸네일 셀 — CuratedHome 그리드와 동일 규격 (radius 10 · 앰버 ✓점수 · 흰 제목)
+function ReviewGridItem({ item, index, videoList, navigation }) {
+  const score = reviewScore(item);
+
+  return (
+    <TouchableOpacity
+      style={styles.gridItem}
+      activeOpacity={0.85}
+      onPress={() => {
+        navigation.push('VideoPage', {
+          videoId: item._id,
+          videoType: 'userUpload',
+          videoList: videoList,
+          videoSortType: 'recent',
+        });
+      }}
+    >
+      <View style={[styles.gridThumbWrap, { height: GRID_HEIGHTS[index % 4] }]}>
+        <FastImage source={{ uri: gridThumbUrl(item) }} style={styles.gridThumb} />
+        {score ? <Badge tone="amber" text={`✓ ${score}`} style={styles.gridBadge} /> : null}
+        <Text style={styles.gridTitle} numberOfLines={1}>
+          {item.title || item.description}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+function EmptyReviewMessage({ title, description }) {
+  return (
+    <View style={styles.emptyMessageContainer}>
+      <Text style={styles.emptyEmoji}>{'📭'}</Text>
+      <Text style={styles.emptyMessage}>{title}</Text>
+      <Text style={styles.emptyDescription}>{description}</Text>
+    </View>
+  );
+}
+
 function UserHistoryView({ context, scrollRef }) {
   const global = useContext(Context);
   const focusedTab = context.state.focusedUserHistoryTab;
@@ -1353,10 +834,12 @@ function UserHistoryView({ context, scrollRef }) {
   const uploadingVideoList = global.state.uploadingVideos;
   const videoList = context.state.user.userUploadVideo;
   const productList = context.state.user.userUploadProduct;
+  // 썸네일 없는 리뷰는 그리드에서 제외 (빈 칸 방지)
+  const gridVideoList = videoList.filter((item) => gridThumbUrl(item));
 
   if (focuseInnerTab === USER_TYPE_TAB_INDEX.QA) {
     return (
-      <View style={{ marginHorizontal: 24, backgroundColor: Constants.COLOR_BACKGROUND_DARK }}>
+      <View style={styles.qnaContainer}>
         <QNAList context={context} scrollRef={scrollRef} navigation={context.props.navigation} />
       </View>
     );
@@ -1366,7 +849,7 @@ function UserHistoryView({ context, scrollRef }) {
     if (context.state.isRefreshing) {
       return (
         <View style={styles.emptyMessageContainer}>
-          <ActivityIndicator size="small" color={Constants.COLOR_MAIN} />
+          <ActivityIndicator size="small" color={COLORS.AMBER} />
         </View>
       );
     }
@@ -1374,48 +857,36 @@ function UserHistoryView({ context, scrollRef }) {
       return <AddNewReviewButton context={context} />;
     } else {
       return (
-        <View style={styles.emptyMessageContainer}>
-          <Text style={styles.emptyMessage}>{Strings.NO_REVIEW_UPLOADED}</Text>
-        </View>
+        <EmptyReviewMessage
+          title={Strings.NO_REVIEW_UPLOADED}
+          description={Strings.USERPAGE_EMPTY_REVIEW_DESC}
+        />
       );
     }
   } else if (focusedTab === USER_HISTORY_TAB_INDEX.PRODUCT && productList.length === 0) {
-    // } else if (focusedTab === USER_HISTORY_TAB_INDEX.PRODUCT) {
     if (context.state.isRefreshing) {
       return (
         <View style={styles.emptyMessageContainer}>
-          <ActivityIndicator size="small" color={Constants.COLOR_MAIN} />
+          <ActivityIndicator size="small" color={COLORS.AMBER} />
         </View>
       );
     }
     if (context.isMyUserPage()) {
       if (!context.state.user.sellerStatus) {
         return <SellerRegistrationButton navigation={context.props.navigation} />;
-        // } else if (context.state.user.sellerStatus === Constants.SELLER_STATUS.APPROVAL_REQUEST) {
-        //   return <SellerApprovalWaitingView />;
       } else {
         if (context.state.user.isSeller) {
           return (
             <>
-              <Shadow
-                stretch
-                containerStyle={{
-                  marginTop: verticalScale(10),
-                  marginHorizontal: horizontalScale(20),
+              <TouchableOpacity
+                style={styles.sellerPageButton}
+                activeOpacity={0.85}
+                onPress={() => {
+                  context.props.navigation.navigate('MyStore');
                 }}
               >
-                <View>
-                  <TouchableNativeFeedback
-                    onPress={() => {
-                      context.props.navigation.navigate('MyStore');
-                    }}
-                  >
-                    <View style={styles.sellerPageButton}>
-                      <Text style={styles.sellerButtonLabel}>{Strings.SELLER_PAGE}</Text>
-                    </View>
-                  </TouchableNativeFeedback>
-                </View>
-              </Shadow>
+                <Text style={styles.sellerButtonLabel}>{Strings.SELLER_PAGE}</Text>
+              </TouchableOpacity>
               <AddNewProductButton context={context} />
             </>
           );
@@ -1424,15 +895,16 @@ function UserHistoryView({ context, scrollRef }) {
       }
     } else {
       return (
-        <View style={styles.emptyMessageContainer}>
-          <Text style={styles.emptyMessage}>{Strings.NO_PRODUCT_UPLOADED}</Text>
-        </View>
+        <EmptyReviewMessage
+          title={Strings.NO_PRODUCT_UPLOADED}
+          description={Strings.USERPAGE_EMPTY_REVIEW_DESC}
+        />
       );
     }
   }
 
   return (
-    <View>
+    <View style={styles.historyBody}>
       {focusedTab === USER_HISTORY_TAB_INDEX.PRODUCT &&
         context.state.user.sellerStatus === Constants.SELLER_STATUS.APPROVAL_REQUEST && (
           <SellerApprovalWaitingView />
@@ -1440,38 +912,27 @@ function UserHistoryView({ context, scrollRef }) {
       {focusedTab === USER_HISTORY_TAB_INDEX.PRODUCT &&
         context.state.user.isSeller &&
         context.isMyUserPage() && (
-          <Shadow
-            stretch
-            containerStyle={{
-              marginVertical: verticalScale(20),
-              marginHorizontal: horizontalScale(20),
+          <TouchableOpacity
+            style={styles.sellerPageButton}
+            activeOpacity={0.85}
+            onPress={() => {
+              context.props.navigation.navigate('MyStore');
             }}
           >
-            <View style={{ borderRadius: 14 }}>
-              <TouchableNativeFeedback
-                onPress={() => {
-                  context.props.navigation.navigate('MyStore');
-                }}
-              >
-                <View style={styles.sellerPageButton}>
-                  <Text style={styles.sellerButtonLabel}>{Strings.SELLER_PAGE}</Text>
-                </View>
-              </TouchableNativeFeedback>
-            </View>
-          </Shadow>
+            <Text style={styles.sellerButtonLabel}>{Strings.SELLER_PAGE}</Text>
+          </TouchableOpacity>
         )}
 
       <FlatGrid
-        fixed={true}
-        containerStyle={{ borderColor: 'red', borderWidth: 1 }}
-        itemDimension={Constants.VIDEO_GRID_LIST_ITEM_VIEW_WIDTH_2}
-        spacing={Constants.VIDEO_LIST_SPACING}
+        maxItemsPerRow={2}
+        itemDimension={Dimensions.get('window').width / 2 - 30}
+        spacing={8}
         data={
           focusedTab === USER_HISTORY_TAB_INDEX.PRODUCT
             ? productList
             : context.isMyUserPage()
-              ? [...uploadingVideoList, ...videoList]
-              : videoList
+              ? [...uploadingVideoList, ...gridVideoList]
+              : gridVideoList
         }
         renderItem={({ item, index }) => {
           if (focusedTab === USER_HISTORY_TAB_INDEX.PRODUCT) {
@@ -1493,21 +954,16 @@ function UserHistoryView({ context, scrollRef }) {
               return <UploadingVideoListItem context={context} item={item} />;
             }
             return (
-              <VideoListItemView
-                style={{
-                  height: Constants.VIDEO_GRID_LIST_ITEM_VIEW_HEIGHT_2 - moderateScale(120),
-                }} // moderateScale(60)
+              <ReviewGridItem
+                item={item}
+                index={index}
+                videoList={videoList}
                 navigation={context.props.navigation}
-                data={item}
-                dataType={'userUpload'}
-                dataList={videoList}
-                dataSortType={'recent'}
-                noCreator
               />
             );
           }
         }}
-        keyExtractor={(item) => item.videoId || item.productId || item.id}
+        keyExtractor={(item) => item.videoId || item.productId || item.id || item._id}
         onRefresh={() => {}}
         refreshing={context.state.isRefreshing}
         onEndReached={({ distanceFromEnd }) => {
@@ -1530,7 +986,7 @@ function UserHistoryView({ context, scrollRef }) {
           }
         }}
         onEndReachedThreshold={0.5}
-        style={{ marginHorizontal: 10 }}
+        style={styles.grid}
       />
     </View>
   );
@@ -1731,88 +1187,81 @@ function NewBlockButton() {
 }
 
 function NewFollowButton({ context, user }) {
-  return (
-    // <Shadow style={styles.editButtonShadow} containerStyle={{ bottom: moderateScale(-15) }}>les.editButtonShadow}>
-    <TouchableOpacity
-      style={styles.newFollowButtonContainer}
-      onPress={() => {
-        const isFollow = !user.isFollowing ? true : false;
-        Vibration.vibrate(Constants.VIBRATION_USER_ACTION);
-        if (!isFollow) {
-          Alert.alert(
-            Strings.CANCEL_FOLLOW_GUIDE_TITLE(user.name),
-            Strings.CANCEL_FOLLOW_GUIDE_BODY,
-            [
-              {
-                text: Strings.BACK_BUTTON_TITLE,
-                onPress: () => {},
-                style: 'cancel',
-              },
-              {
-                text: Strings.UNFOLLOW_BUTTON_TITLE,
-                onPress: () => {
-                  APIprovider.followUser(user.userId, isFollow)
-                    .then((res) => {
-                      if (res.result === 1) {
-                        context.setState({
-                          user: {
-                            ...user,
-                            isFollowing: isFollow,
-                            followerCount: user.followerCount + (isFollow ? 1 : -1),
-                          },
-                        });
-                      }
-                    })
-                    .catch((err) => {
-                      console.log(err);
-                      Alert.alert(
-                        Strings.FAILED_TO_FOLLOW,
-                        err.errorMsg ? err.errorMsg : '',
-                        [{ text: Strings.OK }],
-                        { cancelable: true },
-                      );
+  const onFollowPressed = () => {
+    const isFollow = !user.isFollowing ? true : false;
+    Vibration.vibrate(Constants.VIBRATION_USER_ACTION);
+    if (!isFollow) {
+      Alert.alert(
+        Strings.CANCEL_FOLLOW_GUIDE_TITLE(user.name),
+        Strings.CANCEL_FOLLOW_GUIDE_BODY,
+        [
+          {
+            text: Strings.BACK_BUTTON_TITLE,
+            onPress: () => {},
+            style: 'cancel',
+          },
+          {
+            text: Strings.UNFOLLOW_BUTTON_TITLE,
+            onPress: () => {
+              APIprovider.followUser(user.userId, isFollow)
+                .then((res) => {
+                  if (res.result === 1) {
+                    context.setState({
+                      user: {
+                        ...user,
+                        isFollowing: isFollow,
+                        followerCount: user.followerCount + (isFollow ? 1 : -1),
+                      },
                     });
-                },
-              },
-            ],
-            { cancelable: false },
-          );
-        } else {
-          APIprovider.followUser(user.userId, isFollow)
-            .then((res) => {
-              if (res.result === 1) {
-                context.setState({
-                  user: {
-                    ...user,
-                    isFollowing: isFollow,
-                    followerCount: user.followerCount + (isFollow ? 1 : -1),
-                  },
+                  }
+                })
+                .catch((err) => {
+                  console.log(err);
+                  Alert.alert(
+                    Strings.FAILED_TO_FOLLOW,
+                    err.errorMsg ? err.errorMsg : '',
+                    [{ text: Strings.OK }],
+                    { cancelable: true },
+                  );
                 });
-              }
-            })
-            .catch((err) => {
-              console.log(err);
-              Alert.alert(
-                Strings.FAILED_TO_FOLLOW,
-                err.errorMsg ? err.errorMsg : '',
-                [{ text: Strings.OK }],
-                { cancelable: true },
-              );
+            },
+          },
+        ],
+        { cancelable: false },
+      );
+    } else {
+      APIprovider.followUser(user.userId, isFollow)
+        .then((res) => {
+          if (res.result === 1) {
+            context.setState({
+              user: {
+                ...user,
+                isFollowing: isFollow,
+                followerCount: user.followerCount + (isFollow ? 1 : -1),
+              },
             });
-        }
-      }}
-    >
-      <Text
-        style={{
-          color: user.isFollowing ? Constants.TIER_COLORS.ARTISAN : 'white',
-          fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
-          fontSize: 12,
-        }}
-      >
-        {user.isFollowing ? Strings.FOLLOWING : Strings.FOLLOW}
-      </Text>
-    </TouchableOpacity>
-    // </Shadow>
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          Alert.alert(
+            Strings.FAILED_TO_FOLLOW,
+            err.errorMsg ? err.errorMsg : '',
+            [{ text: Strings.OK }],
+            { cancelable: true },
+          );
+        });
+    }
+  };
+
+  return (
+    <Btn
+      small
+      style={styles.followBtn}
+      title={user.isFollowing ? Strings.FOLLOWING : Strings.FOLLOW}
+      variant={user.isFollowing ? 'ghost' : 'primary'}
+      onPress={onFollowPressed}
+    />
   );
 }
 
@@ -2015,129 +1464,58 @@ function GradeTier({ context, user }) {
 
 function ProfileButtons({ context, user, isGuest }) {
   return (
-    <View
-      style={{
-        marginHorizontal: horizontalScale(20),
-        marginTop: verticalScale(10),
-      }}
-    >
-      <View style={{ borderWidth: 0.5, borderColor: '#a0a0a0' }} />
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          marginVertical: verticalScale(10),
-          marginHorizontal: horizontalScale(20),
+    <View style={styles.profileButtonsRow}>
+      <TouchableOpacity
+        style={styles.profileButton}
+        activeOpacity={0.8}
+        onPress={() => {
+          context.props.navigation.navigate('BookmarkList');
         }}
       >
-        <View style={{ overflow: 'hidden', width: '25%' }}>
-          <TouchableNativeFeedback
-            onPress={() => {
-              context.props.navigation.navigate('BookmarkList');
-            }}
-            background={TouchableNativeFeedback.Ripple('#777', true)}
-          >
-            <View
-              style={{
-                alignSelf: 'center',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <FastImage
-                style={styles.profileButtonIcon}
-                source={require('../../Resources/img/iconRenewal/bookmark.png')}
-              />
-              <Text
-                style={{
-                  color: Constants.TIER_COLORS.ARTISAN,
-                  marginTop: horizontalScale(6),
-                  fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
-                  fontSize: moderateScale(11),
-                }}
-              >
-                {Strings.BOOKMARKS}
-              </Text>
-            </View>
-          </TouchableNativeFeedback>
-        </View>
-        {/* 기능 다이어트 (COMMERCE off): 장바구니·주문 내역 진입점 숨김 */}
-        {FEATURES.COMMERCE ? (
+        <FastImage
+          style={styles.profileButtonIcon}
+          source={require('../../Resources/img/iconRenewal/bookmark.png')}
+        />
+        <Text style={styles.profileButtonLabel}>{Strings.BOOKMARKS}</Text>
+      </TouchableOpacity>
+      {/* 기능 다이어트 (COMMERCE off): 장바구니·주문 내역 진입점 숨김 */}
+      {FEATURES.COMMERCE ? (
         <>
-        <View style={{ overflow: 'hidden', width: '25%' }}>
-          <TouchableNativeFeedback
+          <TouchableOpacity
+            style={styles.profileButton}
+            activeOpacity={0.8}
             onPress={() => {
               context.props.navigation.navigate('Cart');
             }}
-            background={TouchableNativeFeedback.Ripple('#777', true)}
           >
-            <View
-              style={{
-                alignSelf: 'center',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <FastImage
-                style={styles.profileButtonIcon}
-                source={require('../../Resources/img/iconRenewal/cart.png')}
-              />
-              <Text
-                style={{
-                  color: Constants.TIER_COLORS.ARTISAN,
-                  marginTop: horizontalScale(6),
-                  fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
-                  fontSize: moderateScale(11),
-                }}
-              >
-                {Strings.CART}
-              </Text>
-            </View>
-          </TouchableNativeFeedback>
-        </View>
-        <View style={{ overflow: 'hidden', width: '25%' }}>
-          <TouchableNativeFeedback
+            <FastImage
+              style={styles.profileButtonIcon}
+              source={require('../../Resources/img/iconRenewal/cart.png')}
+            />
+            <Text style={styles.profileButtonLabel}>{Strings.CART}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.profileButton}
+            activeOpacity={0.8}
             onPress={() => {
               context.props.navigation.navigate('MyOrderList');
             }}
-            background={TouchableNativeFeedback.Ripple('#777', true)}
           >
-            <View
-              style={{
-                alignSelf: 'center',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              {/* <IconFontAwesome5 name={'clipboard-list'} size={20} color={'white'} /> */}
-              <FastImage
-                style={styles.profileButtonIcon}
-                source={require('../../Resources/img/iconRenewal/orderlist.png')}
-              />
-              <Text
-                style={{
-                  color: Constants.TIER_COLORS.ARTISAN,
-                  marginTop: horizontalScale(6),
-                  fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
-                  fontSize: moderateScale(11),
-                }}
-              >
-                {Strings.ORDER_LIST}
-              </Text>
-            </View>
-          </TouchableNativeFeedback>
-        </View>
+            <FastImage
+              style={styles.profileButtonIcon}
+              source={require('../../Resources/img/iconRenewal/orderlist.png')}
+            />
+            <Text style={styles.profileButtonLabel}>{Strings.ORDER_LIST}</Text>
+          </TouchableOpacity>
         </>
-        ) : null}
-        <View style={{ overflow: 'hidden', width: '25%' }}>
-          {context.isMyUserPage() || isGuest ? (
-            <RewardDetail context={context} />
-          ) : (
-            <GreydTierName context={context} tier={user.class} />
-          )}
-        </View>
+      ) : null}
+      <View style={styles.profileButton}>
+        {context.isMyUserPage() || isGuest ? (
+          <RewardDetail context={context} />
+        ) : (
+          <GreydTierName context={context} tier={user.class} />
+        )}
       </View>
-      <View style={{ borderWidth: 0.5, borderColor: '#a0a0a0' }} />
     </View>
   );
 }
@@ -2185,206 +1563,83 @@ function GradeCount({ user }) {
 function Follower({ user, context }) {
   return (
     <TouchableOpacity
-      style={{
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexDirection: 'row',
-        // width: horizontalScale(90),
-      }}
+      style={styles.statLink}
       onPress={() => {
         const params = context.isMyUserPage() ? {} : { targetUserId: user.userId };
         context.props.navigation.push('FollowList', params);
       }}
     >
-      <Text
-        style={{
-          color: Constants.TIER_COLORS.OPERATOR,
-          fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
-          fontSize: moderateScale(14),
-          textAlign: 'center',
-        }}
-      >
-        {Strings.FOLLOWERS}
-      </Text>
-      <Text
-        style={{
-          color: Constants.TIER_COLORS.ARTISAN,
-          marginLeft: 4,
-          fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
-          fontSize: moderateScale(14),
-        }}
-      >
-        {user.followerCount}
-      </Text>
+      <Text style={styles.statLinkLabel}>{Strings.FOLLOWERS}</Text>
+      <Text style={styles.statLinkValue}>{user.followerCount}</Text>
     </TouchableOpacity>
   );
 }
 function Following({ user, context }) {
   return (
     <TouchableOpacity
-      style={{
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginLeft: 4,
-        flexDirection: 'row',
-      }}
+      style={styles.statLink}
       onPress={() => {
         const params = context.isMyUserPage() ? {} : { targetUserId: user.userId };
         context.props.navigation.push('FollowList', params);
       }}
     >
-      <Text
-        style={{
-          color: Constants.TIER_COLORS.OPERATOR,
-          fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
-          fontSize: moderateScale(14),
-          textAlign: 'center',
-          lineHeight: 20,
-        }}
-      >
-        {Strings.FOLLOWING}
-      </Text>
-      <Text
-        style={{
-          color: Constants.TIER_COLORS.ARTISAN,
-          marginLeft: 4,
-          fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
-          fontSize: moderateScale(14),
-        }}
-      >
-        {user.followingCount}
-      </Text>
+      <Text style={styles.statLinkLabel}>{Strings.FOLLOWING}</Text>
+      <Text style={styles.statLinkValue}>{user.followingCount}</Text>
     </TouchableOpacity>
   );
 }
 function RevenueAmount({ user, context }) {
-  const { navigation, totalRevenue, currencyRate } = context.props;
-
   return (
-    <View
-      style={{
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        width: horizontalScale(90),
-      }}
-    >
-      <Text
-        style={{
-          color: Constants.TIER_COLORS.ARTISAN,
-          fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
-          fontSize: moderateScale(
-            // 십만원까지 16, 백만원 까지 13, 천만원 이상 억이하 10
-            totalRevenue >= 10000000 ? 10 : totalRevenue >= 1000000 ? 13 : 16,
-          ),
-        }}
-      >
+    <View style={styles.statItem}>
+      <Text style={styles.statValue} numberOfLines={1}>
         {!context.isMyUserPage() && user.isHideContributionRevenue ? (
           Strings.CONTRIBUTION_HIDED
         ) : (
           <Text>
-            {getLanguage() === 'en' ? (
-              <Text style={{ color: Constants.COLOR_POINT_BLUE, fontSize: moderateScale(16) }}>
-                ${' '}
-              </Text>
-            ) : null}
+            {getLanguage() === 'en' ? '$ ' : ''}
             {Utils.numberWithCommas(
               changeCurrency({
                 current: user.totalRevenue,
                 currencyRate: context?.props?.route?.params?.KRWPerUSD,
               }),
             )}
-            {getLanguage() === 'ko' ? (
-              <Text style={{ color: Constants.COLOR_POINT_BLUE, fontSize: moderateScale(16) }}>
-                {' '}
-                원
-              </Text>
-            ) : null}
+            {getLanguage() === 'ko' ? ' 원' : ''}
           </Text>
         )}
       </Text>
-
-      <Text
-        style={{
-          color: Constants.TIER_COLORS.ARTISAN,
-          // fontSize: moderateScale(14),
-          fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
-          fontSize: moderateScale(13),
-          marginTop: verticalScale(5),
-          textAlign: 'center',
-        }}
-      >
-        {Strings.CONTRIBUTION}
-      </Text>
+      <Text style={styles.statLabel}>{Strings.CONTRIBUTION}</Text>
     </View>
   );
 }
 function ReviewReward({ user, context }) {
-  const { navigation, totalReward, currencyRate } = context.props;
+  const { navigation, totalReward } = context.props;
 
   return (
     <TouchableOpacity
-      style={{
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: horizontalScale(90),
-      }}
+      style={styles.statItem}
       onPress={() => {
         if (context.isMyUserPage()) {
           navigation.navigate('RewardList');
-          // navigation.navigate('RewardList', { unearnedProfit, unearnedRevenue });
         }
       }}
     >
-      <Text
-        style={{
-          color: Constants.TIER_COLORS.ARTISAN,
-          fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
-          fontSize: moderateScale(
-            // 십만원까지 16, 백만원 까지 13, 천만원 이상 억이하 10
-            totalReward >= 10000000 ? 10 : totalReward >= 1000000 ? 13 : 16,
-          ),
-        }}
-      >
+      <Text style={styles.statValue} numberOfLines={1}>
         {!context.isMyUserPage() && user.isHideContributionRevenue ? (
           Strings.CONTRIBUTION_HIDED
         ) : (
           <Text>
-            {getLanguage() === 'en' ? (
-              <Text style={{ color: Constants.COLOR_POINT_BLUE, fontSize: moderateScale(16) }}>
-                ${' '}
-              </Text>
-            ) : null}
+            {getLanguage() === 'en' ? '$ ' : ''}
             {Utils.numberWithCommas(
               changeCurrency({
-                // current: !context.isMyUserPage()
-                //   ? totalReward + user?.withdrawalAmount
-                //   : totalReward,
-                // current: !context.isMyUserPage() ? user.accumulatedRevenue : user.totalReward,
                 current: !context.isMyUserPage() ? user.totalReward : totalReward,
                 currencyRate: context?.props?.route?.params?.KRWPerUSD,
               }),
             )}
-            {getLanguage() === 'ko' ? (
-              <Text style={{ color: Constants.COLOR_POINT_BLUE, fontSize: moderateScale(16) }}>
-                {' '}
-                원
-              </Text>
-            ) : null}
+            {getLanguage() === 'ko' ? ' 원' : ''}
           </Text>
         )}
       </Text>
-      <Text
-        style={{
-          color: Constants.TIER_COLORS.ARTISAN,
-          // fontSize: moderateScale(14),
-          fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
-          fontSize: moderateScale(13),
-          marginTop: verticalScale(5),
-          textAlign: 'center',
-        }}
-      >
-        {Strings.REVIEW_REWARDS}
-      </Text>
+      <Text style={styles.statLabel}>{Strings.REVIEW_REWARDS}</Text>
     </TouchableOpacity>
   );
 }
@@ -2392,220 +1647,81 @@ function RewardDetail({ context }) {
   const { userId, name, introduction, profilePicUrl } = context.state.user;
 
   return (
-    <View
-      style={{
-        justifyContent: 'center',
-        alignItems: 'center',
+    <TouchableOpacity
+      activeOpacity={0.8}
+      style={styles.profileButtonInner}
+      onPress={() => {
+        if (context.isMyUserPage()) {
+          context.props.navigation.navigate('QRCode', {
+            id: userId,
+            title: name,
+            description: introduction,
+            thumbnailUrl: profilePicUrl,
+          });
+        }
       }}
     >
-      <TouchableOpacity
-        onPress={() => {
-          if (context.isMyUserPage()) {
-            context.props.navigation.navigate('QRCode', {
-              id: userId,
-              title: name,
-              description: introduction,
-              thumbnailUrl: profilePicUrl,
-            });
-          }
-        }}
-        style={{ justifyContent: 'center', alignItems: 'center' }}
-      >
-        <View
-          style={{
-            alignSelf: 'center',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          {/* <IconFontAwesome5 name={'clipboard-list'} size={20} color={'white'} /> */}
-          <FastImage
-            style={styles.profileButtonIcon}
-            source={require('../../Resources/img/iconRenewal/qr.png')}
-          />
-          <Text
-            style={{
-              color: Constants.TIER_COLORS.ARTISAN,
-              marginTop: horizontalScale(6),
-              fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
-              fontSize: moderateScale(11),
-            }}
-          >
-            {Strings.QR_CODE}
-          </Text>
-        </View>
-      </TouchableOpacity>
-    </View>
+      <FastImage
+        style={styles.profileButtonIcon}
+        source={require('../../Resources/img/iconRenewal/qr.png')}
+      />
+      <Text style={styles.profileButtonLabel}>{Strings.QR_CODE}</Text>
+    </TouchableOpacity>
   );
 }
-
 function GreydTierName({ context, tier }) {
   const tierName = Utils.getTierNameByClass(tier);
-  const tierColor = Utils.getTierColorByTierName(tierName);
 
   return (
-    <View
-      style={{
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: horizontalScale(90),
+    <TouchableOpacity
+      activeOpacity={0.8}
+      style={styles.profileButtonInner}
+      onPress={() => {
+        context.props.navigation.navigate('TierGuide', {
+          category: Strings.GREYD_GUIDE_TIER_DESCRIPTION,
+        });
       }}
     >
-      <TouchableOpacity
-        onPress={() => {
-          context.props.navigation.navigate('TierGuide', {
-            category: Strings.GREYD_GUIDE_TIER_DESCRIPTION,
-          });
-        }}
-        style={{ justifyContent: 'center', alignItems: 'center' }}
-      >
-        <Text
-          style={{
-            color: tierName === Strings.GREYD_TIER_GIVER.toUpperCase() ? tierColor : 'white',
-            fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
-            fontSize: moderateScale(18),
-          }}
-        >
-          {tierName ? Utils.capitalizeFirstLetter(tierName) : ''}
-        </Text>
-        <Text
-          style={{
-            color: '#A0A0A0',
-            fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
-            fontSize: moderateScale(14),
-            marginTop: verticalScale(5),
-          }}
-        >
-          {Strings.TIER}
-        </Text>
-      </TouchableOpacity>
-    </View>
+      <Text style={styles.statValue}>{tierName ? Utils.capitalizeFirstLetter(tierName) : ''}</Text>
+      <Text style={styles.profileButtonLabel}>{Strings.TIER}</Text>
+    </TouchableOpacity>
   );
 }
-
 function UserStatBox({ user, context }) {
   return (
-    <View
-      style={{
-        backgroundColor: Constants.TIER_COLORS.PIONEER,
-        borderRadius: moderateScale(14),
-        marginHorizontal: horizontalScale(20),
-        flexDirection: 'column',
-      }}
-    >
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginHorizontal: horizontalScale(20),
-          marginVertical: verticalScale(20),
-        }}
+    <Card style={styles.statCard}>
+      <TouchableOpacity
+        style={styles.statItem}
+        onPress={() =>
+          context.props.navigation.navigate('G6UserChart', {
+            context: context,
+            state: context.state,
+          })
+        }
       >
-        <TouchableOpacity
-          style={{
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: horizontalScale(90),
-            // marginBottom: horizontalScale(6),
-          }}
-          onPress={() =>
-            context.props.navigation.navigate('G6UserChart', {
-              context: context,
-              state: context.state,
-            })
-          }
-        >
-          <View
-            style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
-          >
-            <FastImage
-              source={require('../../Resources/img/icGreydSplashSymbol126.png')}
-              style={{ width: 16, height: 16 }}
-            />
-            <Text
-              style={{
-                paddingLeft: 4,
-                color: Constants.TIER_COLORS.ARTISAN,
-                fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
-                fontSize: moderateScale(16),
-              }}
-            >
-              {user.g6AvgRatingScore}
-            </Text>
-          </View>
-
-          <Text
-            style={{
-              color: Constants.TIER_COLORS.ARTISAN,
-              // fontSize: moderateScale(14),
-              fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
-              fontSize: moderateScale(13),
-              marginTop: verticalScale(5),
-            }}
-          >
-            {Strings.AVERAGE_GRADE}
-          </Text>
-        </TouchableOpacity>
-        <RevenueAmount user={user} context={context} />
-        <ReviewReward user={user} context={context} />
-      </View>
-    </View>
+        <Text style={styles.statValue}>{user.g6AvgRatingScore}</Text>
+        <Text style={styles.statLabel}>{Strings.AVERAGE_GRADE}</Text>
+      </TouchableOpacity>
+      {/* 기능 다이어트 (COMMERCE off): 기여 매출 지표 숨김 */}
+      {FEATURES.COMMERCE ? <RevenueAmount user={user} context={context} /> : null}
+      <ReviewReward user={user} context={context} />
+    </Card>
   );
 }
 
 function UserIntroduction({ user }) {
   if (!user.introduction) {
-    return <View style={{ marginVertical: 10 }} />;
+    return null;
   }
 
   return (
-    <View
-      style={{
-        marginHorizontal: horizontalScale(16),
-        backgroundColor: Constants.COLOR_BACKGROUND_DARK,
-      }}
-    >
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          marginHorizontal: horizontalScale(8),
-          marginTop: verticalScale(20),
-        }}
-      >
-        <Text
-          style={{
-            fontSize: moderateScale(14),
-            fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
-            color: Constants.TIER_COLORS.ARTISAN,
-          }}
-        >
-          {Strings.ABOUT_ME}
-        </Text>
-      </View>
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          marginHorizontal: horizontalScale(8),
-          marginTop: verticalScale(10),
-          marginBottom: verticalScale(20),
-        }}
-      >
-        <Text
-          style={{
-            fontSize: moderateScale(14),
-            fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
-            color: Constants.TIER_COLORS.OPERATOR,
-          }}
-        >
-          {user.introduction ? user.introduction : Strings.WRITE_ABOUT_ME}
-        </Text>
-      </View>
+    <View style={styles.introBox}>
+      <Text style={styles.introLabel}>{Strings.ABOUT_ME}</Text>
+      <Text style={styles.introText}>{user.introduction}</Text>
     </View>
   );
 }
+
 export default function UserScreenWrapper(props) {
   const keyboardHooks = useKeyboard();
 
@@ -2980,23 +2096,23 @@ class UserPageScreen extends React.Component {
       // setState 직후 this.state를 읽으면 이전 값(stale)이라, 그래프 데이터를
       // 지역 변수로 만들어 두 setState 모두에 동일한 최신 값을 사용한다.
       const newG6RatingScoreGraph = [
-            getLanguage() === 'ko'
-              ? {
-                  표현력: data.g6RatingScore.authentic,
-                  재미: data.g6RatingScore.entertaining,
-                  매력도: data.g6RatingScore.attractive,
-                  정보성: data.g6RatingScore.informative,
-                  영상미: data.g6RatingScore.aesthetic,
-                  독창성: data.g6RatingScore.creative,
-                }
-              : {
-                  Authentic: data.g6RatingScore.authentic,
-                  Informative: data.g6RatingScore.informative,
-                  Attractive: data.g6RatingScore.attractive,
-                  Entertaining: data.g6RatingScore.entertaining,
-                  Aesthetic: data.g6RatingScore.aesthetic,
-                  Creative: data.g6RatingScore.creative,
-                },
+        getLanguage() === 'ko'
+          ? {
+              표현력: data.g6RatingScore.authentic,
+              재미: data.g6RatingScore.entertaining,
+              매력도: data.g6RatingScore.attractive,
+              정보성: data.g6RatingScore.informative,
+              영상미: data.g6RatingScore.aesthetic,
+              독창성: data.g6RatingScore.creative,
+            }
+          : {
+              Authentic: data.g6RatingScore.authentic,
+              Informative: data.g6RatingScore.informative,
+              Attractive: data.g6RatingScore.attractive,
+              Entertaining: data.g6RatingScore.entertaining,
+              Aesthetic: data.g6RatingScore.aesthetic,
+              Creative: data.g6RatingScore.creative,
+            },
         this.state.user.g6RatingScoreGraph[1],
       ];
 
@@ -3043,7 +2159,7 @@ class UserPageScreen extends React.Component {
 
   componentDidMount() {
     if (Platform.OS !== 'ios') {
-      StatusBar.setBackgroundColor(Constants.TIER_COLORS.GIVER);
+      StatusBar.setBackgroundColor(COLORS.BG);
     }
 
     this.props.navigation.setOptions({
@@ -3195,13 +2311,13 @@ class UserPageScreen extends React.Component {
           <SectionList
             stickySectionHeadersEnabled
             sections={this.profileScreenSections(scrollRef)}
-            style={{ backgroundColor: Constants.COLOR_BACKGROUND_DARK }}
+            style={styles.sectionList}
             keyExtractor={(item, index) => 'profileScreenSection' + index}
             renderItem={({ item }) => item}
             renderSectionHeader={({ section: { title } }) => title}
             refreshControl={
               <RefreshControl
-                tintColor={Constants.TIER_COLORS.ARTISAN}
+                tintColor={COLORS.GREY}
                 refreshing={isUserRefreshing}
                 onRefresh={() => {
                   this.setState({ isUserRefreshing: true });
@@ -3227,9 +2343,6 @@ class UserPageScreen extends React.Component {
             this.setState({ isShowingRevenueGuideModal: false });
           }}
         />
-        <Shadow distance={20} stretch={true} containerStyle={{ zIndex: 100 }}>
-          <View style={{ height: 0.1 }} />
-        </Shadow>
       </SafeAreaView>
     );
   }
@@ -3238,14 +2351,21 @@ class UserPageScreen extends React.Component {
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Constants.TIER_COLORS.GIVER,
+    backgroundColor: COLORS.BG,
   },
+  sectionList: {
+    backgroundColor: COLORS.BG,
+  },
+
+  // 헤더
   orderHeaderContainer: {
     width: '100%',
-    marginTop: isIphoneX() ? 50 : 20,
-    paddingHorizontal: 20,
+    paddingTop: T.TOP_INSET,
+    paddingHorizontal: 10,
+    paddingBottom: 2,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    backgroundColor: COLORS.BG,
   },
   headerRightButtonContainer: {
     flex: 1,
@@ -3256,285 +2376,372 @@ export const styles = StyleSheet.create({
   headerContainer: {
     justifyContent: 'space-between',
     flexDirection: 'row',
-    // padding: 20,
-    paddingHorizontal: 20,
-    paddingBottom: 7,
+    paddingTop: T.TOP_INSET,
+    paddingHorizontal: 16,
+    paddingBottom: 6,
     alignItems: 'center',
+    backgroundColor: COLORS.BG,
   },
   headerTitle: {
-    fontSize: moderateScale(24),
-    color: Constants.TIER_COLORS.PIONEER,
-    fontFamily: Constants.CUSTOM_FONTS.PRETENDARD.Bold,
+    ...TYPE.H_TITLE,
   },
   headerButtonContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   headerButton: {
-    width: 30,
-    height: 30,
+    width: 24,
+    height: 24,
   },
-  followingButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 10,
-    paddingHorizontal: 20,
-    minWidth: 100,
-    minHeight: 40,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-    backgroundColor: Constants.COLOR_BACKGROUND_DARK,
+  actionButton: {
+    borderRadius: 44,
+    overflow: 'hidden',
   },
-  followButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 10,
-    paddingHorizontal: 20,
-    minWidth: 100,
-    minHeight: 40,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: '#313131',
-    backgroundColor: '#313131',
-  },
-  blockButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 10,
-    paddingHorizontal: 20,
-    minWidth: 100,
-    minHeight: 40,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-  },
+
+  // 프로필 카드
   profileInfoContainer: {
-    // marginTop: 20,
-    // justifyContent: 'center',
-    // alignItems: 'center',
-    // alignSelf: 'center',
-    // backgroundColor: Constants.COLOR_BACKGROUND_DARK,
+    paddingHorizontal: 16,
+    paddingTop: 6,
   },
-  profilePicContainer: {},
-  profilePic: {
-    width: 106,
-    height: 106,
+  profileCard: {
+    paddingVertical: 15,
   },
-  reviewerName: {
-    marginTop: 5,
-    color: 'white',
-    fontSize: moderateScale(24),
-    lineHeight: 24,
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
+  profileRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  reputationText: {
-    color: '#919191',
-    fontSize: moderateScale(14),
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
+  profileBody: {
+    flex: 1,
+    marginLeft: 12,
   },
-  contributionAmount: {
-    color: Constants.COLOR_RED,
+  profileName: {
+    fontFamily: FONT.Bold,
+    fontSize: 15,
+    color: COLORS.INK,
+  },
+  profileMeta: {
+    ...TYPE.SUB,
     marginTop: 2,
-    fontWeight: '600',
   },
-  contributionButtonText: {
-    color: Constants.COLOR_MAIN,
-    fontSize: moderateScale(13),
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
-    textDecorationLine: 'underline',
-  },
-  helpButtonText: {
-    color: '#919191',
-    // fontSize: moderateScale(13),
-    fontSize: moderateScale(14),
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
-    textDecorationLine: 'underline',
-  },
-  myContributionAmount: {
-    color: Constants.TIER_COLORS.ARTISAN,
-    // fontSize: moderateScale(13),
-    fontSize: moderateScale(14),
-    // fontWeight: 'bold',
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
-  },
-  userIntroductionContainer: {
+  profileStatRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 10,
+    alignItems: 'center',
+    marginTop: 7,
   },
-  userIntroduction: {
-    textAlign: 'center',
-    color: 'white',
-    width: (Dimensions.get('window').width * 2) / 3,
-    marginHorizontal: 10,
-  },
-  userSnsContainer: {
+  statLink: {
     flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  statLinkLabel: {
+    ...TYPE.SUB,
+  },
+  statLinkValue: {
+    fontFamily: FONT.Bold,
+    fontSize: 11.5,
+    color: COLORS.INK,
+    marginLeft: 3,
+  },
+  instagramButton: {
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  instagramIcon: {
+    width: 18,
+    height: 18,
+  },
+  followButtonRow: {
+    flexDirection: 'row',
+    marginTop: 12,
+  },
+  followBtn: {
+    flex: 1,
+  },
+  introBox: {
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.LINE,
+  },
+  introLabel: {
+    ...TYPE.LABEL,
+    marginBottom: 3,
+  },
+  introText: {
+    ...TYPE.BODY,
+    lineHeight: 18,
+  },
+
+  // 프로필 하단 버튼 행
+  profileButtonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    marginTop: 9,
+  },
+  profileButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 4,
+  },
+  profileButtonInner: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileButtonIcon: {
+    width: 22,
+    height: 22,
+  },
+  profileButtonLabel: {
+    ...TYPE.XS,
     marginTop: 5,
   },
-  userSnsTitle: {
-    color: 'white',
+
+  // 게스트
+  guestContainer: {
+    padding: 16,
+    gap: 10,
   },
-  userSnsBody: {
-    textDecorationLine: 'underline',
-    color: '#217DBF',
+  guestButton: {
+    marginTop: 4,
   },
-  editProfileButton: {
-    marginTop: 10,
-    paddingHorizontal: 20,
-    minWidth: 100,
-    minHeight: 40,
-    justifyContent: 'center',
+
+  // 통계 카드 + 탭
+  historyTabWrap: {
+    backgroundColor: COLORS.BG,
+    paddingHorizontal: 16,
+    paddingTop: 9,
+  },
+  statCard: {
+    flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    justifyContent: 'space-around',
   },
-  snsButton: {
-    height: 40,
-    minWidth: 40,
-    marginTop: 10,
-    paddingVertical: 10,
-    justifyContent: 'center',
+  statItem: {
+    flex: 1,
     alignItems: 'center',
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    justifyContent: 'center',
   },
-  editProfileButtonLabel: {
-    color: 'white',
-    fontSize: moderateScale(14),
-    // fontWeight: '600',
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
+  statValue: {
+    fontFamily: FONT.ExtraBold,
+    fontSize: 16,
+    color: COLORS.INK,
+  },
+  statLabel: {
+    ...TYPE.XS,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  roleToggle: {
+    flexDirection: 'row',
+    alignSelf: 'center',
+    backgroundColor: COLORS.SURFACE,
+    borderWidth: 1,
+    borderColor: COLORS.LINE,
+    borderRadius: T.RADIUS.PILL,
+    padding: 2,
+    marginBottom: 9,
+  },
+  roleToggleButton: {
+    paddingHorizontal: 22,
+    paddingVertical: 6,
+    borderRadius: T.RADIUS.PILL,
+  },
+  roleToggleButtonOn: {
+    backgroundColor: COLORS.AMBER,
+  },
+  roleToggleText: {
+    fontFamily: FONT.Bold,
+    fontSize: 11.5,
+    color: COLORS.GREY,
+  },
+  roleToggleTextOn: {
+    color: COLORS.ON_AMBER,
   },
   userHistoryTab: {
-    backgroundColor: Constants.COLOR_BACKGROUND_DARK,
-    marginHorizontal: 20,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    flex: 1,
-    borderBottomWidth: 0.5,
-    borderColor: Constants.TIER_COLORS.STRIVER,
+    marginTop: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.LINE,
   },
   userHistoryTabButton: {
-    paddingHorizontal: 10,
-    paddingTop: 20,
-    paddingVertical: 5,
+    paddingHorizontal: 4,
+    paddingBottom: 7,
+    marginRight: 16,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
   },
-  userHistoryTabNameSelected: {
-    color: Constants.COLOR_POINT_BLUE,
-    fontSize: moderateScale(18),
-    // fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
-    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-  },
-  userHistoryTabCount: {
-    // color: 'rgba(255, 255, 255, 0.5)',
-    color: '#999',
-    // fontSize: moderateScale(19),
-    // fontWeight: 'bold',
-    fontSize: moderateScale(20),
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
+  userHistoryTabButtonOn: {
+    borderBottomColor: COLORS.AMBER,
   },
   userHistoryTabName: {
-    color: '#a0a0a0',
-    fontSize: moderateScale(18),
-    // fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
-    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
+    fontFamily: FONT.Bold,
+    fontSize: 13,
+    color: COLORS.GREY,
   },
-  userHistoryRow: {
+  userHistoryTabNameSelected: {
+    fontFamily: FONT.Bold,
+    fontSize: 13,
+    color: COLORS.INK,
+  },
+
+  // 리뷰 그리드
+  historyBody: {
+    paddingBottom: 20,
+  },
+  grid: {
+    marginHorizontal: 12,
+  },
+  gridItem: {
     flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    marginBottom: -20,
   },
+  gridThumbWrap: {
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: COLORS.TRACK,
+  },
+  gridThumb: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  gridBadge: {
+    position: 'absolute',
+    left: 7,
+    top: 7,
+  },
+  gridTitle: {
+    position: 'absolute',
+    left: 8,
+    right: 8,
+    bottom: 7,
+    fontFamily: FONT.Bold,
+    fontSize: 10,
+    color: '#FFFFFF',
+    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+
+  // 빈 상태
+  emptyMessageContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 46,
+    paddingHorizontal: 24,
+  },
+  emptyEmoji: {
+    fontSize: 26,
+    marginBottom: 8,
+  },
+  emptyMessage: {
+    fontFamily: FONT.Bold,
+    fontSize: 13,
+    color: COLORS.INK,
+    textAlign: 'center',
+  },
+  emptyDescription: {
+    ...TYPE.SUB,
+    marginTop: 5,
+    textAlign: 'center',
+  },
+  descriptionTitle: {
+    ...TYPE.SUB,
+    textAlign: 'center',
+  },
+
+  // 리뷰 추가 / 셀러 (COMMERCE)
   addNewReviewContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    flexDirection: 'row',
-    padding: 20,
-    marginBottom: 100,
+    paddingVertical: 30,
   },
   addNewReviewButton: {
+    alignItems: 'center',
     justifyContent: 'center',
-    width: Constants.VIDEO_GRID_LIST_ITEM_VIEW_WIDTH_2,
-    height:
-      Constants.VIDEO_GRID_LIST_ITEM_VIEW_HEIGHT_2 - Constants.VIDEO_LIST_ITEM_VIEW_FOOTER_HEIGHT,
-    backgroundColor: 'rgb(31, 31, 31)',
-    borderRadius: 6,
+    paddingVertical: 22,
+    paddingHorizontal: 34,
+    borderRadius: T.RADIUS.CARD,
+    borderWidth: 1.5,
+    borderColor: COLORS.LINE,
+    backgroundColor: COLORS.SURFACE,
   },
   addNewReviewButtonIcon: {
-    marginTop: 20,
-    width: 34,
-    height: 34,
+    width: 28,
+    height: 28,
     alignSelf: 'center',
   },
   addNewReviewTitle: {
-    marginTop: 20,
-    color: Constants.COLOR_BACKGROUND_DARK,
-    fontSize: moderateScale(14),
+    marginTop: 10,
+    fontFamily: FONT.Bold,
+    fontSize: 12.5,
+    color: COLORS.INK,
     alignSelf: 'center',
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
-  },
-  emptyMessageContainer: {
-    alignItems: 'center',
-    alignSelf: 'center',
-    justifyContent: 'center',
-    height:
-      Constants.VIDEO_GRID_LIST_ITEM_VIEW_HEIGHT_2 - Constants.VIDEO_LIST_ITEM_VIEW_FOOTER_HEIGHT,
-    backgroundColor: Constants.COLOR_BACKGROUND_DARK,
-  },
-  // emptyMessage: {
-  //   color: Constants.TIER_COLORS.ARTISAN,
-  //   fontSize: moderateScale(18),
-  // },
-  revenueGuideButton: {
-    paddingHorizontal: 5,
-    marginRight: -10,
   },
   blockContainer: {
     alignItems: 'center',
     alignSelf: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderRadius: 10,
-    borderColor: Constants.TIER_COLORS.STRIVER,
-    width: (Dimensions.get('window').width * 16) / 20,
-    height: (Dimensions.get('window').width * 9) / 20,
-    marginTop: 10,
-    marginBottom: 100,
+    borderRadius: T.RADIUS.CARD,
+    borderWidth: 1.5,
+    borderColor: COLORS.LINE,
+    backgroundColor: COLORS.SURFACE,
+    paddingVertical: 24,
+    paddingHorizontal: 24,
+    marginHorizontal: 16,
+    marginVertical: 16,
   },
-  revenueContainer: {
+  sellerPageButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: T.RADIUS.BTN,
+    backgroundColor: COLORS.AMBER,
+    paddingVertical: 12,
+    marginHorizontal: 16,
+    marginVertical: 10,
+  },
+  sellerButtonLabel: {
+    ...TYPE.BTN,
+  },
+
+  // QNA (QNAList가 참조)
+  qnaContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    backgroundColor: COLORS.BG,
+  },
+  descriptionText: {
+    ...TYPE.BODY,
+    paddingHorizontal: 8,
+    textAlign: 'center',
+  },
+  qnaSentence: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    marginBottom: 4,
+  },
+  qnaRefresh: {
+    fontFamily: FONT.Bold,
+    fontSize: 12,
+    color: COLORS.INK,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: T.RADIUS.BTN_SM,
+    borderColor: COLORS.LINE,
     borderWidth: 1,
-    borderRadius: 5,
-    // borderColor: 'rgba(255,255,255,0.5)',
-    borderColor: '#999',
-    width: (Dimensions.get('window').width * 3) / 4,
-    marginTop: 10,
+    textAlign: 'center',
   },
-  emptyMessage: {
-    color: Constants.TIER_COLORS.ARTISAN,
-    fontSize: moderateScale(18),
-    marginVertical: 10,
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
-  },
-  descriptionTitle: {
-    fontSize: moderateScale(14),
+  qnaLoadingContainer: {
+    flex: 1,
+    alignSelf: 'stretch',
+    width: '100%',
+    height: 250,
     alignItems: 'center',
-    // color: 'rgba(255, 255, 255, 0.5)',
-    color: '#999',
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
+    justifyContent: 'center',
+    paddingBottom: 40,
   },
+
+  // 레거시 (티어 육각형·차단/수정 버튼 등에서 계속 참조)
   hexagon: (top, left) => ({
     position: 'absolute',
     top: moderateScale(top - 205),
@@ -3551,7 +2758,6 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 100,
-    // backgroundColor: '#2a2a2a',
   },
   editButtonContainer: {
     alignItems: 'center',
@@ -3559,8 +2765,21 @@ export const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 100,
-    backgroundColor: '#2a2a2a',
+    backgroundColor: COLORS.SURFACE,
   },
+  editButton: {
+    width: 22,
+    height: 22,
+  },
+  newBlockButtonContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: horizontalScale(120),
+    height: 30,
+    borderRadius: 14,
+    backgroundColor: COLORS.LINE,
+  },
+  // 비디오 페이지 오버레이(어두운 배경)에서 재사용 — 톤 유지
   newFollowButtonContainer: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -3573,123 +2792,8 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     marginLeft: 14,
   },
-  newBlockButtonContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: horizontalScale(120),
-    height: 30,
-    borderRadius: 14,
-    backgroundColor: '#3a3a3a',
-  },
-  editButton: {
-    width: 22,
-    height: 22,
-  },
-
-  sellerPageButton: {
-    alignItems: 'center',
-    borderRadius: 5,
-    backgroundColor: Constants.COLOR_BACKGROUND_DARK,
-    justifyContent: 'center',
-    height: Constants.PRODUCT_HORIZONTAL_LIST_ITEM_VIEW_WIDTH / 2 - 10,
-    // marginVertical: 5,
-    marginHorizontal: 20,
-  },
-  sellerButtonLabel: {
-    color: Constants.TIER_COLORS.ARTISAN,
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
-    fontSize: 17,
-  },
   profilePicnew: {
     width: 100,
     height: 100,
-  },
-  circuletabview: {
-    flexDirection: 'row',
-    borderWidth: 0.5,
-    borderColor: Constants.TIER_COLORS.ARTISAN,
-    alignSelf: 'center',
-    borderRadius: 21,
-  },
-  lefttabstyle: {
-    paddingHorizontal: 24,
-    height: 30,
-    borderRadius: 20,
-    justifyContent: 'center',
-  },
-  righttabstyle: {
-    marginLeft: -16,
-    paddingHorizontal: 34,
-    height: 30,
-    borderRadius: 20,
-    justifyContent: 'center',
-  },
-
-  tabTextstyle: {
-    fontSize: moderateScale(14),
-    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
-  },
-  roundTabName: {
-    color: '#999',
-    fontSize: moderateScale(14),
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
-  },
-  roundView: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  roundTabContainer: {
-    backgroundColor: Constants.COLOR_BACKGROUND_DARK,
-    marginHorizontal: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    flex: 1,
-  },
-  roundTabContainernew: {
-    // backgroundColor: Constants.COLOR_BACKGROUND_DARK,
-    // marginHorizontal: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    flex: 1,
-  },
-  descriptionText: {
-    fontSize: moderateScale(14),
-    paddingHorizontal: 24,
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
-    textAlign: 'center',
-    color: '#d3d3d3',
-  },
-  qnaSentence: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  qnaRefresh: {
-    fontSize: 16,
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.MEDIUM,
-    color: Constants.TIER_COLORS.ARTISAN,
-    paddingHorizontal: 6,
-    paddingVertical: 6,
-    borderRadius: 4,
-    borderColor: Constants.TIER_COLORS.ARTISAN,
-    borderWidth: 1,
-    textAlign: 'center',
-  },
-  qnaLoadingContainer: {
-    flex: 1,
-    alignSelf: 'stretch',
-    width: '100%',
-    height: 250,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingBottom: 40,
-  },
-  profileButtonIcon: {
-    width: 26,
-    height: 26,
   },
 });

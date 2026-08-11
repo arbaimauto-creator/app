@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import APIprovider from '../../Components/APIprovider';
-import Constants from '../../Components/Constants';
+import T from '../../Components/Constants/DesignTokens';
 import { getLanguage } from '../../Components/Strings/index';
 import UserProfilePicViewUpdate from './UserProfilePicViewUpdate';
 
@@ -11,8 +11,8 @@ function ENSentence({ followers, showFollower, navigation }) {
       <View
         style={{
           flexDirection: 'row',
-          marginHorizontal: 25,
-          marginBottom: 40,
+          marginHorizontal: 20,
+          marginTop: 22,
           alignItems: 'center',
         }}
       >
@@ -52,7 +52,7 @@ function ENSentence({ followers, showFollower, navigation }) {
 
   return (
     <View
-      style={{ flexDirection: 'row', marginHorizontal: 25, marginBottom: 40, alignItems: 'center' }}
+      style={{ flexDirection: 'row', marginHorizontal: 20, marginTop: 22, alignItems: 'center' }}
     >
       <View style={{ flexDirection: 'row', marginRight: 55 }}>
         {showFollower.map((follower, idx) => (
@@ -96,8 +96,8 @@ function KOSentence({ followers, showFollower, navigation }) {
       <View
         style={{
           flexDirection: 'row',
-          marginHorizontal: 25,
-          marginBottom: 40,
+          marginHorizontal: 20,
+          marginTop: 22,
           alignItems: 'center',
         }}
       >
@@ -136,7 +136,7 @@ function KOSentence({ followers, showFollower, navigation }) {
 
   return (
     <View
-      style={{ flexDirection: 'row', marginHorizontal: 25, marginBottom: 40, alignItems: 'center' }}
+      style={{ flexDirection: 'row', marginHorizontal: 20, marginTop: 22, alignItems: 'center' }}
     >
       <View style={{ flexDirection: 'row', marginRight: 55 }}>
         {showFollower.map((follower, idx) => (
@@ -201,12 +201,14 @@ export default function FollowedBy({ user, logonUserId, navigation }) {
 
 const styles = StyleSheet.create({
   regularFont: {
-    color: Constants.TIER_COLORS.STRIVER,
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.MEDIUM,
+    color: T.COLORS.GREY,
+    fontFamily: T.FONT.Regular,
+    fontSize: 11.5,
   },
   boldFont: {
-    color: Constants.TIER_COLORS.ARTISAN,
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
+    color: T.COLORS.INK,
+    fontFamily: T.FONT.Bold,
+    fontSize: 11.5,
   },
   userPicture: ({ idx, length }) => ({
     position: 'absolute',

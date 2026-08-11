@@ -6,15 +6,17 @@ import {
   Switch,
   Text,
   TextInput,
+  TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import { Button } from 'react-native-elements';
 import FastImage from 'react-native-fast-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { isIPhone12, isIPhone12Max } from 'react-native-status-bar-height';
-import Constants from '../../Components/Constants';
+import T from '../../Components/Constants/DesignTokens';
 import Strings from '../../Components/Strings';
+
+const { COLORS, RADIUS, FONT } = T;
 
 function CommentModal({ context }) {
   const bottom = context.state.isShowingCommentInput ? 0 : -Dimensions.get('window').height;
@@ -29,22 +31,17 @@ function CommentModal({ context }) {
     >
       <View style={[styles.addCommentModalContainer(insets), { bottom }]}>
         <TouchableWithoutFeedback>
-          <>
+          <View style={styles.sheet}>
+            <View style={styles.grabBar} />
             <View style={styles.secretCommentContainer}>
-              <Text style={{ fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4 }}>
-                {Strings.SECRET_COMMENT}
-              </Text>
+              <Text style={styles.secretCommentLabel}>{Strings.SECRET_COMMENT}</Text>
               <Switch
                 trackColor={{
-                  false: Constants.TIER_COLORS.ARTISAN,
-                  true: Constants.COLOR_POINT_BLUE,
+                  false: COLORS.TRACK,
+                  true: COLORS.AMBER,
                 }}
-                thumbColor={
-                  context.state.isSecretComment
-                    ? Constants.TIER_COLORS.PIONEER
-                    : Constants.TIER_COLORS.EXPLORER
-                }
-                ios_backgroundColor={Constants.TIER_COLORS.ARTISAN}
+                thumbColor={COLORS.SURFACE}
+                ios_backgroundColor={COLORS.TRACK}
                 onValueChange={(value) => {
                   context.setState({ isSecretComment: value });
                 }}
@@ -61,31 +58,27 @@ function CommentModal({ context }) {
                   context.commentInput = input;
                 }}
                 multiline
-                style={{
-                  flex: 1,
-                  marginRight: 4,
-                  color: Constants.TIER_COLORS.ARTISAN,
-                  fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
-                  fontSize: 14,
-                }}
+                style={styles.commentInput}
                 placeholder={Strings.INPUT_COMMENT}
-                placeholderTextColor={Constants.TIER_COLORS.STRIVER}
+                placeholderTextColor={COLORS.GREY}
                 onChangeText={(newComment) => context.setState({ newComment })}
                 value={context.state.newComment}
               />
               {context.state.newComment !== '' && (
-                <Button
-                  title={Strings.POST}
-                  type="clear"
-                  titleStyle={styles.addCommentButtonTitle}
-                  //containerStyle={styles.interactionButtonContainer}
-                  //buttonStyle={styles.interactionButton}
+                <TouchableOpacity
+                  style={[
+                    styles.submitButton,
+                    context.state.isNewCommentSubmitting && styles.submitButtonDisabled,
+                  ]}
+                  activeOpacity={0.8}
                   onPress={context.onSubmitNewComment.bind(context)}
                   disabled={context.state.isNewCommentSubmitting}
-                />
+                >
+                  <Text style={styles.submitButtonText}>{Strings.POST}</Text>
+                </TouchableOpacity>
               )}
             </View>
-          </>
+          </View>
         </TouchableWithoutFeedback>
       </View>
     </TouchableWithoutFeedback>
@@ -113,44 +106,84 @@ const styles = StyleSheet.create({
     height: '100%',
     justifyContent: 'flex-end',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
     paddingBottom: isIPhone12() || isIPhone12Max() ? insets.bottom : 0,
     // isIPhoneWithDynamicIsland()
   }),
+  sheet: {
+    width: '100%',
+    backgroundColor: COLORS.SURFACE,
+    borderTopLeftRadius: RADIUS.SHEET,
+    borderTopRightRadius: RADIUS.SHEET,
+    paddingTop: 8,
+    ...T.SHADOW_SHEET,
+  },
+  grabBar: {
+    alignSelf: 'center',
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#DDD9D2',
+    marginBottom: 12,
+  },
   addCommentInputContainer: {
     width: '100%',
     flexDirection: 'row',
-    paddingVertical: 10,
-    paddingHorizontal: 21,
+    paddingHorizontal: 20,
+    paddingTop: 10,
     paddingBottom: 20,
     alignItems: 'center',
-    backgroundColor: Constants.COLOR_BACKGROUND_DARK,
   },
   secretCommentContainer: {
     width: '100%',
     flexDirection: 'row',
-    paddingVertical: 10,
-    paddingHorizontal: 21,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Constants.COLOR_BACKGROUND_DARK,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.LINE,
+  },
+  secretCommentLabel: {
+    fontFamily: FONT.Bold,
+    fontSize: 11,
+    color: COLORS.INK,
   },
   userProfilePic: {
-    width: 28,
-    height: 28,
-    borderRadius: 28,
-    marginRight: 20,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginRight: 10,
+    backgroundColor: COLORS.LINE,
   },
-  addCommentButtonTitle: {
-    color: Constants.COLOR_MAIN,
-    fontSize: 16,
-    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.SEMIBOLD_6,
+  commentInput: {
+    flex: 1,
+    marginRight: 8,
+    minHeight: 40,
+    maxHeight: 110,
+    borderWidth: 1.5,
+    borderColor: COLORS.LINE,
+    borderRadius: RADIUS.FIELD,
+    backgroundColor: COLORS.SURFACE,
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+    color: COLORS.INK,
+    fontFamily: FONT.Regular,
+    fontSize: 13,
   },
-  interactionButtonContainer: {
-    padding: 10,
+  submitButton: {
+    backgroundColor: COLORS.AMBER,
+    borderRadius: RADIUS.BTN_SM,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
   },
-  interactionButton: {
-    padding: 10,
+  submitButtonDisabled: {
+    opacity: 0.45,
+  },
+  submitButtonText: {
+    fontFamily: FONT.ExtraBold,
+    fontSize: 12.5,
+    color: COLORS.ON_AMBER,
   },
 });
 

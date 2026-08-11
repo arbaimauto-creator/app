@@ -540,6 +540,7 @@ export default {
   },
   EXCHANGE_RETURN_NOT_AVAILABLE: '교환 또는 반품이 불가능한 상품입니다.',
   NO_REVIEW_UPLOADED: '등록된 리뷰가 없습니다.',
+  USERPAGE_EMPTY_REVIEW_DESC: '새 리뷰가 올라오면 여기에서 볼 수 있어요.',
   NO_PRODUCT_UPLOADED: '등록된 상품이 없습니다.',
   ADD_NEW_REVIEW: '첫 리뷰를 올려보세요',
   ADD_NEW_PRODUCT: '첫 상품을 등록해보세요',
@@ -1597,7 +1598,8 @@ export default {
   PROFILE_HANDLE: '계정 핸들',
   PROFILE_FOLLOWERS: '팔로워 규모',
   // D29: 3채널 수집
-  PROFILE_CHANNELS_HINT: '운영 중인 채널을 모두 알려주면 더 많은 캠페인에 매칭돼요. 주소를 붙여넣어도 돼요.',
+  PROFILE_CHANNELS_HINT:
+    '운영 중인 채널을 모두 알려주면 더 많은 캠페인에 매칭돼요. 주소를 붙여넣어도 돼요.',
   PROFILE_HANDLE_PH: '@handle 또는 프로필 주소',
   PROFILE_CH_PRIMARY: '주력 · 필수',
   PROFILE_CH_OPTIONAL: '선택',
@@ -1635,7 +1637,8 @@ export default {
   FGI_COMPETITOR: '지금 쓰고 있는 유사 제품은?',
   FGI_COMPETITOR_PH: '제품명 (없으면 "없음")',
   FGI_DAYS_USED: (n) => `사용 ${n}일차 응답`,
-  FGI_MIN_TEXT: (n) => `장점·단점은 각각 ${n}자 이상 적어주세요. 구체적일수록 보상 품질 보너스에 반영돼요.`,
+  FGI_MIN_TEXT: (n) =>
+    `장점·단점은 각각 ${n}자 이상 적어주세요. 구체적일수록 보상 품질 보너스에 반영돼요.`,
   // 첫인상 30초 (D27 — 수령 직후)
   FI_TITLE: '첫인상 30초',
   FI_SUB: (brand) => `막 열어보셨죠? ${brand}에게 지금 이 순간의 느낌이 가장 귀해요.`,
@@ -1992,6 +1995,8 @@ export default {
   SHARE_SHORT: '공유',
   // 홈 피드 로딩·빈 상태
   MAIN_FEED_LOADING: '리뷰 불러오는 중…',
+  FEED_NO_COMMENTS_TITLE: '아직 댓글이 없어요',
+  FEED_NO_COMMENTS_DESC: '첫 댓글을 남겨 크리에이터에게 반응을 전해보세요.',
   // i18n 배치 B2 — 리워드 가이드·리워드 내역
   REMARK: '비고',
   REWARD_GUIDE_INTRO_TITLE: '리워드 적립 방법',
@@ -2024,4 +2029,6 @@ export default {
   NO_CURATED_PRODUCTS_AVAILABLE: '지금은 큐레이션된 상품이 없습니다.',
   PRODUCT_DETAILS_TO_MAKE_ORDER: '주문 상품 정보',
   SIGN_UP_TO_GREYD: 'greyd 회원 가입',
+  NOTI_EMPTY_DESC: '새 소식이 도착하면 여기에서 알려드릴게요.',
+  SEARCH_EMPTY_DESC: '크리에이터 이름이나 #해시태그로 찾아보세요.',
 };

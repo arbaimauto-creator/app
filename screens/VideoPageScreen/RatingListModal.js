@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Dimensions,
   Modal,
   StyleSheet,
   Text,
@@ -12,11 +11,13 @@ import FastImage from 'react-native-fast-image';
 import Animated from 'react-native-reanimated';
 import IconFontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import APIprovider from '../../Components/APIprovider';
-import Constants from '../../Components/Constants';
+import T from '../../Components/Constants/DesignTokens';
 import Strings from '../../Components/Strings';
 import { VideoPageFollowButton } from '../UserPageScreen/UserPageScreen';
-import { getIPhoneHeaderMarginTop, isGuestUser } from '../../Components/utils';
+import { isGuestUser } from '../../Components/utils';
 import UserListItemView from '../UserPageScreen/UserListItemView';
+
+const { COLORS, RADIUS, FONT } = T;
 
 const G6Chart = React.lazy(() => import('../../Components/CustomComponents/G6/G6Chart'));
 
@@ -55,6 +56,7 @@ function RatingListModal({ context }) {
     >
       <View style={styles.ratingListModalContainer}>
         <View style={styles.ratingListModalView}>
+          <View style={styles.grabBar} />
           <View style={styles.ratingListModalHeaderContainer}>
             <View style={styles.ratingListModalCloseButton} />
             <View style={styles.ratingListModalHeaderRatingContainer}>
@@ -73,20 +75,13 @@ function RatingListModal({ context }) {
                 style={[
                   styles.ratingListModalHeaderRatingTitle,
                   {
-                    color: video.myG6Rating ? Constants.COLOR_MAIN : Constants.TIER_COLORS.ARTISAN,
+                    color: video.myG6Rating ? COLORS.AMBER_DEEP : COLORS.INK,
                   },
                 ]}
               >
                 {Strings.AVERAGE_GRADE} {video.g6AvgRatingScore}
               </Text>
-              {/* <Text
-                style={[
-                  styles.ratingListModalHeaderRatingSubTitle,
-                  {
-                    color: Constants.TIER_COLORS.ARTISAN,
-                  },
-                ]}
-              >
+              {/* <Text style={styles.ratingListModalHeaderRatingSubTitle}>
                 {`(${Strings.GREYD_COUNT}  ${video.g6RatingCount})`}
               </Text> */}
             </View>
@@ -108,12 +103,7 @@ function RatingListModal({ context }) {
               context.state.isShowingRatingList && (
                 <>
                   <TouchableOpacity
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginHorizontal: 20,
-                    }}
+                    style={styles.userG6Row}
                     onPress={() => {
                       context.props.navigation.navigate('G6Guide');
                       context.setState({
@@ -123,13 +113,9 @@ function RatingListModal({ context }) {
                   >
                     <Text style={styles.userG6}>
                       {context.state.video.author.name}'s
-                      <Text style={{ color: Constants.COLOR_MAIN }}> G6</Text>
+                      <Text style={styles.userG6Accent}> G6</Text>
                     </Text>
-                    <IconFontAwesome5
-                      name={'question-circle'}
-                      size={18}
-                      color={Constants.TIER_COLORS.STRIVER}
-                    />
+                    <IconFontAwesome5 name={'question-circle'} size={16} color={COLORS.GREY} />
                   </TouchableOpacity>
                   <LazyG6Chart
                     innerData={context.state.innerData}
@@ -145,14 +131,7 @@ function RatingListModal({ context }) {
                   <>
                     <View style={styles.divider} />
                     <View style={styles.alignCenter}>
-                      <Text
-                        style={{
-                          fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-                          fontSize: 16,
-                          color: Constants.TIER_COLORS.ARTISAN,
-                          marginBottom: 20,
-                        }}
-                      >
+                      <Text style={[styles.subTitleText, styles.subTitleSpacing]}>
                         {Strings.SCORE_I_GAVE}
                       </Text>
                       <View style={styles.scoreContainer}>
@@ -243,39 +222,38 @@ const styles = StyleSheet.create({
   ratingListModalContainer: {
     flex: 1,
     width: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: Constants.COLOR_BACKGROUND_DARK, //'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
   },
   ratingListModalView: {
-    height: '100%',
+    height: '94%',
     width: '100%',
-    marginHorizontal: 20,
-    // paddingVertical: isIphoneX() ? 30 : 0,
-    paddingVertical: getIPhoneHeaderMarginTop(),
-    backgroundColor: Constants.COLOR_BACKGROUND_DARK, //'#111',
-    borderRadius: 14,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    paddingTop: 8,
+    backgroundColor: COLORS.SURFACE,
+    borderTopLeftRadius: RADIUS.SHEET,
+    borderTopRightRadius: RADIUS.SHEET,
+    ...T.SHADOW_SHEET,
+  },
+  grabBar: {
+    alignSelf: 'center',
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#DDD9D2',
   },
   ratingListModalHeaderContainer: {
-    width: Dimensions.get('window').width,
+    width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginVertical: 13,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.LINE,
   },
   ratingListModalCloseButton: {
     width: 22,
     height: 22,
-    margin: 20,
+    marginHorizontal: 16,
   },
   ratingListModalHeaderRatingContainer: {
     flexDirection: 'row',
@@ -287,52 +265,64 @@ const styles = StyleSheet.create({
   },
   ratingListModalHeaderRatingTitle: {
     marginLeft: 6,
-    fontSize: 17,
-    color: Constants.TIER_COLORS.ARTISAN,
-    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.LIGHT_3,
-    fontWeight: '600',
+    fontSize: 14.5,
+    color: COLORS.INK,
+    fontFamily: FONT.ExtraBold,
+    letterSpacing: -0.2,
   },
   ratingListModalHeaderRatingSubTitle: {
     marginLeft: 6,
-    fontSize: 16,
-    color: Constants.TIER_COLORS.ARTISAN,
-    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.EXTRALIGHT_2,
-    fontWeight: '100',
+    fontSize: 11.5,
+    color: COLORS.GREY,
+    fontFamily: FONT.Regular,
   },
   ratingListModalItemContainer: {
-    width: Dimensions.get('window').width,
+    width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingRight: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.LINE,
+  },
+  userG6Row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 20,
+    marginTop: 16,
   },
   userG6: {
-    color: Constants.TIER_COLORS.ARTISAN,
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.BOLD,
-    fontSize: 18,
+    color: COLORS.INK,
+    fontFamily: FONT.ExtraBold,
+    fontSize: 15,
+    letterSpacing: -0.2,
     marginRight: 5,
   },
-  divider: { marginHorizontal: 20, height: 1, backgroundColor: 'black' },
+  userG6Accent: { color: COLORS.AMBER_DEEP },
+  divider: { marginHorizontal: 20, height: 1, backgroundColor: COLORS.LINE },
   alignCenter: { marginVertical: 20, marginHorizontal: 20, alignItems: 'center' },
   subTitleText: {
-    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-    fontSize: 16,
-    color: Constants.TIER_COLORS.ARTISAN,
+    fontFamily: FONT.Bold,
+    fontSize: 13,
+    color: COLORS.INK,
   },
+  subTitleSpacing: { marginBottom: 16 },
   scoreContainer: { flexDirection: 'row', width: '100%', justifyContent: 'space-around' },
   scoreBox: {
-    borderWidth: 0.5,
-    borderColor: Constants.TIER_COLORS.ARTISAN,
-    borderRadius: 100,
-    backgroundColor: Constants.TIER_COLORS.PIONEER,
+    borderWidth: 1,
+    borderColor: COLORS.LINE,
+    borderRadius: RADIUS.PILL,
+    backgroundColor: COLORS.AMBER_SOFT,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
     width: 44,
     height: 44,
   },
   scoreGroup: { width: '100%', alignItems: 'center' },
-  scoreTitleText: { fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4, fontSize: 11 },
-  scoreText: { fontFamily: Constants.CUSTOM_FONTS.SCDREAM.BOLD_7, fontSize: 18 },
+  scoreTitleText: { fontFamily: FONT.Regular, fontSize: 11, color: COLORS.GREY },
+  scoreText: { fontFamily: FONT.ExtraBold, fontSize: 16, color: COLORS.AMBER_DEEP },
 });
 
 export default RatingListModal;
