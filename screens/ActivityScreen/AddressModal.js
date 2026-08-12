@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Modal,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -25,6 +27,9 @@ export default function AddressModal({ visible, initial, onSubmit, onClose }) {
   const [stateProvince, setStateProvince] = useState(initial?.state || '');
   const [postalCode, setPostalCode] = useState(initial?.postalCode || '');
   const [phone, setPhone] = useState(initial?.phone || '');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const submitLockRef = useRef(false);
 
   const fillFrom = (a) => {
     setName(a?.name || '');
@@ -38,6 +43,9 @@ export default function AddressModal({ visible, initial, onSubmit, onClose }) {
   // 시안 12: 열릴 때 initial이 비어 있으면 저장된 기본 배송지로 프리필
   useEffect(() => {
     if (!visible) {
+      submitLockRef.current = false;
+      setIsSaving(false);
+      setSaveError('');
       return;
     }
     if (initial && (initial.name || initial.line)) {
@@ -54,6 +62,12 @@ export default function AddressModal({ visible, initial, onSubmit, onClose }) {
   const canSubmit = name.trim() && line.trim() && city.trim() && postalCode.trim() && phone.trim();
 
   const submit = async () => {
+    if (!canSubmit || submitLockRef.current) {
+      return;
+    }
+    submitLockRef.current = true;
+    setIsSaving(true);
+    setSaveError('');
     const address = {
       name: name.trim(),
       line: line.trim(),
@@ -62,19 +76,35 @@ export default function AddressModal({ visible, initial, onSubmit, onClose }) {
       postalCode: postalCode.trim(),
       phone: phone.trim(),
     };
-    // 다음 캠페인 자동 입력용 기본 배송지 저장
-    await saveSavedAddress(address);
-    onSubmit(address);
+    try {
+      // 다음 캠페인 자동 입력용 기본 배송지 저장
+      await saveSavedAddress(address);
+      await onSubmit(address);
+    } catch (e) {
+      submitLockRef.current = false;
+      setIsSaving(false);
+      setSaveError(Strings.ADDRESS_SAVE_ERROR);
+    }
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={() => {
+        if (!isSaving) {
+          onClose();
+        }
+      }}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : null}
         style={styles.backdrop}
       >
         <View style={styles.sheet}>
           <View style={styles.grabBar} />
+          <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           <View style={styles.titleRow}>
             <Text style={styles.title}>{Strings.ADDRESS_MODAL_TITLE}</Text>
             <Badge tone="red" text={Strings.ADDRESS_48H_BADGE} />
@@ -120,18 +150,24 @@ export default function AddressModal({ visible, initial, onSubmit, onClose }) {
             </View>
           </View>
 
+          {saveError ? <Text style={styles.saveError}>{saveError}</Text> : null}
           <TouchableOpacity
-            style={[styles.submit, !canSubmit && styles.submitDisabled]}
-            disabled={!canSubmit}
+            style={[styles.submit, (!canSubmit || isSaving) && styles.submitDisabled]}
+            disabled={!canSubmit || isSaving}
             onPress={submit}
             activeOpacity={0.8}
           >
-            <Text style={styles.submitText}>{Strings.ADDRESS_SAVE_AUTOFILL}</Text>
+            {isSaving ? (
+              <ActivityIndicator color={COLORS.ON_AMBER} />
+            ) : (
+              <Text style={styles.submitText}>{Strings.ADDRESS_SAVE_AUTOFILL}</Text>
+            )}
           </TouchableOpacity>
           <Text style={styles.customsNote}>{Strings.ADDRESS_CUSTOMS_NOTE}</Text>
-          <TouchableOpacity style={styles.close} onPress={onClose}>
+          <TouchableOpacity style={styles.close} onPress={onClose} disabled={isSaving}>
             <Text style={styles.closeText}>{Strings.CANCEL}</Text>
           </TouchableOpacity>
+          </ScrollView>
         </View>
       </KeyboardAvoidingView>
     </Modal>
@@ -146,6 +182,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: RADIUS.SHEET,
     padding: 20,
     paddingBottom: 30,
+    maxHeight: '92%',
     ...T.SHADOW_SHEET,
   },
   grabBar: {
@@ -183,6 +220,7 @@ const styles = StyleSheet.create({
   },
   submitDisabled: { opacity: 0.45 },
   submitText: { fontFamily: FONT.ExtraBold, fontSize: 13.5, color: COLORS.ON_AMBER },
+  saveError: { ...TYPE.XS, color: COLORS.RED, marginTop: 4, textAlign: 'center' },
   customsNote: { ...TYPE.XS, marginTop: 10, lineHeight: 15 },
   close: { alignItems: 'center', paddingVertical: 11, marginTop: 2 },
   closeText: { fontFamily: FONT.SemiBold, fontSize: 13, color: COLORS.GREY },

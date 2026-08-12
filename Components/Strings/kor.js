@@ -1859,6 +1859,9 @@ export default {
   APPLYDONE_LIMIT_MID: ' 중 ',
   APPLYDONE_LIMIT_POST: ' 사용 중이에요.',
   APPLYDONE_MORE_CTA: '다른 캠페인 더 보기',
+  APPLYDONE_ADDRESS_CTA: '배송지 입력하고 계속하기',
+  APPLYDONE_ACTIVITY_CTA: '신청 현황 보기',
+  ADDRESS_SAVE_ERROR: '배송지를 저장하지 못했어요. 다시 시도해주세요.',
   // 완주 보상 (시안 16+17)
   DONE_TITLE: '완주 보상',
   DONE_SHARE_MESSAGE: (code) =>

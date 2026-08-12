@@ -63,7 +63,7 @@ const ONGOING_STATUSES = [
   SEEDING_STATUS.REVIEWING,
 ];
 
-export default function ActivityScreen({ navigation }) {
+export default function ActivityScreen({ navigation, route }) {
   const dispatch = useDispatch();
   const campaigns = useSelector(selectCampaigns);
   const totalReward = useSelector((s) => s.user.totalReward);
@@ -88,9 +88,21 @@ export default function ActivityScreen({ navigation }) {
         dispatch(fetchCampaigns());
       }
       reload();
+      const requestedCampaignId = route.params?.openAddressFor;
+      if (requestedCampaignId) {
+        getSeedings().then((saved) => {
+          if (
+            saved[requestedCampaignId]?.status === SEEDING_STATUS.APPROVED &&
+            !saved[requestedCampaignId]?.address
+          ) {
+            setAddressFor(requestedCampaignId);
+          }
+          navigation.setParams({ openAddressFor: undefined });
+        });
+      }
       // 마운트 시 1회 + 포커스마다
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [reload]),
+    }, [navigation, reload, route.params?.openAddressFor]),
   );
 
   const campaignById = Object.fromEntries(campaigns.map((c) => [c.id, c]));

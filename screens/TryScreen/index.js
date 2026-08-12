@@ -175,6 +175,7 @@ export default function TryScreen({ navigation }) {
             // 여기서 opsApply를 또 부르면 Match가 중복 생성된다.
             refreshOffers();
             navigation.navigate('ApplyDone', {
+              campaignId: offer.campaignId,
               campaignTitle: offer.campaign.title,
               applyMode: offer.campaign.applyMode,
               usedCount: activeCount + 1,

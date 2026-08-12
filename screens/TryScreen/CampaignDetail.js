@@ -140,6 +140,7 @@ export default function CampaignDetail({ route, navigation }) {
     opsApply({ campaign, appealText: appeal.trim(), autoConfirmed });
     // 신청 완료 전용 화면(시안)으로 이동 — 신청 후 활성 시딩 수 = 기존 카운트 + 1
     navigation.navigate('ApplyDone', {
+      campaignId: campaign.id,
       campaignTitle: campaign.title,
       applyMode: campaign.applyMode,
       usedCount: activeCount + 1,

@@ -1938,6 +1938,9 @@ export default {
   APPLYDONE_LIMIT_MID: ' — ',
   APPLYDONE_LIMIT_POST: ' in use.',
   APPLYDONE_MORE_CTA: 'Browse more campaigns',
+  APPLYDONE_ADDRESS_CTA: 'Enter shipping address',
+  APPLYDONE_ACTIVITY_CTA: 'View application status',
+  ADDRESS_SAVE_ERROR: 'We could not save your address. Please try again.',
   // Completion rewards (design 16+17)
   DONE_TITLE: 'Completion rewards',
   DONE_SHARE_MESSAGE: (code) =>

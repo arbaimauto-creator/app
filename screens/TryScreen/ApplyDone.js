@@ -8,7 +8,18 @@ import Strings from '../../Components/Strings';
 const { COLORS, FONT, TYPE } = T;
 
 export default function ApplyDone({ navigation, route }) {
-  const { campaignTitle, applyMode, usedCount, limit, autoConfirmed } = route.params || {};
+  const { campaignId, campaignTitle, applyMode, usedCount, limit, autoConfirmed } =
+    route.params || {};
+
+  const openActivity = () => {
+    navigation.navigate('MainBottom', {
+      screen: 'Activity',
+      params: {
+        screen: 'ActivityHome',
+        params: autoConfirmed ? { openAddressFor: campaignId } : undefined,
+      },
+    });
+  };
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -68,6 +79,10 @@ export default function ApplyDone({ navigation, route }) {
           </Text>
         </NoteBox>
 
+        <Btn
+          title={autoConfirmed ? Strings.APPLYDONE_ADDRESS_CTA : Strings.APPLYDONE_ACTIVITY_CTA}
+          onPress={openActivity}
+        />
         <Btn
           variant="ghost"
           title={Strings.APPLYDONE_MORE_CTA}
