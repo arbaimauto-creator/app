@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -32,14 +34,35 @@ const COOLDOWN_BASE_SEC = 30;
 
 // 저장이 실패하거나 응답하지 않아도 게이트 통과를 막지 않는다.
 // (릴리스에서 네이티브 응답이 없으면 버튼이 '먹통'으로 보였던 원인)
-async function prefSet(key, value) {
+async function saveGatePreferences(values) {
   try {
     await Promise.race([
-      Preference.set(key, String(value ?? '')),
+      Preference.setMultiple(values),
       new Promise((resolve) => setTimeout(resolve, 2500)),
     ]);
   } catch (e) {
-    trace(`gate:pref-set-fail:${key}`);
+    trace('gate:pref-set-multiple-fail');
+  }
+  // 저장이 안 되면 재시작 때 게이트로 되돌아온다(실제로 겪은 증상).
+  // 한 번 읽어 확인하고, 비어 있으면 개별 set으로 한 번 더 시도한다.
+  try {
+    const saved = await Promise.race([
+      Preference.get('inviteRole'),
+      new Promise((resolve) => setTimeout(() => resolve(null), 1500)),
+    ]);
+    if (!saved) {
+      trace('gate:pref-verify-empty-retry');
+      await Promise.all(
+        Object.keys(values).map((k) =>
+          Promise.race([
+            Preference.set(k, String(values[k] ?? '')),
+            new Promise((resolve) => setTimeout(resolve, 1500)),
+          ]).catch(() => null),
+        ),
+      );
+    }
+  } catch (e) {
+    trace('gate:pref-verify-fail');
   }
 }
 
@@ -48,6 +71,17 @@ export default function InviteGateScreen({ navigation }) {
   const [country, setCountry] = useState(null);
   const [error, setError] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
+  // setState는 비동기라 연타하면 두 번째 탭이 isVerifying=false를 그대로 본다.
+  // 실제로 두 번 누르면 reset이 두 번 나가 네비게이터가 스플래시에서 멈췄다(iOS는 흰 화면).
+  // 동기적으로 즉시 잠기는 ref로 막는다 — 화면 표시는 계속 state로 한다.
+  const submitLockRef = useRef(false);
+  // 통과 후 언마운트된 뒤 setState가 불리지 않도록
+  const aliveRef = useRef(true);
+  useEffect(() => {
+    return () => {
+      aliveRef.current = false;
+    };
+  }, []);
 
   // 게이트가 첫 화면일 때 네이티브 스플래시 해제 (레거시는 SignInScreen이 담당)
   useEffect(() => {
@@ -57,9 +91,6 @@ export default function InviteGateScreen({ navigation }) {
   const [cooldownUntil, setCooldownUntil] = useState(0);
 
   const onSubmit = async () => {
-    if (isVerifying) {
-      return;
-    }
     const now = Date.now();
     if (now < cooldownUntil) {
       setError(Strings.INVITE_THROTTLED(Math.ceil((cooldownUntil - now) / 1000)));
@@ -74,10 +105,10 @@ export default function InviteGateScreen({ navigation }) {
       setError(Strings.INVITE_COUNTRY_REQUIRED);
       return;
     }
+    Keyboard.dismiss();
     setIsVerifying(true);
     // 국가는 게이트 입력분을 그대로 ops 골든 레코드에 실어 보낸다 (핸들은 온보딩에서 갱신)
     const result = await verifyInviteCode(code, { country });
-    setIsVerifying(false);
     if (!result.success) {
       logEvent('gate_code_submit', { result: result.reason === 'expired' ? 'expired' : 'invalid' });
       const nextFails = failCount + 1;
@@ -99,9 +130,12 @@ export default function InviteGateScreen({ navigation }) {
       setError(Strings.INVITE_BRAND_WEB_ONLY);
       return;
     }
-    await prefSet('inviteRole', result.role);
-    await prefSet('inviteCode', code.trim().toUpperCase());
-    await prefSet('creatorCountry', country);
+    // iOS 네이티브 저장 호출을 하나로 묶어 부분 저장과 중복 bridge 호출을 방지한다.
+    await saveGatePreferences({
+      inviteRole: result.role,
+      inviteCode: code.trim().toUpperCase(),
+      creatorCountry: country,
+    });
     try {
       resetAnalyticsContext(); // role·country 확정 — 공통 파라미터 갱신
       logEvent('gate_code_submit', { result: 'ok' });
@@ -116,11 +150,23 @@ export default function InviteGateScreen({ navigation }) {
 
   // 어떤 이유로든 예외가 나면 버튼이 '먹통'으로 보이지 않게 화면에 원인을 띄운다.
   const onSubmitSafe = async () => {
+    if (submitLockRef.current) {
+      return;
+    }
+    submitLockRef.current = true;
     try {
       await onSubmit();
     } catch (e) {
-      setIsVerifying(false);
-      setError(`오류: ${e?.message || String(e)}`);
+      if (aliveRef.current) {
+        setError(`오류: ${e?.message || String(e)}`);
+      }
+    } finally {
+      // 통과해서 화면을 떠난 경우에는 잠금을 풀지 않는다 —
+      // 풀면 언마운트 직전 남은 탭이 reset을 한 번 더 보낼 수 있다.
+      if (aliveRef.current) {
+        submitLockRef.current = false;
+        setIsVerifying(false);
+      }
     }
   };
 
@@ -128,53 +174,61 @@ export default function InviteGateScreen({ navigation }) {
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : null}
-        style={styles.inner}
+        style={styles.flex}
       >
-        <Wordmark size={30} center style={styles.logo} />
-        <Text style={styles.title}>{Strings.INVITE_GATE_TITLE}</Text>
-        <Text style={styles.subtitle}>{Strings.INVITE_GATE_SUBTITLE}</Text>
+        {/* 키보드가 올라오면 국가 칩·입장 버튼이 화면 밖으로 밀려 "누를 수가 없어서
+            안 넘어가는" 상태가 된다. 스크롤 가능하게 두고, 탭으로 키보드를 닫는다. */}
+        <ScrollView
+          contentContainerStyle={styles.inner}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <Wordmark size={30} center style={styles.logo} />
+          <Text style={styles.title}>{Strings.INVITE_GATE_TITLE}</Text>
+          <Text style={styles.subtitle}>{Strings.INVITE_GATE_SUBTITLE}</Text>
 
-        <TextInput
-          style={styles.codeInput}
-          placeholder={Strings.INVITE_CODE_PLACEHOLDER}
-          placeholderTextColor={COLORS.GREY}
-          autoCapitalize="characters"
-          autoCorrect={false}
-          maxLength={6}
-          value={code}
-          onChangeText={(v) => {
-            setCode(v);
-            setError('');
-          }}
-        />
-
-        <Text style={styles.countryLabel}>{Strings.INVITE_COUNTRY_LABEL}</Text>
-        <Chips
-          items={COUNTRY_ITEMS}
-          selected={country}
-          onSelect={(k) => {
-            setCountry(k);
-            setError('');
-          }}
-          style={styles.countryRow}
-        />
-
-        {error ? <Text style={styles.error}>{error}</Text> : null}
-
-        {isVerifying ? (
-          <View style={styles.submitLoading}>
-            <ActivityIndicator color={COLORS.ON_AMBER} />
-          </View>
-        ) : (
-          <Btn
-            title={Strings.INVITE_SUBMIT}
-            onPress={onSubmitSafe}
-            disabled={!code || !country}
-            style={styles.submit}
+          <TextInput
+            style={styles.codeInput}
+            placeholder={Strings.INVITE_CODE_PLACEHOLDER}
+            placeholderTextColor={COLORS.GREY}
+            autoCapitalize="characters"
+            autoCorrect={false}
+            returnKeyType="done"
+            onSubmitEditing={onSubmitSafe}
+            maxLength={6}
+            value={code}
+            onChangeText={(v) => {
+              setCode(v);
+              setError('');
+            }}
           />
-        )}
 
-        <Text style={styles.help}>{Strings.INVITE_NO_CODE_HELP}</Text>
+          <Text style={styles.countryLabel}>{Strings.INVITE_COUNTRY_LABEL}</Text>
+          <Chips
+            items={COUNTRY_ITEMS}
+            selected={country}
+            onSelect={(k) => {
+              setCountry(k);
+              setError('');
+            }}
+            style={styles.countryRow}
+          />
+
+          {error ? <Text style={styles.error}>{error}</Text> : null}
+
+          {isVerifying ? (
+            <View style={styles.submitLoading}>
+              <ActivityIndicator color={COLORS.ON_AMBER} />
+            </View>
+          ) : (
+            // 버튼을 비활성화하지 않는다. 비활성 상태는 탭해도 아무 일이 없어
+            // "코드를 넣었는데 안 넘어간다"로만 보이고, 아래 필수값 안내(코드 6자리·국가
+            // 선택)가 영원히 도달하지 못하는 죽은 코드가 된다. 눌리면 이유를 말해준다.
+            <Btn title={Strings.INVITE_SUBMIT} onPress={onSubmitSafe} style={styles.submit} />
+          )}
+
+          <Text style={styles.help}>{Strings.INVITE_NO_CODE_HELP}</Text>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -182,7 +236,10 @@ export default function InviteGateScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.BG },
-  inner: { flex: 1, paddingHorizontal: 28, justifyContent: 'center' },
+  flex: { flex: 1 },
+  // ScrollView의 contentContainerStyle — flex:1 대신 flexGrow로 둬야 키보드가
+  // 올라왔을 때 내용이 잘리지 않고 스크롤된다.
+  inner: { flexGrow: 1, paddingHorizontal: 28, justifyContent: 'center', paddingVertical: 24 },
   logo: {
     fontFamily: FONT.Black,
     fontSize: 30,
