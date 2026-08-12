@@ -6,7 +6,6 @@ import LikedBy from './LikedBy';
 import LinkedProduct from './LinkedProduct';
 import LinkedProductReviews from './LinkedProductReviews';
 import QuestionToReviewer from './QuestionToReviewer';
-import RatingListModal from './RatingListModal';
 import RelayReviews from './RelayReviews';
 import RenderImage from './RenderImage';
 import ReviewComments from './ReviewComments';
@@ -108,9 +107,6 @@ export default function VideoRenderDetails({ context, useIsFocused }) {
               <View />
             )}
           </View>
-        )}
-        {context.props.route.params.isFocused && useIsFocused && (
-          <RatingListModal context={context} />
         )}
       </View>
     );

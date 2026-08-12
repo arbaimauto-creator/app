@@ -64,7 +64,6 @@ import RewardGuide from '../../Components/CustomComponents/RewardGuide';
 import OnboardingScreen from '../../Components/OnboardingScreen';
 import NoticeList from '../../Components/CustomComponents/Notice/NoticeList';
 import NoticeDetail from '../../Components/CustomComponents/Notice/NoticeDetail';
-import RatingList from '../../screens/VideoPageScreen/RatingList';
 import MustReadDetail from '../../screens/AddingNewVideoScreen/MustReadDetail';
 import GlobalMakeOrderScreen from '../../Components/GlobalMakeOrderScreen';
 import InviteGateScreen from '../../screens/InviteGateScreen';
@@ -764,14 +763,6 @@ function MainDrawerNavigator({ route, navigation }) {
       <Stack.Screen
         name="NoticeDetail"
         component={NoticeDetail}
-        initialParams={route.params}
-        options={{
-          ...headerBackButton,
-        }}
-      />
-      <Stack.Screen
-        name="RatingList"
-        component={RatingList}
         initialParams={route.params}
         options={{
           ...headerBackButton,

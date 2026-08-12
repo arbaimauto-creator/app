@@ -1,8 +1,6 @@
-import { useNavigation } from '@react-navigation/native';
 import T from '../../Components/Constants/DesignTokens';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  Alert,
   Animated,
   LayoutAnimation,
   StyleSheet,
@@ -11,10 +9,8 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import * as Animatable from 'react-native-animatable';
 import FastImage from 'react-native-fast-image';
 import IconMaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import APIprovider from '../../Components/APIprovider';
 import Constants from '../../Components/Constants';
 import FEATURES from '../../Components/Constants/Features';
 import VideoLikeButton from '../../Components/CustomComponents/VideoLikeButton';
@@ -41,7 +37,6 @@ function RailButton({ onPress, children, label }) {
 
 function ActionRail({ context }) {
   const review = context.state.video;
-  const navigation = useNavigation();
 
   const guardGuest = () => {
     if (isGuestUser(context.props.route.params.logonUserId)) {
@@ -49,23 +44,6 @@ function ActionRail({ context }) {
       return true;
     }
     return false;
-  };
-
-  const onPressRating = () => {
-    if (guardGuest()) {
-      return;
-    }
-    if (review.myG6Rating) {
-      APIprovider.getVideoG6RatingList(review.videoId)
-        .then((ratingList) => {
-          context.setState({ ratingList });
-          navigation.navigate('RatingList', { ratingList, context });
-        })
-        .catch(() => Alert.alert(Strings.FAILED_LOAD_RATINGS));
-    } else {
-      context.setState({ isGreyingShowed: true, isShowingGreyding: true });
-    }
-    LayoutAnimation.easeInEaseOut();
   };
 
   const onPressComment = () => {
@@ -102,23 +80,6 @@ function ActionRail({ context }) {
           <Text style={styles.railLabel}>{review.likes || 0}</Text>
         </View>
       ) : null}
-
-      <RailButton
-        onPress={onPressRating}
-        label={review.g6RatingCount > 0 ? review.g6RatingCount : Strings.RATE_G_SIX}
-      >
-        <Animatable.View
-          useNativeDriver={true}
-          ref={(ref) => {
-            context.handleRatingButtonAnimationRef = ref;
-          }}
-        >
-          <FastImage
-            style={styles.railIconImage}
-            source={require('../../Resources/img/icBadgeGreydW34.png')}
-          />
-        </Animatable.View>
-      </RailButton>
 
       <RailButton onPress={onPressComment} label={review.commentCount}>
         <IconMaterialIcons name="chat-bubble" size={30} color="#fff" style={styles.railShadow} />

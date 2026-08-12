@@ -32,7 +32,6 @@ import APIprovider from '../../Components/APIprovider';
 import Constants from '../../Components/Constants';
 import HelpBubble from '../../Components/CustomComponents/HelpBubble';
 import ReportModal from '../../Components/ReportModal';
-import SpeechBubbleView from '../../Components/SpeechBubbleView';
 import { shareLink } from '../../Components/utils/share';
 import Strings, { getLanguage } from '../../Components/Strings';
 import utils, { LogoutAlert, isGuestUser, videoWatchedFBPixel } from '../../Components/utils';
@@ -43,7 +42,6 @@ import { changeReward, setTotalRevenue, setTotalReward } from '../../slices/user
 import CommentModal from './CommentModal';
 import { setStatusColor } from './Header';
 import LinkedProduct from './LinkedProduct';
-import RatingModal from './RatingModal';
 import RenderVideoPlayer from './RenderVideoPlayer';
 
 const { UIManager } = NativeModules;
@@ -215,10 +213,7 @@ class VideoPageScreen extends React.PureComponent {
       isLoadingRatingList: false,
       logonUserProfilePicUrl: this.props.route.params.logonUserProfilePicUrl,
       isShowingCheckSign: false,
-      isShowingGreyding: false,
-      isShowingGradeBubbleGuide: false,
       isGradedAlready: false,
-      isGreyingShowed: false,
       isShowingCommentInput: false,
       isHLS: false,
 
@@ -1666,22 +1661,6 @@ class VideoPageScreen extends React.PureComponent {
                 </>
               }
             />
-            {/* 별점 버튼은 틱톡 스타일 우측 액션 레일(VideoOverlay)로 이동 */}
-            {!this.state.isFullScreen &&
-              this.state.isShowingGradeBubbleGuide &&
-              this.state.isGreyingShowed === false && (
-                <SpeechBubbleView
-                  style={styles.ratingGuideBubbleContainer}
-                  onPress={() => {
-                    this.setState({ isShowingGradeBubbleGuide: false });
-                  }}
-                >
-                  {Strings.GRADE_GIVING_GUIDE({
-                    userName: this.props.route.params.logonUserName,
-                  })}
-                </SpeechBubbleView>
-              )}
-            <RatingModal context={this} />
             <CommentModal context={this} />
             <ReportModal
               visible={this.state.isInvalidContents}
