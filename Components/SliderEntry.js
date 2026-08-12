@@ -3,10 +3,8 @@ import PropTypes from 'prop-types';
 import React, { PureComponent, useContext, useEffect, useState } from 'react';
 import {
   Alert,
-  Animated,
   AppState,
   Dimensions,
-  Easing,
   LayoutAnimation,
   Linking,
   NativeModules,
@@ -21,7 +19,6 @@ import LinearGradient from 'react-native-linear-gradient';
 import IconFeather from 'react-native-vector-icons/Feather';
 import Video from 'react-native-video';
 import { Context } from '../Contexts';
-import APIprovider from './APIprovider';
 import Constants from './Constants';
 import T from './Constants/DesignTokens';
 import FEATURES from './Constants/Features';
@@ -29,7 +26,7 @@ import { shareLink } from './utils/share';
 import SliderRightButtons from './CustomComponents/SliderRightButtons';
 import Strings from './Strings';
 import { LoadingView, ReviewGradeBadgeView } from './Views';
-import Utils, { LogoutAlert, getKRWPerUSD, isGuestUser } from './utils';
+import Utils, { LogoutAlert, isGuestUser } from './utils';
 
 const { UIManager } = NativeModules;
 if (Platform.OS === 'android') {
@@ -228,11 +225,7 @@ export default class SliderEntry extends PureComponent {
 
   constructor(props) {
     super(props);
-    this.cumulativeTime = 0;
-
     this.state = {
-      currentTime: 0,
-      duration: 0,
       isFullScreen: false,
       isLoading: true,
       isBlurred: false,
@@ -242,41 +235,12 @@ export default class SliderEntry extends PureComponent {
       isHLS: false,
       isNavigationFocused: true,
       isNavigatedVideoScreen: false,
-      KRWPerUSD: 1300,
       likes: this.props.data.likes,
-      fadeAnim: new Animated.Value(0),
       isMuted: true,
       isInfoExpanded: false,
     };
     this.isPaused = false;
   }
-
-  fadeIn = () => {
-    Animated.timing(this.state.fadeAnim, {
-      toValue: 1,
-      duration: 500,
-      easing: Easing.linear,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  fadeOut = () => {
-    Animated.timing(this.state.fadeAnim, {
-      toValue: 0,
-      duration: 500,
-      easing: Easing.linear,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  startAnimation = () => {
-    this.fadeIn();
-
-    // After a delay, fade out
-    setTimeout(() => {
-      this.fadeOut();
-    }, 2000); // Adjust the delay between fade in and fade out as needed
-  };
 
   onPaused = () => {
     //Handler for Video Pause
@@ -285,27 +249,8 @@ export default class SliderEntry extends PureComponent {
     });
   };
 
-  onProgress = (data) => {
-    if (this.isPaused || this.props.paused) {
-      return;
-    }
-    // Video Player will continue progress even if the video already ended
-    this.setState({ currentTime: data.currentTime });
-
-    /*if (this.cumulativeTime < data.playableDuration) {
-          this.cumulativeTime = data.currentTime
-          if (this.cumulativeTime > 25 && this.state.ratableCount === 2) {
-              this.setState({ratableCount: 3})
-          } else if (this.cumulativeTime > 15 && this.cumulativeTime < 25 && this.state.ratableCount === 1) {
-              this.setState({ratableCount: 2})
-          } else if (this.cumulativeTime > 5 && this.cumulativeTime < 15 && this.state.ratableCount === 0) {
-              this.setState({ratableCount: 1})
-          }
-      }*/
-  };
-
-  onLoad = (data) => {
-    this.setState({ duration: data.duration, isLoading: false });
+  onLoad = () => {
+    this.setState({ isLoading: false });
     this.props.onPreviewLoaded(this.props.index);
   };
 
@@ -356,7 +301,6 @@ export default class SliderEntry extends PureComponent {
   };
 
   onFocused = () => {
-    APIprovider.getVideoDetails(this.props.data.videoId);
     this.isPaused = false;
   };
 
@@ -389,11 +333,6 @@ export default class SliderEntry extends PureComponent {
     if (!videoUrl) {
       return;
     }
-    // const renderingCondition =
-    //   index === focusedIndex ||
-    //   ((index === focusedIndex + 1 || index === focusedIndex - 1) && !this.props.paused);
-    const renderingCondition = index === focusedIndex && !this.props.paused;
-
     if (this.state.isNavigatedVideoScreen) {
       return <View />;
     }
@@ -404,13 +343,12 @@ export default class SliderEntry extends PureComponent {
 
     return (
       <View style={styles.video}>
-        {(renderingCondition || (!this.state.isLoading && isNearFocus)) && (
+        {isNearFocus && (
           <Video
             source={this.state.isHLS ? { uri: videoUrl, type: 'm3u8' } : { uri: videoUrl }}
             onEnd={this.onEnd}
             onLoad={this.onLoad}
             onLoadStart={this.onLoadStart}
-            onProgress={this.onProgress}
             onPause={this.onPaused}
             onError={this.onError}
             onBuffer={this.onBuffer}
@@ -437,17 +375,11 @@ export default class SliderEntry extends PureComponent {
             poster={thumbnailUrl}
             posterResizeMode={'cover'}
             automaticallyWaitsToMinimizeStalling={false}
-            // bufferConfig={{
-            //   minBufferMs: 1000,
-            //   maxBufferMs: 4000,
-            //   bufferForPlaybackMs: 100,
-            //   bufferForPlaybackAfterRebufferMs: 200,
-            // }}
             bufferConfig={{
-              minBufferMs: 2500,
+              minBufferMs: 1000,
               maxBufferMs: 3000, // 기본값은 50세군도, 3초
-              bufferForPlaybackMs: 2500,
-              bufferForPlaybackAfterRebufferMs: 2500,
+              bufferForPlaybackMs: 350,
+              bufferForPlaybackAfterRebufferMs: 1000,
             }}
             ignoreSilentSwitch={'obey'}
           />
@@ -465,7 +397,7 @@ export default class SliderEntry extends PureComponent {
     );
   }
 
-  async componentDidMount() {
+  componentDidMount() {
     this._isMounted = true;
     // RN 0.65+: removeEventListener가 없으므로 subscription을 저장해 언마운트 시 해제
     this._appStateSubscription = AppState.addEventListener('change', this._handleAppStateChange);
@@ -506,16 +438,6 @@ export default class SliderEntry extends PureComponent {
         });
       }
     });
-
-    this.intervalId = setInterval(() => {
-      this.startAnimation();
-    }, 3000); // Adjust the interval between animations as needed
-
-    // 환율 조회는 네트워크 대기라 리스너 등록보다 뒤에 두고, 언마운트 후 setState를 막는다.
-    const KRWPerUSD = await getKRWPerUSD();
-    if (this._isMounted) {
-      this.setState({ KRWPerUSD: KRWPerUSD });
-    }
   }
 
   componentWillUnmount() {
@@ -525,7 +447,6 @@ export default class SliderEntry extends PureComponent {
     this._unsubscribeFocusEvent?.();
     this._unsubscribeUnfocusEvent?.();
 
-    clearInterval(this.intervalId);
   }
 
   _handleAppStateChange = (nextAppState) => {

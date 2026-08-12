@@ -1000,14 +1000,15 @@ function MainScreen(props) {
             ref={props.scrollRef}
             showsHorizontalScrollIndicator={false}
             showsVerticalScrollIndicator={false}
-            initialNumToRender={2}
+            initialNumToRender={3}
             pagingEnabled={true}
             legacyImplementation={false}
             data={videoListRecommended}
             renderItem={MainVideoItem}
             extraData={`${videoListRecommended.length}_${focusedIndex}_${feedHeight}`}
-            windowSize={3}
-            maxToRenderPerBatch={2}
+            windowSize={5}
+            maxToRenderPerBatch={3}
+            updateCellsBatchingPeriod={16}
             removeClippedSubviews={Platform.OS === 'android'}
             keyExtractor={(item) => item?._id}
             ListEmptyComponent={
