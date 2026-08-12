@@ -48,7 +48,7 @@ function CampaignCard({ campaign, applied, gScore, completedCount, onPress }) {
       : { tone: locked ? 'curated' : 'amber', text: `+${points}P` };
 
   return (
-    <TouchableOpacity activeOpacity={0.85} onPress={onPress} disabled={closed || locked}>
+    <TouchableOpacity activeOpacity={0.85} onPress={onPress} disabled={closed}>
       <Card style={styles.card}>
         <View style={styles.rowBetween}>
           <Badge tone={trackBadge.tone} text={trackBadge.text} />
@@ -127,6 +127,7 @@ export default function TryScreen({ navigation }) {
   const [gScore, setGScore] = useState(50);
   const [completedCount, setCompletedCount] = useState(0);
   const [pendingOffers, setPendingOffers] = useState([]);
+  const [savedSeedings, setSavedSeedings] = useState({});
 
   const refreshOffers = useCallback(() => {
     getOffers().then((offers) => {
@@ -223,6 +224,7 @@ export default function TryScreen({ navigation }) {
           setCompletedCount(profile.completedCount ?? 0);
         }
       });
+      getSeedings().then(setSavedSeedings);
       refreshOffers();
     }, [refreshOffers]),
   );
@@ -269,7 +271,7 @@ export default function TryScreen({ navigation }) {
         renderItem={({ item }) => (
           <CampaignCard
             campaign={item}
-            applied={applications[item.id] != null}
+            applied={applications[item.id] != null || savedSeedings[item.id] != null}
             gScore={gScore}
             completedCount={completedCount}
             onPress={() => navigation.navigate('CampaignDetail', { campaign: item })}

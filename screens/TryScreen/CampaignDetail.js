@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   SafeAreaView,
@@ -21,6 +21,7 @@ import { isGuestUser, LogoutAlert } from '../../Components/utils';
 import { getCreatorProfile } from '../../api/creators';
 import { getSeedings, upsertSeeding, setSeedingStatus, SEEDING_STATUS } from '../../api/seedings';
 import { personalizedPoints, concurrentLimit, canAutoConfirm } from './points';
+import { CURATED_MIN_G } from './points';
 import { logEvent } from '../../api/common/analytics';
 import { opsApply } from '../../api/opsBridge';
 
@@ -30,12 +31,15 @@ export default function CampaignDetail({ route, navigation }) {
   const { campaign } = route.params;
   const dispatch = useDispatch();
   const applications = useSelector(selectMyApplications);
-  const applied = applications[campaign.id] != null;
+  const [hasSavedSeeding, setHasSavedSeeding] = useState(false);
+  const applied = applications[campaign.id] != null || hasSavedSeeding;
 
   // v2 §3-④: 업로드 서약 체크박스 1개 + 한 줄 어필(선택)
   const [pledged, setPledged] = useState(false);
   const [appeal, setAppeal] = useState('');
   const [gScore, setGScore] = useState(50);
+  const [completedCount, setCompletedCount] = useState(0);
+  const submitLockRef = useRef(false);
 
   useEffect(() => {
     // 이벤트 맵: 카드→상세 전환 (신청 퍼널 2단계)
@@ -44,12 +48,15 @@ export default function CampaignDetail({ route, navigation }) {
       if (p?.gScore != null) {
         setGScore(p.gScore);
       }
+      setCompletedCount(p?.completedCount ?? 0);
     });
+    getSeedings().then((seedings) => setHasSavedSeeding(seedings[campaign.id] != null));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const points = personalizedPoints(campaign.basePoints ?? campaign.rewardPoint, gScore);
   const isCurated = campaign.applyMode === 'curated';
+  const curatedUnlocked = gScore >= CURATED_MIN_G || completedCount >= 2;
 
   // 게스트는 신청/업로드 불가 — 로그인 유도 (다른 업로드 진입점과 동일 정책)
   // __DEV__ / TEST_GUEST_ENTRY: 개발·테스트 배포에서는 소셜 로그인 없이 전체 루프를
@@ -67,6 +74,11 @@ export default function CampaignDetail({ route, navigation }) {
   };
 
   const onApply = async () => {
+    if (submitLockRef.current || applied) {
+      return;
+    }
+    submitLockRef.current = true;
+    try {
     if (await guardGuest()) {
       return;
     }
@@ -74,9 +86,17 @@ export default function CampaignDetail({ route, navigation }) {
       Alert.alert(Strings.APPLY_PLEDGE_REQUIRED);
       return;
     }
-    // 동시 진행 한도 (v2 §4-1): 이력 0회 1건 / G50~79 2건 / G80+ 3건
     const profile = await getCreatorProfile();
+    if (isCurated && (profile?.gScore ?? 50) < CURATED_MIN_G && (profile?.completedCount ?? 0) < 2) {
+      Alert.alert(Strings.CURATED_LOCKED_HINT(CURATED_MIN_G));
+      return;
+    }
+    // 동시 진행 한도 (v2 §4-1): 이력 0회 1건 / G50~79 2건 / G80+ 3건
     const seedings = await getSeedings();
+    if (seedings[campaign.id]) {
+      setHasSavedSeeding(true);
+      return;
+    }
     const activeStatuses = [
       SEEDING_STATUS.APPLIED,
       SEEDING_STATUS.APPROVED,
@@ -108,6 +128,7 @@ export default function CampaignDetail({ route, navigation }) {
     if (autoConfirmed) {
       await setSeedingStatus(campaign.id, SEEDING_STATUS.APPROVED);
     }
+    setHasSavedSeeding(true);
     // 이벤트 맵: 신청 퍼널 완성점 — appeal은 길이만 (PII 금지)
     logEvent('apply_submit', {
       campaign_id: campaign.id,
@@ -125,6 +146,11 @@ export default function CampaignDetail({ route, navigation }) {
       limit,
       autoConfirmed,
     });
+    } catch (e) {
+      Alert.alert(Strings.RETRY_GUIDELINES);
+    } finally {
+      submitLockRef.current = false;
+    }
   };
 
   const onUpload = async () => {
@@ -189,6 +215,9 @@ export default function CampaignDetail({ route, navigation }) {
                 <Text style={styles.pledgeText}>{Strings.APPLY_PLEDGE}</Text>
               </TouchableOpacity>
               <Text style={styles.honestyNote}>{Strings.APPLY_HONESTY_NOTE}</Text>
+              {isCurated && !curatedUnlocked ? (
+                <Text style={styles.lockedNote}>{Strings.CURATED_LOCKED_HINT(CURATED_MIN_G)}</Text>
+              ) : null}
             </>
           ) : null}
         </View>
@@ -201,7 +230,10 @@ export default function CampaignDetail({ route, navigation }) {
             </Text>
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity style={[styles.cta, !pledged && styles.ctaDisabled]} onPress={onApply}>
+          <TouchableOpacity
+            style={[styles.cta, (!pledged || (isCurated && !curatedUnlocked)) && styles.ctaDisabled]}
+            onPress={onApply}
+          >
             <Text style={styles.ctaText}>{Strings.CAMPAIGN_APPLY}</Text>
           </TouchableOpacity>
         )}
@@ -259,6 +291,7 @@ const styles = StyleSheet.create({
   checkboxMark: { fontSize: 11, fontFamily: T.FONT.ExtraBold, color: COLORS.SURFACE },
   pledgeText: { flex: 1, ...TYPE.BODY, fontSize: 12.5, lineHeight: 19 },
   honestyNote: { ...TYPE.XS, marginTop: 10, lineHeight: 16.5 },
+  lockedNote: { ...TYPE.XS, marginTop: 10, color: COLORS.AMBER_DEEP, lineHeight: 16.5 },
   ctaDisabled: { opacity: 0.45 },
   footer: { padding: 16, backgroundColor: COLORS.BG },
   cta: {
