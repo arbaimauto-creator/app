@@ -79,6 +79,7 @@ import MissionDone from '../../screens/ActivityScreen/MissionDone';
 import FirstImpression from '../../screens/ActivityScreen/FirstImpression';
 import T from '../../Components/Constants/DesignTokens';
 import { trace } from '../../Components/bootTrace';
+import APIprovider from '../../Components/APIprovider';
 
 const Stack = createStackNavigator();
 
@@ -163,7 +164,7 @@ function MainDrawerNavigator({ route, navigation }) {
       prefGet('userId'),
       prefGet('userName'),
       prefGet('userProfilePicUrl'),
-      prefGet('userTokenFirebase'),
+      prefGet('userAccessToken'),
       prefGet('userIsSeller'),
       prefGet('KRW/USD'),
       prefGet('previousPage'),
@@ -188,7 +189,8 @@ function MainDrawerNavigator({ route, navigation }) {
           const hasCompleteGateState = Boolean(inviteRole && inviteCode && creatorCountry);
           setGatePassed(hasCompleteGateState ? 'yes' : 'no');
           setIsOnboarded(onboarded);
-          setLogonUserId(userId);
+          // 누락 키를 빈 문자열로 돌려주는 iOS 저장소 구현에서도 부팅 스피너에 갇히지 않게 한다.
+          setLogonUserId(userId || null);
           setLogonUserName(userName);
           setLogonUserProfilePicUrl(profilePicUrl);
           setLogonUserToken(userToken);
@@ -197,6 +199,13 @@ function MainDrawerNavigator({ route, navigation }) {
             setKRWPerUSD(krwPerUsd);
           }
           setPreviousPage(prevPage);
+          // 로그인 시 저장한 requester를 앱 재실행 때 복구한다. 이 단계가 없으면 홈 API가
+          // 무인증으로 시작해 빈 화면/반복 실패가 발생한다.
+          if (userId && userToken) {
+            APIprovider.setRequester(userToken, userId);
+          } else {
+            APIprovider.clearRequester();
+          }
           trace(
             'drawer:boot-done gate=' +
               (hasCompleteGateState ? 'yes' : 'no') +
@@ -243,16 +252,6 @@ function MainDrawerNavigator({ route, navigation }) {
     previousPage,
     setPreviousPage,
   };
-
-  /* logonUserId === '': when initial rendering before completed to load 'userId' from preference.
-   * logonUserId === null: logout
-   * So added below for blocking from unnecessary rendering
-   */
-
-  if (logonUserId === '') {
-    trace('drawer:userId-empty');
-    return <BootFallback />;
-  }
 
   trace('drawer:render-stack onboarded=' + String(isOnboarded));
 

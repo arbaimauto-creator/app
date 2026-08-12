@@ -1,4 +1,3 @@
-import { CommonActions } from '@react-navigation/native';
 import T from '../../Components/Constants/DesignTokens';
 import React from 'react';
 import {
@@ -27,6 +26,7 @@ import SetProfilePic from './SetProfilePic';
 import SetUserInstagramId from './SetUserInstagramId';
 import styles from './styles';
 import { accountRegistrationFBPixel } from '../../Components/utils';
+import { resetToMain } from '../SignInScreen/commonHelperFunction';
 
 const { UIManager } = NativeModules;
 if (Platform.OS === 'android') {
@@ -139,11 +139,17 @@ export default class SignUpScreen extends React.Component {
           this.setState({ isSubmitting: false });
           return;
         }
-        await Preference.set('userId', result._id);
-        Preference.set('userName', result.name);
-        // Preference.set('userIsSeller', 'false');
-        Preference.set('userIsSeller', '');
-        Preference.set('userAccessToken', authData.requesterToken);
+        // iOS에서 개별 네이티브 저장을 연속 호출하면 일부 키만 남은 채 화면이 전환될 수 있다.
+        // 세션을 한 번에 저장한 뒤 공통 진입 분기로 보내 신규 가입도 프로필 온보딩을 거친다.
+        await Preference.setMultiple({
+          userId: result._id,
+          userName: result.name ?? '',
+          userProfilePicUrl: result.profilePicUrl ?? '',
+          userIsSeller: '',
+          userAccessToken: authData.requesterToken,
+          userAuthType: authType,
+        });
+        APIprovider.setRequester(authData.requesterToken, result._id);
         this.props.route.params.setLogonUserId(result._id);
         this.props.route.params.setLogonUserName(result.name);
         // this.props.route.params.setLogonUserIsSeller('false');
@@ -157,12 +163,7 @@ export default class SignUpScreen extends React.Component {
 
         accountRegistrationFBPixel(profile);
 
-        this.props.navigation.dispatch(
-          CommonActions.reset({
-            index: 1,
-            routes: [{ name: 'MainBottom' }],
-          }),
-        );
+        await resetToMain(this.props.navigation);
       })
       .catch((err) => {
         if (err.errorCode === 2) {
