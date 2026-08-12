@@ -2,6 +2,7 @@
 import React from 'react';
 import {
   Alert,
+  Linking,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -14,6 +15,7 @@ import { Card, Badge } from '../../Components/UI';
 import Strings, { getLanguage } from '../../Components/Strings';
 import { menuLogout } from '../../Components/utils';
 import { getSeedings } from '../../api/seedings';
+import { getBuildNumber, getVersion } from 'react-native-device-info';
 
 const { COLORS, FONT, TYPE } = T;
 
@@ -21,6 +23,12 @@ const ACTIVE_STATUSES = ['applied', 'approved', 'shipped', 'received', 'reviewin
 
 export default function SettingsScreen({ navigation, route }) {
   const isKorean = getLanguage() === 'ko';
+  const openAppSettings = () =>
+    Linking.openSettings().catch(() => Alert.alert(Strings.RETRY_GUIDELINES));
+  const openPrivacyPolicy = () =>
+    Linking.openURL(Strings.TERMS_URL.PRIVACY_POLICY).catch(() =>
+      Alert.alert(Strings.FAILED_TO_LOAD_TERMS),
+    );
 
   const onDeleteAccount = async () => {
     const seedings = await getSeedings();
@@ -51,14 +59,17 @@ export default function SettingsScreen({ navigation, route }) {
         <Text style={styles.headerTitle}>{Strings.SET_TITLE}</Text>
       </View>
       <ScrollView contentContainerStyle={styles.scroll}>
+        <TouchableOpacity activeOpacity={0.7} onPress={openAppSettings}>
         <Card>
           <View style={styles.row}>
             <Text style={styles.rowTitle}>{Strings.SET_REMINDER_TITLE}</Text>
-            <Badge tone="open" text={Strings.SET_ON} />
+            <Badge tone="open" text={Strings.SET_OPEN_SETTINGS} />
           </View>
           <Text style={[styles.xs, styles.mt4]}>{Strings.SET_REMINDER_NOTE}</Text>
         </Card>
+        </TouchableOpacity>
 
+        <TouchableOpacity activeOpacity={0.7} onPress={openAppSettings}>
         <Card>
           <View style={styles.row}>
             <Text style={styles.rowTitle}>{Strings.SET_LANGUAGE}</Text>
@@ -75,13 +86,19 @@ export default function SettingsScreen({ navigation, route }) {
           </View>
           <Text style={[styles.xs, styles.mt4]}>{Strings.SET_LANGUAGE_NOTE}</Text>
         </Card>
+        </TouchableOpacity>
 
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={openPrivacyPolicy}
+        >
         <Card>
           <View style={styles.row}>
             <Text style={styles.rowTitle}>{Strings.SET_TERMS_PRIVACY}</Text>
             <Text style={styles.chev}>›</Text>
           </View>
         </Card>
+        </TouchableOpacity>
 
         <TouchableOpacity activeOpacity={0.7} onPress={() => menuLogout({ navigation, route })}>
           <Card>
@@ -99,7 +116,7 @@ export default function SettingsScreen({ navigation, route }) {
           </Card>
         </TouchableOpacity>
 
-        <Text style={styles.version}>v2.0.0 (Phase 1)</Text>
+        <Text style={styles.version}>v{getVersion()} ({getBuildNumber()})</Text>
       </ScrollView>
     </SafeAreaView>
   );

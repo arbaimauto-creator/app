@@ -1831,6 +1831,7 @@ export default {
   // 설정 · 계정 삭제 (시안 25)
   SET_TITLE: '설정',
   SET_REMINDER_TITLE: 'D-day 리마인더',
+  SET_OPEN_SETTINGS: '설정 열기',
   SET_ON: '켜짐',
   SET_REMINDER_NOTE: '마감 관련 알림만 — 마케팅 알림 없음',
   SET_LANGUAGE: '언어',

@@ -72,6 +72,7 @@ export default function ActivityScreen({ navigation, route }) {
   const [addressFor, setAddressFor] = useState(null); // campaignId | null
   const [tab, setTab] = useState('ongoing'); // 시안 24: 'ongoing' | 'done'
   const receiveLocksRef = useRef(new Set());
+  const actionLocksRef = useRef(new Set());
 
   const [bonusPoints, setBonusPoints] = useState(0);
 
@@ -197,32 +198,55 @@ export default function ActivityScreen({ navigation, route }) {
         text: Strings.ACT_CANCEL_CONFIRM,
         style: 'destructive',
         onPress: async () => {
-          logEvent('cancel_confirm', {
-            campaign_id: campaignId,
-            status_at_cancel: seedings[campaignId]?.status || 'unknown',
-          });
-          await setSeedingStatus(campaignId, SEEDING_STATUS.CANCELLED);
-          reload();
+          if (actionLocksRef.current.has(campaignId)) {
+            return;
+          }
+          actionLocksRef.current.add(campaignId);
+          try {
+            logEvent('cancel_confirm', {
+              campaign_id: campaignId,
+              status_at_cancel: seedings[campaignId]?.status || 'unknown',
+            });
+            const all = await setSeedingStatus(campaignId, SEEDING_STATUS.CANCELLED);
+            setSeedings(all);
+            reload();
+          } catch (e) {
+            Alert.alert(Strings.RETRY_GUIDELINES);
+          } finally {
+            actionLocksRef.current.delete(campaignId);
+          }
         },
       },
     ]);
   };
 
   const onExtend = async (seeding) => {
-    if (seeding.extensionUsed) {
+    if (seeding.extensionUsed || actionLocksRef.current.has(seeding.campaignId)) {
       return;
     }
-    logEvent('extension_use', { campaign_id: seeding.campaignId });
-    await upsertSeeding(seeding.campaignId, { extensionUsed: true });
-    // 연장된 마감 기준으로 리마인더 재스케줄
-    scheduleUploadReminders(
-      seeding.campaignId,
-      campaignById[seeding.campaignId]?.title || '',
-      seeding.receivedAt,
-      true,
-    );
-    Alert.alert(Strings.EXTENSION_GRANTED(EXTENSION_DAYS));
-    reload();
+    actionLocksRef.current.add(seeding.campaignId);
+    try {
+      logEvent('extension_use', { campaign_id: seeding.campaignId });
+      const all = await upsertSeeding(seeding.campaignId, { extensionUsed: true });
+      setSeedings(all);
+      // 연장된 마감 기준으로 리마인더 재스케줄
+      try {
+        scheduleUploadReminders(
+          seeding.campaignId,
+          campaignById[seeding.campaignId]?.title || '',
+          seeding.receivedAt,
+          true,
+        );
+      } catch (e) {
+        // 연장 상태는 저장됐으므로 알림 재예약 실패만 무시한다.
+      }
+      Alert.alert(Strings.EXTENSION_GRANTED(EXTENSION_DAYS));
+      reload();
+    } catch (e) {
+      Alert.alert(Strings.RETRY_GUIDELINES);
+    } finally {
+      actionLocksRef.current.delete(seeding.campaignId);
+    }
   };
 
   const onUpload = (campaignId) => {

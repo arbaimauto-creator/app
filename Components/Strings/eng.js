@@ -1909,6 +1909,7 @@ export default {
   // Settings · delete account (design 25)
   SET_TITLE: 'Settings',
   SET_REMINDER_TITLE: 'D-day reminders',
+  SET_OPEN_SETTINGS: 'Open settings',
   SET_ON: 'On',
   SET_REMINDER_NOTE: 'Deadline alerts only — never marketing',
   SET_LANGUAGE: 'Language',

@@ -168,7 +168,7 @@ export default class MembershipWithdrawalPage extends PureComponent {
                     [
                       {
                         text: Strings.OK,
-                        onPress: () => {
+                        onPress: async () => {
                           // authType은 비동기로 읽어야 한다 (기존엔 Promise와 문자열을 비교해 항상 미실행)
                           Preference.get('userAuthType').then((authType) => {
                             if (authType === 'kakao') {
@@ -178,32 +178,32 @@ export default class MembershipWithdrawalPage extends PureComponent {
                             }
                           });
                           APIprovider.clearRequester();
-                          Preference.set('userId', null);
-                          Preference.set('userName', '');
-                          Preference.set('userProfilePicUrl', '');
-                          // Preference.set('userIsSeller', 'false');
-                          Preference.set('userIsSeller', '');
-                          Preference.set('userAccessToken', null);
-                          Preference.set('userAuthType', null);
-                          Preference.set('makeOrderBuyerName', null);
-                          Preference.set('makeOrderBuyerPhone', null);
-                          Preference.set('makeOrderBuyerEmail', null);
-                          Preference.set('makeOrderBuyerMemo', null);
-                          Preference.set('makeOrderReceiverName', null);
-                          Preference.set('makeOrderReceiverPhone', null);
-                          Preference.set('makeOrderAddress', null);
-                          clearGreydLocalData();
+                           await Preference.setMultiple({
+                             userId: '',
+                             userName: '',
+                             userProfilePicUrl: '',
+                             userIsSeller: '',
+                             userAccessToken: '',
+                             userAuthType: '',
+                             makeOrderBuyerName: '',
+                             makeOrderBuyerPhone: '',
+                             makeOrderBuyerEmail: '',
+                             makeOrderBuyerMemo: '',
+                             makeOrderReceiverName: '',
+                             makeOrderReceiverPhone: '',
+                             makeOrderAddress: '',
+                           });
+                           await clearGreydLocalData();
                           this.props.route.params.setLogonUserId(null);
                           this.props.route.params.setLogonUserName('');
                           this.props.route.params.setLogonUserProfilePicUrl('');
                           // this.props.route.params.setLogonUserIsSeller('false');
                           this.props.route.params.setLogonUserIsSeller('');
-                          this.props.navigation.navigate('NotSignedIn');
-                          this.props.navigation.dispatch(
-                            CommonActions.reset({
-                              index: 0,
-                              routes: [{ name: 'NotSignedIn' }],
-                            }),
+                           this.props.navigation.dispatch(
+                             CommonActions.reset({
+                               index: 0,
+                               routes: [{ name: 'InviteGate' }],
+                             }),
                           );
                         },
                       },

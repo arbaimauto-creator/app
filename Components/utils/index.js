@@ -884,25 +884,26 @@ export const menuLogout = async function (props) {
   } else if (authType === 'apple') {
   }
   APIprovider.clearRequester();
-  Preference.set('userId', null);
-  Preference.set('userName', '');
-  Preference.set('userProfilePicUrl', '');
-  Preference.set('userIsSeller', '');
-  Preference.set('userAccessToken', null);
-  Preference.set('userAuthType', null);
-  Preference.set('makeOrderBuyerName', null);
-  Preference.set('makeOrderBuyerPhone', null);
-  Preference.set('makeOrderBuyerEmail', null);
-  Preference.set('makeOrderBuyerMemo', null);
-  Preference.set('makeOrderReceiverName', null);
-  Preference.set('makeOrderReceiverPhone', null);
-  Preference.set('makeOrderAddress', null);
-  Preference.set('agreementToTermsOfService', null);
+  await Preference.setMultiple({
+    userId: '',
+    userName: '',
+    userProfilePicUrl: '',
+    userIsSeller: '',
+    userAccessToken: '',
+    userAuthType: '',
+    makeOrderBuyerName: '',
+    makeOrderBuyerPhone: '',
+    makeOrderBuyerEmail: '',
+    makeOrderBuyerMemo: '',
+    makeOrderReceiverName: '',
+    makeOrderReceiverPhone: '',
+    makeOrderAddress: '',
+    agreementToTermsOfService: '',
+    previousPage: props.route.path || '',
+  });
   // 기기 잔존 PII(주소·전화·프로필·시딩) 클리어 — 공용 기기 대비 (보안 감사 H7).
   // 게이트 통과 상태는 유지 — 초대 코드는 1회성이라 지우면 재입장이 막힌다 (계정 삭제만 전체 클리어)
-  clearGreydLocalData({ keepGate: true });
-
-  Preference.set('previousPage', props.route.path);
+  await clearGreydLocalData({ keepGate: true });
 
   // setter가 없는 라우트(캠페인 상세 등)에서 호출돼도 크래시하지 않도록 ?.() 사용
   props?.route?.params?.setLogonUserId?.(null);

@@ -5,6 +5,7 @@ import {
   Platform,
   SafeAreaView,
   ScrollView,
+  Share,
   StatusBar,
   StyleSheet,
   Text,
@@ -51,7 +52,7 @@ export default function MyScreen({ navigation }) {
   const strikes = profile?.strikes ?? 0;
   const completedCount = profile?.completedCount ?? 0;
   const limit = concurrentLimit(gScore, completedCount);
-  const points = (totalReward ?? 0) + bonusPoints;
+  const points = (totalReward ?? 0) + (profile?.rewardPoints ?? 0) + bonusPoints;
   const codes = referralCodesFor(profile);
   const handle = profile?.handleUrl || '@greyd';
   const meta = [profile?.country, profile?.contentCategories?.[0], profile?.followerBand]
@@ -119,9 +120,17 @@ export default function MyScreen({ navigation }) {
           {completedCount > 0 ? (
             <View style={styles.codeRow}>
               {codes.map((code) => (
-                <View key={code} style={styles.codeBox}>
+                <TouchableOpacity
+                  key={code}
+                  style={styles.codeBox}
+                  onPress={() =>
+                    Share.share({
+                      message: Strings.REFERRAL_SHARE_MESSAGE_NAMED(code, handle),
+                    }).catch(() => {})
+                  }
+                >
                   <Text style={styles.codeText}>{code}</Text>
-                </View>
+                </TouchableOpacity>
               ))}
             </View>
           ) : (
