@@ -43,26 +43,28 @@ async function saveGatePreferences(values) {
   } catch (e) {
     trace('gate:pref-set-multiple-fail');
   }
-  // 저장이 안 되면 재시작 때 게이트로 되돌아온다(실제로 겪은 증상).
-  // 한 번 읽어 확인하고, 비어 있으면 개별 set으로 한 번 더 시도한다.
-  try {
-    const saved = await Promise.race([
-      Preference.get('inviteRole'),
+  const keys = Object.keys(values);
+  const expected = keys.map((key) => String(values[key] ?? ''));
+  const readSavedValues = () =>
+    Promise.race([
+      Preference.getMultiple(keys),
       new Promise((resolve) => setTimeout(() => resolve(null), 1500)),
     ]);
-    if (!saved) {
-      trace('gate:pref-verify-empty-retry');
-      await Promise.all(
-        Object.keys(values).map((k) =>
-          Promise.race([
-            Preference.set(k, String(values[k] ?? '')),
-            new Promise((resolve) => setTimeout(resolve, 1500)),
-          ]).catch(() => null),
-        ),
-      );
+
+  try {
+    let saved = await readSavedValues();
+    if (!saved || !expected.every((value, index) => saved[index] === value)) {
+      trace('gate:pref-verify-incomplete-retry');
+      await Promise.race([
+        Preference.setMultiple(values),
+        new Promise((resolve) => setTimeout(resolve, 1500)),
+      ]);
+      saved = await readSavedValues();
     }
+    return Boolean(saved && expected.every((value, index) => saved[index] === value));
   } catch (e) {
     trace('gate:pref-verify-fail');
+    return false;
   }
 }
 
@@ -75,6 +77,7 @@ export default function InviteGateScreen({ navigation }) {
   // 실제로 두 번 누르면 reset이 두 번 나가 네비게이터가 스플래시에서 멈췄다(iOS는 흰 화면).
   // 동기적으로 즉시 잠기는 ref로 막는다 — 화면 표시는 계속 state로 한다.
   const submitLockRef = useRef(false);
+  const isTransitioningRef = useRef(false);
   // 통과 후 언마운트된 뒤 setState가 불리지 않도록
   const aliveRef = useRef(true);
   useEffect(() => {
@@ -131,11 +134,14 @@ export default function InviteGateScreen({ navigation }) {
       return;
     }
     // iOS 네이티브 저장 호출을 하나로 묶어 부분 저장과 중복 bridge 호출을 방지한다.
-    await saveGatePreferences({
+    const didSaveGate = await saveGatePreferences({
       inviteRole: result.role,
       inviteCode: code.trim().toUpperCase(),
       creatorCountry: country,
     });
+    if (!didSaveGate) {
+      throw new Error('초대 코드 정보를 저장하지 못했습니다. 다시 시도해주세요.');
+    }
     try {
       resetAnalyticsContext(); // role·country 확정 — 공통 파라미터 갱신
       logEvent('gate_code_submit', { result: 'ok' });
@@ -145,6 +151,7 @@ export default function InviteGateScreen({ navigation }) {
     // D28: 게이트 직후 로그인 — 계정에 게이트 통과가 묶여야 기기 변경·재설치 복구가 된다.
     // 로그인 성공 시 resetToMain이 온보딩 미완이면 CreatorOnboarding으로 보낸다.
     trace('gate:navigate-signin');
+    isTransitioningRef.current = true;
     navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'NotSignedIn' }] }));
   };
 
@@ -157,7 +164,7 @@ export default function InviteGateScreen({ navigation }) {
     try {
       await onSubmit();
     } catch (e) {
-      if (aliveRef.current) {
+      if (aliveRef.current && !isTransitioningRef.current) {
         setError(`오류: ${e?.message || String(e)}`);
       }
     } finally {
@@ -172,10 +179,7 @@ export default function InviteGateScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : null}
-        style={styles.flex}
-      >
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : null} style={styles.flex}>
         {/* 키보드가 올라오면 국가 칩·입장 버튼이 화면 밖으로 밀려 "누를 수가 없어서
             안 넘어가는" 상태가 된다. 스크롤 가능하게 두고, 탭으로 키보드를 닫는다. */}
         <ScrollView
