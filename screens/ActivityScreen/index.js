@@ -70,7 +70,6 @@ export default function ActivityScreen({ navigation, route }) {
   const [seedings, setSeedings] = useState({});
   const [profile, setProfile] = useState(null);
   const [addressFor, setAddressFor] = useState(null); // campaignId | null
-  const [localPoints, setLocalPoints] = useState(0);
   const [tab, setTab] = useState('ongoing'); // 시안 24: 'ongoing' | 'done'
   const receiveLocksRef = useRef(new Set());
 
@@ -115,7 +114,7 @@ export default function ActivityScreen({ navigation, route }) {
   const shownMissions = tab === 'ongoing' ? ongoingMissions : doneMissions;
 
   const gScore = profile?.gScore ?? 50;
-  const points = (totalReward ?? 0) + localPoints + bonusPoints;
+  const points = (totalReward ?? 0) + (profile?.rewardPoints ?? 0) + bonusPoints;
 
   const onReceive = async (campaignId) => {
     if (
@@ -247,13 +246,13 @@ export default function ActivityScreen({ navigation, route }) {
   const openMissionDone = (seeding, campaign, gBefore, gAfter) => {
     const grace = isInGrace(seeding);
     const base = personalizedPoints(campaign?.basePoints ?? 0, gBefore);
-    const granted = Math.round(base * (grace ? GRACE_MULTIPLIER : 1));
+    const granted = seeding.pointsGranted ?? Math.round(base * (grace ? GRACE_MULTIPLIER : 1));
     navigation.navigate('MissionDone', {
       pointsGranted: granted,
-      basePoints: campaign?.basePoints ?? 0,
-      multiplier: gradeMultiplier(gBefore),
-      gBefore,
-      gAfter,
+      basePoints: seeding.basePointsAtCompletion ?? campaign?.basePoints ?? 0,
+      multiplier: seeding.multiplierAtCompletion ?? gradeMultiplier(gBefore),
+      gBefore: seeding.gBefore ?? gBefore,
+      gAfter: seeding.gAfter ?? gAfter,
       brandName: campaign?.brand,
       handleUrl: profile?.handleUrl,
     });
@@ -271,7 +270,9 @@ export default function ActivityScreen({ navigation, route }) {
     if (!next) {
       return;
     }
-    await setSeedingStatus(seeding.campaignId, next);
+    if (next !== SEEDING_STATUS.DONE) {
+      await setSeedingStatus(seeding.campaignId, next);
+    }
     if (next === SEEDING_STATUS.REVIEWING) {
       cancelUploadReminders(seeding.campaignId);
     }
@@ -280,15 +281,31 @@ export default function ActivityScreen({ navigation, route }) {
       const grace = isInGrace(seeding);
       const base = personalizedPoints(campaign?.basePoints ?? 0, gScore);
       const granted = Math.round(base * (grace ? GRACE_MULTIPLIER : 1));
-      setLocalPoints((p) => p + granted);
-      const nextProfile = {
-        ...(profile || {}),
-        gScore: gScore + (grace ? G_DELTA.GRACE_COMPLETE : G_DELTA.COMPLETE),
-        completedCount: (profile?.completedCount ?? 0) + 1,
-      };
-      await saveCreatorProfile(nextProfile);
+      const completedCampaignIds = profile?.completedCampaignIds ?? [];
+      const alreadyGranted = completedCampaignIds.includes(seeding.campaignId);
+      const nextProfile = alreadyGranted
+        ? profile
+        : {
+            ...(profile || {}),
+            gScore: gScore + (grace ? G_DELTA.GRACE_COMPLETE : G_DELTA.COMPLETE),
+            completedCount: (profile?.completedCount ?? 0) + 1,
+            rewardPoints: (profile?.rewardPoints ?? 0) + granted,
+            completedCampaignIds: [...completedCampaignIds, seeding.campaignId],
+          };
+      if (!alreadyGranted) {
+        await saveCreatorProfile(nextProfile);
+      }
+      const completedSeedings = await setSeedingStatus(seeding.campaignId, next);
+      const withReward = await upsertSeeding(seeding.campaignId, {
+        pointsGranted: alreadyGranted ? seeding.pointsGranted ?? granted : granted,
+        basePointsAtCompletion: campaign?.basePoints ?? 0,
+        multiplierAtCompletion: gradeMultiplier(gScore),
+        gBefore: alreadyGranted ? seeding.gBefore ?? gScore : gScore,
+        gAfter: alreadyGranted ? seeding.gAfter ?? nextProfile?.gScore ?? gScore : nextProfile.gScore,
+        doneAt: completedSeedings[seeding.campaignId].doneAt,
+      });
       // 시안 16: 완주 보상 리포트로 즉시 연결
-      openMissionDone(seeding, campaign, gScore, nextProfile.gScore);
+      openMissionDone(withReward[seeding.campaignId], campaign, gScore, nextProfile?.gScore ?? gScore);
     }
     reload();
   };
