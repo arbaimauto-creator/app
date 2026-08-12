@@ -124,7 +124,8 @@ function ProductDescription({ product, KRWPerUSD = 1300 }) {
         {product.title || title}
       </Text>
 
-      {(product.price || price) && (
+      {/* 커머스 숨김(v2 §D5): COMMERCE가 꺼지면 가격·최저가 안내를 노출하지 않는다 */}
+      {FEATURES.COMMERCE && (product.price || price) && (
         <View>
           {isGuestUser(logonUserId) ? (
             <Text style={{ ...styles.linkedProductPrice, marginTop: 2 }} numberOfLines={1}>
