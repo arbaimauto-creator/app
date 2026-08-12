@@ -1,6 +1,6 @@
 # GREYD Phase 1 구현 매트릭스
 
-기준일: 2026-08-12  
+기준일: 2026-08-12
 정본: `docs/superpowers/specs/2026-08-10-greyd-phase1-v2-design.md`
 
 ## 범위 원칙
