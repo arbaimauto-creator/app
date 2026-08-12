@@ -7,6 +7,7 @@ import {
   AppState,
   Dimensions,
   Easing,
+  LayoutAnimation,
   Linking,
   NativeModules,
   Platform,
@@ -17,6 +18,7 @@ import {
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import LinearGradient from 'react-native-linear-gradient';
+import IconFeather from 'react-native-vector-icons/Feather';
 import Video from 'react-native-video';
 import { Context } from '../Contexts';
 import APIprovider from './APIprovider';
@@ -24,7 +26,6 @@ import Constants from './Constants';
 import T from './Constants/DesignTokens';
 import FEATURES from './Constants/Features';
 import { shareLink } from './utils/share';
-import ReviewDescriptionSummary from './CustomComponents/ReviewDescriptionSummary';
 import SliderRightButtons from './CustomComponents/SliderRightButtons';
 import Strings from './Strings';
 import { LoadingView, ReviewGradeBadgeView } from './Views';
@@ -37,9 +38,11 @@ if (Platform.OS === 'android') {
   }
 }
 
-function ReviewInfo({ review }) {
-  const [title, setTitle] = useState(review.title.trim());
-  const [description, setDescription] = useState(review.description.trim());
+function ReviewInfo({ review, expanded }) {
+  const [title, setTitle] = useState(typeof review.title === 'string' ? review.title.trim() : '');
+  const [description, setDescription] = useState(
+    typeof review.description === 'string' ? review.description.trim() : '',
+  );
 
   useEffect(() => {
     if (review.titleByCountry) {
@@ -53,7 +56,7 @@ function ReviewInfo({ review }) {
   }, []);
 
   return (
-    <View style={styles.reviewInfo}>
+    <View style={[styles.reviewInfo, expanded && styles.reviewInfoExpanded]} pointerEvents="none">
       <ReviewGradeBadgeView
         type={'main'}
         ratingScore={review.ratingScore}
@@ -90,7 +93,16 @@ function ReviewInfo({ review }) {
         ) : null}
       </View>
       {/* <ReviewDescriptionSummary description={review.description} isMain /> */}
-      <ReviewDescriptionSummary description={description} isMain />
+      <Text style={styles.reviewDescription} numberOfLines={expanded ? 8 : 1}>
+        {description}
+      </Text>
+      <View style={styles.inlineDetailHint}>
+        <IconFeather
+          name={expanded ? 'chevron-down' : 'chevron-up'}
+          size={18}
+          color="rgba(255,255,255,0.9)"
+        />
+      </View>
       {/* <LinkedProduct
         videoId={videoId}
         product={review.linkedProduct}
@@ -234,6 +246,7 @@ export default class SliderEntry extends PureComponent {
       likes: this.props.data.likes,
       fadeAnim: new Animated.Value(0),
       isMuted: true,
+      isInfoExpanded: false,
     };
     this.isPaused = false;
   }
@@ -539,10 +552,6 @@ export default class SliderEntry extends PureComponent {
   };
 
   render() {
-    const {
-      data: { videoId, videoUrl, thumbnailUrl },
-      navigation,
-    } = this.props;
     // 세로 피드에서는 부모가 실측한 뷰포트 높이를 내려준다. 없으면 기존 상수를 쓴다.
     const itemHeight = this.props.height || slideHeight;
 
@@ -551,21 +560,11 @@ export default class SliderEntry extends PureComponent {
         activeOpacity={1}
         style={[styles.slideInnerContainer, itemHeight ? { height: itemHeight } : null]}
         onPress={() => {
-          this.setState({ isNavigatedVideoScreen: true });
-
-          navigation.navigate('VideoPage', {
-            videoId,
-            videoSortType: this.props.dataSortType,
-            videoType: this.props.dataType,
-            videoList: this.props.dataList,
-            onVideoListChanged: this.props.onVideoListChanged,
-            onVideoIndexChanged: this.props.onVideoIndexChanged,
-            totalReward: this.props.totalReward,
-            changeNavigatedVideoScreen: () => this.setState({ isNavigatedVideoScreen: false }),
-            videoUrl,
-            thumbnailUrl,
-          });
+          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+          this.setState((state) => ({ isInfoExpanded: !state.isInfoExpanded }));
         }}
+        accessibilityRole="button"
+        accessibilityLabel={this.state.isInfoExpanded ? '리뷰 정보 접기' : '리뷰 정보 펼치기'}
       >
         {this.props.isSheetOpened ? (
           <View style={{ flex: 1 }}>
@@ -594,10 +593,8 @@ export default class SliderEntry extends PureComponent {
             <SliderRightButtons context={this} />
 
             <ReviewInfo
-              videoId={videoId}
               review={this.props.data}
-              navigation={this.props.navigation}
-              KRWPerUSD={this.state.KRWPerUSD}
+              expanded={this.state.isInfoExpanded}
             />
           </View>
         )}
@@ -649,6 +646,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 20,
   },
+  reviewInfoExpanded: {
+    backgroundColor: 'rgba(0, 0, 0, 0.62)',
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
+    paddingTop: 18,
+    paddingBottom: 28,
+  },
   reviewTitle: {
     marginTop: 5,
     fontSize: 15.5,
@@ -677,6 +681,20 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.4)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 4,
+  },
+  reviewDescription: {
+    color: 'white',
+    fontSize: 14,
+    lineHeight: 21,
+    marginTop: 7,
+    fontFamily: T.FONT.Regular,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+  },
+  inlineDetailHint: {
+    alignSelf: 'center',
+    marginTop: 8,
   },
   metaSponsored: {
     fontSize: 11,
