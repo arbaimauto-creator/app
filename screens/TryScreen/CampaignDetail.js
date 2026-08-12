@@ -154,18 +154,7 @@ export default function CampaignDetail({ route, navigation }) {
     }
   };
 
-  const onUpload = async () => {
-    if (await guardGuest()) {
-      return;
-    }
-    // FGI 설문 미완료 시 설문부터 (업로드는 설문 완료 화면에서 이어짐)
-    const seedings = await getSeedings();
-    if (!seedings[campaign.id]?.fgiSurvey) {
-      navigation.navigate('FgiSurvey', { campaign });
-      return;
-    }
-    navigation.navigate('ReviewLinkSubmit', { campaignId: campaign.id });
-  };
+  const openActivity = () => navigation.navigate('MainBottom', { screen: 'Activity' });
 
   return (
     <SafeAreaView style={styles.container}>
@@ -225,9 +214,9 @@ export default function CampaignDetail({ route, navigation }) {
       </ScrollView>
       <View style={styles.footer}>
         {applied ? (
-          <TouchableOpacity style={[styles.cta, styles.ctaSecondary]} onPress={onUpload}>
+          <TouchableOpacity style={[styles.cta, styles.ctaSecondary]} onPress={openActivity}>
             <Text style={[styles.ctaText, styles.ctaTextSecondary]}>
-              {Strings.UPLOAD_REVIEW_CTA}
+              {Strings.APPLYDONE_ACTIVITY_CTA}
             </Text>
           </TouchableOpacity>
         ) : (

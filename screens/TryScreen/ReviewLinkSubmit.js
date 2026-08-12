@@ -1,7 +1,7 @@
 // 시안 15 · 리뷰 업로드 — SNS에 이미 올린 리뷰의 링크를 제출한다 (§6 review 스키마).
 // platform_url + format 4종 수집 → reviewing 전환 + uploadedAt 기록 + 리마인더 취소.
 // 피드용 영상 업로드(AddingNewVideo)와는 별개의 미션 전용 플로우.
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -70,6 +70,8 @@ export default function ReviewLinkSubmit({ route, navigation }) {
   const [hashtagsCopied, setHashtagsCopied] = useState(false);
   const [pointsChecked, setPointsChecked] = useState(false);
   const [taggedBrand, setTaggedBrand] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitLockRef = useRef(false);
 
   useEffect(() => {
     getSeedings().then((all) => setSeeding(all[campaignId] || null));
@@ -90,6 +92,9 @@ export default function ReviewLinkSubmit({ route, navigation }) {
   };
 
   const onSubmit = async () => {
+    if (submitLockRef.current) {
+      return;
+    }
     const platformUrl = normalizeUrl(url);
     if (!platformUrl) {
       Alert.alert(Strings.REVIEW_SUBMIT_INVALID_URL);
@@ -99,20 +104,37 @@ export default function ReviewLinkSubmit({ route, navigation }) {
       Alert.alert(Strings.REVIEW_SUBMIT_INCOMPLETE);
       return;
     }
-    await upsertSeeding(campaignId, {
-      review: { platformUrl, format, hashtagsCopied, taggedBrand },
-    });
-    await setSeedingStatus(campaignId, SEEDING_STATUS.REVIEWING);
-    cancelUploadReminders(campaignId);
-    logEvent('review_link_submit', { campaign_id: campaignId, format });
-    // Phase 1.5: ops Content + POSTED 미러링 (수동 브리지 ③ 대체)
-    opsUpload(campaignId, platformUrl, format);
-    Alert.alert(Strings.REVIEW_SUBMIT_DONE_TITLE, Strings.REVIEW_SUBMIT_DONE_BODY, [
-      {
-        text: Strings.OK,
-        onPress: () => navigation.navigate('MainBottom', { screen: 'Activity' }),
-      },
-    ]);
+    submitLockRef.current = true;
+    setIsSubmitting(true);
+    try {
+      const all = await getSeedings();
+      const current = all[campaignId];
+      if (current?.status !== SEEDING_STATUS.RECEIVED || !current?.fgiSurvey) {
+        throw new Error('invalid_seeding_status');
+      }
+      await upsertSeeding(campaignId, {
+        review: { platformUrl, format, hashtagsCopied, taggedBrand },
+      });
+      await setSeedingStatus(campaignId, SEEDING_STATUS.REVIEWING);
+      try {
+        cancelUploadReminders(campaignId);
+      } catch (e) {
+        // 리뷰 상태 저장이 정본이다. 로컬 알림 취소 실패가 제출을 되돌리지는 않는다.
+      }
+      logEvent('review_link_submit', { campaign_id: campaignId, format });
+      // Phase 1.5: ops Content + POSTED 미러링 (수동 브리지 ③ 대체)
+      opsUpload(campaignId, platformUrl, format);
+      Alert.alert(Strings.REVIEW_SUBMIT_DONE_TITLE, Strings.REVIEW_SUBMIT_DONE_BODY, [
+        {
+          text: Strings.OK,
+          onPress: () => navigation.navigate('MainBottom', { screen: 'Activity' }),
+        },
+      ], { cancelable: false });
+    } catch (e) {
+      submitLockRef.current = false;
+      setIsSubmitting(false);
+      Alert.alert(Strings.RETRY_GUIDELINES);
+    }
   };
 
   return (
@@ -207,7 +229,12 @@ export default function ReviewLinkSubmit({ route, navigation }) {
           </View>
 
           <Text style={styles.footnote}>{Strings.REVIEW_SUBMIT_FOOTNOTE}</Text>
-          <Btn title={Strings.REVIEW_SUBMIT_CTA} onPress={onSubmit} style={styles.submit} />
+          <Btn
+            title={Strings.REVIEW_SUBMIT_CTA}
+            onPress={onSubmit}
+            disabled={isSubmitting}
+            style={styles.submit}
+          />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

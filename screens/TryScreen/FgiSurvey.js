@@ -14,7 +14,7 @@ import {
 import Strings from '../../Components/Strings';
 import T from '../../Components/Constants/DesignTokens';
 import { Card, Chips, Badge } from '../../Components/UI';
-import { getSeedings, upsertSeeding } from '../../api/seedings';
+import { getSeedings, upsertSeeding, SEEDING_STATUS } from '../../api/seedings';
 import { getCreatorProfile } from '../../api/creators';
 import { logEvent, toGBand } from '../../api/common/analytics';
 
@@ -74,6 +74,8 @@ export default function FgiSurvey({ route, navigation }) {
     Array.isArray(campaign.fgiExtraQuestions) ? campaign.fgiExtraQuestions : []
   ).map((q) => (typeof q === 'string' ? { q, type: 'text' } : q));
   const [extraAnswers, setExtraAnswers] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitLockRef = React.useRef(false);
 
   const complete =
     QUANT.every((q) => scores[q.key]) &&
@@ -84,6 +86,9 @@ export default function FgiSurvey({ route, navigation }) {
     extraQuestions.every((q) => (extraAnswers[q.q] || '').trim());
 
   const onSubmit = async () => {
+    if (submitLockRef.current) {
+      return;
+    }
     if (!complete) {
       Alert.alert(Strings.FGI_INCOMPLETE);
       return;
@@ -93,9 +98,16 @@ export default function FgiSurvey({ route, navigation }) {
       Alert.alert(Strings.FGI_MIN_TEXT(MIN_TEXT_LEN));
       return;
     }
-    // 세그먼트 집계용 프로필 스냅샷 — 제출 시점 값 고정 (이후 프로필 변경과 무관하게 보존)
-    const profile = await getCreatorProfile();
-    await upsertSeeding(campaign.id, {
+    submitLockRef.current = true;
+    setIsSubmitting(true);
+    try {
+      const seedings = await getSeedings();
+      if (seedings[campaign.id]?.status !== SEEDING_STATUS.RECEIVED) {
+        throw new Error('invalid_seeding_status');
+      }
+      // 세그먼트 집계용 프로필 스냅샷 — 제출 시점 값 고정 (이후 프로필 변경과 무관하게 보존)
+      const profile = await getCreatorProfile();
+      await upsertSeeding(campaign.id, {
       fgiSurvey: {
         ...scores,
         fairPriceUsd: Number(fairPrice) || fairPrice.trim(),
@@ -116,18 +128,23 @@ export default function FgiSurvey({ route, navigation }) {
           : null,
         submittedAt: new Date().toISOString(),
       },
-    });
-    logEvent('fgi_submit', {
-      campaign_id: campaign.id,
-      extra_count: extraQuestions.length,
-      usage_days: usageDays ?? -1,
-    });
-    Alert.alert(Strings.FGI_DONE_TITLE, Strings.FGI_DONE_BODY, [
-      {
-        text: Strings.UPLOAD_REVIEW_CTA,
-        onPress: () => navigation.replace('ReviewLinkSubmit', { campaignId: campaign.id }),
-      },
-    ]);
+      });
+      logEvent('fgi_submit', {
+        campaign_id: campaign.id,
+        extra_count: extraQuestions.length,
+        usage_days: usageDays ?? -1,
+      });
+      Alert.alert(Strings.FGI_DONE_TITLE, Strings.FGI_DONE_BODY, [
+        {
+          text: Strings.UPLOAD_REVIEW_CTA,
+          onPress: () => navigation.replace('ReviewLinkSubmit', { campaignId: campaign.id }),
+        },
+      ], { cancelable: false });
+    } catch (e) {
+      submitLockRef.current = false;
+      setIsSubmitting(false);
+      Alert.alert(Strings.RETRY_GUIDELINES);
+    }
   };
 
   return (
@@ -240,8 +257,9 @@ export default function FgiSurvey({ route, navigation }) {
           <Text style={styles.honesty}>{Strings.APPLY_HONESTY_NOTE}</Text>
 
           <TouchableOpacity
-            style={[styles.submit, !complete && styles.submitDisabled]}
+            style={[styles.submit, (!complete || isSubmitting) && styles.submitDisabled]}
             onPress={onSubmit}
+            disabled={isSubmitting}
             activeOpacity={0.8}
           >
             <Text style={styles.submitText}>{Strings.FGI_SUBMIT}</Text>

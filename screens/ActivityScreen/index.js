@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   Alert,
   FlatList,
@@ -72,6 +72,7 @@ export default function ActivityScreen({ navigation, route }) {
   const [addressFor, setAddressFor] = useState(null); // campaignId | null
   const [localPoints, setLocalPoints] = useState(0);
   const [tab, setTab] = useState('ongoing'); // 시안 24: 'ongoing' | 'done'
+  const receiveLocksRef = useRef(new Set());
 
   const [bonusPoints, setBonusPoints] = useState(0);
 
@@ -117,8 +118,23 @@ export default function ActivityScreen({ navigation, route }) {
   const points = (totalReward ?? 0) + localPoints + bonusPoints;
 
   const onReceive = async (campaignId) => {
+    if (
+      receiveLocksRef.current.has(campaignId) ||
+      seedings[campaignId]?.status !== SEEDING_STATUS.SHIPPED
+    ) {
+      return;
+    }
+    receiveLocksRef.current.add(campaignId);
     const prev = seedings[campaignId];
-    const all = await setSeedingStatus(campaignId, SEEDING_STATUS.RECEIVED);
+    let all;
+    try {
+      all = await setSeedingStatus(campaignId, SEEDING_STATUS.RECEIVED);
+    } catch (e) {
+      receiveLocksRef.current.delete(campaignId);
+      Alert.alert(Strings.RETRY_GUIDELINES);
+      return;
+    }
+    setSeedings(all);
     // 수령 확인 = 리마인더 시퀀스 시작 (D+7/D-3/D-1/마감/유예)
     const s = all[campaignId];
     // 이벤트 맵: 북극성 분모 — 배송 리드타임 분포의 원천
@@ -128,29 +144,42 @@ export default function ActivityScreen({ navigation, route }) {
         ? Math.round((Date.now() - new Date(prev.shippedAt).getTime()) / 86400000)
         : -1,
     });
-    scheduleUploadReminders(campaignId, campaignById[campaignId]?.title || '', s.receivedAt, false);
+    try {
+      scheduleUploadReminders(
+        campaignId,
+        campaignById[campaignId]?.title || '',
+        s.receivedAt,
+        false,
+      );
+    } catch (e) {
+      // 수령 상태 저장이 정본이다. 알림 예약 실패로 수령을 되돌리지 않는다.
+    }
     // Phase 1.5: ops Shipment DELIVERED 미러링
     opsReceived(campaignId);
     // 시안 22: 알림 가치가 가장 높은 순간(리마인더 시작 직후)에만 권한 컨텍스트 프롬프트 (Android 13+, 1회)
-    if (Platform.OS === 'android' && Platform.Version >= 33) {
-      const shown = await Preference.get('notifPromptShown');
-      if (shown !== 'true') {
-        Alert.alert(Strings.ACT_NOTIF_TITLE, Strings.ACT_NOTIF_BODY, [
-          {
-            text: Strings.ACT_NOTIF_LATER,
-            style: 'cancel',
-            onPress: () => logEvent('noti_permission_prompt', { result: 'later' }),
-          },
-          {
-            text: Strings.ACT_NOTIF_ALLOW,
-            onPress: () => {
-              logEvent('noti_permission_prompt', { result: 'allow' });
-              PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+    try {
+      if (Platform.OS === 'android' && Platform.Version >= 33) {
+        const shown = await Preference.get('notifPromptShown');
+        if (shown !== 'true') {
+          Alert.alert(Strings.ACT_NOTIF_TITLE, Strings.ACT_NOTIF_BODY, [
+            {
+              text: Strings.ACT_NOTIF_LATER,
+              style: 'cancel',
+              onPress: () => logEvent('noti_permission_prompt', { result: 'later' }),
             },
-          },
-        ]);
-        await Preference.set('notifPromptShown', 'true');
+            {
+              text: Strings.ACT_NOTIF_ALLOW,
+              onPress: () => {
+                logEvent('noti_permission_prompt', { result: 'allow' });
+                PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+              },
+            },
+          ]);
+          await Preference.set('notifPromptShown', 'true');
+        }
       }
+    } catch (e) {
+      // 권한 프롬프트 실패는 수령 및 첫인상 흐름을 막지 않는다.
     }
     reload();
     // D27: 개봉 직후에만 잡히는 데이터 — 첫인상 30초 설문 (스킵 가능)
@@ -158,6 +187,7 @@ export default function ActivityScreen({ navigation, route }) {
     if (campaign) {
       navigation.navigate('FirstImpression', { campaign });
     }
+    receiveLocksRef.current.delete(campaignId);
   };
 
   // 시안 23: 발송 전(applied/approved) 무페널티 취소

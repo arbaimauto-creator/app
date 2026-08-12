@@ -1,8 +1,17 @@
 // D27: 첫인상 30초 설문 — 수령 확인 직후 1회. FGI를 종단 조사로 만드는 첫 번째 터치.
 // (개봉·첫 사용 반응은 2주 뒤 본 설문 시점엔 이미 소실되는 데이터라 이 시점에만 잡을 수 있다)
 // 스킵 가능 — 마찰 최소 원칙. 본 설문(FgiSurvey)과 달리 업로드 필수 조건이 아니다.
-import React, { useState } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useRef, useState } from 'react';
+import {
+  Alert,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import Strings from '../../Components/Strings';
 import T from '../../Components/Constants/DesignTokens';
 import { Card, Btn } from '../../Components/UI';
@@ -34,21 +43,37 @@ export default function FirstImpression({ route, navigation }) {
   const { campaign } = route.params;
   const [scores, setScores] = useState({});
   const [note, setNote] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitLockRef = useRef(false);
   const complete = ITEMS.every((q) => scores[q.key]);
 
   const onSubmit = async () => {
-    await upsertSeeding(campaign.id, {
-      firstImpression: {
-        ...scores,
-        note: note.trim() || null,
-        submittedAt: new Date().toISOString(),
-      },
-    });
-    logEvent('fi_submit', { campaign_id: campaign.id, has_note: note.trim().length > 0 });
-    navigation.goBack();
+    if (!complete || submitLockRef.current) {
+      return;
+    }
+    submitLockRef.current = true;
+    setIsSubmitting(true);
+    try {
+      await upsertSeeding(campaign.id, {
+        firstImpression: {
+          ...scores,
+          note: note.trim() || null,
+          submittedAt: new Date().toISOString(),
+        },
+      });
+      logEvent('fi_submit', { campaign_id: campaign.id, has_note: note.trim().length > 0 });
+      navigation.goBack();
+    } catch (e) {
+      submitLockRef.current = false;
+      setIsSubmitting(false);
+      Alert.alert(Strings.RETRY_GUIDELINES);
+    }
   };
 
   const onSkip = () => {
+    if (submitLockRef.current) {
+      return;
+    }
     logEvent('fi_skip', { campaign_id: campaign.id });
     navigation.goBack();
   };
@@ -79,7 +104,12 @@ export default function FirstImpression({ route, navigation }) {
           />
         </Card>
 
-        <Btn title={Strings.FI_SUBMIT} onPress={onSubmit} disabled={!complete} style={styles.submit} />
+        <Btn
+          title={Strings.FI_SUBMIT}
+          onPress={onSubmit}
+          disabled={!complete || isSubmitting}
+          style={styles.submit}
+        />
         <TouchableOpacity onPress={onSkip} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
           <Text style={styles.skip}>{Strings.FI_SKIP}</Text>
         </TouchableOpacity>
