@@ -1,6 +1,7 @@
 import T from '../../Components/Constants/DesignTokens';
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  Alert,
   Animated,
   LayoutAnimation,
   StyleSheet,
@@ -11,6 +12,7 @@ import {
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import IconMaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import APIprovider from '../../Components/APIprovider';
 import Constants from '../../Components/Constants';
 import FEATURES from '../../Components/Constants/Features';
 import VideoLikeButton from '../../Components/CustomComponents/VideoLikeButton';
@@ -54,6 +56,20 @@ function ActionRail({ context }) {
     setTimeout(() => context.commentInput?.focus(), 100);
   };
 
+  // 저장 = 레퍼런스 보관. 서버는 기존 북마크 엔드포인트를 그대로 쓴다.
+  // 낙관적 반영 후 실패하면 되돌린다 — 탭 반응이 서버 왕복을 기다리지 않게.
+  const onPressSave = () => {
+    if (guardGuest()) {
+      return;
+    }
+    const next = !review.isBookmarked;
+    context.setState({ video: { ...review, isBookmarked: next } });
+    APIprovider.bookmarkVideo(review.videoId, next).catch(() => {
+      context.setState({ video: { ...review, isBookmarked: !next } });
+      Alert.alert(Strings.FAILED_TO_BOOKMARK);
+    });
+  };
+
   return (
     <View style={styles.rail} pointerEvents="box-none">
       <TouchableOpacity
@@ -85,7 +101,19 @@ function ActionRail({ context }) {
         <IconMaterialIcons name="chat-bubble" size={30} color="#fff" style={styles.railShadow} />
       </RailButton>
 
-      {/* 북마크는 ⋯ 메뉴로 이동 — 레일은 핵심 5개(아바타·좋아요·별점·댓글·공유)만 */}
+      {/* 하트 대신 '저장' — 참고할 리뷰를 레퍼런스로 모아두고, 나중에 그걸 보고 만든
+          리뷰를 원본에 연결한다(인용 계보). 인기 투표가 아니라 창작 재료 보관함. */}
+      {FEATURES.REFERENCE_ARCHIVE ? (
+        <RailButton onPress={onPressSave} label={review.isBookmarked ? Strings.REF_SAVED : Strings.REF_SAVE}>
+          <IconMaterialIcons
+            name={review.isBookmarked ? 'bookmark' : 'bookmark-border'}
+            size={30}
+            color={review.isBookmarked ? T.COLORS.AMBER : '#fff'}
+            style={styles.railShadow}
+          />
+        </RailButton>
+      ) : null}
+
       <RailButton onPress={() => context.menuShareToExport()}>
         <FastImage
           style={styles.railIconImage}

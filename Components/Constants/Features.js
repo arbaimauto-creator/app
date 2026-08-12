@@ -30,6 +30,12 @@ const FEATURES = {
   // 좋아요(하트)·좋아요 목록 등 소셜 장식 (회의: "라이크 등 소셜 장식 제거" — 데이터는 유지, UI만 숨김)
   SOCIAL_LIKES: false,
 
+  // 레퍼런스 아카이브 + 인용 계보.
+  // 하트(인기 투표) 대신, 참고할 리뷰를 저장해두고 그걸 보고 만든 리뷰를 원본에 연결한다.
+  // 서버·클라 모두 이미 존재하던 것을 앞으로 꺼내는 것: 저장은 PUT /videos/:id/bookmarks,
+  // 인용은 업로드 시 relayingVideoId → 원본에 relayedVideoCount 집계.
+  REFERENCE_ARCHIVE: true,
+
   // 테스트 빌드용 게스트 진입 — TestFlight/내부 배포에서 소셜 로그인 없이 전 플로우를 보기 위함.
   // ⚠️ 스토어 정식 배포 전에는 반드시 false (클로즈드 앱 원칙)
   TEST_GUEST_ENTRY: true,

@@ -2031,4 +2031,16 @@ export default {
   SIGN_UP_TO_GREYD: 'greyd 회원 가입',
   NOTI_EMPTY_DESC: '새 소식이 도착하면 여기에서 알려드릴게요.',
   SEARCH_EMPTY_DESC: '크리에이터 이름이나 #해시태그로 찾아보세요.',
+
+  // 레퍼런스 아카이브 + 인용 계보 (FEATURES.REFERENCE_ARCHIVE)
+  REF_SAVE: '저장',
+  REF_SAVED: '저장됨',
+  REF_MY_REFERENCES: '내 레퍼런스',
+  REF_MY_REFERENCES_DESC: '촬영 전에 참고하려고 저장해 둔 리뷰',
+  REF_MAKE_LIKE_THIS: '이걸 참고해서 올리기',
+  REF_INSPIRED_BY: '이 리뷰를 참고했어요',
+  REF_REFERENCED_COUNT: (n) => `${n}명이 이 리뷰를 참고했어요`,
+  REF_EMPTY_TITLE: '아직 저장한 리뷰가 없어요',
+  REF_EMPTY_DESC: '리뷰에서 저장을 누르면 여기에 모입니다.',
+  REF_TIMES_REFERENCED: '참고된 횟수',
 };

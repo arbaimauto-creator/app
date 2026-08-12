@@ -4,6 +4,7 @@ import { StyleSheet, Text, TouchableNativeFeedback, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { FlatList as GestureHandlerFlatList } from 'react-native-gesture-handler';
 import Constants from '../../Components/Constants';
+import FEATURES from '../../Components/Constants/Features';
 import Strings from '../../Components/Strings';
 import VideoListItemView from '../../Components/VideoListItemView';
 
@@ -23,10 +24,15 @@ function RelayReviews({ context }) {
         }}
       >
         <View>
-          <View style={styles.sectionTitleContainer}>
+          {/* 아직 참고한 사람이 없으면 계보 줄은 숨기고 CTA만 남긴다 */}
+          <View style={[styles.sectionTitleContainer, !video.relayedVideoCount && styles.hidden]}>
             <Text style={styles.sectionTitle}>
-              {Strings.RELAYS_OF_THIS_REVIEW}{' '}
-              {video.relayedVideoCount > 0 ? video.relayedVideoCount : ''}
+              {/* 인용 계보: 하트 수 대신 "이 리뷰를 보고 몇 명이 만들었는가"를 보여준다 */}
+              {FEATURES.REFERENCE_ARCHIVE
+                ? Strings.REF_REFERENCED_COUNT(video.relayedVideoCount || 0)
+                : `${Strings.RELAYS_OF_THIS_REVIEW} ${
+                    video.relayedVideoCount > 0 ? video.relayedVideoCount : ''
+                  }`}
             </Text>
             {video.relayedVideoCount > 0 && (
               <FastImage
@@ -73,11 +79,15 @@ function RelayReviews({ context }) {
         </View>
       </TouchableNativeFeedback>
 
-      {/* <TouchableNativeFeedback onPress={context.onAddRelayButtonPressed.bind(context)}>
+      {/* "이걸 참고해서 올리기" — 누르면 업로드 화면이 원본을 물고 열리고(relayingVideo),
+          올린 리뷰가 원본의 계보에 붙는다. 저장 → 참고 → 업로드를 한 줄로 잇는 지점. */}
+      <TouchableNativeFeedback onPress={() => context.onAddRelayButtonPressed()}>
         <View style={styles.addRelayButton}>
-          <Text style={styles.addRelayButtonLabel}>{Strings.ADD_RELAY_REVIEW}</Text>
+          <Text style={styles.addRelayButtonLabel}>
+            {FEATURES.REFERENCE_ARCHIVE ? Strings.REF_MAKE_LIKE_THIS : Strings.ADD_RELAY_REVIEW}
+          </Text>
         </View>
-      </TouchableNativeFeedback> */}
+      </TouchableNativeFeedback>
     </View>
   );
 
@@ -111,6 +121,7 @@ const styles = StyleSheet.create({
     width: 12,
     height: 20,
   },
+  hidden: { display: 'none' },
   addRelayButton: {
     marginBottom: 53,
     // 밝은 상세 영역 위에 놓이므로 반투명 흰색 대신 흰 카드 + 경계선으로 보이게 한다.

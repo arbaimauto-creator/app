@@ -98,7 +98,10 @@ export default function VideoRenderDetails({ context, useIsFocused }) {
           <View style={styles.relatedInfoContainer}>
             {/* {commentCount > 0 ? <ReviewComments context={context} /> : null} */}
             <ReviewComments context={context} />
-            {video.relayedVideoCount > 0 && <RelayReviews context={context} />}
+            {/* 계보가 없어도 "참고해서 올리기" CTA는 항상 노출한다 */}
+            {FEATURES.REFERENCE_ARCHIVE || video.relayedVideoCount > 0 ? (
+              <RelayReviews context={context} />
+            ) : null}
             {context.props.route.params.isFocused &&
             useIsFocused &&
             video.linkedProduct?.productId !== undefined ? (

@@ -15,6 +15,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import Preference from 'react-native-default-preference';
 import T from '../../Components/Constants/DesignTokens';
+import FEATURES from '../../Components/Constants/Features';
 import { Card, ProgressBar } from '../../Components/UI';
 import Strings from '../../Components/Strings';
 import { getCreatorProfile } from '../../api/creators';
@@ -127,6 +128,19 @@ export default function MyScreen({ navigation }) {
             <Text style={[styles.xs, styles.mt4]}>{Strings.MY_REFERRAL_LOCKED_HINT}</Text>
           )}
         </Card>
+
+        {/* 내 레퍼런스 — 저장해 둔 리뷰 보관함. 여기서 바로 "참고해서 올리기"로 이어진다. */}
+        {FEATURES.REFERENCE_ARCHIVE ? (
+          <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('BookmarkList')}>
+            <Card>
+              <View style={styles.row}>
+                <Text style={styles.rowTitle}>{Strings.REF_MY_REFERENCES}</Text>
+                <Text style={styles.chev}>›</Text>
+              </View>
+              <Text style={[styles.xs, styles.mt4]}>{Strings.REF_MY_REFERENCES_DESC}</Text>
+            </Card>
+          </TouchableOpacity>
+        ) : null}
 
         {/* 행 카드 3개 */}
         <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('AddressBook')}>

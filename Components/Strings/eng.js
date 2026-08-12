@@ -2114,4 +2114,16 @@ export default {
   SIGN_UP_TO_GREYD: 'Sign up to greyd',
   NOTI_EMPTY_DESC: 'We will let you know here when something new arrives.',
   SEARCH_EMPTY_DESC: 'Try a creator name or a #hashtag.',
+
+  // 레퍼런스 아카이브 + 인용 계보 (FEATURES.REFERENCE_ARCHIVE)
+  REF_SAVE: 'Save',
+  REF_SAVED: 'Saved',
+  REF_MY_REFERENCES: 'My references',
+  REF_MY_REFERENCES_DESC: 'Reviews you saved to study before you shoot',
+  REF_MAKE_LIKE_THIS: 'Make one like this',
+  REF_INSPIRED_BY: 'Inspired by this review',
+  REF_REFERENCED_COUNT: (n) => `${n} creators made one from this`,
+  REF_EMPTY_TITLE: 'Nothing saved yet',
+  REF_EMPTY_DESC: 'Tap Save on a review to keep it here as a reference.',
+  REF_TIMES_REFERENCED: 'Times referenced',
 };
