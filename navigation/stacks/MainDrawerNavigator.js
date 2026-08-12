@@ -158,6 +158,8 @@ function MainDrawerNavigator({ route, navigation }) {
 
     Promise.all([
       prefGet('inviteRole'),
+      prefGet('inviteCode'),
+      prefGet('creatorCountry'),
       prefGet('isOnboarded'),
       prefGet('userId'),
       prefGet('userName'),
@@ -170,6 +172,8 @@ function MainDrawerNavigator({ route, navigation }) {
       .then(
         ([
           inviteRole,
+          inviteCode,
+          creatorCountry,
           onboarded,
           userId,
           userName,
@@ -182,7 +186,8 @@ function MainDrawerNavigator({ route, navigation }) {
           if (!alive) {
             return;
           }
-          setGatePassed(inviteRole ? 'yes' : 'no');
+          const hasCompleteGateState = Boolean(inviteRole && inviteCode && creatorCountry);
+          setGatePassed(hasCompleteGateState ? 'yes' : 'no');
           setIsOnboarded(onboarded);
           setLogonUserId(userId);
           setLogonUserName(userName);
@@ -194,7 +199,10 @@ function MainDrawerNavigator({ route, navigation }) {
           }
           setPreviousPage(prevPage);
           trace(
-            'drawer:boot-done gate=' + (inviteRole ? 'yes' : 'no') + ' uid=' + (userId ? 1 : 0),
+            'drawer:boot-done gate=' +
+              (hasCompleteGateState ? 'yes' : 'no') +
+              ' uid=' +
+              (userId ? 1 : 0),
           );
           setBootLoaded(true);
         },

@@ -67,9 +67,14 @@ export default function QNAChat(props) {
   }, [currentPushedNotification, props.route.params.qnaId]);
 
   useEffect(() => {
-    setIsLoading(true);
-    APIprovider.getQnaChatlist(props.route.params.qnaId).then((result) => {
-      if (result && result.success) {
+    let isActive = true;
+    const loadQna = async () => {
+      setIsLoading(true);
+      try {
+        const result = await APIprovider.getQnaChatlist(props.route.params.qnaId);
+        if (!isActive || !result?.success) {
+          return;
+        }
         if (!result.updatedQna || result.updatedQna.statusCode === 1) {
           Alert.alert(Strings.QNA_HASHTAG_DELETED);
           props.navigation.pop();
@@ -81,26 +86,36 @@ export default function QNAChat(props) {
         setHastagSelected(result.updatedQna.hashtag);
         setHastagSelectedID(result.updatedQna._id);
 
-        APIprovider.getUserDetails(props.route.params.logonUserId).then((_logonUser) => {
-          setLogonUser(_logonUser);
+        const _logonUser = await APIprovider.getUserDetails(props.route.params.logonUserId);
+        if (!isActive) {
+          return;
+        }
+        setLogonUser(_logonUser);
+        const isHost = result.updatedQna.host === props.route.params.logonUserId;
+        setIsMyUserPage(isHost);
 
-          setIsMyUserPage(result.updatedQna.host === props.route.params.logonUserId);
-
-          if (result.updatedQna.host === props.route.params.logonUserId) {
-            setHost(_logonUser);
-          } else {
-            APIprovider.getUserDetails(result.updatedQna.host).then((_host) => {
-              setHost(_host);
-            });
+        if (isHost) {
+          setHost(_logonUser);
+        } else {
+          const _host = await APIprovider.getUserDetails(result.updatedQna.host);
+          if (isActive) {
+            setHost(_host);
           }
-        });
+        }
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
       }
-    });
+    };
 
-    setTimeout(() => setIsLoading(false), 500);
+    loadQna();
+    return () => {
+      isActive = false;
+    };
     // 마운트 시 1회만 실행 (deps 추가 시 재실행 위험)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [props.navigation, props.route.params.logonUserId, props.route.params.qnaId]);
 
   const handlePressRemoveChat = () => {
     // 게스트 공용 계정으로는 삭제 불가 (게스트끼리 상호 삭제 방지)

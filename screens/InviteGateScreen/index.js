@@ -170,7 +170,7 @@ export default function InviteGateScreen({ navigation }) {
     } finally {
       // 통과해서 화면을 떠난 경우에는 잠금을 풀지 않는다 —
       // 풀면 언마운트 직전 남은 탭이 reset을 한 번 더 보낼 수 있다.
-      if (aliveRef.current) {
+      if (aliveRef.current && !isTransitioningRef.current) {
         submitLockRef.current = false;
         setIsVerifying(false);
       }

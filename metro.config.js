@@ -5,6 +5,7 @@ const defaultConfig = getDefaultConfig(__dirname);
 const config = {
   resolver: {
     unstable_enablePackageExports: true,
+    blockList: [/[\\/]android[\\/]build[\\/].*/, /[\\/]ios[\\/]build[\\/].*/],
   },
   transformer: {
     unstable_allowRequireContext: true,

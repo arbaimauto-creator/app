@@ -5,6 +5,12 @@ module.exports = {
     node: true,
     jest: true,
   },
+  overrides: [
+    {
+      files: ['web/**/*.{js,jsx,ts,tsx}'],
+      env: { browser: true },
+    },
+  ],
 
   // '@react-native-community'는 구버전 패키지명 — RN 0.72+부터 '@react-native'로 이관됨
   extends: ['@react-native'],

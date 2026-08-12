@@ -14,6 +14,23 @@ import ReviewerRating from './ReviewerRating';
 import UpperRelayReview from './UpperRelayReview';
 import VideoHashTag from './VideoHashTag';
 
+/**
+ * 크리에이터가 붙여넣은 설명에 마크다운 기호가 그대로 남아 화면에 **별표**로 보였다.
+ * 리치 텍스트 렌더러를 새로 들이는 대신, 화면에서 의미 없는 기호만 걷어낸다.
+ * (굵게/기울임 표시는 잃지만, 기호가 노출되는 것보다 낫다)
+ */
+function plainText(s) {
+  if (!s) {
+    return '';
+  }
+  return String(s)
+    .replace(/\*\*(.+?)\*\*/g, '$1') // **굵게**
+    .replace(/(^|\s)\*(\S(?:.*?\S)?)\*(?=\s|$)/g, '$1$2') // *기울임*
+    .replace(/(^|\s)__(.+?)__(?=\s|$)/g, '$1$2') // __강조__
+    .replace(/^#{1,6}\s+/gm, '') // # 제목
+    .replace(/^\s*[-*+]\s+/gm, '· '); // 목록 기호
+}
+
 export default function VideoRenderDetails({ context, useIsFocused }) {
   const { video } = context.state;
 
@@ -61,7 +78,9 @@ export default function VideoRenderDetails({ context, useIsFocused }) {
             navigation={context.props.navigation}
           />
         ) : null}
-        <Text style={styles.description}>{video.description || video.descriptionByCountry}</Text>
+        <Text style={styles.description}>
+          {plainText(video.description || video.descriptionByCountry)}
+        </Text>
 
         <View>
           {video.hashTags ? (

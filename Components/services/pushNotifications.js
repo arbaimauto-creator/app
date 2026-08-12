@@ -24,6 +24,22 @@ import * as Sentry from '@sentry/react-native';
 
 let notificationHandler;
 
+const parseNotificationData = (value, fallback) => {
+  if (value === undefined || value === null || value === '') {
+    return fallback;
+  }
+  if (typeof value !== 'string') {
+    return value;
+  }
+  try {
+    return JSON.parse(value);
+  } catch (error) {
+    console.warn('Invalid notification payload', error);
+    Sentry.captureException(error);
+    return fallback;
+  }
+};
+
 const getDeviceToken = async () => {
   const deviceToken = await messaging().getToken();
   return deviceToken;
@@ -142,7 +158,7 @@ const configure = async (onNotification) => {
         soundName: 'default',
         userInfo: {
           isTouchEvent: true,
-          navigationParams: JSON.parse(remoteMessage.data.navigationParams),
+          navigationParams: parseNotificationData(remoteMessage.data.navigationParams, {}),
         },
       });
 
@@ -153,8 +169,11 @@ const configure = async (onNotification) => {
       return;
     }
 
-    const msgCode = JSON.parse(remoteMessage.data.messageCode);
-    const paramsObj = JSON.parse(remoteMessage.data.parameters);
+    const msgCode = parseNotificationData(remoteMessage.data.messageCode, null);
+    const paramsObj = parseNotificationData(remoteMessage.data.parameters, {});
+    if (msgCode === null) {
+      return;
+    }
 
     // message structure example : const message = {messageId: {messageType:'NEW_COMMENT_ON_UPLOADED_REVIEW', messageCode: 103}, parameters: params};
 
@@ -220,7 +239,7 @@ const configure = async (onNotification) => {
         soundName: 'default',
         userInfo: {
           isTouchEvent: true,
-          navigationParams: JSON.parse(remoteMessage.data.navigationParams),
+          navigationParams: parseNotificationData(remoteMessage.data.navigationParams, {}),
         },
       });
 
@@ -248,8 +267,11 @@ const configure = async (onNotification) => {
       return;
     }
 
-    const msgCode = JSON.parse(remoteMessage.data?.messageCode);
-    const paramsObj = JSON.parse(remoteMessage.data?.parameters);
+    const msgCode = parseNotificationData(remoteMessage.data?.messageCode, null);
+    const paramsObj = parseNotificationData(remoteMessage.data?.parameters, {});
+    if (msgCode === null) {
+      return;
+    }
 
     // TODO: remoteMessage 에 따라서 포맷 수정하도록 api 만들 것
     const contents = NotificationProvider.getNotificationByCode(msgCode);

@@ -145,7 +145,9 @@ function ProductDescription({ product, logonUserId }) {
       <Text style={styles.linkedProductTitle} numberOfLines={1}>
         {product.title}
       </Text>
-      {(product.price || price) && (
+      {/* 커머스 숨김(v2 §D5): 가격·최저가 안내는 COMMERCE가 꺼지면 노출하지 않는다.
+          플래그와 무관하게 "Sign in and Check Lowest Price"가 리뷰 상세에 떠 있었다. */}
+      {FEATURES.COMMERCE && (product.price || price) && (
         <View>
           {isGuestUser(logonUserId) ? (
             <Text style={styles.linkedProductPrice} numberOfLines={1}>

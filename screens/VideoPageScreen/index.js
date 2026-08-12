@@ -2370,7 +2370,8 @@ export const styles = StyleSheet.create({
   /* --------------------------------------------- */
 
   slidePagination: {
-    marginTop: 8,
+    // 상세를 위로 올리면 썸네일 줄이 상태바(시계·배터리)와 겹쳤다
+    marginTop: 8 + T.TOP_INSET,
     marginLeft: 24,
     alignSelf: 'flex-start',
     justifyContent: 'flex-start',

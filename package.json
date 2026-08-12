@@ -6,7 +6,7 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "lint": "eslint .",
-    "start": "NODE_OPTIONS=--max-old-space-size=8192 npx react-native start --reset-cache",
+    "start": "node --max-old-space-size=8192 node_modules/react-native/cli.js start --reset-cache",
     "test": "jest",
     "postinstall": "npx patch-package",
     "ios12": "npm run ios -- --simulator='iPhone 12'",
