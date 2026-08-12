@@ -1592,6 +1592,7 @@ export default {
   ONBOARD_3_BODY: "그게 greyd의 'grade'예요. 리뷰를 올리면 브랜드가 7일 안에 평가를 남깁니다.",
   ONBOARD_NEXT: '다음',
   ONBOARD_FINISH: '시작하기 (+50P)',
+  ONBOARD_SAVE_ERROR: '프로필을 저장하지 못했어요. 잠시 후 다시 시도해주세요.',
   ONBOARD_PROFILE_TITLE: '맞춤 캠페인을 위해\n프로필을 알려주세요',
   ONBOARD_PROFILE_BODY: '연결된 계정 기준으로 신청 가능한 캠페인이 표시돼요.',
   PROFILE_PLATFORM: '주력 플랫폼',

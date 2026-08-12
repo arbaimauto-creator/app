@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   Dimensions,
   SafeAreaView,
   ScrollView,
@@ -50,7 +51,10 @@ const CATEGORY_ITEMS = CATEGORIES.map((c) => ({ key: c, label: c }));
 
 export default function CreatorOnboarding({ navigation }) {
   const scrollRef = useRef(null);
+  const submitLockRef = useRef(false);
   const [page, setPage] = useState(0);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   const [platform, setPlatform] = useState('instagram');
   // D29: 3채널 수집 — 주력 채널만 필수, 나머지는 선택 (매칭 커버리지 ↑, 마찰은 최소)
@@ -77,34 +81,49 @@ export default function CreatorOnboarding({ navigation }) {
   };
 
   const onFinish = async () => {
-    const country = await Preference.get('creatorCountry');
-    // 핸들은 정규화해 저장 (URL 붙여넣기 → 순수 핸들)
-    const normalized = {};
-    CHANNELS.forEach(({ key }) => {
-      normalized[key] = {
-        handle: normalizeHandle(channels[key].handle),
-        followerBand: channels[key].followerBand ?? null,
+    if (!canFinish || submitLockRef.current) {
+      return;
+    }
+    submitLockRef.current = true;
+    setIsSaving(true);
+    setSaveError('');
+    try {
+      const country = await Preference.get('creatorCountry');
+      if (!country) {
+        throw new Error('country_missing');
+      }
+      // 핸들은 정규화해 저장 (URL 붙여넣기 → 순수 핸들)
+      const normalized = {};
+      CHANNELS.forEach(({ key }) => {
+        normalized[key] = {
+          handle: normalizeHandle(channels[key].handle),
+          followerBand: channels[key].followerBand ?? null,
+        };
+      });
+      const profile = {
+        country,
+        primaryPlatform: platform,
+        channels: normalized,
+        // 하위 호환: 기존 화면들이 참조하는 단일 핸들·밴드는 주력 채널 값으로 유지
+        handleUrl: normalized[platform].handle,
+        followerBand: normalized[platform].followerBand,
+        ageBand,
+        gender,
+        contentCategories: [category],
+        skinType,
+        onboardedAt: new Date().toISOString(),
       };
-    });
-    const profile = {
-      country,
-      primaryPlatform: platform,
-      channels: normalized,
-      // 하위 호환: 기존 화면들이 참조하는 단일 핸들·밴드는 주력 채널 값으로 유지
-      handleUrl: normalized[platform].handle,
-      followerBand: normalized[platform].followerBand,
-      ageBand,
-      gender,
-      contentCategories: [category],
-      skinType,
-      onboardedAt: new Date().toISOString(),
-    };
-    await saveCreatorProfile(profile);
-    // 온보딩 완료 보상 +50P (mock: 로컬 표시용)
-    await Preference.set('onboardingBonusGranted', 'true');
-    // D29: ops 골든 레코드에 채널·인구통계 동기화 (실패해도 로컬 진행 무영향)
-    opsSyncProfile(profile);
-    navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'MainBottom' }] }));
+      await saveCreatorProfile(profile);
+      // 온보딩 완료 보상 +50P (mock: 로컬 표시용). 동일 키라 재시도해도 중복 지급되지 않는다.
+      await Preference.set('onboardingBonusGranted', 'true');
+      // D29: ops 골든 레코드 동기화는 로컬 완료를 막지 않는다.
+      opsSyncProfile(profile);
+      navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'MainBottom' }] }));
+    } catch (e) {
+      submitLockRef.current = false;
+      setIsSaving(false);
+      setSaveError(Strings.ONBOARD_SAVE_ERROR);
+    }
   };
 
   return (
@@ -181,12 +200,19 @@ export default function CreatorOnboarding({ navigation }) {
             <Chips items={SKIN_TYPES} selected={skinType} onSelect={setSkinType} />
           </ScrollView>
 
-          <Btn
-            title={Strings.ONBOARD_FINISH}
-            onPress={onFinish}
-            disabled={!canFinish}
-            style={styles.next}
-          />
+          {saveError ? <Text style={styles.saveError}>{saveError}</Text> : null}
+          {isSaving ? (
+            <View style={styles.savingButton}>
+              <ActivityIndicator color={COLORS.ON_AMBER} />
+            </View>
+          ) : (
+            <Btn
+              title={Strings.ONBOARD_FINISH}
+              onPress={onFinish}
+              disabled={!canFinish}
+              style={styles.next}
+            />
+          )}
         </View>
       </ScrollView>
 
@@ -230,6 +256,23 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   next: { marginBottom: 30, marginTop: 16, paddingVertical: 14 },
+  saveError: {
+    color: COLORS.RED,
+    fontFamily: FONT.SemiBold,
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 10,
+    textAlign: 'center',
+  },
+  savingButton: {
+    alignItems: 'center',
+    backgroundColor: COLORS.AMBER,
+    borderRadius: RADIUS.BTN,
+    justifyContent: 'center',
+    marginBottom: 30,
+    marginTop: 16,
+    paddingVertical: 14,
+  },
   formScroll: { flex: 1 },
   formContent: { paddingBottom: 30 },
   formTitle: {

@@ -1658,6 +1658,7 @@ export default {
     "That's the 'grade' in greyd. Post your review — the brand scores it within 7 days.",
   ONBOARD_NEXT: 'Next',
   ONBOARD_FINISH: 'Start (+50P)',
+  ONBOARD_SAVE_ERROR: 'We could not save your profile. Please try again.',
   ONBOARD_PROFILE_TITLE: 'Tell us about\nyour channel',
   ONBOARD_PROFILE_BODY: 'Campaigns you can apply to are matched to your profile.',
   PROFILE_PLATFORM: 'Main platform',
