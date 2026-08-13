@@ -2066,4 +2066,8 @@ export default {
   APPLY_TRACK_CTA: 'Activity에서 확인하기',
   APPLY_KEEP_BROWSING: '다른 캠페인 더 보기',
   REF_SAVED_COUNT: (n) => `${n}개 저장됨`,
+  HOME_HERO_CREATORS: (n) => `${n}명 모집`,
+  HOME_HERO_CLOSES: (n) => (n <= 0 ? '오늘 마감' : `${n}일 후 마감`),
+  HOME_HERO_SHIPS: (c) => `${c} 배송`,
+  APPLYDONE_PROGRESS: '진행 상황',
 };

@@ -82,6 +82,12 @@ function reviewScore(item) {
   return n > 0 ? n.toFixed(1) : null;
 }
 
+// 마감까지 남은 일수 — 지난 날짜는 0으로 (음수 D-day를 보여주지 않는다)
+function daysUntil(dateStr) {
+  const diff = new Date(dateStr).getTime() - Date.now();
+  return Math.max(0, Math.ceil(diff / 86400000));
+}
+
 // 큐레이션 그리드는 썸네일 있는 리뷰만 전시
 function gridThumbUrl(item) {
   return item.thumbnailUrl || item?.relayedVideo?.thumbnailUrl || null;
@@ -209,10 +215,25 @@ export default function CuratedHome({ navigation }) {
               />
               <View style={styles.heroBody}>
                 <Badge tone="open" text={Strings.HOME_HERO_SPOTS(hero.remaining)} />
-                <Text style={styles.heroTitle} numberOfLines={2}>
-                  {hero.title}
-                </Text>
               </View>
+            </View>
+            {/* 시안: 제목·조건은 이미지 위 글자가 아니라 아래 흰 카드로 내린다.
+                밝은 썸네일에서도 읽히고, 신청 판단에 필요한 세 가지를 한 줄로 준다. */}
+            <View style={styles.heroCard}>
+              <Text style={styles.heroCardTitle} numberOfLines={2}>
+                {hero.title}
+              </Text>
+              <Text style={styles.heroMeta} numberOfLines={1}>
+                {[
+                  Strings.HOME_HERO_CREATORS(hero.remaining),
+                  hero.deadline ? Strings.HOME_HERO_CLOSES(daysUntil(hero.deadline)) : null,
+                  (hero.countries || []).length
+                    ? Strings.HOME_HERO_SHIPS((hero.countries || []).join('/'))
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </Text>
             </View>
           </TouchableOpacity>
         ) : null}
@@ -347,6 +368,17 @@ const styles = StyleSheet.create({
   heroImage: { ...StyleSheet.absoluteFillObject },
   heroFallback: { backgroundColor: COLORS.TRACK },
   heroOverlay: { ...StyleSheet.absoluteFillObject },
+  heroCard: {
+    backgroundColor: COLORS.SURFACE,
+    borderBottomLeftRadius: T.RADIUS.CARD,
+    borderBottomRightRadius: T.RADIUS.CARD,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginTop: -T.RADIUS.CARD,
+    paddingTop: 12 + T.RADIUS.CARD,
+  },
+  heroCardTitle: { ...TYPE.CARD_TITLE, fontSize: 15, lineHeight: 20 },
+  heroMeta: { ...TYPE.SUB, marginTop: 4 },
   heroBody: { position: 'absolute', left: 13, right: 13, bottom: 11 },
   heroTitle: {
     fontFamily: T.FONT.ExtraBold,

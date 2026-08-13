@@ -2,7 +2,7 @@
 import React from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import T from '../../Components/Constants/DesignTokens';
-import { Card, Btn, StatusPill, NoteBox } from '../../Components/UI';
+import { Card, Btn, NoteBox } from '../../Components/UI';
 import Strings from '../../Components/Strings';
 
 const { COLORS, FONT, TYPE } = T;
@@ -44,29 +44,37 @@ export default function ApplyDone({ navigation, route }) {
           </Text>
         </View>
 
+        {/* 시안 09: 진행 단계를 세로 타임라인으로. 지금 어디까지 왔고 다음에 무엇이
+            일어나는지를 점·선으로 보여준다. 첫 단계만 완료(앰버), 나머지는 예정. */}
         <Card>
-          {!autoConfirmed ? (
-            <>
-              <View style={styles.timelineRow}>
-                <StatusPill status="applied" label={Strings.CAMPAIGN_STATUS_APPLIED} />
-                <Text style={styles.xs}>{Strings.APPLYDONE_NOW}</Text>
-              </View>
-              <View style={styles.divider} />
-            </>
-          ) : null}
-          <View style={styles.timelineRow}>
-            <StatusPill status="approved" label={Strings.CAMPAIGN_STATUS_APPROVED} />
-            <Text style={styles.xs}>
-              {autoConfirmed
-                ? Strings.APPLYDONE_AUTO_CONFIRM_NOTE
-                : Strings.APPLYDONE_APPROVAL_NOTE}
+          <View style={styles.progressHeader}>
+            <Text style={styles.progressLabel}>{Strings.APPLYDONE_PROGRESS}</Text>
+            <Text style={styles.progressValue}>
+              {usedCount} / {limit}
             </Text>
           </View>
           <View style={styles.divider} />
-          <View style={styles.timelineRow}>
-            <StatusPill status="shipped" label={Strings.CAMPAIGN_STATUS_SHIPPED} />
-            <Text style={styles.xs}>{Strings.APPLYDONE_SHIP_NOTE}</Text>
-          </View>
+          {[
+            { label: Strings.APPLY_STEP_SENT, done: true },
+            {
+              label: autoConfirmed
+                ? Strings.APPLYDONE_AUTO_CONFIRM_NOTE
+                : Strings.APPLY_STEP_REVIEW,
+              done: autoConfirmed,
+            },
+            { label: Strings.APPLY_STEP_SHIP, done: false },
+            { label: Strings.APPLY_STEP_POST(14), done: false },
+          ].map((step, i, arr) => (
+            <View key={step.label} style={styles.stepRow}>
+              <View style={styles.stepRail}>
+                <View style={[styles.stepDot, step.done && styles.stepDotDone]} />
+                {i < arr.length - 1 ? <View style={styles.stepLine} /> : null}
+              </View>
+              <Text style={[styles.stepLabel, step.done && styles.stepLabelDone]}>
+                {step.label}
+              </Text>
+            </View>
+          ))}
         </Card>
 
         <NoteBox tone="amber">
@@ -105,11 +113,41 @@ const styles = StyleSheet.create({
   back: { fontFamily: FONT.Bold, fontSize: 26, color: COLORS.INK, lineHeight: 28 },
   headerTitle: { fontFamily: FONT.ExtraBold, fontSize: 18, color: COLORS.INK },
   scroll: { padding: 16, paddingTop: 4, paddingBottom: 32, gap: 9 },
+  progressHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  progressLabel: {
+    fontFamily: FONT.Bold,
+    fontSize: 11,
+    letterSpacing: 0.6,
+    color: COLORS.GREY,
+    textTransform: 'uppercase',
+  },
+  progressValue: { fontFamily: FONT.ExtraBold, fontSize: 15, color: COLORS.INK },
+  stepRow: { flexDirection: 'row', alignItems: 'flex-start' },
+  stepRail: { width: 18, alignItems: 'center' },
+  stepDot: {
+    width: 9,
+    height: 9,
+    borderRadius: 9,
+    marginTop: 5,
+    backgroundColor: COLORS.TRACK,
+  },
+  stepDotDone: { backgroundColor: COLORS.AMBER },
+  // 점과 점을 잇는 세로선 — 마지막 단계에는 붙이지 않는다
+  stepLine: { width: 1.5, flex: 1, minHeight: 18, backgroundColor: COLORS.LINE, marginTop: 2 },
+  stepLabel: {
+    flex: 1,
+    marginLeft: 9,
+    paddingBottom: 12,
+    fontFamily: FONT.Regular,
+    fontSize: 12.5,
+    lineHeight: 18,
+    color: COLORS.GREY,
+  },
+  stepLabelDone: { fontFamily: FONT.Bold, color: COLORS.INK },
   hero: { alignItems: 'center', paddingVertical: 18, gap: 6 },
   emoji: { fontSize: 34 },
   title: { fontFamily: FONT.Black, fontSize: 19, color: COLORS.INK },
   sub: { fontFamily: FONT.Regular, fontSize: 13, color: COLORS.GREY, textAlign: 'center' },
-  timelineRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   divider: { height: 1, backgroundColor: COLORS.LINE, marginVertical: 10 },
   xs: { ...TYPE.XS, flex: 1 },
   noteText: { fontFamily: FONT.Regular, fontSize: 11, lineHeight: 16.5, color: COLORS.AMBER_DEEP },

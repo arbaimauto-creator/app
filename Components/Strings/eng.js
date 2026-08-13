@@ -2149,4 +2149,8 @@ export default {
   APPLY_TRACK_CTA: 'Track it in Activity',
   APPLY_KEEP_BROWSING: 'Keep browsing campaigns',
   REF_SAVED_COUNT: (n) => `${n} saved`,
+  HOME_HERO_CREATORS: (n) => `${n} creators`,
+  HOME_HERO_CLOSES: (n) => (n <= 0 ? 'closes today' : `closes in ${n} days`),
+  HOME_HERO_SHIPS: (c) => `ships to ${c}`,
+  APPLYDONE_PROGRESS: 'Progress',
 };
