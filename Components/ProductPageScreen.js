@@ -113,21 +113,6 @@ function HeaderRight({ context }) {
           });
         }}
       />
-      <View style={{ marginRight: 20 }} />
-      <ActionButton
-        renderItem={
-          <FastImage
-            style={styles.headerButton}
-            source={require('../Resources/img/iconRenewal/white-cart.png')}
-          />
-        }
-        onPress={() => {
-          if (isGuestUser(context.props.route.params.logonUserId)) {
-            return LogoutAlert(context.props);
-          }
-          navigation.push('Cart');
-        }}
-      />
       <View style={{ marginRight: 5 }} />
       <ModalMenuButton
         navigation={context.props.navigation}

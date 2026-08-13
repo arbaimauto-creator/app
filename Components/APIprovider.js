@@ -725,13 +725,6 @@ export default class APIprovider {
   };
 
   /** Product */
-  static getStoreMain = (limit = 10) => {
-    return this.request(API_ROOT_URL + '/products', 'GET', {
-      listType: 'storeMain',
-      limit: limit,
-    });
-  };
-
   static getProductList = (
     listOf,
     sortType = undefined,
@@ -1017,28 +1010,6 @@ export default class APIprovider {
   /** My store **/
   static getMystoreDashboard = async () => {
     return this.request(API_ROOT_URL + '/users/' + this.requesterId + '/dashboard', 'GET', {});
-  };
-
-  static getCart = (offset = '', limit = 18) => {
-    return this.request(API_ROOT_URL + '/cart', 'GET', {
-      offset: offset,
-      limit: limit,
-      buyerId: this.requesterId,
-    });
-  };
-
-  static newCartItem = (productId, number, options, reviewerVideoId, cartOrBuy) => {
-    return this.request(API_ROOT_URL + '/cart', 'POST', {
-      productId: productId,
-      number: number,
-      options: options,
-      reviewerVideoId,
-      cartOrBuy,
-    });
-  };
-
-  static deleteCart = (cartItemId) => {
-    return this.request(API_ROOT_URL + '/cart/' + cartItemId, 'DELETE', {});
   };
 
   static getOrderList = (orderStatusCode, buyerId, sellerId, offset = '', limit = 18) => {

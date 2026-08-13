@@ -612,22 +612,6 @@ function GuestProfileInfo({ onPress }) {
   );
 }
 
-function SellerRegistrationButton({ navigation }) {
-  return (
-    <Pressable
-      onPress={() => {
-        navigation.navigate('RegisterAsSeller');
-      }}
-    >
-      <View style={styles.blockContainer}>
-        <Text style={styles.emptyMessage}>{'+ ' + Strings.REGISTER_SELLER_BUTTON_TITLE}</Text>
-        <Text style={styles.descriptionTitle}>{Strings.REGISTER_SELLER_BUTTON_GUIDE1}</Text>
-        <Text style={styles.descriptionTitle}>{Strings.REGISTER_SELLER_BUTTON_GUIDE2}</Text>
-      </View>
-    </Pressable>
-  );
-}
-
 function SellerApprovalWaitingView({ navigation }) {
   return (
     <View>
@@ -863,66 +847,10 @@ function UserHistoryView({ context, scrollRef }) {
         />
       );
     }
-  } else if (focusedTab === USER_HISTORY_TAB_INDEX.PRODUCT && productList.length === 0) {
-    if (context.state.isRefreshing) {
-      return (
-        <View style={styles.emptyMessageContainer}>
-          <ActivityIndicator size="small" color={COLORS.AMBER} />
-        </View>
-      );
-    }
-    if (context.isMyUserPage()) {
-      if (!context.state.user.sellerStatus) {
-        return <SellerRegistrationButton navigation={context.props.navigation} />;
-      } else {
-        if (context.state.user.isSeller) {
-          return (
-            <>
-              <TouchableOpacity
-                style={styles.sellerPageButton}
-                activeOpacity={0.85}
-                onPress={() => {
-                  context.props.navigation.navigate('MyStore');
-                }}
-              >
-                <Text style={styles.sellerButtonLabel}>{Strings.SELLER_PAGE}</Text>
-              </TouchableOpacity>
-              <AddNewProductButton context={context} />
-            </>
-          );
-        }
-        return <AddNewProductButton context={context} />;
-      }
-    } else {
-      return (
-        <EmptyReviewMessage
-          title={Strings.NO_PRODUCT_UPLOADED}
-          description={Strings.USERPAGE_EMPTY_REVIEW_DESC}
-        />
-      );
-    }
   }
 
   return (
     <View style={styles.historyBody}>
-      {focusedTab === USER_HISTORY_TAB_INDEX.PRODUCT &&
-        context.state.user.sellerStatus === Constants.SELLER_STATUS.APPROVAL_REQUEST && (
-          <SellerApprovalWaitingView />
-        )}
-      {focusedTab === USER_HISTORY_TAB_INDEX.PRODUCT &&
-        context.state.user.isSeller &&
-        context.isMyUserPage() && (
-          <TouchableOpacity
-            style={styles.sellerPageButton}
-            activeOpacity={0.85}
-            onPress={() => {
-              context.props.navigation.navigate('MyStore');
-            }}
-          >
-            <Text style={styles.sellerButtonLabel}>{Strings.SELLER_PAGE}</Text>
-          </TouchableOpacity>
-        )}
-
       <FlatGrid
         maxItemsPerRow={2}
         itemDimension={Dimensions.get('window').width / 2 - 30}
@@ -1479,36 +1407,6 @@ function ProfileButtons({ context, user, isGuest }) {
         <Text style={styles.profileButtonLabel}>{Strings.BOOKMARKS}</Text>
       </TouchableOpacity>
       {/* 기능 다이어트 (COMMERCE off): 장바구니·주문 내역 진입점 숨김 */}
-      {FEATURES.COMMERCE ? (
-        <>
-          <TouchableOpacity
-            style={styles.profileButton}
-            activeOpacity={0.8}
-            onPress={() => {
-              context.props.navigation.navigate('Cart');
-            }}
-          >
-            <FastImage
-              style={styles.profileButtonIcon}
-              source={require('../../Resources/img/iconRenewal/cart.png')}
-            />
-            <Text style={styles.profileButtonLabel}>{Strings.CART}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.profileButton}
-            activeOpacity={0.8}
-            onPress={() => {
-              context.props.navigation.navigate('MyOrderList');
-            }}
-          >
-            <FastImage
-              style={styles.profileButtonIcon}
-              source={require('../../Resources/img/iconRenewal/orderlist.png')}
-            />
-            <Text style={styles.profileButtonLabel}>{Strings.ORDER_LIST}</Text>
-          </TouchableOpacity>
-        </>
-      ) : null}
       <View style={styles.profileButton}>
         {context.isMyUserPage() || isGuest ? (
           <RewardDetail context={context} />
@@ -1703,7 +1601,6 @@ function UserStatBox({ user, context }) {
         <Text style={styles.statLabel}>{Strings.AVERAGE_GRADE}</Text>
       </TouchableOpacity>
       {/* 기능 다이어트 (COMMERCE off): 기여 매출 지표 숨김 */}
-      {FEATURES.COMMERCE ? <RevenueAmount user={user} context={context} /> : null}
       <ReviewReward user={user} context={context} />
     </Card>
   );
