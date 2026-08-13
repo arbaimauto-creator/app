@@ -114,6 +114,9 @@ export default function CampaignDetail({ route, navigation }) {
       return;
     }
     const userId = await Preference.get('userId');
+    const autoConfirmed = !isCurated && canAutoConfirm(profile);
+    // Persist locally only after ops accepts the application.
+    await opsApply({ campaign, appealText: appeal.trim(), autoConfirmed });
     const action = await dispatch(applyToCampaign({ campaignId: campaign.id, userId }));
     // thunk 실패 시 완료 알럿을 띄우지 않는다
     if (action?.error) {
@@ -124,7 +127,6 @@ export default function CampaignDetail({ route, navigation }) {
     await upsertSeeding(campaign.id, { pledgeChecked: true, appealText: appeal.trim() });
     await setSeedingStatus(campaign.id, SEEDING_STATUS.APPLIED);
     // D24: Open 캠페인은 기준 충족 시 자동 확정 (서버 연동 시 ops가 동일 기준으로 판정)
-    const autoConfirmed = !isCurated && canAutoConfirm(profile);
     if (autoConfirmed) {
       await setSeedingStatus(campaign.id, SEEDING_STATUS.APPROVED);
     }
@@ -137,7 +139,6 @@ export default function CampaignDetail({ route, navigation }) {
       auto_confirmed: autoConfirmed,
     });
     // Phase 1.5 2단계: ops Match 미러링 (실패해도 로컬 진행 무영향)
-    opsApply({ campaign, appealText: appeal.trim(), autoConfirmed });
     // 신청 완료 전용 화면(시안)으로 이동 — 신청 후 활성 시딩 수 = 기존 카운트 + 1
     navigation.navigate('ApplyDone', {
       campaignId: campaign.id,

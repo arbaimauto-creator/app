@@ -2,6 +2,8 @@
 // enum: applied → approved → shipped → received → reviewing → done
 //       approved → cancelled (무페널티) / received → no_show (Strike)
 import Preference from 'react-native-default-preference';
+import FEATURES from '../Components/Constants/Features';
+import { opsGetSeedings } from './opsBridge';
 
 const KEY = 'seedingsV2';
 
@@ -18,14 +20,32 @@ export const SEEDING_STATUS = {
 
 export async function getSeedings() {
   const raw = await Preference.get(KEY);
-  if (!raw) {
-    return {};
+  let local = {};
+  if (raw) {
+    try {
+      local = JSON.parse(raw);
+    } catch (e) {
+      local = {};
+    }
   }
-  try {
-    return JSON.parse(raw);
-  } catch (e) {
-    return {};
+  if (FEATURES.LIVE_OPS_API) {
+    try {
+      const remote = await opsGetSeedings();
+      for (const seeding of remote) {
+        if (!seeding?.campaignId) continue;
+        local[seeding.campaignId] = {
+          ...(local[seeding.campaignId] || {}),
+          ...seeding,
+        };
+      }
+      await Preference.set(KEY, JSON.stringify(local));
+    } catch (e) {
+      if (__DEV__) {
+        console.log('ops seedings sync failed, using local state', e?.message);
+      }
+    }
   }
+  return local;
 }
 
 async function persist(seedings) {

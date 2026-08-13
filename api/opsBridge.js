@@ -3,7 +3,7 @@
 // 미전송분은 주간 수동 브리지(29번 플랜)가 잡는다. 3단계(토큰 인증)에서 정본이 ops로 넘어간다.
 import Preference from 'react-native-default-preference';
 import FEATURES from '../Components/Constants/Features';
-import { opsPost } from './opsClient';
+import { opsGet, opsPost } from './opsClient';
 import { getCreatorProfile } from './creators';
 import { toChannelPayload } from './channels';
 
@@ -52,20 +52,33 @@ export async function opsSyncProfile(profile) {
 
 // 신청 → ops Match 생성 (수동 브리지 ① 대체). 제안 수락도 autoConfirmed=true로 동일 경로.
 export async function opsApply({ campaign, appealText, autoConfirmed }) {
+  if (!FEATURES.LIVE_OPS_API) {
+    return null;
+  }
   const [greydAppId, profile] = await Promise.all([getGreydAppId(), getCreatorProfile()]);
-  await safePost(
-    '/apply',
-    {
-      campaignId: campaign.id,
-      greydAppId,
-      handle: profile?.handleUrl ?? null,
-      country: profile?.country ?? null,
-      appealText: appealText ?? null,
-      applyMode: campaign.applyMode,
-      autoConfirmed: autoConfirmed === true,
-    },
-    'apply',
-  );
+  return opsPost('/apply', {
+    campaignId: campaign.id,
+    greydAppId,
+    handle: profile?.handleUrl ?? null,
+    country: profile?.country ?? null,
+    appealText: appealText ?? null,
+    applyMode: campaign.applyMode,
+    autoConfirmed: autoConfirmed === true,
+  });
+}
+
+// ops에는 아직 /seedings 라우트가 없다 (있는 것: auth·campaigns·offers·profile·
+// apply·received·upload). 매 호출마다 404를 받아 던지고 있어서, 진행 목록을 읽는
+// 모든 화면(Activity·홈 할 일·캠페인 상세)이 불필요한 왕복과 예외를 겪었다.
+// 서버에 라우트가 생기면 이 상수를 켠다.
+const OPS_SEEDINGS_ROUTE_READY = false;
+
+export async function opsGetSeedings() {
+  if (!FEATURES.LIVE_OPS_API || !OPS_SEEDINGS_ROUTE_READY) {
+    return [];
+  }
+  const response = await opsGet('/seedings');
+  return Array.isArray(response?.seedings) ? response.seedings : [];
 }
 
 // 수령 확인 → ops Shipment DELIVERED (수동 브리지 ② 일부 대체)
