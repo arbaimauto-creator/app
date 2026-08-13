@@ -2153,4 +2153,9 @@ export default {
   HOME_HERO_CLOSES: (n) => (n <= 0 ? 'closes today' : `closes in ${n} days`),
   HOME_HERO_SHIPS: (c) => `ships to ${c}`,
   APPLYDONE_PROGRESS: 'Progress',
+  HOME_HERO_FEATURED: 'FEATURED',
+  HOME_HERO_SPOTS_TAKEN: (taken, total) => `${taken} of ${total} spots taken`,
+  HOME_DO_NEXT: 'DO THIS NEXT',
+  HOME_MADE_THIS: (n) => `${n} made this`,
+  CAMPAIGN_OPEN: 'OPEN',
 };

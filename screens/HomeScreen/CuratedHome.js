@@ -19,7 +19,7 @@ import APIprovider from '../../Components/APIprovider';
 import Constants from '../../Components/Constants';
 import T from '../../Components/Constants/DesignTokens';
 import Strings from '../../Components/Strings';
-import { Badge, Card, Chips, Wordmark } from '../../Components/UI';
+import { Badge, Card, Chips, ProgressBar, Wordmark } from '../../Components/UI';
 import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
 import { getCreatorProfile } from '../../api/creators';
 import { getSeedings, SEEDING_STATUS } from '../../api/seedings';
@@ -167,175 +167,260 @@ export default function CuratedHome({ navigation }) {
     navigation.navigate('VideoPage', { videoList: playable, videoId: item._id });
   };
 
+  const heroClosesIn = hero?.deadline ? daysUntil(hero.deadline) : null;
+  // 히어로 정원 소진률 — 시안 1c의 "28 of 40 spots taken" 진행바
+  const heroTotal = hero?.reviewersNeeded ?? hero?.quota ?? null;
+  const heroTaken = heroTotal != null ? Math.max(0, heroTotal - (hero?.remaining ?? 0)) : null;
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* 1. 헤더 */}
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        // 전면 히어로가 상태바까지 올라가므로 스크롤 인디케이터 여백도 위로 붙인다
+        contentInsetAdjustmentBehavior="never"
+      >
+        {/* 1c 전면 히어로 — 이미지가 화면 폭을 꽉 채우고 그 위에 헤더가 얹힌다.
+            아래 콘텐츠 시트가 이미지 위로 올라오며 상단 모서리만 둥글다. */}
+        <View style={styles.heroLayer} pointerEvents="none">
+          {hero?.thumbnailUrl ? (
+            <FastImage source={{ uri: hero.thumbnailUrl }} style={styles.heroImage} />
+          ) : (
+            <View style={[styles.heroImage, styles.heroFallback]} />
+          )}
+          {/* 위쪽은 헤더 글자가, 아래쪽은 시트 경계가 읽히도록 양방향 그라데이션 */}
+          <LinearGradient
+            colors={['rgba(244,244,244,0.92)', 'rgba(244,244,244,0.15)', 'rgba(244,244,244,0.85)']}
+            locations={[0, 0.42, 1]}
+            style={StyleSheet.absoluteFill}
+          />
+        </View>
+
+        {/* 헤더 — 히어로 위에 얹히므로 아이콘은 흰 원형 버튼 */}
         <View style={styles.headerRow}>
           <Wordmark size={17} />
           <View style={styles.headerIcons}>
-            <TouchableOpacity onPress={() => navigation.navigate('Search')} hitSlop={HIT_SLOP}>
+            <TouchableOpacity
+              style={styles.iconBtn}
+              onPress={() => navigation.navigate('Search')}
+              hitSlop={HIT_SLOP}
+            >
               <Text style={styles.headerIcon}>🔍</Text>
             </TouchableOpacity>
             <TouchableOpacity
+              style={styles.iconBtn}
               onPress={() => navigation.navigate('Notification')}
               hitSlop={HIT_SLOP}
             >
               <Text style={styles.headerIcon}>🔔</Text>
+              {todos.length > 0 ? <View style={styles.iconDot} /> : null}
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* 2. 할 일 스트립 — 없으면 숨김 */}
-        {todos.length > 0 ? (
-          <TouchableOpacity
-            style={styles.todoStrip}
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate('Activity')}
-          >
-            <Text style={styles.todoText} numberOfLines={1}>
-              {Strings.HOME_TODO(todos.length, todos[0].summary)}
-            </Text>
-            <Text style={styles.todoChevron}>›</Text>
-          </TouchableOpacity>
-        ) : null}
-
-        {/* 3. 히어로 — 첫 Open 캠페인 */}
+        {/* 히어로 위 텍스트 — 뱃지 2개 + 큰 제목 */}
         {hero ? (
-          <TouchableOpacity activeOpacity={0.85} onPress={() => openCampaign(hero)}>
-            <View style={styles.hero}>
-              {hero.thumbnailUrl ? (
-                <FastImage source={{ uri: hero.thumbnailUrl }} style={styles.heroImage} />
-              ) : (
-                <View style={[styles.heroImage, styles.heroFallback]} />
-              )}
-              <LinearGradient
-                colors={['rgba(20,14,4,0)', 'rgba(20,14,4,0.72)']}
-                style={styles.heroOverlay}
-              />
-              <View style={styles.heroBody}>
-                <Badge tone="open" text={Strings.HOME_HERO_SPOTS(hero.remaining)} />
-              </View>
+          <View style={styles.heroText}>
+            <View style={styles.heroBadges}>
+              <Badge tone="amber" text={Strings.HOME_HERO_FEATURED} />
+              {heroClosesIn != null ? (
+                <Badge tone="curated" text={Strings.HOME_HERO_CLOSES(heroClosesIn)} />
+              ) : null}
             </View>
-            {/* 시안: 제목·조건은 이미지 위 글자가 아니라 아래 흰 카드로 내린다.
-                밝은 썸네일에서도 읽히고, 신청 판단에 필요한 세 가지를 한 줄로 준다. */}
-            <View style={styles.heroCard}>
-              <Text style={styles.heroCardTitle} numberOfLines={2}>
-                {hero.title}
-              </Text>
-              <Text style={styles.heroMeta} numberOfLines={1}>
-                {[
-                  Strings.HOME_HERO_CREATORS(hero.remaining),
-                  hero.deadline ? Strings.HOME_HERO_CLOSES(daysUntil(hero.deadline)) : null,
-                  (hero.countries || []).length
-                    ? Strings.HOME_HERO_SHIPS((hero.countries || []).join('/'))
-                    : null,
-                ]
-                  .filter(Boolean)
-                  .join(' · ')}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        ) : null}
+            <Text style={styles.heroTitle} numberOfLines={2}>
+              {hero.title}
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.heroTextEmpty} />
+        )}
 
-        {/* 4. 지금 신청 가능 */}
-        {miniCampaigns.length > 0 ? (
-          <>
-            <View style={styles.sectionRow}>
-              <Text style={styles.sectionTitle}>{Strings.HOME_APPLY_OPEN_NOW}</Text>
-              <TouchableOpacity onPress={() => navigation.navigate('Try')} hitSlop={HIT_SLOP}>
-                <Text style={styles.sectionLink}>{Strings.HOME_SEE_ALL} ›</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.miniRow}>
-              {miniCampaigns.map((campaign) => {
-                const isCurated = campaign.applyMode === 'curated';
-                const locked = isCurated && !curatedUnlocked;
-                const points = personalizedPoints(
-                  campaign.basePoints ?? campaign.rewardPoint,
-                  gScore,
-                );
-                const sub = locked
-                  ? `🔒 G${CURATED_MIN_G} · ${points}P~`
-                  : isCurated
-                    ? `Curated · ${points}P`
-                    : `Open · ${points}P`;
-                return (
-                  <TouchableOpacity
-                    key={campaign.id}
-                    style={styles.miniTouch}
-                    activeOpacity={0.85}
-                    disabled={locked}
-                    onPress={() => openCampaign(campaign)}
-                  >
-                    <Card style={[styles.miniCard, locked && styles.miniLocked]}>
-                      <FastImage source={{ uri: campaign.thumbnailUrl }} style={styles.miniThumb} />
-                      <View style={styles.miniBody}>
-                        <Text style={styles.miniTitle} numberOfLines={1}>
-                          {campaign.title}
+        {/* 콘텐츠 시트 — 여기부터는 일반 배경 위 카드들 */}
+        <View style={styles.sheet}>
+          {hero ? (
+            <TouchableOpacity activeOpacity={0.9} onPress={() => openCampaign(hero)}>
+              <Card>
+                <Text style={styles.heroMeta} numberOfLines={1}>
+                  {[
+                    hero.brand,
+                    (hero.countries || []).length
+                      ? Strings.HOME_HERO_SHIPS((hero.countries || []).join(' / '))
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </Text>
+                <View style={styles.heroApplyRow}>
+                  <View style={styles.heroApplyLeft}>
+                    {heroTotal ? (
+                      <>
+                        <ProgressBar ratio={heroTaken / heroTotal} style={styles.heroBar} />
+                        <Text style={styles.xs}>
+                          {Strings.HOME_HERO_SPOTS_TAKEN(heroTaken, heroTotal)}
                         </Text>
-                        <Text style={styles.miniSub} numberOfLines={1}>
-                          {sub}
-                        </Text>
+                      </>
+                    ) : (
+                      <Text style={styles.xs}>{Strings.HOME_HERO_SPOTS(hero.remaining)}</Text>
+                    )}
+                  </View>
+                  <View style={styles.applyBtn}>
+                    <Text style={styles.applyBtnText}>{Strings.CAMPAIGN_APPLY}</Text>
+                  </View>
+                </View>
+              </Card>
+            </TouchableOpacity>
+          ) : null}
+
+          {/* DO THIS NEXT — 할 일이 있을 때만. 오른쪽 원에 D-N */}
+          {todos.length > 0 ? (
+            <TouchableOpacity
+              style={styles.nextStrip}
+              activeOpacity={0.85}
+              onPress={() => navigation.navigate('Activity')}
+            >
+              <View style={styles.nextBody}>
+                <Text style={styles.nextLabel}>{Strings.HOME_DO_NEXT}</Text>
+                <Text style={styles.nextTitle} numberOfLines={1}>
+                  {todos[0].summary}
+                </Text>
+              </View>
+              <View style={styles.nextDday}>
+                <Text style={styles.nextDdayText}>D-{todos[0].d ?? 0}</Text>
+              </View>
+            </TouchableOpacity>
+          ) : null}
+
+          {/* Open now — 가로 스크롤 카드 */}
+          {miniCampaigns.length > 0 ? (
+            <>
+              <View style={styles.sectionRow}>
+                <Text style={styles.sectionTitle}>{Strings.HOME_APPLY_OPEN_NOW}</Text>
+                <TouchableOpacity onPress={() => navigation.navigate('Try')} hitSlop={HIT_SLOP}>
+                  <Text style={styles.sectionLink}>{Strings.HOME_SEE_ALL} ›</Text>
+                </TouchableOpacity>
+              </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.openRow}
+              >
+                {miniCampaigns.map((campaign) => {
+                  const isCurated = campaign.applyMode === 'curated';
+                  const locked = isCurated && !curatedUnlocked;
+                  const points = personalizedPoints(
+                    campaign.basePoints ?? campaign.rewardPoint,
+                    gScore,
+                  );
+                  return (
+                    <TouchableOpacity
+                      key={campaign.id}
+                      activeOpacity={0.85}
+                      disabled={locked}
+                      onPress={() => openCampaign(campaign)}
+                    >
+                      <View style={[styles.openCard, locked && styles.openLocked]}>
+                        <View style={styles.openThumbWrap}>
+                          <FastImage
+                            source={{ uri: campaign.thumbnailUrl }}
+                            style={styles.openThumb}
+                          />
+                          <Badge
+                            tone={locked ? 'curated' : 'amber'}
+                            text={locked ? `🔒 G${CURATED_MIN_G}` : Strings.CAMPAIGN_OPEN}
+                            style={styles.openBadge}
+                          />
+                        </View>
+                        <View style={styles.openBody}>
+                          <Text style={styles.openTitle} numberOfLines={2}>
+                            {campaign.title}
+                          </Text>
+                          <Text style={styles.xs} numberOfLines={1}>
+                            {locked
+                              ? Strings.CURATED_LOCKED_HINT(CURATED_MIN_G)
+                              : `${Strings.CAMPAIGN_REMAINING(campaign.remaining)} · +${points}P`}
+                          </Text>
+                        </View>
                       </View>
-                    </Card>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </>
-        ) : null}
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            </>
+          ) : null}
 
-        {/* 5. 지금 뜨는 리뷰 — 로드 실패 시 섹션 숨김 */}
-        {videos !== null ? (
-          <>
-            <View style={styles.sectionRow}>
-              <Text style={styles.sectionTitle}>{Strings.HOME_TRENDING}</Text>
-              <TouchableOpacity onPress={() => openFeed(videos[0])} hitSlop={HIT_SLOP}>
-                <Text style={styles.sectionLink}>{Strings.HOME_GO_FEED} ▶</Text>
-              </TouchableOpacity>
-            </View>
-            {videosLoading ? (
-              <ActivityIndicator color={COLORS.AMBER} style={styles.gridLoading} />
-            ) : (
-              <View style={styles.grid}>
-                {videos.map((item, index) => (
-                  <TouchableOpacity
-                    key={item._id}
-                    style={styles.gridItem}
-                    activeOpacity={0.85}
-                    onPress={() => openFeed(item)}
-                  >
-                    <View style={[styles.gridThumbWrap, { height: GRID_HEIGHTS[index % 4] }]}>
-                      <FastImage source={{ uri: gridThumbUrl(item) }} style={styles.gridThumb} />
-                      {reviewScore(item) ? (
-                        <Badge
-                          tone="amber"
-                          text={`✓ ${reviewScore(item)}`}
-                          style={styles.gridBadge}
-                        />
-                      ) : null}
-                      <Text style={styles.gridTitle} numberOfLines={1}>
-                        {item.title}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                ))}
+          {/* Trending reviews — 좌우 2열, 높이를 달리해 리듬을 준다 */}
+          {videos !== null ? (
+            <>
+              <View style={styles.sectionRow}>
+                <Text style={styles.sectionTitle}>{Strings.HOME_TRENDING}</Text>
+                <TouchableOpacity onPress={() => openFeed(videos[0])} hitSlop={HIT_SLOP}>
+                  <Text style={styles.sectionLink}>{Strings.HOME_GO_FEED} ▶</Text>
+                </TouchableOpacity>
               </View>
-            )}
+              {videosLoading ? (
+                <ActivityIndicator color={COLORS.AMBER} style={styles.gridLoading} />
+              ) : (
+                <View style={styles.columns}>
+                  {[0, 1].map((col) => (
+                    <View key={col} style={styles.column}>
+                      {videos
+                        .filter((_, i) => i % 2 === col)
+                        .map((item, i) => (
+                          <TouchableOpacity
+                            key={item._id}
+                            activeOpacity={0.85}
+                            onPress={() => openFeed(item)}
+                          >
+                            <View style={styles.reviewCard}>
+                              <View
+                                style={[
+                                  styles.reviewThumbWrap,
+                                  { height: GRID_HEIGHTS[(col * 2 + i) % 4] + 40 },
+                                ]}
+                              >
+                                <FastImage
+                                  source={{ uri: gridThumbUrl(item) }}
+                                  style={styles.reviewThumb}
+                                />
+                                {reviewScore(item) ? (
+                                  <Badge
+                                    tone="amber"
+                                    text={`✓ ${reviewScore(item)}`}
+                                    style={styles.reviewBadge}
+                                  />
+                                ) : null}
+                              </View>
+                              <View style={styles.reviewBody}>
+                                <Text style={styles.reviewTitle} numberOfLines={2}>
+                                  {item.titleByCountry || item.title}
+                                </Text>
+                                {/* 하트 대신 인용 수 — 이 리뷰를 보고 몇 명이 만들었는가 */}
+                                {item.relayedVideoCount > 0 ? (
+                                  <Text style={styles.reviewMade}>
+                                    {Strings.HOME_MADE_THIS(item.relayedVideoCount)}
+                                  </Text>
+                                ) : null}
+                              </View>
+                            </View>
+                          </TouchableOpacity>
+                        ))}
+                    </View>
+                  ))}
+                </View>
+              )}
 
-            {/* 6. 카테고리 칩 */}
-            <Chips
-              style={styles.chips}
-              items={[
-                { key: 'all', label: Strings.HOME_CATEGORY_ALL },
-                ...Constants.CATEGORY_LIST.map(({ key, title }) => ({ key, label: title })),
-              ]}
-              selected={category}
-              onSelect={setCategory}
-            />
-          </>
-        ) : null}
+              <Chips
+                style={styles.chips}
+                items={[
+                  { key: 'all', label: Strings.HOME_CATEGORY_ALL },
+                  ...Constants.CATEGORY_LIST.map(({ key, title }) => ({ key, label: title })),
+                ]}
+                selected={category}
+                onSelect={setCategory}
+              />
+            </>
+          ) : null}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -343,88 +428,158 @@ export default function CuratedHome({ navigation }) {
 
 const HIT_SLOP = { top: 8, bottom: 8, left: 8, right: 8 };
 
+const HERO_H = 380; // 시안 1c: 390×420 기준을 세로 여백에 맞춰 축소
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.BG, paddingTop: T.TOP_INSET },
-  content: { paddingHorizontal: 16, paddingTop: 10, paddingBottom: 28, gap: 9 },
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  headerIcons: { flexDirection: 'row', gap: 14 },
-  headerIcon: { fontSize: 15 },
-  todoStrip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.AMBER_SOFT,
-    borderRadius: 9,
-    paddingVertical: 7,
-    paddingHorizontal: 11,
-  },
-  todoText: {
-    flex: 1,
-    fontFamily: T.FONT.Bold,
-    fontSize: 10.5,
-    color: COLORS.AMBER_DEEP,
-  },
-  todoChevron: { fontFamily: T.FONT.Bold, fontSize: 13, color: COLORS.AMBER_DEEP, marginLeft: 6 },
-  hero: { height: 118, borderRadius: 14, overflow: 'hidden' },
+  container: { flex: 1, backgroundColor: COLORS.BG },
+  // 히어로가 상태바 아래까지 올라오므로 컨테이너에는 인셋을 주지 않는다
+  content: { paddingBottom: 28 },
+
+  heroLayer: { position: 'absolute', top: 0, left: 0, right: 0, height: HERO_H },
   heroImage: { ...StyleSheet.absoluteFillObject },
   heroFallback: { backgroundColor: COLORS.TRACK },
-  heroOverlay: { ...StyleSheet.absoluteFillObject },
-  heroCard: {
-    backgroundColor: COLORS.SURFACE,
-    borderBottomLeftRadius: T.RADIUS.CARD,
-    borderBottomRightRadius: T.RADIUS.CARD,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    marginTop: -T.RADIUS.CARD,
-    paddingTop: 12 + T.RADIUS.CARD,
-  },
-  heroCardTitle: { ...TYPE.CARD_TITLE, fontSize: 15, lineHeight: 20 },
-  heroMeta: { ...TYPE.SUB, marginTop: 4 },
-  heroBody: { position: 'absolute', left: 13, right: 13, bottom: 11 },
-  heroTitle: {
-    fontFamily: T.FONT.ExtraBold,
-    fontSize: 14,
-    color: '#FFFFFF',
-    marginTop: 5,
-    lineHeight: 18,
-  },
-  sectionRow: {
+
+  headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 2,
+    paddingHorizontal: 16,
+    paddingTop: T.TOP_INSET + 4,
   },
-  sectionTitle: { fontFamily: T.FONT.Bold, fontSize: 13, color: COLORS.INK },
-  sectionLink: { ...TYPE.XS },
-  miniRow: { flexDirection: 'row', gap: 8 },
-  miniTouch: { flex: 1 },
-  miniCard: {
-    paddingVertical: 9,
-    paddingHorizontal: 10,
-    flexDirection: 'row',
+  headerIcons: { flexDirection: 'row', gap: 8 },
+  iconBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: COLORS.SURFACE,
+    borderWidth: 1,
+    borderColor: COLORS.LINE,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  miniLocked: { opacity: 0.75 },
-  miniThumb: { width: 34, height: 34, borderRadius: 8, backgroundColor: COLORS.TRACK },
-  miniBody: { flex: 1, marginLeft: 8 },
-  miniTitle: { fontFamily: T.FONT.Bold, fontSize: 11.5, color: COLORS.INK },
-  miniSub: { ...TYPE.XS, marginTop: 1 },
-  gridLoading: { marginVertical: 24 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-  gridItem: { width: '48.6%', marginBottom: 8 },
-  gridThumbWrap: { borderRadius: 10, overflow: 'hidden', backgroundColor: COLORS.TRACK },
-  gridThumb: { ...StyleSheet.absoluteFillObject },
-  gridBadge: { position: 'absolute', left: 7, top: 7 },
-  gridTitle: {
+  headerIcon: { fontSize: 14 },
+  iconDot: {
     position: 'absolute',
-    left: 8,
-    right: 8,
-    bottom: 7,
-    fontFamily: T.FONT.Bold,
-    fontSize: 10,
-    color: '#FFFFFF',
-    textShadowColor: 'rgba(0,0,0,0.5)',
+    top: 6,
+    right: 7,
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: COLORS.AMBER,
+    borderWidth: 1.5,
+    borderColor: COLORS.SURFACE,
+  },
+
+  // 히어로 위 텍스트 — 이미지 하단부에 놓이도록 위쪽을 비운다
+  heroText: { paddingHorizontal: 16, paddingTop: HERO_H - 210 },
+  heroTextEmpty: { height: 12 },
+  heroBadges: { flexDirection: 'row', gap: 7 },
+  heroTitle: {
+    fontFamily: T.FONT.ExtraBold,
+    fontSize: 26,
+    lineHeight: 32,
+    letterSpacing: -0.8,
+    color: COLORS.INK,
+    marginTop: 12,
+    textShadowColor: 'rgba(255,255,255,0.65)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
   },
-  chips: { marginTop: 2 },
+
+  // 콘텐츠 시트 — 이미지 위로 올라오며 상단 모서리만 둥글다
+  sheet: {
+    marginTop: 22,
+    backgroundColor: COLORS.BG,
+    borderTopLeftRadius: T.RADIUS.SHEET,
+    borderTopRightRadius: T.RADIUS.SHEET,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    gap: 10,
+  },
+
+  heroMeta: { ...TYPE.XS },
+  heroApplyRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 12 },
+  heroApplyLeft: { flex: 1 },
+  heroBar: { marginBottom: 7 },
+  xs: { ...TYPE.XS },
+  applyBtn: {
+    height: 38,
+    paddingHorizontal: 16,
+    borderRadius: T.RADIUS.BTN_SM,
+    backgroundColor: COLORS.AMBER,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  applyBtnText: { fontFamily: T.FONT.ExtraBold, fontSize: 13.5, color: COLORS.ON_AMBER },
+
+  nextStrip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: COLORS.AMBER_SOFT,
+    borderRadius: T.RADIUS.CARD,
+    padding: 13,
+  },
+  nextBody: { flex: 1 },
+  nextLabel: { fontFamily: T.FONT.Bold, fontSize: 11, color: COLORS.AMBER_DEEP },
+  nextTitle: { fontFamily: T.FONT.Bold, fontSize: 13, color: COLORS.INK, marginTop: 4 },
+  nextDday: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.SURFACE,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  nextDdayText: { fontFamily: T.FONT.ExtraBold, fontSize: 13, color: COLORS.INK },
+
+  sectionRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    marginTop: 14,
+  },
+  sectionTitle: {
+    fontFamily: T.FONT.ExtraBold,
+    fontSize: 20,
+    letterSpacing: -0.2,
+    color: COLORS.INK,
+  },
+  sectionLink: { ...TYPE.SUB, fontFamily: T.FONT.Bold },
+
+  openRow: { gap: 10, paddingVertical: 2, paddingRight: 16 },
+  openCard: {
+    width: 172,
+    backgroundColor: COLORS.SURFACE,
+    borderWidth: 1,
+    borderColor: COLORS.LINE,
+    borderRadius: T.RADIUS.CARD,
+    overflow: 'hidden',
+  },
+  openLocked: { opacity: 0.6 },
+  openThumbWrap: { height: 108, backgroundColor: COLORS.TRACK },
+  openThumb: { width: '100%', height: '100%' },
+  openBadge: { position: 'absolute', top: 8, left: 8 },
+  openBody: { paddingHorizontal: 12, paddingTop: 11, paddingBottom: 13 },
+  openTitle: { ...TYPE.CARD_TITLE, fontSize: 13, lineHeight: 17, height: 34 },
+
+  columns: { flexDirection: 'row', gap: 10, marginTop: 10 },
+  column: { flex: 1, gap: 10 },
+  reviewCard: {
+    backgroundColor: COLORS.SURFACE,
+    borderWidth: 1,
+    borderColor: COLORS.LINE,
+    borderRadius: T.RADIUS.CARD,
+    overflow: 'hidden',
+  },
+  reviewThumbWrap: { backgroundColor: COLORS.TRACK },
+  reviewThumb: { width: '100%', height: '100%' },
+  reviewBadge: { position: 'absolute', top: 8, left: 8 },
+  reviewBody: { paddingHorizontal: 11, paddingTop: 10, paddingBottom: 12 },
+  reviewTitle: { ...TYPE.CARD_TITLE, fontSize: 12.5, lineHeight: 17 },
+  reviewMade: { ...TYPE.XS, marginTop: 6 },
+
+  gridLoading: { marginVertical: 24 },
+  chips: { marginTop: 16 },
 });
+

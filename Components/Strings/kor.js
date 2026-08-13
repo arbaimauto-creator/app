@@ -2070,4 +2070,9 @@ export default {
   HOME_HERO_CLOSES: (n) => (n <= 0 ? '오늘 마감' : `${n}일 후 마감`),
   HOME_HERO_SHIPS: (c) => `${c} 배송`,
   APPLYDONE_PROGRESS: '진행 상황',
+  HOME_HERO_FEATURED: '추천',
+  HOME_HERO_SPOTS_TAKEN: (taken, total) => `${total}자리 중 ${taken}자리 찼어요`,
+  HOME_DO_NEXT: '다음에 할 일',
+  HOME_MADE_THIS: (n) => `${n}명이 참고했어요`,
+  CAMPAIGN_OPEN: '모집중',
 };
