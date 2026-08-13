@@ -2048,4 +2048,21 @@ export default {
   REF_EMPTY_TITLE: '아직 저장한 리뷰가 없어요',
   REF_EMPTY_DESC: '리뷰에서 저장을 누르면 여기에 모입니다.',
   REF_TIMES_REFERENCED: '참고된 횟수',
+
+  // 시안 고도화 (리뷰 상세 평가 카드 · 캠페인 약속 그리드 · 신청 완료 타임라인)
+  REVIEW_RATING_TITLE: '6개 항목 평가',
+  CAMPAIGN_COMMIT_TITLE: '약속하는 것',
+  CAMPAIGN_COMMIT_RECEIVE: '받는 것',
+  CAMPAIGN_COMMIT_DEADLINE: '게시 기한',
+  CAMPAIGN_COMMIT_PLATFORM: '플랫폼',
+  CAMPAIGN_COMMIT_SHIPS: '배송 국가',
+  CAMPAIGN_COMMIT_FREE: '무료',
+  CAMPAIGN_COMMIT_DAYS: (n) => `${n}일 이내`,
+  CAMPAIGN_COMMIT_PLATFORM_VALUE: '인스타 또는 틱톡',
+  APPLY_STEP_SENT: '신청 전송',
+  APPLY_STEP_REVIEW: '브랜드 검토 · 최대 3일',
+  APPLY_STEP_SHIP: '제품 배송',
+  APPLY_STEP_POST: (n) => `D+${n}일 이내 리뷰 게시`,
+  APPLY_TRACK_CTA: 'Activity에서 확인하기',
+  APPLY_KEEP_BROWSING: '다른 캠페인 더 보기',
 };

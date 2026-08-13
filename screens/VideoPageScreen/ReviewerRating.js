@@ -1,135 +1,114 @@
 import React from 'react';
 import T from '../../Components/Constants/DesignTokens';
-import { Dimensions, StyleSheet, Text, View } from 'react-native';
-import Constants from '../../Components/Constants';
-import CustomRating from '../../Components/CustomComponents/CustomRating';
-import Strings, { getLanguage } from '../../Components/Strings';
+import { StyleSheet, Text, View } from 'react-native';
+import Strings from '../../Components/Strings';
 
-const width = Dimensions.get('window').width;
-const RatingSection = React.memo(({ label, ratingScore, selectedIcon, emptyIcon }) => (
-  <View style={styles.ratingSectionContainer}>
-    <Text style={styles.performanceRating} numberOfLines={1}>
-      {label}
-    </Text>
-    <CustomRating
-      rated={ratingScore}
-      totalCount={5}
-      size={20}
-      type="custom"
-      selectedIconImage={selectedIcon}
-      emptyIconImage={emptyIcon}
-    />
-    <Text
-      style={[
-        styles.reviewerRating,
-        {
-          color: ratingScore ? T.COLORS.INK : T.COLORS.GREY,
-        },
-      ]}
-    >
-      {ratingScore ? ratingScore : 0}
-    </Text>
-  </View>
-));
+const { COLORS, RADIUS, FONT } = T;
+
+// 시안(greyd App.html · Review detail)의 "Rated on 6 points" 카드.
+// 별 아이콘 6줄 대신 라벨 · 막대 · 숫자 한 줄로 읽히게 바꿨다.
+//
+// 주의: 시안은 0~10 척도(Evidence 9.4 …)를 쓰지만, 서버에 저장된 p6Score는
+// 0~5 상품 평가(브랜드·품질·실용성…)다. 라벨만 시안대로 갈아끼우면 측정한 적 없는
+// 값을 다른 이름으로 보여주는 셈이라, 숫자와 축은 그대로 두고 구조만 옮긴다.
+// 리뷰 품질 6축(Evidence·Usage window·Specificity·Balance·Production·Disclosure)은
+// 채점이 서버에서 나와야 하므로 ops 연동 후 교체한다.
+const MAX = 5;
+
+function RatingRow({ label, score }) {
+  const value = typeof score === 'number' ? score : 0;
+  const ratio = Math.max(0, Math.min(1, value / MAX));
+  return (
+    <View style={styles.row}>
+      <Text style={styles.label} numberOfLines={1}>
+        {label}
+      </Text>
+      <View style={styles.track}>
+        <View style={[styles.fill, { width: `${ratio * 100}%` }]} />
+      </View>
+      <Text style={[styles.score, !value && styles.scoreEmpty]}>{value ? value.toFixed(1) : '—'}</Text>
+    </View>
+  );
+}
 
 function ReviewerRating({ context }) {
   const { video } = context.state;
+  const p6 = video?.p6Score;
 
-  const defaultRating = 5;
-  // Rendering the P6 ratings if they exist
+  if (!p6) {
+    const single = video?.linkedProduct?.uploaderRating;
+    if (!single) {
+      return null;
+    }
+    return (
+      <View style={styles.card}>
+        <RatingRow label={Strings.REVIEW_RATING_TITLE} score={single} />
+      </View>
+    );
+  }
+
+  const rows = [
+    [Strings.P6_BRAND, p6.brand],
+    [Strings.P6_MERCHANTABILITY, p6.merchantabilityRating],
+    [Strings.P6_PRACTICALITY, p6.practicality],
+    [Strings.P6_CONVENIENCE, p6.convenience],
+    [Strings.P6_DESIGN, p6.design],
+    [Strings.P6_REASONABILITY, p6.reasonabilityRating],
+  ];
 
   return (
-    <View style={styles.reviewerRatingContainer}>
-      {video.p6Score ? (
-        <>
-          <RatingSection
-            label={Strings.P6_BRAND}
-            ratingScore={video?.p6Score?.brand || defaultRating}
-            selectedIcon={require('../../Resources/img/iconRenewal/icBadgeStoreStarOn14_.png')}
-            emptyIcon={require('../../Resources/img/iconRenewal/icBadgeStoreStarOff14.png')}
-          />
-          <RatingSection
-            label={Strings.P6_MERCHANTABILITY}
-            ratingScore={video?.p6Score?.merchantabilityRating || defaultRating}
-            selectedIcon={require('../../Resources/img/iconRenewal/icBadgeStoreStarOn14_.png')}
-            emptyIcon={require('../../Resources/img/iconRenewal/icBadgeStoreStarOff14.png')}
-          />
-          <RatingSection
-            label={Strings.P6_PRACTICALITY}
-            ratingScore={video?.p6Score?.practicality || defaultRating}
-            selectedIcon={require('../../Resources/img/iconRenewal/icBadgeStoreStarOn14_.png')}
-            emptyIcon={require('../../Resources/img/iconRenewal/icBadgeStoreStarOff14.png')}
-          />
-          <RatingSection
-            label={Strings.P6_CONVENIENCE}
-            ratingScore={video?.p6Score?.convenience || defaultRating}
-            selectedIcon={require('../../Resources/img/iconRenewal/icBadgeStoreStarOn14_.png')}
-            emptyIcon={require('../../Resources/img/iconRenewal/icBadgeStoreStarOff14.png')}
-          />
-          <RatingSection
-            label={Strings.P6_DESIGN}
-            ratingScore={video?.p6Score?.design || defaultRating}
-            selectedIcon={require('../../Resources/img/iconRenewal/icBadgeStoreStarOn14_.png')}
-            emptyIcon={require('../../Resources/img/iconRenewal/icBadgeStoreStarOff14.png')}
-          />
-          <RatingSection
-            label={Strings.P6_REASONABILITY}
-            ratingScore={video?.p6Score?.reasonabilityRating || defaultRating}
-            selectedIcon={require('../../Resources/img/iconRenewal/icBadgeStoreStarOn14_.png')}
-            emptyIcon={require('../../Resources/img/iconRenewal/icBadgeStoreStarOff14.png')}
-          />
-        </>
-      ) : (
-        <View style={styles.simpleRatingContainer}>
-          <CustomRating
-            rated={video?.linkedProduct?.uploaderRating}
-            totalCount={5}
-            size={14}
-            type="custom"
-            selectedIconImage={require('../../Resources/img/iconRenewal/icBadgeStoreStarOn14_.png')}
-            emptyIconImage={require('../../Resources/img/iconRenewal/icBadgeStoreStarOff14.png')}
-          />
-          <Text style={styles.reviewerRating}>{video?.linkedProduct?.uploaderRating}</Text>
-        </View>
-      )}
+    <View style={styles.card}>
+      <Text style={styles.cardTitle}>{Strings.REVIEW_RATING_TITLE}</Text>
+      {rows.map(([label, score]) => (
+        <RatingRow key={label} label={label} score={score} />
+      ))}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  reviewerRatingContainer: {
-    width: width - 40,
-    marginVertical: 30,
+  card: {
     marginHorizontal: 20,
-    alignSelf: 'flex-start',
+    marginVertical: 22,
+    backgroundColor: COLORS.SURFACE,
+    borderWidth: 1,
+    borderColor: COLORS.LINE,
+    borderRadius: RADIUS.CARD,
+    padding: 16,
   },
-  ratingSectionContainer: {
-    width: width - 40,
-    flexDirection: 'row',
-    marginVertical: 4,
+  cardTitle: {
+    fontFamily: FONT.Bold,
+    fontSize: 11,
+    letterSpacing: 0.6,
+    color: COLORS.GREY,
+    textTransform: 'uppercase',
+    marginBottom: 12,
   },
-  performanceRating: {
-    marginRight: 8,
-    marginBottom: 8,
-    width: getLanguage() === 'ko' ? '15%' : '30%',
-    fontSize: 16,
-    color: T.COLORS.INK,
-    fontFamily: Constants.CUSTOM_FONTS.PRETENDARD.Medium,
+  row: { flexDirection: 'row', alignItems: 'center', marginVertical: 5 },
+  label: {
+    width: 104,
+    fontFamily: FONT.Medium,
+    fontSize: 12.5,
+    color: COLORS.INK,
   },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  track: {
+    flex: 1,
+    height: 6,
+    borderRadius: 6,
+    backgroundColor: COLORS.TRACK,
+    overflow: 'hidden',
   },
-  reviewerRating: {
-    color: T.COLORS.INK,
-    fontFamily: Constants.CUSTOM_FONTS.PRETENDARD.Medium,
-    fontSize: 16,
-    marginLeft: 8,
+  fill: { height: 6, borderRadius: 6, backgroundColor: COLORS.AMBER },
+  score: {
+    width: 34,
+    textAlign: 'right',
+    fontFamily: FONT.ExtraBold,
+    fontSize: 13,
+    color: COLORS.INK,
+    // 숫자 열이 흔들리지 않게
+    fontVariant: ['tabular-nums'],
   },
-  simpleRatingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+  scoreEmpty: { color: COLORS.GREY, fontFamily: FONT.Regular },
 });
 
 export default ReviewerRating;

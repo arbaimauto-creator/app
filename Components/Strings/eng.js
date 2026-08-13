@@ -2131,4 +2131,21 @@ export default {
   REF_EMPTY_TITLE: 'Nothing saved yet',
   REF_EMPTY_DESC: 'Tap Save on a review to keep it here as a reference.',
   REF_TIMES_REFERENCED: 'Times referenced',
+
+  // 시안 고도화 (리뷰 상세 평가 카드 · 캠페인 약속 그리드 · 신청 완료 타임라인)
+  REVIEW_RATING_TITLE: 'Rated on 6 points',
+  CAMPAIGN_COMMIT_TITLE: 'What you commit to',
+  CAMPAIGN_COMMIT_RECEIVE: 'You receive',
+  CAMPAIGN_COMMIT_DEADLINE: 'Post within',
+  CAMPAIGN_COMMIT_PLATFORM: 'Platform',
+  CAMPAIGN_COMMIT_SHIPS: 'Ships to',
+  CAMPAIGN_COMMIT_FREE: 'Free',
+  CAMPAIGN_COMMIT_DAYS: (n) => `${n} days`,
+  CAMPAIGN_COMMIT_PLATFORM_VALUE: 'IG or TikTok',
+  APPLY_STEP_SENT: 'Application sent',
+  APPLY_STEP_REVIEW: 'Brand review · up to 3 days',
+  APPLY_STEP_SHIP: 'Product ships',
+  APPLY_STEP_POST: (n) => `Post review by D+${n}`,
+  APPLY_TRACK_CTA: 'Track it in Activity',
+  APPLY_KEEP_BROWSING: 'Keep browsing campaigns',
 };

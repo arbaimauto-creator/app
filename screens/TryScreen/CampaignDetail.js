@@ -178,12 +178,42 @@ export default function CampaignDetail({ route, navigation }) {
             <Text style={styles.approvalNote}>{Strings.APPLY_AVG_APPROVAL}</Text>
           </Card>
 
+          {/* 시안: "What you commit to" — 신청 전에 무엇을 받고 무엇을 해야 하는지
+              네 칸으로 먼저 못박는다. 가이드 문장보다 이게 앞에 와야 한다. */}
+          <Card style={styles.commitCard}>
+            <Text style={styles.commitTitle}>{Strings.CAMPAIGN_COMMIT_TITLE}</Text>
+            <View style={styles.commitGrid}>
+              <View style={styles.commitCell}>
+                <Text style={styles.commitLabel}>{Strings.CAMPAIGN_COMMIT_RECEIVE}</Text>
+                <Text style={styles.commitValue}>{Strings.CAMPAIGN_COMMIT_FREE}</Text>
+              </View>
+              <View style={styles.commitCell}>
+                <Text style={styles.commitLabel}>{Strings.CAMPAIGN_COMMIT_DEADLINE}</Text>
+                <Text style={styles.commitValue}>
+                  {Strings.CAMPAIGN_COMMIT_DAYS(campaign.postWithinDays ?? 14)}
+                </Text>
+              </View>
+              <View style={styles.commitCell}>
+                <Text style={styles.commitLabel}>{Strings.CAMPAIGN_COMMIT_PLATFORM}</Text>
+                <Text style={styles.commitValue}>{Strings.CAMPAIGN_COMMIT_PLATFORM_VALUE}</Text>
+              </View>
+              <View style={styles.commitCell}>
+                <Text style={styles.commitLabel}>{Strings.CAMPAIGN_COMMIT_SHIPS}</Text>
+                <Text style={styles.commitValue} numberOfLines={1}>
+                  {(campaign.countries || []).join(' / ') || '—'}
+                </Text>
+              </View>
+            </View>
+          </Card>
+
           {Array.isArray(campaign.contentGuide) && campaign.contentGuide.length > 0 ? (
             <Card style={styles.guideCard}>
-              {campaign.contentGuide.map((g) => (
-                <Text key={g} style={styles.guideItem}>
-                  · {g}
-                </Text>
+              {/* 시안처럼 번호를 매긴다 — 순서가 곧 촬영 순서다 */}
+              {campaign.contentGuide.map((g, i) => (
+                <View key={g} style={styles.guideRow}>
+                  <Text style={styles.guideNum}>{i + 1}</Text>
+                  <Text style={styles.guideItem}>{g}</Text>
+                </View>
               ))}
             </Card>
           ) : null}
@@ -251,8 +281,35 @@ const styles = StyleSheet.create({
     color: COLORS.GREEN,
     marginTop: 6,
   },
+  commitCard: { marginBottom: 10 },
+  commitTitle: {
+    ...TYPE.LABEL,
+    fontSize: 11,
+    letterSpacing: 0.6,
+    color: COLORS.GREY,
+    textTransform: 'uppercase',
+    marginBottom: 10,
+  },
+  commitGrid: { flexDirection: 'row', flexWrap: 'wrap' },
+  commitCell: { width: '50%', paddingVertical: 7, paddingRight: 8 },
+  commitLabel: { ...TYPE.XS, marginBottom: 3 },
+  commitValue: { ...TYPE.CARD_TITLE, fontSize: 13.5 },
   guideCard: { marginBottom: 10 },
-  guideItem: { ...TYPE.BODY, lineHeight: 21 },
+  guideRow: { flexDirection: 'row', alignItems: 'flex-start', marginVertical: 3 },
+  guideNum: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: COLORS.AMBER_SOFT,
+    color: COLORS.AMBER_DEEP,
+    fontFamily: T.FONT.ExtraBold,
+    fontSize: 10.5,
+    textAlign: 'center',
+    lineHeight: 18,
+    marginRight: 9,
+    overflow: 'hidden',
+  },
+  guideItem: { ...TYPE.BODY, lineHeight: 21, flex: 1 },
   appealInput: {
     marginTop: 4,
     borderWidth: 1,

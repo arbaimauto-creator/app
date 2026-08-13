@@ -1,4 +1,5 @@
 import { useRoute } from '@react-navigation/native';
+import FEATURES from './Constants/Features';
 import T from './Constants/DesignTokens';
 import dayjs from 'dayjs';
 import { PureComponent, useContext } from 'react';
@@ -39,6 +40,12 @@ function ProductPrice({ product, doubleLines, KRWPerUSD }) {
   } = useRoute();
 
   if (!product.productId) {
+    return <View />;
+  }
+
+  // 커머스 숨김(v2 §D5): 가격 블록 전체를 플래그 뒤로. 리뷰 상세의 연결 상품 카드가
+  // 이 경로를 타면서 "Sign in and Check Lowest Price"가 계속 노출되고 있었다.
+  if (!FEATURES.COMMERCE) {
     return <View />;
   }
 
