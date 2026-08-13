@@ -169,7 +169,6 @@ function MainScreen(props) {
   const global = useContext(Context);
   const carousel = useRef(null);
   const scrollViewRef = useRef(null);
-  const productListRef = useRef(null);
   const userListRef = useRef(null);
   const { navigation } = props;
 
@@ -214,7 +213,6 @@ function MainScreen(props) {
   const [videoListRecentEntireCount, setVideoListRecentEntireCount] = useState(0);
 
   // const [videoListTrending, setVideoListTrending] = useState([]);
-  const [discountedProductList, setDiscountedProductList] = useState([]);
   const [userListRecommended, setUserListRecommended] = useState([]);
   const [currentListType, setCurrentListType] = useState([]);
 
@@ -341,9 +339,6 @@ function MainScreen(props) {
 
       setVideoLists(lists);
 
-      const storeItems = await APIprovider.getStoreMain(20);
-      onStoreItemLoaded(storeItems);
-
       // TODO: 유저 선별은 서버에서 가능하도록 수정 필요, 200명은 아님.
       const userItems = await APIprovider.getUserList(
         Constants.USER_LIST_LATEST_RECOMMENDED,
@@ -357,7 +352,6 @@ function MainScreen(props) {
 
       videoListRef.recent?.current?.scrollToIndex({ index: 0 });
       // videoListRef['trending']?.current?.scrollToIndex({index: 0});
-      productListRef?.current?.scrollToIndex({ index: 0 });
       userListRef?.current?.scrollToIndex({ index: 0 });
     } catch (err) {
       setRefreshing(false);
@@ -492,10 +486,6 @@ function MainScreen(props) {
     if (index === focusedIndex) {
       setPreviewChanging(false);
     }
-  }
-
-  function onStoreItemLoaded({ specialPrice }) {
-    setDiscountedProductList(specialPrice.productList);
   }
 
   const MainVideoItem = ({ item, index }) => {
@@ -720,8 +710,6 @@ function MainScreen(props) {
         props.navigation.navigate('QNAChat', {
           qnaId: data.qnaId,
         });
-      } else if (data.type === 'store') {
-        props.navigation.navigate('Store');
       }
     };
     pushNotifications.setNotificationHandler(onPushNotification);

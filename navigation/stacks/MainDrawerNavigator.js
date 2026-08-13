@@ -13,31 +13,17 @@ import {
   AgreementToWithdrawalScreen,
   BlockedUserListScreen,
   BookmarkListScreen,
-  CartScreen,
   EditProfileScreen,
   EditSingleVideoScreen,
   FollowListScreen,
   G6Guide,
   HelpScreen,
-  MakeOrderScreen,
   MembershipWithdrawalPage,
-  MyOrderListScreen,
-  MyStoreScreen,
   NotificationScreen,
-  OrderListScreen,
-  OrderPageScreen,
-  OrderRejectionPage,
   PasswordInputScreen,
-  PayPaypalScreen,
-  PayScreen,
   ProductListScreen,
   ProductPageScreen,
-  PurchaseCancellationPage,
   QRScreen,
-  RegisterAsSellerApplicationScreen,
-  RegisterAsSellerScreen,
-  RegisterAsSellerSuccessScreen,
-  RevenueListScreen,
   RewardListScreen,
   SearchProductScreen,
   SearchScreen,
@@ -65,7 +51,6 @@ import OnboardingScreen from '../../Components/OnboardingScreen';
 import NoticeList from '../../Components/CustomComponents/Notice/NoticeList';
 import NoticeDetail from '../../Components/CustomComponents/Notice/NoticeDetail';
 import MustReadDetail from '../../screens/AddingNewVideoScreen/MustReadDetail';
-import GlobalMakeOrderScreen from '../../Components/GlobalMakeOrderScreen';
 import InviteGateScreen from '../../screens/InviteGateScreen';
 import CreatorOnboarding from '../../screens/InviteGateScreen/CreatorOnboarding';
 import FgiSurvey from '../../screens/TryScreen/FgiSurvey';
@@ -536,72 +521,6 @@ function MainDrawerNavigator({ route, navigation }) {
         }}
       />
       <Stack.Screen
-        name="OrderPage"
-        component={OrderPageScreen}
-        initialParams={initialParams}
-        options={{
-          ...headerBackButton,
-        }}
-      />
-      <Stack.Screen
-        name="OrderList"
-        component={OrderListScreen}
-        initialParams={initialParams}
-        options={{
-          ...headerBackButton,
-        }}
-      />
-      <Stack.Screen
-        name="MyOrderList"
-        component={MyOrderListScreen}
-        initialParams={initialParams}
-        options={{
-          ...headerBackButton,
-        }}
-      />
-      <Stack.Screen
-        name="Cart"
-        component={CartScreen}
-        initialParams={initialParams}
-        options={{
-          ...headerBackButton,
-        }}
-      />
-      <Stack.Screen
-        name="MakeOrder"
-        component={MakeOrderScreen}
-        initialParams={initialParams}
-        options={{
-          ...headerBackButton,
-        }}
-      />
-      <Stack.Screen
-        name="GlobalMakeOrder"
-        component={GlobalMakeOrderScreen}
-        initialParams={initialParams}
-        options={{
-          ...headerBackButton,
-        }}
-      />
-      <Stack.Screen
-        name="Pay"
-        component={PayScreen}
-        initialParams={initialParams}
-        options={{
-          // headerShown: null,
-          ...headerBackButton,
-        }}
-      />
-      <Stack.Screen
-        name="PayPaypal"
-        component={PayPaypalScreen}
-        initialParams={initialParams}
-        options={{
-          // headerShown: null,
-          ...headerBackButton,
-        }}
-      />
-      <Stack.Screen
         name="BookmarkList"
         component={BookmarkListScreen}
         initialParams={initialParams}
@@ -624,46 +543,6 @@ function MainDrawerNavigator({ route, navigation }) {
           ...headerBackButton
         }}/> */}
       <Stack.Screen
-        name="MyStore"
-        component={MyStoreScreen}
-        initialParams={initialParams}
-        options={{
-          ...headerBackButton,
-        }}
-      />
-      <Stack.Screen
-        name="RevenueList"
-        component={RevenueListScreen}
-        initialParams={initialParams}
-        options={{
-          ...headerBackButton,
-        }}
-      />
-      <Stack.Screen
-        name="RegisterAsSeller"
-        component={RegisterAsSellerScreen}
-        initialParams={initialParams}
-        options={{
-          ...headerBackButton,
-        }}
-      />
-      <Stack.Screen
-        name="RegisterAsSellerApplication"
-        component={RegisterAsSellerApplicationScreen}
-        initialParams={initialParams}
-        options={{
-          ...headerBackButton,
-        }}
-      />
-      <Stack.Screen
-        name="RegisterAsSellerSuccess"
-        component={RegisterAsSellerSuccessScreen}
-        initialParams={initialParams}
-        options={{
-          ...headerBackButton,
-        }}
-      />
-      <Stack.Screen
         name="Withdrawal"
         component={WithdrawalManagementScreen}
         initialParams={initialParams}
@@ -682,22 +561,6 @@ function MainDrawerNavigator({ route, navigation }) {
       <Stack.Screen
         name="WithdrawalRequest"
         component={WithdrawalRequestScreen}
-        initialParams={route.params}
-        options={{
-          ...headerBackButton,
-        }}
-      />
-      <Stack.Screen
-        name="PurchaseCancellation"
-        component={PurchaseCancellationPage}
-        initialParams={route.params}
-        options={{
-          ...headerBackButton,
-        }}
-      />
-      <Stack.Screen
-        name="OrderRejection"
-        component={OrderRejectionPage}
         initialParams={route.params}
         options={{
           ...headerBackButton,

@@ -10,7 +10,6 @@ import MyMaterialBottomTabNavigator from '../../../Components/MyMaterialBottomTa
 import { capitalizeFirstLetter } from '../../../Components/utils';
 import DiscoverNavigator from '../navigator/DiscoverNavigator';
 import HomeNavigator from '../navigator/HomeNavigator';
-import ProductsNavigator from '../navigator/ProductsNavigator';
 import TryNavigator from '../navigator/TryNavigator';
 import ActivityNavigator from '../navigator/ActivityNavigator';
 import { tabBarIcon, tabBarLabel } from './renderTabBar';
@@ -158,23 +157,6 @@ function BottomTabNavigator({ route, navigation }) {
         initialParams={initialParams}
       /> */}
       {/* 커머스 숨김(v2 §D5): 라우트는 유지하되 COMMERCE 플래그가 꺼지면 탭에서 제외 */}
-      {FEATURES.COMMERCE ? (
-        <Tab.Screen
-          name="Store"
-          component={ProductsNavigator}
-          listeners={() => ({
-            tabPress: (e) => {
-              FastImage.clearMemoryCache();
-
-              if (Platform.OS !== 'ios') {
-                StatusBar.setBackgroundColor(T.COLORS.BG);
-                StatusBar.setBarStyle('dark-content', true);
-              }
-            },
-          })}
-          initialParams={initialParams}
-        />
-      ) : null}
       <Tab.Screen
         name="Try"
         component={TryNavigator}
