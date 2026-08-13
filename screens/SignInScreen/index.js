@@ -139,7 +139,15 @@ class SignInScreen extends React.Component {
         // userName 확인을 await하지 않으면 게스트 로그아웃(NotSignedIn 리셋)과
         // 아래 MainBottom 리셋이 경쟁해 비결정적으로 동작한다.
         const userName = await Preference.get('userName');
-        if (userName && (userName === 'greyd.guest' || userName === 'Guest')) {
+        // 게스트는 원래 부팅 때마다 로그아웃시킨다(클로즈드 앱 원칙 — 계정 없이 상태가
+        // 쌓이면 안 된다). 문제는 menuLogout이 로컬 데이터까지 지운다는 것: 테스트
+        // 빌드에서 게스트로 신청해 두고 앱을 재시작하면 진행 중인 미션이 통째로 사라져
+        // 수령·업로드 단계를 확인할 수 없었다. TEST_GUEST_ENTRY가 켜진 동안만 유지한다.
+        if (
+          userName &&
+          (userName === 'greyd.guest' || userName === 'Guest') &&
+          !FEATURES.TEST_GUEST_ENTRY
+        ) {
           return menuLogout(this.props);
         }
         this.props.changeGuestStatus(false);

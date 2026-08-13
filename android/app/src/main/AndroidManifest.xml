@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
   <uses-permission android:name="android.permission.INTERNET"/>
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+  <!-- 업로드 D-day 리마인더(로컬 알림 예약)용. Android 12~13은 선언만으로 허용,
+       14+는 기본 거부라 JS쪽에서 API 34+는 예약을 건너뛴다 (reminders.js) -->
+  <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
   <uses-permission android:name="com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE" />
   <uses-permission android:name="com.android.vending.CHECK_LICENSE" />
   <uses-permission android:name="com.google.android.gms.permission.AD_ID" />

@@ -50,6 +50,8 @@ const STATUS_LABEL = () => ({
 // 운영 수동 전이(승인·발송)를 에뮬레이터에서 확인하기 위한 개발 전용 시뮬 버튼
 const DEV_NEXT = {
   [SEEDING_STATUS.APPLIED]: SEEDING_STATUS.APPROVED,
+  // 운영이 운송장을 넣으면 넘어가는 단계 — 앱에서 수령 버튼을 보려면 여기까지 와야 한다
+  [SEEDING_STATUS.APPROVED]: SEEDING_STATUS.SHIPPED,
   [SEEDING_STATUS.SHIPPED]: null, // 수령은 사용자 버튼
   [SEEDING_STATUS.REVIEWING]: SEEDING_STATUS.DONE,
 };
@@ -284,7 +286,9 @@ export default function ActivityScreen({ navigation, route }) {
 
   // 개발용 운영 시뮬: 다음 상태로 전이 + done 시 보상/G-스코어 반영
   const devAdvance = async (seeding) => {
-    if (!__DEV__) {
+    // 릴리스 번들로 실기기/에뮬 검증할 때도 운영 전이(승인·발송)를 흉내 내야 한다.
+    // TEST_GUEST_ENTRY가 켜진 테스트 빌드에서만 열리고, 스토어 배포 시 함께 닫힌다.
+    if (!__DEV__ && !FEATURES.TEST_GUEST_ENTRY) {
       return;
     }
     const next =
