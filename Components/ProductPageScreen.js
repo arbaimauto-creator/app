@@ -903,61 +903,10 @@ function B2BInquiryButton({ context }) {
 }
 
 function PurchaseButton({ context }) {
-  const { product } = context.state;
-
   if (isB2B(context)) {
     return <B2BInquiryButton context={context} />;
   }
-
-  return (
-    <Button
-      containerStyle={styles.bottomButtonGroupButton}
-      buttonStyle={{
-        backgroundColor:
-          product.isAvailableToSale === false ||
-          product.availableNumberToSale === 0 ||
-          product.isRefundProductAlreadyBuy
-            ? '#999'
-            : Constants.COLOR_POINT_BLUE,
-        height: 45,
-      }}
-      titleStyle={{
-        color: Constants.COLOR_BACKGROUND_DARK,
-        fontSize: 18,
-        fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
-      }}
-      title={context.state.buyButtonPhrase}
-      onPress={() => {
-        if (isGuestUser(context.props.route.params.logonUserId)) {
-          return LogoutAlert(context.props);
-        }
-        if (
-          product.isAvailableToSale === false ||
-          product.availableNumberToSale === 0 ||
-          product.isRefundProductAlreadyBuy
-        ) {
-          if (product.isRefundProductAlreadyBuy) {
-            Alert.alert(
-              Strings.REFUND_PRODUCT_ALREADY_BOUGHT_TITLE,
-              Strings.REFUND_PRODUCT_ONLY_ONCE,
-              [{ text: Strings.OK }],
-              {
-                cancelable: true,
-              },
-            );
-            return;
-          }
-
-          Alert.alert(Strings.NOT_AVAILABLE_PRODUCT_TO_SALE, '', [{ text: Strings.OK }], {
-            cancelable: true,
-          });
-          return;
-        }
-        LayoutAnimation.easeInEaseOut();
-        context.setState({ isShowPurchaseUI: true });
-      }}
-    />
-  );
+  return null;
 }
 
 function ReviewButton({ context }) {
@@ -2416,7 +2365,6 @@ export default class ProductPageScreen extends React.Component {
             </View>
           )}
           {/* B2B는 구매 팝업 없이 문의 화면으로만 이동한다 */}
-          {!this.props.isB2B && <PurchasePopup context={this} />}
           <CommentModal context={this} />
           <ReportModal
             visible={this.state.isInvalidContents}

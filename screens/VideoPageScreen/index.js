@@ -1699,10 +1699,6 @@ class VideoPageScreen extends React.PureComponent {
 
           {/* 하단 고정 구매 바 제거 — 오버레이의 상품 카드가 구매 진입점 (틱톡/릴스 스타일).
               구매 팝업은 오버레이의 구매 버튼이 연다. */}
-          {!this.state.video.linkedProduct.externalLink &&
-          this.state.video.linkedProduct.productId ? (
-            <PurchasePopup context={this} />
-          ) : null}
         </KeyboardAvoidingView>
       </>
     );

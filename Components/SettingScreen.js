@@ -10,7 +10,6 @@ import { getStatusBarHeight } from 'react-native-safearea-height';
 import APIprovider from './APIprovider';
 import Constants from './Constants';
 import T from './Constants/DesignTokens';
-import FEATURES from './Constants/Features';
 import HeaderLeftBackButton from './CustomComponents/headerBackButton/headerLeftBackButton';
 import Strings from './Strings';
 import { menuLogout } from './utils/index';
@@ -18,10 +17,6 @@ import { moderateScale } from './utils/scailing';
 
 let toastRef;
 export default class SettingScreen extends React.Component {
-  menuRegisterSeller = function () {
-    this.props.navigation.navigate('RegisterAsSeller');
-  };
-
   menuBlockedUserList = function () {
     this.props.navigation.navigate('BlockedUserList');
   };
@@ -31,11 +26,6 @@ export default class SettingScreen extends React.Component {
     this.props.navigation.navigate('EditProfile', {
       ...this.props.route.params, // expected user data
     });
-  };
-
-  menuOrderList = function () {
-    this.props.navigation.pop();
-    this.props.navigation.navigate('MyOrderList');
   };
 
   menuHelp = function () {
@@ -110,19 +100,6 @@ export default class SettingScreen extends React.Component {
     //   onPress: this.menuQRCode.bind(this),
     // });
     // 커머스 숨김(v2 §D5): 주문 내역·셀러 등록은 플래그가 꺼지면 메뉴에서 제외한다.
-    if (FEATURES.COMMERCE) {
-      list.push({
-        title: Strings.MY_ORDER_LIST,
-        onPress: this.menuOrderList.bind(this),
-      });
-    }
-    if (FEATURES.COMMERCE && this.state.isSeller === 'false') {
-      list.push({
-        title: Strings.REGISTER_SELLER,
-        //        icon: <IconFontAwesome5 size={20} name="user-tie" color="#000" style={{marginRight:4}}/>,
-        onPress: this.menuRegisterSeller.bind(this),
-      });
-    }
     list.push({
       title: Strings.BLOCKED_ACCOUNT,
       //      icon: <IconFontAwesome5 size={18} name={"user-edit"} color={'#000'} style={{}} />,
