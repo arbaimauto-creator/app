@@ -21,7 +21,7 @@ import Strings from '../../Components/Strings';
 import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
 import { getSeedings, setSeedingStatus, upsertSeeding, SEEDING_STATUS } from '../../api/seedings';
 import { logEvent } from '../../api/common/analytics';
-import { getCreatorProfile, saveCreatorProfile } from '../../api/creators';
+import { getCreatorProfile, refreshServerStats, saveCreatorProfile } from '../../api/creators';
 import { referralCodesFor } from '../../api/referral';
 import {
   personalizedPoints,
@@ -322,6 +322,7 @@ export default function ActivityScreen({ navigation, route }) {
           };
       if (!alreadyGranted) {
         await saveCreatorProfile(nextProfile);
+        refreshServerStats(); // 서버 지급분과 수렴하도록 캐시 무효화
       }
       const completedSeedings = await setSeedingStatus(seeding.campaignId, next);
       const withReward = await upsertSeeding(seeding.campaignId, {

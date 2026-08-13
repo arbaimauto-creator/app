@@ -67,11 +67,21 @@ export async function opsApply({ campaign, appealText, autoConfirmed }) {
   });
 }
 
+// 내 스탯 정본 조회 (G-스코어·스트라이크·완주 수·포인트 잔액).
+// Bearer 세션이면 신원이 토큰에 있고, 공유키 폴백이면 greydAppId를 쿼리로 싣는다.
+export async function opsGetMe() {
+  if (!FEATURES.LIVE_OPS_API) {
+    return null;
+  }
+  const greydAppId = await getGreydAppId();
+  return opsGet(`/me?greydAppId=${encodeURIComponent(greydAppId)}`);
+}
+
 // ops에는 아직 /seedings 라우트가 없다 (있는 것: auth·campaigns·offers·profile·
 // apply·received·upload). 매 호출마다 404를 받아 던지고 있어서, 진행 목록을 읽는
 // 모든 화면(Activity·홈 할 일·캠페인 상세)이 불필요한 왕복과 예외를 겪었다.
 // 서버에 라우트가 생기면 이 상수를 켠다.
-const OPS_SEEDINGS_ROUTE_READY = false;
+const OPS_SEEDINGS_ROUTE_READY = true;
 
 export async function opsGetSeedings() {
   if (!FEATURES.LIVE_OPS_API || !OPS_SEEDINGS_ROUTE_READY) {

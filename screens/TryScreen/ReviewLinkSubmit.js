@@ -25,6 +25,7 @@ import { getSeedings, upsertSeeding, setSeedingStatus, SEEDING_STATUS } from '..
 import { daysLeft } from '../ActivityScreen/missionLogic';
 import { cancelUploadReminders } from '../ActivityScreen/reminders';
 import { opsUpload } from '../../api/opsBridge';
+import { refreshServerStats } from '../../api/creators';
 import { logEvent } from '../../api/common/analytics';
 
 const { COLORS, RADIUS, FONT, TYPE } = T;
@@ -124,6 +125,8 @@ export default function ReviewLinkSubmit({ route, navigation }) {
       logEvent('review_link_submit', { campaign_id: campaignId, format });
       // Phase 1.5: ops Content + POSTED 미러링 (수동 브리지 ③ 대체)
       opsUpload(campaignId, platformUrl, format);
+      // 서버가 업로드 시점에 완주 보상을 지급한다 — 다음 프로필 조회에서 새 잔액을 읽게 한다
+      refreshServerStats();
       Alert.alert(Strings.REVIEW_SUBMIT_DONE_TITLE, Strings.REVIEW_SUBMIT_DONE_BODY, [
         {
           text: Strings.OK,
