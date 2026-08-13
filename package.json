@@ -3,9 +3,12 @@
   "version": "1.4.3",
   "private": true,
   "scripts": {
+    "preandroid": "node scripts/generate-ops-config.js",
     "android": "react-native run-android",
+    "preios": "node scripts/generate-ops-config.js",
     "ios": "react-native run-ios",
     "lint": "eslint .",
+    "prestart": "node scripts/generate-ops-config.js",
     "start": "node --max-old-space-size=8192 node_modules/react-native/cli.js start --reset-cache",
     "test": "jest",
     "postinstall": "npx patch-package",
@@ -18,7 +21,7 @@
     "iosxm": "npm run ios -- --simulator='iPhone Xs Max'",
     "codepush-aos": "appcenter codepush release-react -a greyd/greyd_android --mandatory -d Production",
     "codepush-ios": "appcenter codepush release-react -a greyd/greyd_ios --mandatory -d Production",
-    "eas-build-pre-install": "corepack enable"
+    "eas-build-pre-install": "node scripts/generate-ops-config.js && corepack enable"
   },
   "dependencies": {
     "@invertase/react-native-apple-authentication": "^2.3.0",

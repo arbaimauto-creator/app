@@ -83,8 +83,9 @@ export async function fetchCampaignList() {
   if (FEATURES.LIVE_OPS_API) {
     try {
       const res = await opsGet('/campaigns');
-      if (Array.isArray(res?.campaigns) && res.campaigns.length > 0) {
-        return res.campaigns;
+      const campaigns = res?.items || res?.campaigns;
+      if (Array.isArray(campaigns)) {
+        return campaigns;
       }
     } catch (e) {
       // 실패 시 mock 폴백 (27번 설계 §10) — 조용히 폴백하되 dev에선 로그

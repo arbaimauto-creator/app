@@ -2,9 +2,8 @@
 // 인증: 게이트 인증(/auth) 후엔 장수명 Bearer 토큰(3단계), 그 전엔 간이 공유키.
 // 키·도메인은 릴리스 설정 시 채운다. (react-native-config 미사용 프로젝트라 상수로 관리)
 import Preference from 'react-native-default-preference';
+import { OPS_API_BASE, OPS_APP_KEY } from './opsRuntimeConfig';
 
-const OPS_API_BASE = 'https://greyd-ops.vercel.app/api/mobile'; // 배포 도메인 확정 시 수정
-const OPS_APP_KEY = ''; // GREYD_APP_MOBILE_KEY — 키 설정 전엔 LIVE_OPS_API를 켜지 말 것
 const TIMEOUT_MS = 8000;
 
 export async function setOpsToken(token) {
@@ -13,7 +12,9 @@ export async function setOpsToken(token) {
 
 async function authHeaders() {
   const token = await Preference.get('opsToken');
-  return token ? { Authorization: `Bearer ${token}` } : { 'x-greyd-app-key': OPS_APP_KEY };
+  if (token) return { Authorization: `Bearer ${token}` };
+  if (!OPS_APP_KEY) throw new Error('GREYD_APP_MOBILE_KEY is not configured');
+  return { 'x-greyd-app-key': OPS_APP_KEY };
 }
 
 // 4xx/5xx는 status를 담아 던진다 — 호출부가 reason 분기(게이트) 또는 무시(브리지)한다

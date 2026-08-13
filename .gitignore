@@ -74,6 +74,7 @@ buck-out/
 vendor/
 # 환경변수 (비밀값)
 .env
+api/opsRuntimeConfig.js
 
 # Sentry auth token (보안 감사 2026-08-10 — 로컬 전용)
 android/sentry.properties
