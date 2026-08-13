@@ -2148,4 +2148,5 @@ export default {
   APPLY_STEP_POST: (n) => `Post review by D+${n}`,
   APPLY_TRACK_CTA: 'Track it in Activity',
   APPLY_KEEP_BROWSING: 'Keep browsing campaigns',
+  REF_SAVED_COUNT: (n) => `${n} saved`,
 };

@@ -59,6 +59,8 @@ import BrandWelcome from '../../screens/InviteGateScreen/BrandWelcome';
 import AddressBook from '../../screens/MyScreen/AddressBook';
 import AboutScreen from '../../screens/MyScreen/AboutScreen';
 import GreydSettingsScreen from '../../screens/MyScreen/SettingsScreen';
+import ReferenceListScreen from '../../Components/ReferenceListScreen';
+import FEATURES from '../../Components/Constants/Features';
 import ApplyDone from '../../screens/TryScreen/ApplyDone';
 import MissionDone from '../../screens/ActivityScreen/MissionDone';
 import FirstImpression from '../../screens/ActivityScreen/FirstImpression';
@@ -522,11 +524,15 @@ function MainDrawerNavigator({ route, navigation }) {
       />
       <Stack.Screen
         name="BookmarkList"
-        component={BookmarkListScreen}
+        // 커머스가 꺼진 동안 북마크는 "내 레퍼런스"다 — 상품 탭이 있는 레거시 화면
+        // 대신 저장한 리뷰 그리드를 보여준다. COMMERCE를 켜면 원래 화면으로 돌아간다.
+        component={FEATURES.COMMERCE ? BookmarkListScreen : ReferenceListScreen}
         initialParams={initialParams}
-        options={{
-          ...headerBackButton,
-        }}
+        // 레퍼런스 화면은 자체 헤더(뒤로가기 + 제목 + 개수)를 그린다 —
+        // 기본 헤더를 켜두면 "BookmarkList"가 위에 겹친다.
+        options={
+          FEATURES.COMMERCE ? { ...headerBackButton } : { headerShown: false }
+        }
       />
       <Stack.Screen
         name="RewardList"

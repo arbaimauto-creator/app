@@ -2065,4 +2065,5 @@ export default {
   APPLY_STEP_POST: (n) => `D+${n}일 이내 리뷰 게시`,
   APPLY_TRACK_CTA: 'Activity에서 확인하기',
   APPLY_KEEP_BROWSING: '다른 캠페인 더 보기',
+  REF_SAVED_COUNT: (n) => `${n}개 저장됨`,
 };
