@@ -35,17 +35,18 @@ function CampaignCard({ campaign, applied, gScore, completedCount, onPress }) {
   const points = personalizedPoints(campaign.basePoints ?? campaign.rewardPoint, gScore);
   const bonus = points - (campaign.basePoints ?? campaign.rewardPoint);
 
-  const trackBadge = isCurated
-    ? { tone: 'curated', text: locked ? '🔒 Curated' : 'Curated' }
-    : {
-        tone: 'open',
-        text: !closed ? `Open · ${Strings.CAMPAIGN_FIRST_COME(campaign.remaining)}` : 'Open',
-      };
-  const pointBadge = closed
-    ? { tone: 'curated', text: Strings.CAMPAIGN_CLOSED }
-    : applied
-      ? { tone: 'curated', text: Strings.CAMPAIGN_APPLIED }
-      : { tone: locked ? 'curated' : 'amber', text: `+${points}P` };
+  // 시안: 상태가 카드 맨 위에 온다. 내가 신청한 건지 마감된 건지를
+  // 목록에서 훑을 때 바로 보여야 한다 (예전엔 하단 포인트 자리에 있었다).
+  const trackBadge = applied
+    ? { tone: 'curated', text: Strings.CAMPAIGN_APPLIED }
+    : closed
+      ? { tone: 'curated', text: Strings.CAMPAIGN_CLOSED }
+      : isCurated
+        ? { tone: 'curated', text: locked ? '🔒 Curated' : 'Curated' }
+        : { tone: 'open', text: `Open · ${Strings.CAMPAIGN_FIRST_COME(campaign.remaining)}` };
+  // 포인트는 아직 신청할 수 있을 때만 의미가 있다
+  const pointBadge =
+    closed || applied ? null : { tone: locked ? 'curated' : 'amber', text: `+${points}P` };
 
   return (
     <TouchableOpacity activeOpacity={0.85} onPress={onPress} disabled={closed}>
@@ -66,12 +67,12 @@ function CampaignCard({ campaign, applied, gScore, completedCount, onPress }) {
             </Text>
           </View>
         </View>
-        <View style={styles.pointRow}>
-          <Badge tone={pointBadge.tone} text={pointBadge.text} />
-          {!closed && !applied && bonus > 0 ? (
-            <Text style={styles.bonusText}>+{bonus}P</Text>
-          ) : null}
-        </View>
+        {pointBadge ? (
+          <View style={styles.pointRow}>
+            <Badge tone={pointBadge.tone} text={pointBadge.text} />
+            {bonus > 0 ? <Text style={styles.bonusText}>+{bonus}P</Text> : null}
+          </View>
+        ) : null}
         {locked ? (
           <NoteBox
             tone="amber"

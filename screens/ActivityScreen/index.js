@@ -348,6 +348,15 @@ export default function ActivityScreen({ navigation, route }) {
           seeding.status === SEEDING_STATUS.CANCELLED && styles.cancelledCard,
         ]}
       >
+        {/* 시안: 남은 기한을 카드 맨 위에 D-N으로. 목록을 훑을 때 급한 것부터 보인다.
+            3일 이하면 빨강, 유예 중이면 별도 표시. 기한이 없는 단계(신청·검토)는 생략. */}
+        {typeof left === 'number' && left >= 0 && !grace ? (
+          <Badge
+            tone={left <= 3 ? 'red' : 'curated'}
+            text={`D-${left}`}
+            style={styles.dDayBadge}
+          />
+        ) : null}
         <View style={styles.missionHeader}>
           <Text style={styles.missionTitle} numberOfLines={1}>
             {campaign.title}
@@ -599,6 +608,7 @@ const styles = StyleSheet.create({
 
   // 진행 카드
   mission: { marginBottom: 10 },
+  dDayBadge: { alignSelf: 'flex-start', marginBottom: 8 },
   missionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   missionTitle: { ...TYPE.CARD_TITLE, flex: 1, marginRight: 10 },
   subInfo: { ...TYPE.SUB, marginTop: 8 },

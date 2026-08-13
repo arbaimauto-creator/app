@@ -134,7 +134,18 @@ export default function MyScreen({ navigation }) {
               ))}
             </View>
           ) : (
-            <Text style={[styles.xs, styles.mt4]}>{Strings.MY_REFERRAL_LOCKED_HINT}</Text>
+            <>
+              {/* 시안: 잠겨 있어도 코드 칸을 빈 상태로 보여준다. 문장만 있으면
+                  무엇이 열리는지 그려지지 않는다. */}
+              <View style={styles.codeRow}>
+                {[0, 1, 2].map((i) => (
+                  <View key={i} style={[styles.codeBox, styles.codeBoxLocked]}>
+                    <Text style={styles.codeDot}>•</Text>
+                  </View>
+                ))}
+              </View>
+              <Text style={[styles.xs, styles.mt4]}>{Strings.MY_REFERRAL_LOCKED_HINT}</Text>
+            </>
           )}
         </Card>
 
@@ -226,6 +237,12 @@ const styles = StyleSheet.create({
   pointValue: { fontFamily: FONT.ExtraBold, fontSize: 14, color: COLORS.AMBER_DEEP },
   mt4: { marginTop: 4 },
   codeRow: { flexDirection: 'row', gap: 7, marginTop: 10 },
+  codeBoxLocked: {
+    borderColor: COLORS.LINE,
+    borderStyle: 'solid',
+    backgroundColor: COLORS.BG,
+  },
+  codeDot: { fontFamily: FONT.Bold, fontSize: 15, color: COLORS.GREY },
   codeBox: {
     flex: 1,
     borderWidth: 1.5,
