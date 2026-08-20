@@ -11,7 +11,10 @@ import { trace } from '../bootTrace';
 // getInitialURL은 NavigationContainer가 자식 렌더 전에 await 한다.
 // 여기서 무응답이면 앱은 영원히 빈 화면이 되므로 반드시 상한을 둔다.
 const INITIAL_URL_TIMEOUT_MS = 3000;
-const DEFAULT_URL = 'mylinker://home';
+// A normal cold start is not a deep link. React Navigation expects null here;
+// returning an unregistered placeholder URL can build an invalid initial state
+// and leave the app on the fallback screen after a relaunch.
+const DEFAULT_URL = null;
 
 const config = {
   screens: {

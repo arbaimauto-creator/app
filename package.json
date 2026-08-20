@@ -3,14 +3,15 @@
   "version": "1.4.3",
   "private": true,
   "scripts": {
-    "preandroid": "node scripts/generate-ops-config.js",
+    "preandroid": "node scripts/generate-ops-config.js && node scripts/verify-release.js",
     "android": "react-native run-android",
-    "preios": "node scripts/generate-ops-config.js",
+    "preios": "node scripts/generate-ops-config.js && node scripts/verify-release.js",
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "prestart": "node scripts/generate-ops-config.js",
     "start": "node --max-old-space-size=8192 node_modules/react-native/cli.js start --reset-cache",
     "test": "jest",
+    "verify:release": "node scripts/verify-release.js",
     "postinstall": "npx patch-package",
     "ios12": "npm run ios -- --simulator='iPhone 12'",
     "ios12p": "npm run ios -- --simulator='iPhone 12 Pro'",
@@ -21,7 +22,7 @@
     "iosxm": "npm run ios -- --simulator='iPhone Xs Max'",
     "codepush-aos": "appcenter codepush release-react -a greyd/greyd_android --mandatory -d Production",
     "codepush-ios": "appcenter codepush release-react -a greyd/greyd_ios --mandatory -d Production",
-    "eas-build-pre-install": "node scripts/generate-ops-config.js && corepack enable"
+    "eas-build-pre-install": "node scripts/generate-ops-config.js && node scripts/verify-release.js && corepack enable"
   },
   "dependencies": {
     "@invertase/react-native-apple-authentication": "^2.3.0",

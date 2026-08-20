@@ -38,18 +38,25 @@ const Root = () => {
     // 실행 시점 권한 요청 금지 (D11): 알림은 수령 확인 직후 컨텍스트 프롬프트가 담당,
     // 국가는 게이트에서 직접 입력받는다. 위치는 이미 허용된 기기에서만 보조로 사용.
     if (Platform.OS === 'android') {
-      PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION).then(
-        (granted) => {
+      PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION)
+        .then((granted) => {
           if (granted) {
             setCountryFromLocation();
           }
-        },
-      );
+        })
+        .catch(() => trace('root:location-check-error'));
     } else {
-      setCountryFromLocation();
+      // Location is only supplemental. It must never block or crash startup.
+      try {
+        setCountryFromLocation();
+      } catch (e) {
+        trace('root:location-start-error');
+      }
     }
 
-    initializeFBPixel();
+    // Third-party SDK initialization is non-critical and may reject after a
+    // permission decision. Keep that rejection out of the boot path.
+    Promise.resolve(initializeFBPixel()).catch(() => trace('root:fb-pixel-error'));
 
     return () => clearTimeout(splashSafetyTimer);
   }, []);

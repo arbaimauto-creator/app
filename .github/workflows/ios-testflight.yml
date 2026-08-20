@@ -23,6 +23,16 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
+      - name: Run regression tests
+        run: yarn test --runInBand
+
+      - name: Verify release-critical configuration
+        env:
+          GREYD_APP_MOBILE_KEY: ${{ secrets.GREYD_APP_MOBILE_KEY }}
+        run: |
+          node scripts/generate-ops-config.js
+          yarn verify:release
+
       - name: Install EAS CLI
         run: npm install -g eas-cli
 
