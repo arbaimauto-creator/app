@@ -82,9 +82,3 @@ export async function saveCreatorProfile(profile) {
   await Preference.set(PROFILE_KEY, JSON.stringify(merged));
   return merged;
 }
-
-export async function adjustGScore(delta) {
-  const profile = (await getCreatorProfile()) || {};
-  const next = Math.max(0, (profile.gScore ?? 50) + delta);
-  return saveCreatorProfile({ ...profile, gScore: next });
-}

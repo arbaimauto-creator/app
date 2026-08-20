@@ -80,7 +80,7 @@ target 'greyd' do
     # iOS 13.4+ 설정
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
-        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.4'
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '16.0'
       end
     end
 

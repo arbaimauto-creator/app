@@ -25,8 +25,8 @@ export default class CameraScreen extends React.Component {
 
   componentDidMount() {
     this.props.navigation.navigate('AddingNewVideo', {
-      linkedProduct: this.props.route.params.linkedProduct,
-      relayingVideo: this.props.route.params.relayingVideo,
+      linkedProduct: this.props.route.params?.linkedProduct,
+      relayingVideo: this.props.route.params?.relayingVideo,
     });
     //    Utils.checkPermissionToAccessGallery()
     //    .then(() => this.openPicker())
@@ -49,16 +49,16 @@ export default class CameraScreen extends React.Component {
         if (duration < Constants.MAX_VIDEO_LENGTH) {
           this.props.navigation.navigate('AddingNewVideo', {
             video: respond.path,
-            linkedProduct: this.props.route.params.linkedProduct,
-            relayingVideo: this.props.route.params.relayingVideo,
+            linkedProduct: this.props.route.params?.linkedProduct,
+            relayingVideo: this.props.route.params?.relayingVideo,
           });
         } else {
           this.props.navigation.navigate('EditSingleVideo', {
             hideActivityIndicatorPreviousScreen: this.hideActivityIndicator.bind(this),
             video: respond,
-            linkedProduct: this.props.route.params.linkedProduct,
-            relayingVideo: this.props.route.params.relayingVideo,
-            onVideoSubmitted: this.props.route.params.onVideoSubmitted,
+            linkedProduct: this.props.route.params?.linkedProduct,
+            relayingVideo: this.props.route.params?.relayingVideo,
+            onVideoSubmitted: this.props.route.params?.onVideoSubmitted,
           });
         }
       })
@@ -74,7 +74,7 @@ export default class CameraScreen extends React.Component {
     const video = await this.camera.recordAsync();
     this.props.navigation.navigate('AddingNewVideo', {
       video: video,
-      linkedProduct: this.props.route.params.linkedProduct,
+      linkedProduct: this.props.route.params?.linkedProduct,
     });
   }
 

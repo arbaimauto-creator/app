@@ -80,16 +80,22 @@ async function resolveInitialURL() {
       user: { isGuest },
     } = store.getState();
 
-    if (isGuest && (dynamicLinkParams.startsWith('users') || dynamicLinkParams.startsWith('qnas'))) {
+    if (
+      isGuest &&
+      (dynamicLinkParams.startsWith('users') || dynamicLinkParams.startsWith('qnas'))
+    ) {
       return Alert.alert(Strings.LOGIN_REQUIRED_TITLE, Strings.LOGIN_REQUIRED_TO_VIEW_PAGE);
     }
 
-    const myUserId = await Preference.get('userId');
-    const myUserName = await Preference.get('userName');
-    const originalRequesterToken = await Preference.get('userAccessToken');
+    let myUserId = await Preference.get('userId');
+    let myUserName = await Preference.get('userName');
+    let originalRequesterToken = await Preference.get('userAccessToken');
 
     if (!myUserId || !myUserName || !originalRequesterToken) {
       await loginWithGuest();
+      myUserId = await Preference.get('userId');
+      myUserName = await Preference.get('userName');
+      originalRequesterToken = await Preference.get('userAccessToken');
       // return Alert.alert(
       //   '로그인 필요',
       //   '해당 페이지는 게스트모드 혹은 로그인 상태에서 확인 가능합니다.',
@@ -103,7 +109,7 @@ async function resolveInitialURL() {
       store.dispatch(setGuest({ isGuest: true }));
     }
 
-    if (originalRequesterToken) {
+    if (originalRequesterToken && myUserId) {
       APIprovider.setRequester(originalRequesterToken, myUserId);
     }
     /* 다이나믹 링크를 통해 들어왔을대 로그인 되도록 로직추가 */

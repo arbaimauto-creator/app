@@ -33,6 +33,8 @@ function BootFallback() {
 const Root = () => {
   trace('root:render');
   React.useEffect(() => {
+    const splashSafetyTimer = setTimeout(() => SplashScreen.hide(), 1800);
+
     // 실행 시점 권한 요청 금지 (D11): 알림은 수령 확인 직후 컨텍스트 프롬프트가 담당,
     // 국가는 게이트에서 직접 입력받는다. 위치는 이미 허용된 기기에서만 보조로 사용.
     if (Platform.OS === 'android') {
@@ -48,6 +50,8 @@ const Root = () => {
     }
 
     initializeFBPixel();
+
+    return () => clearTimeout(splashSafetyTimer);
   }, []);
 
   return (

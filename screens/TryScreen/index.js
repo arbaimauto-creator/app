@@ -159,8 +159,11 @@ export default function TryScreen({ navigation }) {
               SEEDING_STATUS.RECEIVED,
               SEEDING_STATUS.REVIEWING,
             ];
-            const activeCount = Object.values(seedings).filter((s) =>
-              activeStatuses.includes(s.status),
+            // 현재 캠페인 목록에 없는 잔여 시딩은 한도에서 제외 (CampaignDetail과 동일 기준)
+            const knownCampaignIds = new Set(campaigns.map((c) => c.id));
+            knownCampaignIds.add(offer.campaignId);
+            const activeCount = Object.values(seedings).filter(
+              (s) => activeStatuses.includes(s.status) && knownCampaignIds.has(s.campaignId),
             ).length;
             const limit = concurrentLimit(gScore, completedCount);
             if (activeCount >= limit) {

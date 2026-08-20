@@ -1,6 +1,7 @@
 // 신청 완료 (시안 화면 11) — 신청 직후 타임라인 안내.
 import React from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Preference from 'react-native-default-preference';
 import T from '../../Components/Constants/DesignTokens';
 import { Card, Btn, NoteBox } from '../../Components/UI';
 import Strings from '../../Components/Strings';
@@ -11,14 +12,13 @@ export default function ApplyDone({ navigation, route }) {
   const { campaignId, campaignTitle, applyMode, usedCount, limit, autoConfirmed } =
     route.params || {};
 
-  const openActivity = () => {
-    navigation.navigate('MainBottom', {
-      screen: 'Activity',
-      params: {
-        screen: 'ActivityHome',
-        params: autoConfirmed ? { openAddressFor: campaignId } : undefined,
-      },
-    });
+  const openActivity = async () => {
+    // 중첩 params({screen, params}) 전달은 커스텀 탭 내비게이터와 조합 시 무한
+    // 재디스패치를 일으킨다(ActivityScreen 참조) — Preference 핸드오프로 대체.
+    if (autoConfirmed) {
+      await Preference.set('pendingAddressFor', campaignId);
+    }
+    navigation.navigate('MainBottom', { screen: 'Activity' });
   };
 
   return (

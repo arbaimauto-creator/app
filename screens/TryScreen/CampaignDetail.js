@@ -16,7 +16,7 @@ import Strings from '../../Components/Strings';
 import FEATURES from '../../Components/Constants/Features';
 import T from '../../Components/Constants/DesignTokens';
 import { Card, Badge } from '../../Components/UI';
-import { applyToCampaign, selectMyApplications } from '../../slices/campaign';
+import { applyToCampaign, selectMyApplications, selectCampaigns } from '../../slices/campaign';
 import { isGuestUser, LogoutAlert } from '../../Components/utils';
 import { getCreatorProfile } from '../../api/creators';
 import { getSeedings, upsertSeeding, setSeedingStatus, SEEDING_STATUS } from '../../api/seedings';
@@ -31,6 +31,7 @@ export default function CampaignDetail({ route, navigation }) {
   const { campaign } = route.params;
   const dispatch = useDispatch();
   const applications = useSelector(selectMyApplications);
+  const campaignList = useSelector(selectCampaigns);
   const [hasSavedSeeding, setHasSavedSeeding] = useState(false);
   const applied = applications[campaign.id] != null || hasSavedSeeding;
 
@@ -104,8 +105,11 @@ export default function CampaignDetail({ route, navigation }) {
       SEEDING_STATUS.RECEIVED,
       SEEDING_STATUS.REVIEWING,
     ];
-    const activeCount = Object.values(seedings).filter((s) =>
-      activeStatuses.includes(s.status),
+    // 현재 캠페인 목록에 없는 시딩(과거 서버 동기화 잔여 등)은 화면에 보이지도,
+    // 취소할 수도 없으므로 한도 계산에서 제외한다 — 서버가 최종 재검증한다(§2-4).
+    const knownCampaignIds = new Set(campaignList.map((c) => c.id));
+    const activeCount = Object.values(seedings).filter(
+      (s) => activeStatuses.includes(s.status) && knownCampaignIds.has(s.campaignId),
     ).length;
     const limit = concurrentLimit(profile?.gScore ?? 50, profile?.completedCount ?? 0);
     if (activeCount >= limit) {

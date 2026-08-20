@@ -3,7 +3,7 @@
 //       approved → cancelled (무페널티) / received → no_show (Strike)
 import Preference from 'react-native-default-preference';
 import FEATURES from '../Components/Constants/Features';
-import { opsGetSeedings } from './opsBridge';
+import { opsGet } from './opsClient';
 
 const KEY = 'seedingsV2';
 
@@ -30,9 +30,12 @@ export async function getSeedings() {
   }
   if (FEATURES.LIVE_OPS_API) {
     try {
-      const remote = await opsGetSeedings();
+      const response = await opsGet('/seedings');
+      const remote = Array.isArray(response?.seedings) ? response.seedings : [];
       for (const seeding of remote) {
-        if (!seeding?.campaignId) continue;
+        if (!seeding?.campaignId) {
+          continue;
+        }
         local[seeding.campaignId] = {
           ...(local[seeding.campaignId] || {}),
           ...seeding,

@@ -5,6 +5,8 @@ import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactActivityDelegate;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import org.devio.rn.splashscreen.SplashScreen;
 
 public class MainActivity extends ReactActivity {
@@ -46,5 +48,6 @@ public class MainActivity extends ReactActivity {
     // https://github.com/software-mansion/react-native-screens#android
     // https://stackoverflow.com/questions/57709742/unable-to-instantiate-fragment-com-swmansion-rnscreens-screen
     super.onCreate(null);
+    new Handler(Looper.getMainLooper()).postDelayed(() -> SplashScreen.hide(this), 2500);
   }
 }

@@ -91,8 +91,15 @@ export default function ActivityScreen({ navigation, route }) {
         dispatch(fetchCampaigns());
       }
       reload();
-      const requestedCampaignId = route.params?.openAddressFor;
-      if (requestedCampaignId) {
+      // 신청 완료 화면의 "배송지 입력" CTA 딥링크. 중첩 navigate params({screen, params})는
+      // 커스텀 탭 내비게이터(MyMaterialBottomTabNavigator)와 조합 시 StackNavigator가
+      // 무한 재디스패치(Maximum update depth)에 빠지고 param도 도착하지 않아,
+      // Preference 1회성 핸드오프로 전달한다.
+      Preference.get('pendingAddressFor').then((requestedCampaignId) => {
+        if (!requestedCampaignId) {
+          return;
+        }
+        Preference.set('pendingAddressFor', '');
         getSeedings().then((saved) => {
           if (
             saved[requestedCampaignId]?.status === SEEDING_STATUS.APPROVED &&
@@ -100,12 +107,11 @@ export default function ActivityScreen({ navigation, route }) {
           ) {
             setAddressFor(requestedCampaignId);
           }
-          navigation.setParams({ openAddressFor: undefined });
         });
-      }
+      });
       // 마운트 시 1회 + 포커스마다
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [navigation, reload, route.params?.openAddressFor]),
+    }, [reload, campaigns.length]),
   );
 
   const campaignById = Object.fromEntries(campaigns.map((c) => [c.id, c]));

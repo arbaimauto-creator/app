@@ -41,7 +41,7 @@ const FEATURES = {
   TEST_GUEST_ENTRY: true,
 
   // ops 실연동 (Phase 1.5 롤아웃 1단계 — 캠페인 읽기). OFF면 전면 mock (현행 동일)
-  LIVE_OPS_API: true,
+  LIVE_OPS_API: false,
 };
 
 export default FEATURES;
