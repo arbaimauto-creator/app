@@ -23,15 +23,17 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
+      # opsRuntimeConfig.js는 생성 파일(커밋 금지)이라 테스트 전에 만들어야 한다
+      - name: Generate ops runtime config
+        env:
+          GREYD_APP_MOBILE_KEY: ${{ secrets.GREYD_APP_MOBILE_KEY }}
+        run: node scripts/generate-ops-config.js
+
       - name: Run regression tests
         run: yarn test --runInBand
 
       - name: Verify release-critical configuration
-        env:
-          GREYD_APP_MOBILE_KEY: ${{ secrets.GREYD_APP_MOBILE_KEY }}
-        run: |
-          node scripts/generate-ops-config.js
-          yarn verify:release
+        run: yarn verify:release
 
       - name: Install EAS CLI
         run: npm install -g eas-cli
