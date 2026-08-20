@@ -1,0 +1,44 @@
+name: ios-testflight
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-submit:
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Enable corepack (yarn 4)
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+
+      # 서명 인증서·프로비저닝 프로파일·빌드 번호는 모두 EAS 서버에
+      # 저장된 것을 그대로 사용한다 (EXPO_TOKEN만 있으면 됨).
+      - name: Build iOS ipa
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: eas build --platform ios --profile production --local --non-interactive --output ${{ github.workspace }}/greyd.ipa
+
+      - name: Submit to TestFlight
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: eas submit --platform ios --profile production --path ${{ github.workspace }}/greyd.ipa --non-interactive
+
+      - name: Upload ipa artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: greyd-ipa
+          path: greyd.ipa
+          if-no-files-found: ignore
