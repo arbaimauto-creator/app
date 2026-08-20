@@ -28,6 +28,8 @@ jobs:
       - name: Build iOS ipa
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          # eas-build-pre-install 훅(generate-ops-config.js)이 요구
+          GREYD_APP_MOBILE_KEY: ${{ secrets.GREYD_APP_MOBILE_KEY }}
         run: eas build --platform ios --profile production --local --non-interactive --output ${{ github.workspace }}/greyd.ipa
 
       - name: Submit to TestFlight
