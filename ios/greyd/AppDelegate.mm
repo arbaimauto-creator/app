@@ -13,9 +13,8 @@
 #import <RNKakaoLogins.h>
 #import <React/RCTLinkingManager.h>
 
-#import <AppCenterReactNative.h>
-#import <AppCenterReactNativeAnalytics.h>
-#import <AppCenterReactNativeCrashes.h>
+// AppCenter 제거 — 서비스 자체가 2025-03 종료되어 시작 시 등록·전송이 전부 실패한다.
+// 죽은 엔드포인트로의 시작 시 활동은 제거 대상 (재실행 흰 화면 조사 과정에서 정리).
 
 @implementation AppDelegate
 
@@ -34,11 +33,35 @@
   [[FBSDKApplicationDelegate sharedInstance] application:application
                            didFinishLaunchingWithOptions:launchOptions];
 
-  [AppCenterReactNative register];
-  [AppCenterReactNativeAnalytics registerWithInitiallyEnabled:true];
-  [AppCenterReactNativeCrashes registerWithAutomaticProcessing];
+  // 부팅 감시장치: JS가 표시하는 두 마커(bootJsStartedAt / bootNavReadyAt)를
+  // 시작 직전에 지우고, 8초 뒤에도 비어 있으면 네이티브 알림으로 진단을 띄운다.
+  // JS가 아예 실행되지 못하는 흰 화면(진단 오버레이조차 못 뜨는 경우)을 잡기 위한 장치.
+  NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+  [ud removeObjectForKey:@"bootJsStartedAt"];
+  [ud removeObjectForKey:@"bootNavReadyAt"];
 
-  return [super application:application didFinishLaunchingWithOptions:launchOptions];
+  BOOL result = [super application:application didFinishLaunchingWithOptions:launchOptions];
+
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(8 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSString *jsStarted = [defaults stringForKey:@"bootJsStartedAt"];
+    NSString *navReady = [defaults stringForKey:@"bootNavReadyAt"];
+    if (navReady != nil) {
+      return; // 정상 부팅
+    }
+    NSString *msg = [NSString stringWithFormat:
+      @"8초 내 부팅 미완료\nJS 실행: %@\n내비게이션 준비: 안 됨\n이 화면을 캡처해 개발자에게 보내주세요.",
+      jsStarted ? @"됨" : @"안 됨(번들 미실행)"];
+    UIViewController *rootVC = self.window.rootViewController;
+    if (rootVC == nil) { return; }
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"greyd 부팅 진단"
+                                                                   message:msg
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:@"확인" style:UIAlertActionStyleDefault handler:nil]];
+    [rootVC presentViewController:alert animated:YES completion:nil];
+  });
+
+  return result;
 }
 
 // // ✅ React Native 0.76.6 필수 메서드 추가!

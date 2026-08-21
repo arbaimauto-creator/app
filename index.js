@@ -23,6 +23,14 @@ try {
   // bootTrace 미탑재 — 단계 기록 없이 경과 시간만 보여준다.
 }
 
+// 네이티브 부팅 감시장치(AppDelegate 8초 알림)용 마커 — JS 번들이 실행됐음을 남긴다.
+// 이 줄에 도달하지 못하면 알림에 "JS 실행: 안 됨"이 떠 번들/브리지 단계 문제로 특정된다.
+try {
+  require('react-native-default-preference').default.set('bootJsStartedAt', String(Date.now()));
+} catch (e) {
+  // 마커 실패는 부팅에 영향 없음
+}
+
 // 화면이 뜨지 않았다고 판정하기까지의 유예 시간.
 const BOOT_TIMEOUT_MS = 6000;
 const BOOT_POLL_MS = 500;

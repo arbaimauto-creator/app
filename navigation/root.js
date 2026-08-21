@@ -73,6 +73,15 @@ const Root = () => {
       onReady={() => {
         trace('root:nav-ready');
         SplashScreen.hide();
+        // 네이티브 부팅 감시장치(AppDelegate 8초 알림) 해제 마커
+        try {
+          require('react-native-default-preference').default.set(
+            'bootNavReadyAt',
+            String(Date.now()),
+          );
+        } catch (e) {
+          trace('root:nav-ready-marker-fail');
+        }
       }}
     >
       <Stack.Navigator initialRouteName={'Main'} screenOptions={horizontalAnimation}>
