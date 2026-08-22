@@ -14,7 +14,46 @@ export const FGI_QUANT_ITEMS = [
   { key: 'competitiveness', type: 'quant' },
   { key: 'recommend', type: 'quant' }, // D27 추가 — 추천 의향
 ];
+
+// Development-only end-to-end fixture. It is merged into server results in
+// debug builds so the complete Try -> Detail -> Apply flow remains testable
+// even when the ops server has no active campaigns.
+export const DEV_MOCK_CAMPAIGN = {
+  id: 'mock-oliveyoung-sun-serum-2026',
+  brand: 'ROUND LAB',
+  brandId: 'mock-brand-roundlab',
+  title: 'Birch Juice Moisturizing Sun Serum — 14-day honest review',
+  thumbnailUrl: 'https://picsum.photos/seed/greyd-roundlab-sun/800/440',
+  remaining: 18,
+  total: 30,
+  deadline: '2026-09-15T23:59:59.000Z',
+  countries: ['KR', 'US', 'JP'],
+  seedingQuotaPerCountry: { KR: 14, US: 10, JP: 6 },
+  rewardPoint: 700,
+  basePoints: 700,
+  track: 'SEEDING',
+  applyMode: 'open',
+  uploadDays: 14,
+  contentGuide: [
+    'Show the texture and finish in natural light',
+    'Share how it layers under makeup',
+    'Include your honest experience after 14 days',
+    '#roundlab #birchjuice #greydreview',
+  ],
+  fgiExtraQuestions: [
+    'What mattered most when choosing this sunscreen?',
+    {
+      q: 'Which finish do you prefer?',
+      type: 'choice',
+      options: ['Dewy', 'Natural', 'Matte'],
+    },
+  ],
+  status: 'open',
+  isMock: true,
+};
+
 const MOCK_CAMPAIGNS = [
+  DEV_MOCK_CAMPAIGN,
   {
     id: 'cmp-001',
     brand: 'SonPlan',
@@ -85,6 +124,9 @@ export async function fetchCampaignList() {
       const res = await opsGet('/campaigns');
       const campaigns = res?.items || res?.campaigns;
       if (Array.isArray(campaigns)) {
+        if (__DEV__ && !campaigns.some((campaign) => campaign.id === DEV_MOCK_CAMPAIGN.id)) {
+          return [DEV_MOCK_CAMPAIGN, ...campaigns];
+        }
         return campaigns;
       }
     } catch (e) {
