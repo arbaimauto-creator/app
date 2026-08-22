@@ -1641,6 +1641,7 @@ export default {
   INVITE_CODE_PLACEHOLDER: '6-digit code',
   INVITE_CODE_FORMAT_ERROR: 'Enter your 6-digit invite code',
   INVITE_CODE_INVALID: "That code doesn't work. Ask the person who invited you for a new one.",
+  INVITE_VERIFY_TIMEOUT: 'Verification is taking too long. Check your connection and try again.',
   INVITE_THROTTLED: (sec) => `Too many attempts. Try again in ${sec} seconds.`,
   INVITE_BRAND_WEB_ONLY:
     'Brand partners use the web dashboard. Your analyst will email you the link.',

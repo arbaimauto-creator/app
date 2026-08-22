@@ -1,19 +1,24 @@
 // greyd-ops 모바일 API 클라이언트.
 // 인증: 게이트 인증(/auth) 후엔 장수명 Bearer 토큰(3단계), 그 전엔 간이 공유키.
 // 키·도메인은 릴리스 설정 시 채운다. (react-native-config 미사용 프로젝트라 상수로 관리)
-import Preference from 'react-native-default-preference';
+import { prefGetSafe, prefSetSafe } from './prefSafe';
 import { OPS_API_BASE, OPS_APP_KEY } from './opsRuntimeConfig';
 
 const TIMEOUT_MS = 8000;
 
+// 저장소 무응답이 인증 흐름을 멈추지 않도록 타임아웃 레이스 사용 (iOS 릴리스 사례)
 export async function setOpsToken(token) {
-  await Preference.set('opsToken', token || '');
+  await prefSetSafe('opsToken', token || '');
 }
 
 async function authHeaders() {
-  const token = await Preference.get('opsToken');
-  if (token) return { Authorization: `Bearer ${token}` };
-  if (!OPS_APP_KEY) throw new Error('GREYD_APP_MOBILE_KEY is not configured');
+  const token = await prefGetSafe('opsToken');
+  if (token) {
+    return { Authorization: `Bearer ${token}` };
+  }
+  if (!OPS_APP_KEY) {
+    throw new Error('GREYD_APP_MOBILE_KEY is not configured');
+  }
   return { 'x-greyd-app-key': OPS_APP_KEY };
 }
 

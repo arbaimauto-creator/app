@@ -1,18 +1,20 @@
 // Phase 1.5 2단계 — 로컬 상태머신은 그대로 두고 ops에 미러링하는 브리지.
 // LIVE_OPS_API OFF면 전부 no-op. 실패해도 절대 던지지 않는다 — 로컬 진행이 우선이고,
 // 미전송분은 주간 수동 브리지(29번 플랜)가 잡는다. 3단계(토큰 인증)에서 정본이 ops로 넘어간다.
-import Preference from 'react-native-default-preference';
+import { prefGetSafe, prefSetSafe } from './prefSafe';
 import FEATURES from '../Components/Constants/Features';
 import { opsGet, opsPost } from './opsClient';
 import { getCreatorProfile } from './creators';
 import { toChannelPayload } from './channels';
 
 // 기기 식별자 — 3단계에서 로그인 계정과 매핑된다 (ops Influencer.greydAppId)
+// 저장소가 응답하지 않아도 게이트가 멈추지 않도록 타임아웃 레이스로 접근한다.
+// (읽기 실패 시 새 ID 생성 — 코드 재사용 판정이 갈릴 수 있으나 멈춤보다 낫다)
 export async function getGreydAppId() {
-  let id = await Preference.get('greydAppId');
+  let id = await prefGetSafe('greydAppId');
   if (!id) {
     id = `app-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-    await Preference.set('greydAppId', id);
+    await prefSetSafe('greydAppId', id);
   }
   return id;
 }

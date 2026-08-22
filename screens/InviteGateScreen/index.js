@@ -111,7 +111,18 @@ export default function InviteGateScreen({ navigation }) {
     Keyboard.dismiss();
     setIsVerifying(true);
     // 국가는 게이트 입력분을 그대로 ops 골든 레코드에 실어 보낸다 (핸들은 온보딩에서 갱신)
-    const result = await verifyInviteCode(code, { country });
+    // 검증 체인 어딘가(네이티브 저장소·네트워크)가 무응답이어도 스피너에 갇히지 않게
+    // 전체에 상한을 둔다 — 15초를 넘기면 에러로 떨어뜨리고 버튼을 되살린다.
+    const VERIFY_TIMEOUT = Symbol('verify-timeout');
+    const result = await Promise.race([
+      verifyInviteCode(code, { country }),
+      new Promise((resolve) => setTimeout(() => resolve(VERIFY_TIMEOUT), 15000)),
+    ]);
+    if (result === VERIFY_TIMEOUT) {
+      logEvent('gate_code_submit', { result: 'timeout' });
+      setError(Strings.INVITE_VERIFY_TIMEOUT);
+      return;
+    }
     if (!result.success) {
       logEvent('gate_code_submit', { result: result.reason === 'expired' ? 'expired' : 'invalid' });
       const nextFails = failCount + 1;
