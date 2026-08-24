@@ -16,11 +16,20 @@ import FastImage from './utils/SafeFastImage.tsx';
 import { Context } from '../Contexts';
 import APIprovider from './APIprovider';
 import Constants from './Constants';
+import FEATURES from './Constants/Features';
 import CourierCompanySelectionModal from './CourierCompanySelectionModal';
 import ModalMenuButton from './ModalMenuButton';
 import Strings from './Strings';
 import Utils from './utils';
 import CourierTrackingLinkUrls from './utils/CourierTrackingLinkUrls';
+
+function navigateLegacyCommerce(context, routeName, params) {
+  if (!FEATURES.COMMERCE) {
+    Alert.alert('Unavailable', 'Ordering is not available in this version.');
+    return;
+  }
+  context.props.navigation.navigate(routeName, params);
+}
 
 function CourierSelector({ onChangeText, disabled, initialCourier = '' }) {
   const [courierName, setCourierName] = useState(initialCourier);
@@ -357,7 +366,7 @@ function UserActionButtons({ order, context, disable = false }) {
     actionData.onAction1 = () => {
       // insert address and pay
       APIprovider.getOrder(order.orderId, order.buyer.userId, null).then((order) => {
-        context.props.navigation.navigate('MakeOrder', {
+      navigateLegacyCommerce(context, 'MakeOrder', {
           order: order,
           onSucceedToPay: () => {
             order.statusCode = Constants.ORDER_STATUS_CODE.NOT_ACCEPTED;
@@ -437,7 +446,7 @@ function UserActionButtons({ order, context, disable = false }) {
     actionData.title2 = Strings.REJECT;
     actionData.message2 = Strings.SURE_TO_REJECT_ORDER;
     actionData.onAction2 = () => {
-      context.props.navigation.navigate('OrderRejection', {
+      navigateLegacyCommerce(context, 'OrderRejection', {
         userId: context.props.data.seller.userId,
         orderId: order.orderId,
       });
@@ -449,7 +458,7 @@ function UserActionButtons({ order, context, disable = false }) {
     actionData.title1 = Strings.CANCEL_PURCHASE;
     actionData.message1 = Strings.SURE_TO_CANCEL_PURCHASE;
     actionData.onAction1 = () => {
-      context.props.navigation.navigate('PurchaseCancellation', {
+      navigateLegacyCommerce(context, 'PurchaseCancellation', {
         userId: context.props.data.buyer.userId,
         orderId: order.orderId,
         getOrderList: () => context.props?.getOrderList(),
@@ -486,7 +495,7 @@ function UserActionButtons({ order, context, disable = false }) {
     actionData.title2 = Strings.REJECT;
     actionData.message2 = Strings.SURE_TO_REJECT_ORDER;
     actionData.onAction2 = () => {
-      context.props.navigation.navigate('OrderRejection', {
+      navigateLegacyCommerce(context, 'OrderRejection', {
         userId: context.props.data.seller.userId,
         orderId: order.orderId,
       });

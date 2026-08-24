@@ -43,6 +43,7 @@ import { setTotalRevenue, setTotalReward } from '../slices/user';
 import APIprovider from './APIprovider';
 import CommentListItemView from './CommentListItemView';
 import Constants from './Constants';
+import FEATURES from './Constants/Features';
 import CustomRating from './CustomComponents/CustomRating';
 import ModalMenuButton from './ModalMenuButton';
 import ProductListItemView from './ProductListItemView';
@@ -880,7 +881,10 @@ function B2BInquiryButton({ context }) {
           if (isGuestUser(context.props.route.params.logonUserId)) {
             return LogoutAlert(context.props);
           }
-          context.props.navigation.navigate('B2BProductInquiry', { product });
+          context.props.navigation.navigate('B2B', {
+            screen: 'B2BProductInquiry',
+            params: { product },
+          });
         }}
       />
     </View>
@@ -977,6 +981,10 @@ function PurchasePopup({ context }) {
   const dispatch = useDispatch();
 
   const handlePressBuy = () => {
+    if (!FEATURES.COMMERCE) {
+      Alert.alert('Unavailable', 'Ordering is not available in this version.');
+      return;
+    }
     APIprovider.newCartItem(
       product.productId,
       context.state.buyNumber,

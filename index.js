@@ -79,10 +79,6 @@ let App = null;
 try {
   App = require('./App.tsx').default;
   require('./Components/services').pushNotifications.configure();
-  if (__DEV__) {
-    require('./Components/utils/cleanOnClickForNative');
-    require('./Components/utils/debugOnClickLeak');
-  }
 } catch (e) {
   reportStartupError(e, 'import');
 }

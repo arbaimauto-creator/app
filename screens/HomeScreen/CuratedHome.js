@@ -15,6 +15,7 @@ import FastImage from 'react-native-fast-image';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import APIprovider from '../../Components/APIprovider';
 import T from '../../Components/Constants/DesignTokens';
+import Strings from '../../Components/Strings';
 import { Badge, Wordmark } from '../../Components/UI';
 import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
 import { getCreatorProfile } from '../../api/creators';
@@ -354,10 +355,21 @@ export default function CuratedHome({ navigation }) {
           <Text style={styles.feedCount}>
             {visiblePosts.length} REVIEWS · {filter.toUpperCase()}
           </Text>
-          <TouchableOpacity style={styles.sortButton} onPress={cycleSort}>
-            <Text style={styles.sortText}>{sort}</Text>
-            <MaterialCommunityIcons name="swap-vertical" size={15} color={COLORS.INK} />
-          </TouchableOpacity>
+          <View style={styles.feedActions}>
+            <TouchableOpacity
+              style={[styles.sortButton, styles.swipeFeedButton]}
+              onPress={() => navigation.navigate('HomeFeed')}
+              accessibilityRole="button"
+              accessibilityLabel="Open vertical swipe feed"
+            >
+              <MaterialCommunityIcons name="gesture-swipe-vertical" size={15} color="#FFFFFF" />
+              <Text style={styles.swipeFeedText}>{Strings.HOME_GO_FEED}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.sortButton} onPress={cycleSort}>
+              <Text style={styles.sortText}>{sort}</Text>
+              <MaterialCommunityIcons name="swap-vertical" size={15} color={COLORS.INK} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {loading && visiblePosts.length === 0 ? (
@@ -710,8 +722,8 @@ const styles = StyleSheet.create({
   curationMeta: { fontFamily: T.FONT.Bold, fontSize: 10.5, color: '#FFFFFF' },
   feedMeta: { flexDirection: 'row', alignItems: 'center', padding: 16, paddingBottom: 10 },
   feedCount: { fontFamily: T.FONT.Bold, fontSize: 11, color: COLORS.GREY },
+  feedActions: { marginLeft: 'auto', flexDirection: 'row', alignItems: 'center', gap: 6 },
   sortButton: {
-    marginLeft: 'auto',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
@@ -723,6 +735,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.SURFACE,
   },
   sortText: { fontFamily: T.FONT.Bold, fontSize: 11, color: COLORS.INK },
+  swipeFeedButton: { backgroundColor: COLORS.INK, borderColor: COLORS.INK },
+  swipeFeedText: { fontFamily: T.FONT.Bold, fontSize: 11, color: '#FFFFFF' },
   loader: { marginVertical: 48 },
   feed: { gap: 12, paddingHorizontal: 16 },
   postCard: {

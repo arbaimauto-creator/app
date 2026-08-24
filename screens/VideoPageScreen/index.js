@@ -30,6 +30,7 @@ import IconMaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { connect, useDispatch } from 'react-redux';
 import APIprovider from '../../Components/APIprovider';
 import Constants from '../../Components/Constants';
+import FEATURES from '../../Components/Constants/Features';
 import HelpBubble from '../../Components/CustomComponents/HelpBubble';
 import ReportModal from '../../Components/ReportModal';
 import { shareLink } from '../../Components/utils/share';
@@ -1823,6 +1824,10 @@ function PurchasePopup({ context }) {
   };
 
   const handlePressBuy = () => {
+    if (!FEATURES.COMMERCE) {
+      Alert.alert('Unavailable', 'Ordering is not available in this version.');
+      return;
+    }
     if (options.lists.length && !options.lists.find((option) => option.selectedItemName)) {
       alert(Strings.MUST_SELECT_OPTION);
       return;

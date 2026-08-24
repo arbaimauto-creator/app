@@ -64,6 +64,7 @@ import FEATURES from '../../Components/Constants/Features';
 import ApplyDone from '../../screens/TryScreen/ApplyDone';
 import MissionDone from '../../screens/ActivityScreen/MissionDone';
 import FirstImpression from '../../screens/ActivityScreen/FirstImpression';
+import RatingList from '../../screens/VideoPageScreen/RatingList';
 import T from '../../Components/Constants/DesignTokens';
 import { trace } from '../../Components/bootTrace';
 import APIprovider from '../../Components/APIprovider';
@@ -356,6 +357,12 @@ function MainDrawerNavigator({ route, navigation }) {
         options={{
           headerShown: false,
         }}
+      />
+      <Stack.Screen
+        name="RatingList"
+        component={RatingList}
+        initialParams={initialParams}
+        options={{ headerShown: true }}
       />
       <Stack.Screen
         name="VideoList"

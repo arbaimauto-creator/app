@@ -13,6 +13,12 @@ const runtime = read('api/opsRuntimeConfig.js');
 if (!/LIVE_OPS_API:\s*true/.test(features)) {
   failures.push('LIVE_OPS_API must be true for a production release');
 }
+if (!/TEST_GUEST_ENTRY:\s*false/.test(features)) {
+  failures.push('TEST_GUEST_ENTRY must be false for a production release');
+}
+if (!/COMMERCE:\s*false/.test(features)) {
+  failures.push('legacy commerce must remain disabled until its routes are restored');
+}
 if (!/const DEFAULT_URL = null;/.test(linking) || linking.includes('mylinker://')) {
   failures.push('normal cold starts must return null, not a placeholder deep link');
 }
@@ -24,6 +30,14 @@ if (!/OPS_API_BASE = "https:\/\//.test(runtime)) {
 }
 if (/OPS_APP_KEY = ""/.test(runtime)) {
   failures.push('OPS_APP_KEY must be generated before release');
+}
+
+const androidBuild = read('android/app/build.gradle');
+if (!/include\s+"arm64-v8a"/.test(androidBuild)) {
+  failures.push('release APK must include the supported arm64-v8a ABI');
+}
+if (/include\s+"[^"]*x86/.test(androidBuild)) {
+  failures.push('x86 APKs must not be generated without complete FFmpeg native libraries');
 }
 
 if (failures.length) {

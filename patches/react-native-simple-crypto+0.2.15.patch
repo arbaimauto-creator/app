@@ -1,0 +1,13 @@
+diff --git a/node_modules/react-native-simple-crypto/android/build.gradle b/node_modules/react-native-simple-crypto/android/build.gradle
+index 7415e67..a9fe2cb 100644
+--- a/node_modules/react-native-simple-crypto/android/build.gradle
++++ b/node_modules/react-native-simple-crypto/android/build.gradle
+@@ -24,7 +24,7 @@ android {
+ }
+ 
+ dependencies {
+-    implementation 'com.android.support:appcompat-v7:23.0.1'
++    implementation 'androidx.appcompat:appcompat:1.0.0'
+     implementation 'com.facebook.react:react-native:+'
+     implementation 'com.madgag.spongycastle:core:1.58.0.0'
+     implementation 'com.madgag.spongycastle:prov:1.54.0.0'
