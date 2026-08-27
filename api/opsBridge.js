@@ -6,6 +6,7 @@ import FEATURES from '../Components/Constants/Features';
 import { opsGet, opsPost } from './opsClient';
 import { getCreatorProfile } from './creators';
 import { toChannelPayload } from './channels';
+import { sendOrQueue } from './opsOutbox';
 
 // 기기 식별자 — 3단계에서 로그인 계정과 매핑된다 (ops Influencer.greydAppId)
 // 저장소가 응답하지 않아도 게이트가 멈추지 않도록 타임아웃 레이스로 접근한다.
@@ -95,12 +96,55 @@ export async function opsGetSeedings() {
 
 // 수령 확인 → ops Shipment DELIVERED (수동 브리지 ② 일부 대체)
 export async function opsReceived(campaignId) {
+  if (!FEATURES.LIVE_OPS_API) return;
   const greydAppId = await getGreydAppId();
-  await safePost('/received', { campaignId, greydAppId }, 'received');
+  await sendOrQueue('received', campaignId, '/received', { campaignId, greydAppId });
 }
 
 // 리뷰 링크 제출 → ops Content + POSTED (수동 브리지 ③ 대체)
 export async function opsUpload(campaignId, postUrl, format) {
+  if (!FEATURES.LIVE_OPS_API) return;
   const greydAppId = await getGreydAppId();
-  await safePost('/upload', { campaignId, greydAppId, postUrl, format: format ?? null }, 'upload');
+  await sendOrQueue('upload', campaignId, '/upload', {
+    campaignId,
+    greydAppId,
+    postUrl,
+    format: format ?? null,
+  });
+}
+
+export async function opsCancel(campaignId) {
+  if (!FEATURES.LIVE_OPS_API) return;
+  const greydAppId = await getGreydAppId();
+  await sendOrQueue('cancel', campaignId, '/cancel', { campaignId, greydAppId });
+}
+
+export async function opsAddress(campaignId, address) {
+  if (!FEATURES.LIVE_OPS_API) return;
+  const greydAppId = await getGreydAppId();
+  await sendOrQueue('address', campaignId, '/address', { campaignId, greydAppId, ...address });
+}
+
+export async function opsFgi(campaignId, survey, firstImpression) {
+  if (!FEATURES.LIVE_OPS_API) return;
+  const greydAppId = await getGreydAppId();
+  await sendOrQueue('fgi', campaignId, '/fgi', {
+    campaignId,
+    greydAppId,
+    quant: {
+      purchaseIntent: survey.purchaseIntent,
+      priceFairness: survey.priceFairness,
+      competitiveness: survey.competitiveness,
+      recommend: survey.recommend,
+    },
+    fairPriceUsd: survey.fairPriceUsd ?? null,
+    priceCapUsd: survey.priceCeilingUsd ?? null,
+    competitor: survey.competitorName ?? null,
+    pros: survey.pros,
+    cons: survey.cons,
+    extraAnswers: survey.extraAnswers ?? null,
+    firstImpression: firstImpression ?? null,
+    profileSnapshot: survey.profileSnapshot ?? {},
+    usageDays: survey.usageDays ?? null,
+  });
 }

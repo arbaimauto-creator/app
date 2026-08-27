@@ -146,11 +146,13 @@ class SignInScreen extends React.Component {
         if (
           userName &&
           (userName === 'greyd.guest' || userName === 'Guest') &&
+          !__DEV__ &&
           !FEATURES.TEST_GUEST_ENTRY
         ) {
           return menuLogout(this.props);
         }
-        this.props.changeGuestStatus(false);
+        const restoredGuest = userName === 'greyd.guest' || userName === 'Guest';
+        this.props.changeGuestStatus(restoredGuest);
 
         console.log('SignInScreen() - You signed up');
         // D28: 기로그인 부팅도 게이트/온보딩 미완 분기를 태운다 (로그인 성공과 동일 경로)

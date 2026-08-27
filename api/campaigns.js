@@ -131,9 +131,10 @@ export async function fetchCampaignList() {
       }
     } catch (e) {
       // 실패 시 mock 폴백 (27번 설계 §10) — 조용히 폴백하되 dev에선 로그
-      if (__DEV__) {
-        console.log('ops campaigns fetch failed, fallback to mock', e?.message);
+      if (!__DEV__ && !FEATURES.TEST_GUEST_ENTRY) {
+        throw e;
       }
+      console.log('ops campaigns fetch failed, fallback to mock offline');
     }
   }
   return MOCK_CAMPAIGNS;

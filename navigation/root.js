@@ -82,6 +82,13 @@ const Root = () => {
         } catch (e) {
           trace('root:nav-ready-marker-fail');
         }
+        setTimeout(() => {
+          try {
+            require('../api/opsOutbox').flush();
+          } catch (e) {
+            trace('root:outbox-flush-fail');
+          }
+        }, 3000);
       }}
     >
       <Stack.Navigator initialRouteName={'Main'} screenOptions={horizontalAnimation}>

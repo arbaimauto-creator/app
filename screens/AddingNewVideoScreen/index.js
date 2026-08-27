@@ -818,18 +818,35 @@ class AddingNewVideoScreen extends Component {
               reasonable: this.state.p6Score.reasonable,
             };
 
+            const missionCampaignId = this.props.route?.params?.campaignId;
+            if (missionCampaignId) {
+              const { getSeedings } = require('../../api/seedings');
+              const mission = (await getSeedings())[missionCampaignId];
+              if (!mission?.fgiSurvey) {
+                this.props.navigation.navigate('FgiSurvey', {
+                  campaign: this.props.route?.params?.campaign,
+                });
+                return;
+              }
+            }
+
             try {
               const result = await APIprovider.createVideo(video);
 
               if (result) {
                 // 캠페인 미션에서 진입한 업로드면 상태머신을 reviewing으로 전이 + 리마인더 취소
-                const missionCampaignId = this.props.route?.params?.campaignId;
                 if (missionCampaignId) {
                   const { setSeedingStatus, SEEDING_STATUS } = require('../../api/seedings');
+                  const { opsUpload } = require('../../api/opsBridge');
                   const {
                     cancelUploadReminders,
                   } = require('../ActivityScreen/reminders');
-                  setSeedingStatus(missionCampaignId, SEEDING_STATUS.REVIEWING).catch(() => {});
+                  await setSeedingStatus(missionCampaignId, SEEDING_STATUS.REVIEWING);
+                  await opsUpload(
+                    missionCampaignId,
+                    result.videoUrl || result.url || result._id || '',
+                    'short',
+                  );
                   cancelUploadReminders(missionCampaignId);
                 }
                 this.props.setReward(result.totalReward);

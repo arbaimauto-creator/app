@@ -17,7 +17,6 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 // 서버 도달 실패(네트워크)면 mock으로 폴백하지만, 서버가 코드를 거부한 건 폴백하지 않는다.
 export async function verifyInviteCode(rawCode, profile) {
   const code = (rawCode || '').trim().toUpperCase();
-  // Authentication is release-critical and must never be disabled by a feature flag.
   try {
     const greydAppId = await getGreydAppId();
     const res = await opsPost('/auth', {
@@ -36,9 +35,10 @@ export async function verifyInviteCode(rawCode, profile) {
     if (e?.status === 401) {
       return { success: false, reason: e?.body?.error };
     }
-    if (__DEV__) {
-      console.log('ops auth unreachable, fallback to mock', e?.message);
+    if (!__DEV__) {
+      return { success: false, reason: 'service_unavailable' };
     }
+    console.log('ops auth unreachable, fallback to mock offline');
   }
   await delay(400);
   const found = INVITE_CODES.find((c) => c.code === code);

@@ -17,6 +17,7 @@ import { Card, Chips, Badge } from '../../Components/UI';
 import { getSeedings, upsertSeeding, SEEDING_STATUS } from '../../api/seedings';
 import { getCreatorProfile } from '../../api/creators';
 import { logEvent, toGBand } from '../../api/common/analytics';
+import { opsFgi } from '../../api/opsBridge';
 
 // 계획서 TSK-007: 신청→승인→[FGI 설문]→UGC 업로드.
 // 리포트 1·2섹션(종합점수·구매의향 %·가격 반응)의 데이터 원천 — 업로드 전에 반드시 작성.
@@ -107,8 +108,7 @@ export default function FgiSurvey({ route, navigation }) {
       }
       // 세그먼트 집계용 프로필 스냅샷 — 제출 시점 값 고정 (이후 프로필 변경과 무관하게 보존)
       const profile = await getCreatorProfile();
-      await upsertSeeding(campaign.id, {
-      fgiSurvey: {
+      const surveyPayload = {
         ...scores,
         fairPriceUsd: Number(fairPrice) || fairPrice.trim(),
         priceCeilingUsd: priceCeiling.trim() ? Number(priceCeiling) || priceCeiling.trim() : null,
@@ -127,8 +127,9 @@ export default function FgiSurvey({ route, navigation }) {
             }
           : null,
         submittedAt: new Date().toISOString(),
-      },
-      });
+      };
+      await upsertSeeding(campaign.id, { fgiSurvey: surveyPayload });
+      await opsFgi(campaign.id, surveyPayload, seedings[campaign.id]?.firstImpression);
       logEvent('fgi_submit', {
         campaign_id: campaign.id,
         extra_count: extraQuestions.length,

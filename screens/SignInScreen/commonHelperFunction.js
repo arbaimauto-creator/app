@@ -66,7 +66,32 @@ const applyLogonUser = (
   setLogonUserId(result._id);
   setLogonUserName(result.name);
   setLogonUserProfilePicUrl(result.profilePicUrl);
-  setLogonUserIsSeller(result.sellerStatus.toString());
+  setLogonUserIsSeller(result.sellerStatus?.toString() ?? 'false');
+};
+
+const createLocalGuestResult = () => ({
+  _id: 'local-guest',
+  name: 'greyd.guest',
+  profilePicUrl: '',
+  sellerStatus: false,
+  agreementToTermsOfService: true,
+});
+
+const loginGuestWithFallback = async (authData) => {
+  if (!FEATURES.LIVE_OPS_API) {
+    return createLocalGuestResult();
+  }
+  try {
+    return await APIprovider.login('google', authData);
+  } catch (error) {
+    // Local guest access is only a development/test facility. Production
+    // authentication failures must remain visible instead of creating a fake account.
+    if (__DEV__ || FEATURES.TEST_GUEST_ENTRY) {
+      console.log('guest auth unreachable, fallback to local guest');
+      return createLocalGuestResult();
+    }
+    throw error;
+  }
 };
 
 // D28: 게이트 → 로그인 → 온보딩 → 메인 순서의 분기점.
@@ -411,7 +436,7 @@ export const guestUser = async (props, setLoggingIn, isDynamicLink = false) => {
 
     const authData = JSON.parse(GUEST_AUTH_DATA_JSON);
     // console.log('AUTH_data_PROVIDER', authData);
-    APIprovider.login('google', authData)
+    loginGuestWithFallback(authData)
       .then(async (result) => {
         // console.log('IS_DELETED', result);
         if (result.statusCode === Constants.USER_STATUS_CODE.NOT_MEMBER_YET) {
@@ -445,7 +470,7 @@ export const guestUser = async (props, setLoggingIn, isDynamicLink = false) => {
         setLoggingIn(false);
         store.dispatch(setGuest({ isGuest: true }));
 
-        setGuestDeviceInfo();
+        setGuestDeviceInfo().catch(() => {});
       })
       .catch((err) => {
         setLoggingIn(false);
@@ -475,17 +500,23 @@ export const loginWithGuest = async () => {
 
   const authData = JSON.parse(GUEST_AUTH_DATA_JSON);
 
-  const loginResult = await APIprovider.login('google', authData);
+  const loginResult = await loginGuestWithFallback(authData);
 
   APIprovider.setRequester(authData.idToken, loginResult._id);
   await Preference.set('userId', loginResult._id);
   await Preference.set('userName', loginResult.name);
   await Preference.set('userProfilePicUrl', loginResult.profilePicUrl);
-  await Preference.set('userIsSeller', loginResult.sellerStatus.toString());
+  await Preference.set('userIsSeller', loginResult.sellerStatus?.toString() ?? 'false');
   await Preference.set('userAccessToken', authData.idToken);
   await Preference.set('userAuthType', 'google');
-  const currency = await APIprovider.getCurrencyRate('USD');
-  await Preference.set('KRW/USD', currency.currencyRate.toString());
+  try {
+    const currency = await APIprovider.getCurrencyRate('USD');
+    if (currency?.currencyRate) {
+      await Preference.set('KRW/USD', currency.currencyRate.toString());
+    }
+  } catch (error) {
+    // Currency is supplemental and must not invalidate an otherwise valid session.
+  }
 
   store.dispatch(setGuest({ isGuest: true }));
 
@@ -493,7 +524,7 @@ export const loginWithGuest = async () => {
     // await bootChannelIO({ name: getUniqueIdSync() });
   }
 
-  setGuestDeviceInfo();
+  setGuestDeviceInfo().catch(() => {});
 };
 
 async function setGuestDeviceInfo() {

@@ -32,7 +32,8 @@ import {
 import { daysLeft, isInGrace, isNoShowDue, EXTENSION_DAYS } from './missionLogic';
 import AddressModal from './AddressModal';
 import { scheduleUploadReminders, cancelUploadReminders } from './reminders';
-import { opsReceived } from '../../api/opsBridge';
+import { opsAddress, opsCancel, opsReceived } from '../../api/opsBridge';
+import { flush as flushOpsOutbox } from '../../api/opsOutbox';
 
 const { COLORS, RADIUS, FONT, TYPE } = T;
 
@@ -91,6 +92,7 @@ export default function ActivityScreen({ navigation, route }) {
         dispatch(fetchCampaigns());
       }
       reload();
+      flushOpsOutbox();
       // 신청 완료 화면의 "배송지 입력" CTA 딥링크. 중첩 navigate params({screen, params})는
       // 커스텀 탭 내비게이터(MyMaterialBottomTabNavigator)와 조합 시 StackNavigator가
       // 무한 재디스패치(Maximum update depth)에 빠지고 param도 도착하지 않아,
@@ -216,6 +218,7 @@ export default function ActivityScreen({ navigation, route }) {
               status_at_cancel: seedings[campaignId]?.status || 'unknown',
             });
             const all = await setSeedingStatus(campaignId, SEEDING_STATUS.CANCELLED);
+            await opsCancel(campaignId);
             setSeedings(all);
             reload();
           } catch (e) {
@@ -270,6 +273,7 @@ export default function ActivityScreen({ navigation, route }) {
 
   const onSubmitAddress = async (address) => {
     await upsertSeeding(addressFor, { address });
+    await opsAddress(addressFor, address);
     setAddressFor(null);
     reload();
   };
@@ -294,7 +298,7 @@ export default function ActivityScreen({ navigation, route }) {
   const devAdvance = async (seeding) => {
     // 릴리스 번들로 실기기/에뮬 검증할 때도 운영 전이(승인·발송)를 흉내 내야 한다.
     // TEST_GUEST_ENTRY가 켜진 테스트 빌드에서만 열리고, 스토어 배포 시 함께 닫힌다.
-    if (!__DEV__ && !FEATURES.TEST_GUEST_ENTRY) {
+    if (!__DEV__) {
       return;
     }
     const next =
