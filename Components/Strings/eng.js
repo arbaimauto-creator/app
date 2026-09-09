@@ -1973,6 +1973,10 @@ export default {
   ADDRESS_SAVE_AUTOFILL: 'Save — auto-fills next time',
   ADDRESS_CUSTOMS_NOTE:
     "International shipping can be delayed at customs. Customs delays don't count against your upload deadline (D-day).",
+  // Personal-information consent (2026-09-09) — the server rejects the address without privacyAgree
+  ADDRESS_PRIVACY_CONSENT:
+    'I agree to the collection and use of my personal information (name, address, phone) for shipping and payment.',
+  ADDRESS_PRIVACY_LINK: 'View privacy policy',
   // Brand dashboard empty state
   BRAND_EMPTY_TITLE: "We're in the shipping & creation window",
   BRAND_EMPTY_BODY:

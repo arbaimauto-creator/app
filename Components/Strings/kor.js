@@ -1893,6 +1893,9 @@ export default {
   ADDRESS_SAVE_AUTOFILL: '저장 — 다음부터 자동 입력',
   ADDRESS_CUSTOMS_NOTE:
     '해외 배송은 통관 사정으로 지연될 수 있어요. 통관 지연 기간은 업로드 기한(D-day)에서 제외됩니다.',
+  // 개인정보 수집·이용 동의 (2026-09-09) — 서버가 privacyAgree 없으면 배송지를 받지 않는다
+  ADDRESS_PRIVACY_CONSENT: '배송·정산을 위한 개인정보(이름·주소·연락처) 수집·이용에 동의합니다.',
+  ADDRESS_PRIVACY_LINK: '개인정보처리방침 보기',
   // 브랜드 대시보드 빈 상태
   BRAND_EMPTY_TITLE: '지금은 배송·제작 기간이에요',
   BRAND_EMPTY_BODY:

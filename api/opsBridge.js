@@ -120,9 +120,21 @@ export async function opsCancel(campaignId) {
 }
 
 export async function opsAddress(campaignId, address) {
-  if (!FEATURES.LIVE_OPS_API) return;
+  if (!FEATURES.LIVE_OPS_API) {
+    return;
+  }
   const greydAppId = await getGreydAppId();
-  await sendOrQueue('address', campaignId, '/address', { campaignId, greydAppId, ...address });
+  await sendOrQueue('address', campaignId, '/address', {
+    campaignId,
+    greydAppId,
+    name: address.name,
+    phone: address.phone,
+    addr1: address.line,
+    addr2: [address.city, address.state].filter(Boolean).join(', ') || null,
+    zip: address.postalCode,
+    // 개인정보 수집·이용 동의(2026-09-09) — 서버는 true 가 아니면 400 privacy_consent_required 로 거부한다
+    privacyAgree: address.privacyAgree === true,
+  });
 }
 
 export async function opsFgi(campaignId, survey, firstImpression) {
