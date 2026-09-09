@@ -1,14 +1,14 @@
 diff --git a/node_modules/react-native-reanimated/android/CMakeLists.txt b/node_modules/react-native-reanimated/android/CMakeLists.txt
-index 37e7280..2b0e3ec 100644
 --- a/node_modules/react-native-reanimated/android/CMakeLists.txt
 +++ b/node_modules/react-native-reanimated/android/CMakeLists.txt
-@@ -1,5 +1,9 @@
- cmake_minimum_required(VERSION 3.13)
+@@ -1,6 +1,10 @@
+ project(Reanimated)
+ cmake_minimum_required(VERSION 3.8)
  
-+# Keep generated object paths below Windows' legacy path-length limit.
-+# This is harmless on other platforms.
++# Keep generated object paths below Windows' legacy MAX_PATH limit. Without
++# this, release builds fail when the repository is nested under a long path.
 +set(CMAKE_OBJECT_PATH_MAX 128)
 +
- project(Reanimated)
+ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
  
- set(CMAKE_VERBOSE_MAKEFILE ON)
