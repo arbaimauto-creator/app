@@ -1,6 +1,7 @@
 #import "AppDelegate.h"
 
 #import <React/RCTBundleURLProvider.h>
+#import <React/RCTLog.h>
 #import <UserNotifications/UserNotifications.h>
 #import <RNCPushNotificationIOS.h>
 #import <Firebase.h>
@@ -16,12 +17,113 @@
 // AppCenter 제거 — 서비스 자체가 2025-03 종료되어 시작 시 등록·전송이 전부 실패한다.
 // 죽은 엔드포인트로의 시작 시 활동은 제거 대상 (재실행 흰 화면 조사 과정에서 정리).
 
+
+// ── 진단 오버레이 (2026-09-15, TestFlight 흰 화면 추적용 임시 장치) ──
+// 릴리스에서 JS가 조용히 실패하면(번들 로드 실패·JS 예외·등록 실패) 흰 화면만 남고 로그는 기기 밖으로 못 나온다.
+// RN 네이티브 로그를 메모리에 모아 실행 5초 뒤 최상위 UIWindow에 그대로 띄운다. 알림·alert와 달리 가려지지 않는다.
+// 원인 확인 후 제거 대상.
+static NSMutableArray<NSString *> *gGreydBootLog = nil;
+static UIWindow *gGreydDiagWindow = nil;
+
+static void GreydAppendBootLog(NSString *line) {
+  @synchronized(gGreydBootLog) {
+    if (gGreydBootLog.count < 300) {
+      [gGreydBootLog addObject:line];
+    }
+  }
+}
+
+static void GreydShowDiagOverlay(void) {
+  if (gGreydDiagWindow != nil) { return; }
+  NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+  NSString *jsStarted = [ud stringForKey:@"bootJsStartedAt"] ?: @"(없음)";
+  NSString *navReady = [ud stringForKey:@"bootNavReadyAt"] ?: @"(없음)";
+  NSURL *bundleURL = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
+  NSMutableString *text = [NSMutableString string];
+  [text appendFormat:@"greyd 부팅 진단 (%@ build %@)
+",
+    [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"],
+    [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"]];
+  [text appendFormat:@"main.jsbundle: %@
+", bundleURL ? @"있음" : @"없음"];
+  [text appendFormat:@"JS 시작 마커: %@
+내비 준비 마커: %@
+", jsStarted, navReady];
+  UIViewController *rootVC = [UIApplication sharedApplication].delegate.window.rootViewController;
+  UIView *rootView = rootVC.view;
+  [text appendFormat:@"rootVC: %@
+rootView 자식 수: %lu, 배경: %@
+",
+    NSStringFromClass([rootVC class]), (unsigned long)rootView.subviews.count, rootView.backgroundColor];
+  UIView *first = rootView.subviews.firstObject;
+  if (first) {
+    [text appendFormat:@"첫 자식: %@ frame=%@ 자식 %lu
+", NSStringFromClass([first class]),
+      NSStringFromCGRect(first.frame), (unsigned long)first.subviews.count];
+  }
+  [text appendString:@"
+── RN 로그 ──
+"];
+  @synchronized(gGreydBootLog) {
+    [text appendString:[gGreydBootLog componentsJoinedByString:@"
+"]];
+  }
+  [text appendString:@"
+
+이 화면을 캡처해 개발자에게 보내주세요. (위쪽 '닫기'로 닫힘)"];
+
+  UIWindow *w = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  w.windowLevel = UIWindowLevelAlert + 100;
+  w.backgroundColor = [UIColor colorWithWhite:0.08 alpha:0.96];
+  UIViewController *vc = [UIViewController new];
+  vc.view.backgroundColor = [UIColor clearColor];
+  w.rootViewController = vc;
+
+  UIButton *close = [UIButton buttonWithType:UIButtonTypeSystem];
+  close.frame = CGRectMake(0, 44, w.bounds.size.width, 44);
+  [close setTitle:@"닫기" forState:UIControlStateNormal];
+  close.titleLabel.font = [UIFont boldSystemFontOfSize:17];
+  [close setTitleColor:[UIColor colorWithRed:1 green:0.72 blue:0.19 alpha:1] forState:UIControlStateNormal];
+  [close addTarget:[UIApplication sharedApplication].delegate action:@selector(greydHideDiag) forControlEvents:UIControlEventTouchUpInside];
+  [vc.view addSubview:close];
+
+  UITextView *tv = [[UITextView alloc] initWithFrame:CGRectMake(8, 92, w.bounds.size.width - 16, w.bounds.size.height - 110)];
+  tv.editable = NO;
+  tv.backgroundColor = [UIColor clearColor];
+  tv.textColor = [UIColor whiteColor];
+  tv.font = [UIFont monospacedSystemFontOfSize:11 weight:UIFontWeightRegular];
+  tv.text = text;
+  [vc.view addSubview:tv];
+
+  gGreydDiagWindow = w;
+  [w makeKeyAndVisible];
+}
+
 @implementation AppDelegate
+
+- (void)greydHideDiag
+{
+  gGreydDiagWindow.hidden = YES;
+  gGreydDiagWindow = nil;
+}
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   self.moduleName = @"greyd";
   self.initialProps = @{};
+
+  // 진단: RN 네이티브 로그를 전부 모은다(번들 로드·JS 예외·등록 실패가 여기에 찍힌다)
+  gGreydBootLog = [NSMutableArray array];
+  RCTLogFunction prevLog = RCTGetLogFunction() ?: RCTDefaultLogFunction;
+  RCTSetLogFunction(^(RCTLogLevel level, RCTLogSource source, NSString *fileName, NSNumber *lineNumber, NSString *message) {
+    NSString *lvl = level >= RCTLogLevelError ? @"E" : (level == RCTLogLevelWarning ? @"W" : @"I");
+    GreydAppendBootLog([NSString stringWithFormat:@"[%@%@] %@", lvl, source == RCTLogSourceJavaScript ? @"/js" : @"", [message length] > 600 ? [message substringToIndex:600] : message]);
+    prevLog(level, source, fileName, lineNumber, message);
+  });
+  GreydAppendBootLog(@"[I] didFinishLaunching");
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    GreydShowDiagOverlay();
+  });
 
   // Define UNUserNotificationCenter
   UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
