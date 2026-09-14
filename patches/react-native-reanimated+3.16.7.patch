@@ -7,7 +7,7 @@ diff --git a/node_modules/react-native-reanimated/android/CMakeLists.txt b/node_
  
 +# Keep generated object paths below Windows' legacy MAX_PATH limit. Without
 +# this, release builds fail when the repository is nested under a long path.
-+set(CMAKE_OBJECT_PATH_MAX 128)
++set(CMAKE_OBJECT_PATH_MAX 240)
 +
  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
  set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")

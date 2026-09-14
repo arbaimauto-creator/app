@@ -18,6 +18,8 @@ import { getSeedings, upsertSeeding, SEEDING_STATUS } from '../../api/seedings';
 import { getCreatorProfile } from '../../api/creators';
 import { logEvent, toGBand } from '../../api/common/analytics';
 import { opsFgi } from '../../api/opsBridge';
+import { getDraft, saveDraft, clearDraft, draftHasContent } from '../../api/drafts';
+import { describeError } from '../../api/opsErrors';
 
 // 계획서 TSK-007: 신청→승인→[FGI 설문]→UGC 업로드.
 // 리포트 1·2섹션(종합점수·구매의향 %·가격 반응)의 데이터 원천 — 업로드 전에 반드시 작성.
@@ -76,7 +78,59 @@ export default function FgiSurvey({ route, navigation }) {
   ).map((q) => (typeof q === 'string' ? { q, type: 'text' } : q));
   const [extraAnswers, setExtraAnswers] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [restored, setRestored] = useState(false);
   const submitLockRef = React.useRef(false);
+
+  // §5.2 임시 저장 — 긴 설문이라 화면을 떠나도 답변을 잃지 않는다
+  React.useEffect(() => {
+    getDraft('fgi', campaign.id)
+      .then((d) => {
+        if (
+          !draftHasContent(d, [
+            'scores',
+            'fairPrice',
+            'competitorName',
+            'pros',
+            'cons',
+            'extraAnswers',
+          ])
+        ) {
+          return;
+        }
+        setScores(d.scores || {});
+        setFairPrice(d.fairPrice || '');
+        setPriceCeiling(d.priceCeiling || '');
+        setCompetitorName(d.competitorName || '');
+        setPros(d.pros || '');
+        setCons(d.cons || '');
+        setExtraAnswers(d.extraAnswers || {});
+        setRestored(true);
+      })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  React.useEffect(() => {
+    saveDraft('fgi', campaign.id, {
+      scores,
+      fairPrice,
+      priceCeiling,
+      competitorName,
+      pros,
+      cons,
+      extraAnswers,
+    });
+  }, [scores, fairPrice, priceCeiling, competitorName, pros, cons, extraAnswers, campaign.id]);
+  const discardDraft = () => {
+    clearDraft('fgi', campaign.id).catch(() => {});
+    setScores({});
+    setFairPrice('');
+    setPriceCeiling('');
+    setCompetitorName('');
+    setPros('');
+    setCons('');
+    setExtraAnswers({});
+    setRestored(false);
+  };
 
   const complete =
     QUANT.every((q) => scores[q.key]) &&
@@ -97,6 +151,17 @@ export default function FgiSurvey({ route, navigation }) {
     // 응답 품질 최소선 — 한 단어 답변은 리포트 재료가 안 된다
     if (pros.trim().length < MIN_TEXT_LEN || cons.trim().length < MIN_TEXT_LEN) {
       Alert.alert(Strings.FGI_MIN_TEXT(MIN_TEXT_LEN));
+      return;
+    }
+    // §5.2 제출 직전 최종 확인
+    Alert.alert(Strings.FGI_CONFIRM_TITLE, Strings.FGI_CONFIRM_BODY, [
+      { text: Strings.CANCEL, style: 'cancel' },
+      { text: Strings.FGI_CONFIRM_OK, onPress: () => submitSurvey() },
+    ]);
+  };
+
+  const submitSurvey = async () => {
+    if (submitLockRef.current) {
       return;
     }
     submitLockRef.current = true;
@@ -129,22 +194,29 @@ export default function FgiSurvey({ route, navigation }) {
         submittedAt: new Date().toISOString(),
       };
       await upsertSeeding(campaign.id, { fgiSurvey: surveyPayload });
+      clearDraft('fgi', campaign.id).catch(() => {});
       await opsFgi(campaign.id, surveyPayload, seedings[campaign.id]?.firstImpression);
       logEvent('fgi_submit', {
         campaign_id: campaign.id,
         extra_count: extraQuestions.length,
         usage_days: usageDays ?? -1,
       });
-      Alert.alert(Strings.FGI_DONE_TITLE, Strings.FGI_DONE_BODY, [
-        {
-          text: Strings.UPLOAD_REVIEW_CTA,
-          onPress: () => navigation.replace('ReviewLinkSubmit', { campaignId: campaign.id }),
-        },
-      ], { cancelable: false });
+      Alert.alert(
+        Strings.FGI_DONE_TITLE,
+        Strings.FGI_DONE_BODY,
+        [
+          {
+            text: Strings.UPLOAD_REVIEW_CTA,
+            onPress: () => navigation.replace('ReviewLinkSubmit', { campaignId: campaign.id }),
+          },
+        ],
+        { cancelable: false },
+      );
     } catch (e) {
       submitLockRef.current = false;
       setIsSubmitting(false);
-      Alert.alert(Strings.RETRY_GUIDELINES);
+      const d = describeError(e);
+      Alert.alert(d.title, d.body);
     }
   };
 
@@ -156,6 +228,8 @@ export default function FgiSurvey({ route, navigation }) {
             style={styles.backButton}
             onPress={() => navigation.goBack()}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel={Strings.BACK || 'Back'}
           >
             <Text style={styles.backGlyph}>‹</Text>
           </TouchableOpacity>
@@ -163,6 +237,17 @@ export default function FgiSurvey({ route, navigation }) {
         </View>
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
           <Text style={styles.subtitle}>{Strings.FGI_SUBTITLE(campaign.brand)}</Text>
+          {restored ? (
+            <View style={styles.restoredRow}>
+              <Text style={styles.restoredText}>{Strings.DRAFT_RESTORED}</Text>
+              <TouchableOpacity
+                onPress={discardDraft}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Text style={styles.restoredAction}>{Strings.DRAFT_DISCARD}</Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
           {usageDays != null ? (
             <Badge tone="amber" text={Strings.FGI_DAYS_USED(usageDays)} style={styles.daysBadge} />
           ) : null}
@@ -272,6 +357,23 @@ export default function FgiSurvey({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
+  restoredRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: T.COLORS.AMBER_SOFT,
+    borderRadius: T.RADIUS.FIELD,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginBottom: 10,
+  },
+  restoredText: { fontFamily: T.FONT.Medium, fontSize: 12, color: T.COLORS.AMBER_DEEP },
+  restoredAction: {
+    fontFamily: T.FONT.Bold,
+    fontSize: 12,
+    color: T.COLORS.AMBER_DEEP,
+    textDecorationLine: 'underline',
+  },
   container: { flex: 1, backgroundColor: T.COLORS.BG, paddingTop: T.TOP_INSET },
   header: {
     flexDirection: 'row',

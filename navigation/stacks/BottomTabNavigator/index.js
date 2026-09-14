@@ -39,11 +39,11 @@ function BottomTabNavigator({ route, navigation }) {
 
   const { screenType } = useSelector((state) => state.common.mainScreen);
 
-  route.params = {
-    ...route.params,
-    logonUserIsSeller: logonUserIsSeller,
-    // setLogonUserIsSeller: setLogonUserIsSeller,
-  };
+  // route.params를 직접 재할당하면 렌더마다 새 객체가 되고, 중첩 navigate('MainBottom',
+  // { screen: 'Activity' })가 남긴 `screen` 파라미터를 useNavigationBuilder가 "새 요청"으로
+  // 재해석해 매 렌더 navigate를 디스패치했다(Maximum update depth — Activity 진입 시 실측).
+  // 파라미터는 읽기만 하고, 자식에게는 별도 객체로 넘긴다.
+  const { screen: _nestedScreen, params: _nestedParams, ...parentParams } = route.params || {};
 
   useEffect(() => {
     navigation.setOptions({
@@ -51,7 +51,9 @@ function BottomTabNavigator({ route, navigation }) {
       setInitialBottomTabRouteName: setInitialRoute,
     });
 
-    Preference.get('inviteRole').then((role) => setInviteRole(role || 'influencer'));
+    Preference.get('inviteRole')
+      .then((role) => setInviteRole(role || 'influencer'))
+      .catch(() => setInviteRole('influencer'));
 
     messaging()
       .getInitialNotification()
@@ -75,7 +77,8 @@ function BottomTabNavigator({ route, navigation }) {
   }
 
   const initialParams = {
-    ...route.params,
+    ...parentParams,
+    logonUserIsSeller,
     initialRoute,
     // setInitialBottomTabRouteName: setInitialRoute,
   };

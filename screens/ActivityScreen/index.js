@@ -20,6 +20,7 @@ import { Card, Btn, Badge, StatusPill, ProgressBar, NoteBox } from '../../Compon
 import Strings from '../../Components/Strings';
 import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
 import { getSeedings, setSeedingStatus, upsertSeeding, SEEDING_STATUS } from '../../api/seedings';
+import { seedingStatusLabel, ONGOING_STATUSES, gProgressRatio } from '../../api/statusModel';
 import { logEvent } from '../../api/common/analytics';
 import { getCreatorProfile, refreshServerStats, saveCreatorProfile } from '../../api/creators';
 import { referralCodesFor } from '../../api/referral';
@@ -28,25 +29,16 @@ import {
   gradeMultiplier,
   G_DELTA,
   GRACE_MULTIPLIER,
+  CURATED_MIN_G,
 } from '../TryScreen/points';
-import { daysLeft, isInGrace, isNoShowDue, EXTENSION_DAYS } from './missionLogic';
+import { daysLeft, isInGrace, isNoShowDue, addressHoursLeft, EXTENSION_DAYS } from './missionLogic';
+import { isFgiEnabled } from '../../api/campaignMeta';
 import AddressModal from './AddressModal';
 import { scheduleUploadReminders, cancelUploadReminders } from './reminders';
 import { opsAddress, opsCancel, opsReceived } from '../../api/opsBridge';
 import { flush as flushOpsOutbox } from '../../api/opsOutbox';
 
 const { COLORS, RADIUS, FONT, TYPE } = T;
-
-const STATUS_LABEL = () => ({
-  [SEEDING_STATUS.APPLIED]: Strings.CAMPAIGN_STATUS_APPLIED,
-  [SEEDING_STATUS.APPROVED]: Strings.CAMPAIGN_STATUS_APPROVED,
-  [SEEDING_STATUS.SHIPPED]: Strings.CAMPAIGN_STATUS_SHIPPED,
-  [SEEDING_STATUS.RECEIVED]: Strings.CAMPAIGN_STATUS_RECEIVED,
-  [SEEDING_STATUS.REVIEWING]: Strings.CAMPAIGN_STATUS_REVIEWING,
-  [SEEDING_STATUS.DONE]: Strings.CAMPAIGN_STATUS_DONE,
-  [SEEDING_STATUS.CANCELLED]: Strings.CAMPAIGN_STATUS_CANCELLED,
-  [SEEDING_STATUS.NO_SHOW]: Strings.CAMPAIGN_STATUS_NO_SHOW,
-});
 
 // 운영 수동 전이(승인·발송)를 에뮬레이터에서 확인하기 위한 개발 전용 시뮬 버튼
 const DEV_NEXT = {
@@ -57,20 +49,15 @@ const DEV_NEXT = {
   [SEEDING_STATUS.REVIEWING]: SEEDING_STATUS.DONE,
 };
 
-// 시안 24: 진행/완료 세그먼트 분류 기준
-const ONGOING_STATUSES = [
-  SEEDING_STATUS.APPLIED,
-  SEEDING_STATUS.APPROVED,
-  SEEDING_STATUS.SHIPPED,
-  SEEDING_STATUS.RECEIVED,
-  SEEDING_STATUS.REVIEWING,
-];
+// 시안 24: 진행/완료 세그먼트 분류 기준 — api/statusModel ONGOING_STATUSES (단일 출처)
 
 export default function ActivityScreen({ navigation, route }) {
   const dispatch = useDispatch();
   const campaigns = useSelector(selectCampaigns);
-  const totalReward = useSelector((s) => s.user.totalReward);
+  const campaignLoading = useSelector((s) => s.campaign.loading);
+  const campaignError = useSelector((s) => s.campaign.error);
   const [seedings, setSeedings] = useState({});
+  const [loadFailed, setLoadFailed] = useState(false);
   const [profile, setProfile] = useState(null);
   const [addressFor, setAddressFor] = useState(null); // campaignId | null
   const [tab, setTab] = useState('ongoing'); // 시안 24: 'ongoing' | 'done'
@@ -79,12 +66,81 @@ export default function ActivityScreen({ navigation, route }) {
 
   const [bonusPoints, setBonusPoints] = useState(0);
 
-  const reload = useCallback(() => {
-    getSeedings().then(setSeedings);
-    getCreatorProfile().then(setProfile);
-    // 온보딩 완료 보상 +50P (v2 §3-③) — mock: 로컬 합산
-    Preference.get('onboardingBonusGranted').then((v) => setBonusPoints(v === 'true' ? 50 : 0));
+  // 수령 후 D+16 미업로드 → no_show(Strike). 서버 스냅샷·로컬 어느 쪽이든 한 번만 적용한다.
+  // 이게 없으면 만료 미션이 영원히 "진행 중"으로 남아 동시 한도를 차지한다.
+  const applyNoShows = useCallback(async (all) => {
+    let changed = false;
+    for (const seeding of Object.values(all)) {
+      if (seeding.status === SEEDING_STATUS.RECEIVED && isNoShowDue(seeding)) {
+        await setSeedingStatus(seeding.campaignId, SEEDING_STATUS.NO_SHOW);
+        try {
+          cancelUploadReminders(seeding.campaignId);
+        } catch (e) {
+          // 알림 취소 실패는 상태 전이를 막지 않는다
+        }
+        const current = await getCreatorProfile().catch(() => null);
+        if (current && !(current.strikedCampaignIds || []).includes(seeding.campaignId)) {
+          await saveCreatorProfile({
+            ...current,
+            strikes: (current.strikes ?? 0) + 1,
+            gScore: Math.max(0, (current.gScore ?? 50) + G_DELTA.STRIKE),
+            strikedCampaignIds: [...(current.strikedCampaignIds || []), seeding.campaignId],
+          });
+        }
+        logEvent('no_show_applied', { campaign_id: seeding.campaignId });
+        changed = true;
+      }
+    }
+    return changed;
   }, []);
+
+  // 서버에서 received가 내려온 경우(ops DELIVERED)엔 수령 탭 경로를 거치지 않아 리마인더가
+  // 예약되지 않는다. 플래그로 1회만 예약한다.
+  const ensureReminders = useCallback(async (all, byId) => {
+    for (const seeding of Object.values(all)) {
+      if (
+        seeding.status === SEEDING_STATUS.RECEIVED &&
+        seeding.receivedAt &&
+        !seeding.remindersScheduledAt
+      ) {
+        try {
+          scheduleUploadReminders(
+            seeding.campaignId,
+            byId[seeding.campaignId]?.title || '',
+            seeding.receivedAt,
+            !!seeding.extensionUsed,
+          );
+        } catch (e) {
+          // 알림 예약 실패는 무시
+        }
+        await upsertSeeding(seeding.campaignId, {
+          remindersScheduledAt: new Date().toISOString(),
+        });
+      }
+    }
+  }, []);
+
+  const reload = useCallback(() => {
+    getSeedings()
+      .then(async (all) => {
+        setLoadFailed(false);
+        const byId = Object.fromEntries(campaigns.map((c) => [c.id, c]));
+        await ensureReminders(all, byId);
+        if (await applyNoShows(all)) {
+          all = await getSeedings();
+        }
+        setSeedings(all);
+      })
+      .catch(() => setLoadFailed(true));
+    getCreatorProfile()
+      .then(setProfile)
+      .catch(() => setProfile(null));
+    // 온보딩 완료 보상 +50P (v2 §3-③) — mock: 로컬 합산
+    Preference.get('onboardingBonusGranted')
+      .then((v) => setBonusPoints(v === 'true' ? 50 : 0))
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [campaigns.length]);
 
   useFocusEffect(
     useCallback(() => {
@@ -97,20 +153,25 @@ export default function ActivityScreen({ navigation, route }) {
       // 커스텀 탭 내비게이터(MyMaterialBottomTabNavigator)와 조합 시 StackNavigator가
       // 무한 재디스패치(Maximum update depth)에 빠지고 param도 도착하지 않아,
       // Preference 1회성 핸드오프로 전달한다.
-      Preference.get('pendingAddressFor').then((requestedCampaignId) => {
-        if (!requestedCampaignId) {
-          return;
-        }
-        Preference.set('pendingAddressFor', '');
-        getSeedings().then((saved) => {
-          if (
-            saved[requestedCampaignId]?.status === SEEDING_STATUS.APPROVED &&
-            !saved[requestedCampaignId]?.address
-          ) {
-            setAddressFor(requestedCampaignId);
+      Preference.get('pendingAddressFor')
+        .then((requestedCampaignId) => {
+          if (!requestedCampaignId) {
+            return;
           }
-        });
-      });
+          getSeedings()
+            .then((saved) => {
+              const target = saved[requestedCampaignId];
+              if (target?.status === SEEDING_STATUS.APPROVED && !target?.address) {
+                // 모달을 실제로 열 때만 핸드오프를 소모한다 — 승인 동기화가 늦으면 다음 포커스에서 다시 시도
+                Preference.set('pendingAddressFor', '');
+                setAddressFor(requestedCampaignId);
+              } else if (target?.address || !target || target.status !== SEEDING_STATUS.APPLIED) {
+                Preference.set('pendingAddressFor', '');
+              }
+            })
+            .catch(() => {});
+        })
+        .catch(() => {});
       // 마운트 시 1회 + 포커스마다
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [reload, campaigns.length]),
@@ -125,7 +186,8 @@ export default function ActivityScreen({ navigation, route }) {
   const shownMissions = tab === 'ongoing' ? ongoingMissions : doneMissions;
 
   const gScore = profile?.gScore ?? 50;
-  const points = (totalReward ?? 0) + (profile?.rewardPoints ?? 0) + bonusPoints;
+  // 포인트(P)와 레거시 리워드(R, 통화)는 단위가 다르다 — P에는 rewardPoints만 합산한다.
+  const points = (profile?.rewardPoints ?? 0) + bonusPoints;
 
   const onReceive = async (campaignId) => {
     if (
@@ -164,6 +226,7 @@ export default function ActivityScreen({ navigation, route }) {
     } catch (e) {
       // 수령 상태 저장이 정본이다. 알림 예약 실패로 수령을 되돌리지 않는다.
     }
+    upsertSeeding(campaignId, { remindersScheduledAt: new Date().toISOString() }).catch(() => {});
     // Phase 1.5: ops Shipment DELIVERED 미러링
     opsReceived(campaignId);
     // 시안 22: 알림 가치가 가장 높은 순간(리마인더 시작 직후)에만 권한 컨텍스트 프롬프트 (Android 13+, 1회)
@@ -171,6 +234,7 @@ export default function ActivityScreen({ navigation, route }) {
       if (Platform.OS === 'android' && Platform.Version >= 33) {
         const shown = await Preference.get('notifPromptShown');
         if (shown !== 'true') {
+          // "나중에"는 다음 수령 때 다시 묻는다. 허용을 눌렀을 때만 완료로 기록한다.
           Alert.alert(Strings.ACT_NOTIF_TITLE, Strings.ACT_NOTIF_BODY, [
             {
               text: Strings.ACT_NOTIF_LATER,
@@ -181,11 +245,16 @@ export default function ActivityScreen({ navigation, route }) {
               text: Strings.ACT_NOTIF_ALLOW,
               onPress: () => {
                 logEvent('noti_permission_prompt', { result: 'allow' });
-                PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+                PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS)
+                  .then((granted) => {
+                    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+                      Preference.set('notifPromptShown', 'true');
+                    }
+                  })
+                  .catch(() => {});
               },
             },
           ]);
-          await Preference.set('notifPromptShown', 'true');
         }
       }
     } catch (e) {
@@ -213,13 +282,23 @@ export default function ActivityScreen({ navigation, route }) {
           }
           actionLocksRef.current.add(campaignId);
           try {
+            // 확인 다이얼로그가 떠 있는 동안 발송으로 넘어갔을 수 있다 — 쓰기 직전에 재확인
+            const latest = (await getSeedings())[campaignId];
+            if (
+              latest?.status !== SEEDING_STATUS.APPLIED &&
+              latest?.status !== SEEDING_STATUS.APPROVED
+            ) {
+              reload();
+              return;
+            }
             logEvent('cancel_confirm', {
               campaign_id: campaignId,
-              status_at_cancel: seedings[campaignId]?.status || 'unknown',
+              status_at_cancel: latest.status,
             });
             const all = await setSeedingStatus(campaignId, SEEDING_STATUS.CANCELLED);
-            await opsCancel(campaignId);
             setSeedings(all);
+            // ops 미러링은 아웃박스가 재시도한다 — 로컬 취소는 이미 확정됐으니 실패를 사용자 오류로 보이지 않는다
+            opsCancel(campaignId).catch(() => {});
             reload();
           } catch (e) {
             Alert.alert(Strings.RETRY_GUIDELINES);
@@ -264,7 +343,8 @@ export default function ActivityScreen({ navigation, route }) {
     // FGI 설문(구매의향·가격·경쟁력 + 정성)이 업로드보다 먼저다 — 리포트 데이터 원천
     const seeding = seedings[campaignId];
     const campaign = campaignById[campaignId];
-    if (!seeding?.fgiSurvey && campaign) {
+    // 기획서 §2.1: FGI는 캠페인별 선택형 — 꺼진 캠페인은 설문 없이 바로 업로드
+    if (!seeding?.fgiSurvey && campaign && isFgiEnabled(campaign)) {
       navigation.navigate('FgiSurvey', { campaign });
       return;
     }
@@ -273,8 +353,8 @@ export default function ActivityScreen({ navigation, route }) {
 
   const onSubmitAddress = async (address) => {
     await upsertSeeding(addressFor, { address });
-    await opsAddress(addressFor, address);
     setAddressFor(null);
+    opsAddress(addressFor, address).catch(() => {});
     reload();
   };
 
@@ -282,7 +362,9 @@ export default function ActivityScreen({ navigation, route }) {
   const openMissionDone = (seeding, campaign, gBefore, gAfter) => {
     const grace = isInGrace(seeding);
     const base = personalizedPoints(campaign?.basePoints ?? 0, gBefore);
-    const granted = seeding.pointsGranted ?? Math.round(base * (grace ? GRACE_MULTIPLIER : 1));
+    // 서버에서 done이 내려온 시딩은 지급 스냅샷이 없다 — 현재 값으로 지어내지 않고 "확정 중"으로 표시
+    const hasSnapshot = seeding.pointsGranted != null;
+    const granted = hasSnapshot ? seeding.pointsGranted : null;
     navigation.navigate('MissionDone', {
       pointsGranted: granted,
       basePoints: seeding.basePointsAtCompletion ?? campaign?.basePoints ?? 0,
@@ -301,6 +383,10 @@ export default function ActivityScreen({ navigation, route }) {
     if (!__DEV__) {
       return;
     }
+    // 프로필이 없으면(로드 실패·진행 중) 보상 계산이 G50 기준으로 덮어써진다 — 중단
+    if (profile == null || actionLocksRef.current.has(seeding.campaignId)) {
+      return;
+    }
     const next =
       seeding.status === SEEDING_STATUS.RECEIVED
         ? SEEDING_STATUS.REVIEWING
@@ -308,45 +394,57 @@ export default function ActivityScreen({ navigation, route }) {
     if (!next) {
       return;
     }
-    if (next !== SEEDING_STATUS.DONE) {
-      await setSeedingStatus(seeding.campaignId, next);
-    }
-    if (next === SEEDING_STATUS.REVIEWING) {
-      cancelUploadReminders(seeding.campaignId);
-    }
-    if (next === SEEDING_STATUS.DONE) {
-      const campaign = campaignById[seeding.campaignId];
-      const grace = isInGrace(seeding);
-      const base = personalizedPoints(campaign?.basePoints ?? 0, gScore);
-      const granted = Math.round(base * (grace ? GRACE_MULTIPLIER : 1));
-      const completedCampaignIds = profile?.completedCampaignIds ?? [];
-      const alreadyGranted = completedCampaignIds.includes(seeding.campaignId);
-      const nextProfile = alreadyGranted
-        ? profile
-        : {
-            ...(profile || {}),
-            gScore: gScore + (grace ? G_DELTA.GRACE_COMPLETE : G_DELTA.COMPLETE),
-            completedCount: (profile?.completedCount ?? 0) + 1,
-            rewardPoints: (profile?.rewardPoints ?? 0) + granted,
-            completedCampaignIds: [...completedCampaignIds, seeding.campaignId],
-          };
-      if (!alreadyGranted) {
-        await saveCreatorProfile(nextProfile);
-        refreshServerStats(); // 서버 지급분과 수렴하도록 캐시 무효화
+    actionLocksRef.current.add(seeding.campaignId);
+    try {
+      if (next !== SEEDING_STATUS.DONE) {
+        await setSeedingStatus(seeding.campaignId, next);
       }
-      const completedSeedings = await setSeedingStatus(seeding.campaignId, next);
-      const withReward = await upsertSeeding(seeding.campaignId, {
-        pointsGranted: alreadyGranted ? seeding.pointsGranted ?? granted : granted,
-        basePointsAtCompletion: campaign?.basePoints ?? 0,
-        multiplierAtCompletion: gradeMultiplier(gScore),
-        gBefore: alreadyGranted ? seeding.gBefore ?? gScore : gScore,
-        gAfter: alreadyGranted ? seeding.gAfter ?? nextProfile?.gScore ?? gScore : nextProfile.gScore,
-        doneAt: completedSeedings[seeding.campaignId].doneAt,
-      });
-      // 시안 16: 완주 보상 리포트로 즉시 연결
-      openMissionDone(withReward[seeding.campaignId], campaign, gScore, nextProfile?.gScore ?? gScore);
+      if (next === SEEDING_STATUS.REVIEWING) {
+        cancelUploadReminders(seeding.campaignId);
+      }
+      if (next === SEEDING_STATUS.DONE) {
+        const campaign = campaignById[seeding.campaignId];
+        const grace = isInGrace(seeding);
+        const base = personalizedPoints(campaign?.basePoints ?? 0, gScore);
+        const granted = Math.round(base * (grace ? GRACE_MULTIPLIER : 1));
+        const completedCampaignIds = profile?.completedCampaignIds ?? [];
+        const alreadyGranted = completedCampaignIds.includes(seeding.campaignId);
+        const nextProfile = alreadyGranted
+          ? profile
+          : {
+              ...(profile || {}),
+              gScore: gScore + (grace ? G_DELTA.GRACE_COMPLETE : G_DELTA.COMPLETE),
+              completedCount: (profile?.completedCount ?? 0) + 1,
+              rewardPoints: (profile?.rewardPoints ?? 0) + granted,
+              completedCampaignIds: [...completedCampaignIds, seeding.campaignId],
+            };
+        if (!alreadyGranted) {
+          await saveCreatorProfile(nextProfile);
+          refreshServerStats(); // 서버 지급분과 수렴하도록 캐시 무효화
+        }
+        const completedSeedings = await setSeedingStatus(seeding.campaignId, next);
+        const withReward = await upsertSeeding(seeding.campaignId, {
+          pointsGranted: alreadyGranted ? (seeding.pointsGranted ?? granted) : granted,
+          basePointsAtCompletion: campaign?.basePoints ?? 0,
+          multiplierAtCompletion: gradeMultiplier(gScore),
+          gBefore: alreadyGranted ? (seeding.gBefore ?? gScore) : gScore,
+          gAfter: alreadyGranted
+            ? (seeding.gAfter ?? nextProfile?.gScore ?? gScore)
+            : nextProfile.gScore,
+          doneAt: completedSeedings[seeding.campaignId].doneAt,
+        });
+        // 시안 16: 완주 보상 리포트로 즉시 연결
+        openMissionDone(
+          withReward[seeding.campaignId],
+          campaign,
+          gScore,
+          nextProfile?.gScore ?? gScore,
+        );
+      }
+      reload();
+    } finally {
+      actionLocksRef.current.delete(seeding.campaignId);
     }
-    reload();
   };
 
   const renderMission = ({ item: seeding }) => {
@@ -354,7 +452,7 @@ export default function ActivityScreen({ navigation, route }) {
     const left = daysLeft(seeding);
     const grace = isInGrace(seeding);
     const noShowDue = isNoShowDue(seeding);
-    const label = STATUS_LABEL()[seeding.status] || seeding.status;
+    const label = seedingStatusLabel(seeding.status);
 
     return (
       <Card
@@ -366,11 +464,7 @@ export default function ActivityScreen({ navigation, route }) {
         {/* 시안: 남은 기한을 카드 맨 위에 D-N으로. 목록을 훑을 때 급한 것부터 보인다.
             3일 이하면 빨강, 유예 중이면 별도 표시. 기한이 없는 단계(신청·검토)는 생략. */}
         {typeof left === 'number' && left >= 0 && !grace ? (
-          <Badge
-            tone={left <= 3 ? 'red' : 'curated'}
-            text={`D-${left}`}
-            style={styles.dDayBadge}
-          />
+          <Badge tone={left <= 3 ? 'red' : 'curated'} text={`D-${left}`} style={styles.dDayBadge} />
         ) : null}
         <View style={styles.missionHeader}>
           <Text style={styles.missionTitle} numberOfLines={1}>
@@ -382,11 +476,22 @@ export default function ActivityScreen({ navigation, route }) {
         </View>
 
         {seeding.status === SEEDING_STATUS.APPROVED && !seeding.address ? (
-          <Btn
-            title={Strings.ADDRESS_CTA}
-            onPress={() => setAddressFor(seeding.campaignId)}
-            style={styles.actionGap}
-          />
+          <>
+            <Btn
+              title={Strings.ADDRESS_CTA}
+              onPress={() => setAddressFor(seeding.campaignId)}
+              style={styles.actionGap}
+            />
+            {addressHoursLeft(seeding) != null ? (
+              <Text
+                style={[styles.subInfo, addressHoursLeft(seeding) <= 0 ? styles.ddayDanger : null]}
+              >
+                {addressHoursLeft(seeding) > 0
+                  ? Strings.ADDRESS_HOURS_LEFT(addressHoursLeft(seeding))
+                  : Strings.ADDRESS_DEADLINE_PASSED}
+              </Text>
+            ) : null}
+          </>
         ) : null}
         {seeding.status === SEEDING_STATUS.APPROVED && seeding.address ? (
           <Text style={styles.subInfo}>{Strings.ADDRESS_SAVED}</Text>
@@ -434,11 +539,13 @@ export default function ActivityScreen({ navigation, route }) {
               </Text>
             )}
             <View style={styles.rowBtns}>
-              <Btn
-                title={Strings.UPLOAD_REVIEW_CTA}
-                onPress={() => onUpload(seeding.campaignId)}
-                style={styles.rowBtn}
-              />
+              {!noShowDue ? (
+                <Btn
+                  title={Strings.UPLOAD_REVIEW_CTA}
+                  onPress={() => onUpload(seeding.campaignId)}
+                  style={styles.rowBtn}
+                />
+              ) : null}
               {!seeding.extensionUsed && left != null && left <= 3 && !grace ? (
                 <Btn
                   variant="ghost"
@@ -453,8 +560,12 @@ export default function ActivityScreen({ navigation, route }) {
 
         {seeding.status === SEEDING_STATUS.DONE ? (
           <View style={styles.feedbackCard}>
-            <Text style={styles.feedbackStars}>★★★★☆</Text>
-            <Text style={styles.feedbackText}>{Strings.BRAND_FEEDBACK_MOCK(campaign.brand)}</Text>
+            {/* 브랜드 평가 데이터는 아직 앱에 내려오지 않는다 — 가짜 별점 대신 확인 상태(원장 pointsGranted)만 정직하게 */}
+            <Text style={styles.feedbackText}>
+              {seeding.pointsGranted != null
+                ? Strings.ACT_BRAND_CONFIRMED(campaign.brand)
+                : Strings.ACT_BRAND_REVIEWING(campaign.brand)}
+            </Text>
             <Btn
               variant="ghost"
               small
@@ -504,12 +615,11 @@ export default function ActivityScreen({ navigation, route }) {
         <Card style={styles.topCard}>
           <Text style={styles.topLabel}>G-Score</Text>
           <Text style={styles.gValue}>G{gScore}</Text>
-          <ProgressBar
-            ratio={Math.min(100, Math.max(4, ((gScore - 50) / 10) * 100)) / 100}
-            style={styles.gBar}
-          />
+          <ProgressBar ratio={gProgressRatio(gScore)} style={styles.gBar} />
           <Text style={styles.topNote}>
-            {gScore < 60 ? Strings.G_NEXT_UNLOCK(60 - gScore) : Strings.G_UNLOCKED}
+            {gScore < CURATED_MIN_G
+              ? Strings.G_NEXT_UNLOCK(CURATED_MIN_G - gScore)
+              : Strings.G_UNLOCKED}
           </Text>
         </Card>
         <Card style={styles.topCard}>
@@ -554,10 +664,30 @@ export default function ActivityScreen({ navigation, route }) {
         keyExtractor={(item) => item.campaignId}
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
         ListEmptyComponent={
-          <View style={styles.emptyWrap}>
-            <Text style={styles.emptyEmoji}>📦</Text>
-            <Text style={styles.emptyTitle}>{Strings.NO_CAMPAIGNS}</Text>
-          </View>
+          campaignLoading && campaigns.length === 0 ? (
+            <View style={styles.emptyWrap}>
+              <Text style={styles.emptyTitle}>{Strings.MAIN_FEED_LOADING}</Text>
+            </View>
+          ) : loadFailed || (campaignError && campaigns.length === 0) ? (
+            <View style={styles.emptyWrap}>
+              <Text style={styles.emptyEmoji}>⚠️</Text>
+              <Text style={styles.emptyTitle}>{Strings.CAMPAIGNS_LOAD_ERROR}</Text>
+              <Btn
+                variant="ghost"
+                small
+                title={Strings.RETRY}
+                onPress={() => {
+                  dispatch(fetchCampaigns());
+                  reload();
+                }}
+              />
+            </View>
+          ) : (
+            <View style={styles.emptyWrap}>
+              <Text style={styles.emptyEmoji}>📦</Text>
+              <Text style={styles.emptyTitle}>{Strings.NO_CAMPAIGNS}</Text>
+            </View>
+          )
         }
         renderItem={renderMission}
       />
@@ -644,7 +774,6 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.FIELD,
     padding: 12,
   },
-  feedbackStars: { color: COLORS.AMBER, fontSize: 13, letterSpacing: 2 },
   cancelBtn: { marginTop: 10, alignSelf: 'flex-start' },
   cancelledCard: { opacity: 0.75 },
   cancelledNote: { ...TYPE.XS, marginTop: 8 },

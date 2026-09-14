@@ -54,9 +54,12 @@ import MustReadDetail from '../../screens/AddingNewVideoScreen/MustReadDetail';
 import InviteGateScreen from '../../screens/InviteGateScreen';
 import CreatorOnboarding from '../../screens/InviteGateScreen/CreatorOnboarding';
 import FgiSurvey from '../../screens/TryScreen/FgiSurvey';
+import CampaignSwipeFeed from '../../screens/HomeScreen/CampaignSwipeFeed';
+import CampaignDetail from '../../screens/TryScreen/CampaignDetail';
 import ReviewLinkSubmit from '../../screens/TryScreen/ReviewLinkSubmit';
 import BrandWelcome from '../../screens/InviteGateScreen/BrandWelcome';
 import AddressBook from '../../screens/MyScreen/AddressBook';
+import RewardLedgerScreen from '../../screens/MyScreen/RewardLedgerScreen';
 import AboutScreen from '../../screens/MyScreen/AboutScreen';
 import GreydSettingsScreen from '../../screens/MyScreen/SettingsScreen';
 import ReferenceListScreen from '../../Components/ReferenceListScreen';
@@ -247,7 +250,8 @@ function MainDrawerNavigator({ route, navigation }) {
     <Stack.Navigator
       // v2 §3-1: 게이트 미통과 = 초대 게이트가 최전면 (클로즈드 베타 — 신규 디자인 진입점).
       // 통과 후에는 화면 인벤토리 1번 = 소셜 로그인. 온보딩 4장은 게이트 이후 CreatorOnboarding 담당.
-      initialRouteName={gatePassed === 'yes' ? 'NotSignedIn' : 'InviteGate'}
+      // INVITE_GATE가 꺼진 빌드는 저장된 게이트 상태와 무관하게 로그인이 첫 화면.
+      initialRouteName={FEATURES.INVITE_GATE && gatePassed !== 'yes' ? 'InviteGate' : 'NotSignedIn'}
       screenOptions={horizontalAnimation}
     >
       <Stack.Screen
@@ -334,13 +338,31 @@ function MainDrawerNavigator({ route, navigation }) {
       <Stack.Screen name="BrandWelcome" component={BrandWelcome} options={{ headerShown: false }} />
       {/* 마이 탭 서브 화면 + 신청·완주 결과 화면 (시안 11·16·17·18·19·20·25) */}
       <Stack.Screen name="AddressBook" component={AddressBook} options={{ headerShown: false }} />
+      {/* 보상 내역(P2 2026-09-14) — 5상태 원장 전용. 레거시 RewardList(R)는 그대로 두고 여기서 연결 */}
+      <Stack.Screen
+        name="RewardLedger"
+        component={RewardLedgerScreen}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen name="AboutGreyd" component={AboutScreen} options={{ headerShown: false }} />
       <Stack.Screen
         name="GreydSettings"
         component={GreydSettingsScreen}
+        initialParams={initialParams}
         options={{ headerShown: false }}
       />
       <Stack.Screen name="ApplyDone" component={ApplyDone} options={{ headerShown: false }} />
+      {/* 기획서 §5.1 세로형 슬라이딩 탐색 + 홈에서 바로 여는 상세 (탭 안 CampaignDetail과 같은 컴포넌트) */}
+      <Stack.Screen
+        name="CampaignSwipe"
+        component={CampaignSwipeFeed}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="CampaignDetailRoot"
+        component={CampaignDetail}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen name="MissionDone" component={MissionDone} options={{ headerShown: false }} />
       <Stack.Screen
         name="VideoPage"
@@ -537,9 +559,7 @@ function MainDrawerNavigator({ route, navigation }) {
         initialParams={initialParams}
         // 레퍼런스 화면은 자체 헤더(뒤로가기 + 제목 + 개수)를 그린다 —
         // 기본 헤더를 켜두면 "BookmarkList"가 위에 겹친다.
-        options={
-          FEATURES.COMMERCE ? { ...headerBackButton } : { headerShown: false }
-        }
+        options={FEATURES.COMMERCE ? { ...headerBackButton } : { headerShown: false }}
       />
       <Stack.Screen
         name="RewardList"

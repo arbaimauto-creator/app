@@ -28,16 +28,21 @@ export default function BrandMy({ navigation }) {
   const [uploads, setUploads] = useState(0);
   const [evaluated, setEvaluated] = useState(0);
 
-  const campaign = campaigns[0];
+  // 브랜드 캠페인 목록 — 진행 중(open)과 지난(closed)을 데이터로 센다 (이전엔 '1건' 고정 문자열)
+  const ongoing = campaigns.filter((c) => c.status !== 'closed');
+  const past = campaigns.filter((c) => c.status === 'closed');
+  const campaign = ongoing[0] || campaigns[0];
 
   useFocusEffect(
     useCallback(() => {
       // BrandDashboard와 동일 소스: 게이트에서 저장한 inviteBrandName
-      Preference.get('inviteBrandName').then((v) => setBrandName(v || 'SonPlan'));
+      Preference.get('inviteBrandName').then((v) =>
+        setBrandName(v || Strings.BRAND_MY_DEFAULT_NAME),
+      );
       if (campaigns.length === 0) {
         dispatch(fetchCampaigns());
       }
-      const id = campaigns[0]?.id;
+      const id = (campaigns.find((c) => c.status !== 'closed') || campaigns[0])?.id;
       if (id) {
         Promise.all([fetchCampaignReviews(id), getEvaluations()]).then(([reviews, evals]) => {
           setUploads(reviews.length);
@@ -70,7 +75,10 @@ export default function BrandMy({ navigation }) {
         <Card style={styles.rowCard}>
           <View style={styles.rowHead}>
             <Text style={styles.rowTitle}>{Strings.BRAND_MY_ONGOING}</Text>
-            <Badge tone="open" text="1" />
+            <Badge
+              tone={ongoing.length > 0 ? 'open' : 'curated'}
+              text={Strings.BRAND_MY_ONGOING_COUNT(ongoing.length)}
+            />
           </View>
           <Text style={styles.campaignLine}>{campaignLine}</Text>
         </Card>
@@ -78,14 +86,15 @@ export default function BrandMy({ navigation }) {
         {/* 지난 캠페인 */}
         <Card style={[styles.rowCard, styles.rowInline]}>
           <Text style={styles.rowTitle}>{Strings.BRAND_MY_PAST}</Text>
-          <Text style={styles.xs}>{Strings.BRAND_MY_PAST_COUNT}</Text>
+          <Text style={styles.xs}>{Strings.BRAND_MY_PAST_COUNT_N(past.length)}</Text>
         </Card>
 
         {/* FGI 리포트 */}
         <Card style={styles.rowCard}>
           <View style={styles.rowHead}>
             <Text style={styles.rowTitle}>{Strings.BRAND_MY_REPORT}</Text>
-            <Text style={styles.xs}>{Strings.BRAND_MY_REPORT_COUNT}</Text>
+            {/* 리포트는 캠페인 종료 후 애널리스트가 작성 — 종료 캠페인 수만큼 제공 예정 */}
+            <Text style={styles.xs}>{Strings.BRAND_MY_REPORT_COUNT_N(past.length)}</Text>
           </View>
           <Text style={[styles.xs, { marginTop: 4 }]}>{Strings.BRAND_MY_REPORT_NOTE}</Text>
         </Card>

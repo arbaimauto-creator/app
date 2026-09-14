@@ -31,8 +31,15 @@ export default function SettingsScreen({ navigation, route }) {
     );
 
   const onDeleteAccount = async () => {
-    const seedings = await getSeedings();
-    const hasActive = Object.values(seedings).some((s) => ACTIVE_STATUSES.includes(s.status));
+    let hasActive = true;
+    try {
+      const seedings = await getSeedings();
+      hasActive = Object.values(seedings).some((s) => ACTIVE_STATUSES.includes(s.status));
+    } catch (e) {
+      // 진행 미션을 확인하지 못하면 삭제를 막는다(닫힌 실패)
+      Alert.alert(Strings.RETRY_GUIDELINES);
+      return;
+    }
     if (hasActive) {
       Alert.alert(Strings.SET_DELETE_BLOCKED);
       return;
@@ -42,7 +49,8 @@ export default function SettingsScreen({ navigation, route }) {
       {
         text: Strings.SET_DELETE,
         style: 'destructive',
-        onPress: () => navigation.navigate('AgreementToWithdrawal'),
+        // 'AgreementToWithdrawal'은 리워드 출금 약관 화면이다 — 계정 삭제는 MembershipWithdrawal(cancelMembership)
+        onPress: () => navigation.navigate('MembershipWithdrawal'),
       },
     ]);
   };
@@ -60,44 +68,41 @@ export default function SettingsScreen({ navigation, route }) {
       </View>
       <ScrollView contentContainerStyle={styles.scroll}>
         <TouchableOpacity activeOpacity={0.7} onPress={openAppSettings}>
-        <Card>
-          <View style={styles.row}>
-            <Text style={styles.rowTitle}>{Strings.SET_REMINDER_TITLE}</Text>
-            <Badge tone="open" text={Strings.SET_OPEN_SETTINGS} />
-          </View>
-          <Text style={[styles.xs, styles.mt4]}>{Strings.SET_REMINDER_NOTE}</Text>
-        </Card>
+          <Card>
+            <View style={styles.row}>
+              <Text style={styles.rowTitle}>{Strings.SET_REMINDER_TITLE}</Text>
+              <Badge tone="open" text={Strings.SET_OPEN_SETTINGS} />
+            </View>
+            <Text style={[styles.xs, styles.mt4]}>{Strings.SET_REMINDER_NOTE}</Text>
+          </Card>
         </TouchableOpacity>
 
         <TouchableOpacity activeOpacity={0.7} onPress={openAppSettings}>
-        <Card>
-          <View style={styles.row}>
-            <Text style={styles.rowTitle}>{Strings.SET_LANGUAGE}</Text>
-            <View style={styles.seg}>
-              <View style={[styles.segItem, !isKorean && styles.segItemOn]}>
-                <Text style={[styles.segText, !isKorean && styles.segTextOn]}>EN</Text>
-              </View>
-              <View style={[styles.segItem, isKorean && styles.segItemOn]}>
-                <Text style={[styles.segText, isKorean && styles.segTextOn]}>
-                  {Strings.SET_LANG_KO}
-                </Text>
+          <Card>
+            <View style={styles.row}>
+              <Text style={styles.rowTitle}>{Strings.SET_LANGUAGE}</Text>
+              <View style={styles.seg}>
+                <View style={[styles.segItem, !isKorean && styles.segItemOn]}>
+                  <Text style={[styles.segText, !isKorean && styles.segTextOn]}>EN</Text>
+                </View>
+                <View style={[styles.segItem, isKorean && styles.segItemOn]}>
+                  <Text style={[styles.segText, isKorean && styles.segTextOn]}>
+                    {Strings.SET_LANG_KO}
+                  </Text>
+                </View>
               </View>
             </View>
-          </View>
-          <Text style={[styles.xs, styles.mt4]}>{Strings.SET_LANGUAGE_NOTE}</Text>
-        </Card>
+            <Text style={[styles.xs, styles.mt4]}>{Strings.SET_LANGUAGE_NOTE}</Text>
+          </Card>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={openPrivacyPolicy}
-        >
-        <Card>
-          <View style={styles.row}>
-            <Text style={styles.rowTitle}>{Strings.SET_TERMS_PRIVACY}</Text>
-            <Text style={styles.chev}>›</Text>
-          </View>
-        </Card>
+        <TouchableOpacity activeOpacity={0.7} onPress={openPrivacyPolicy}>
+          <Card>
+            <View style={styles.row}>
+              <Text style={styles.rowTitle}>{Strings.SET_TERMS_PRIVACY}</Text>
+              <Text style={styles.chev}>›</Text>
+            </View>
+          </Card>
         </TouchableOpacity>
 
         <TouchableOpacity activeOpacity={0.7} onPress={() => menuLogout({ navigation, route })}>
@@ -116,7 +121,9 @@ export default function SettingsScreen({ navigation, route }) {
           </Card>
         </TouchableOpacity>
 
-        <Text style={styles.version}>v{getVersion()} ({getBuildNumber()})</Text>
+        <Text style={styles.version}>
+          v{getVersion()} ({getBuildNumber()})
+        </Text>
       </ScrollView>
     </SafeAreaView>
   );

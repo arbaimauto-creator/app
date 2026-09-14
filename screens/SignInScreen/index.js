@@ -134,65 +134,88 @@ class SignInScreen extends React.Component {
     // };
     // getPermissionAndInitSingular();
 
-    Preference.get('userId').then(async (value) => {
-      if (value) {
-        // userName 확인을 await하지 않으면 게스트 로그아웃(NotSignedIn 리셋)과
-        // 아래 MainBottom 리셋이 경쟁해 비결정적으로 동작한다.
-        const userName = await Preference.get('userName');
-        // 게스트는 원래 부팅 때마다 로그아웃시킨다(클로즈드 앱 원칙 — 계정 없이 상태가
-        // 쌓이면 안 된다). 문제는 menuLogout이 로컬 데이터까지 지운다는 것: 테스트
-        // 빌드에서 게스트로 신청해 두고 앱을 재시작하면 진행 중인 미션이 통째로 사라져
-        // 수령·업로드 단계를 확인할 수 없었다. TEST_GUEST_ENTRY가 켜진 동안만 유지한다.
-        if (
-          userName &&
-          (userName === 'greyd.guest' || userName === 'Guest') &&
-          !__DEV__ &&
-          !FEATURES.TEST_GUEST_ENTRY
-        ) {
-          return menuLogout(this.props);
-        }
-        const restoredGuest = userName === 'greyd.guest' || userName === 'Guest';
-        this.props.changeGuestStatus(restoredGuest);
-
-        console.log('SignInScreen() - You signed up');
-        // D28: 기로그인 부팅도 게이트/온보딩 미완 분기를 태운다 (로그인 성공과 동일 경로)
-        await resetToMain(this.props.navigation);
-      }
-
-      if (!__DEV__) {
-        const uniqueId = await deviceInfoModule.getUniqueId();
-        APIprovider.getChannelIOMemberHash({ memberId: uniqueId }).then(async (result) => {
-          if (result && result.success) {
-            const userAgent = await deviceInfoModule.getUserAgent();
-            const userfbToken = await pushNotifications.getDeviceToken();
-
-            // ChannelIO.boot({
-            //   pluginKey: Constants.CHANNEL_IO_PLUGIN_KEY,
-            //   memberId: uniqueId,
-            //   memberHash: result.hash,
-            //   profile: {
-            //     name: uniqueId,
-            //     userfbToken,
-            //     userAgent,
-            //   },
-            // }).then(() => console.log('ChannelIO initial booted!'));
+    Preference.get('userId')
+      .then(async (value) => {
+        if (value) {
+          // userName 확인을 await하지 않으면 게스트 로그아웃(NotSignedIn 리셋)과
+          // 아래 MainBottom 리셋이 경쟁해 비결정적으로 동작한다.
+          const userName = await Preference.get('userName');
+          // 게스트는 원래 부팅 때마다 로그아웃시킨다(클로즈드 앱 원칙 — 계정 없이 상태가
+          // 쌓이면 안 된다). 문제는 menuLogout이 로컬 데이터까지 지운다는 것: 테스트
+          // 빌드에서 게스트로 신청해 두고 앱을 재시작하면 진행 중인 미션이 통째로 사라져
+          // 수령·업로드 단계를 확인할 수 없었다. TEST_GUEST_ENTRY가 켜진 동안만 유지한다.
+          if (
+            userName &&
+            (userName === 'greyd.guest' || userName === 'Guest') &&
+            !__DEV__ &&
+            !FEATURES.TEST_GUEST_ENTRY
+          ) {
+            return menuLogout(this.props);
           }
-        });
-      }
-    });
-    DeviceCountry.getCountryCode().then((value) => {
-      if (this._isMounted) {
-        this.setState({
-          location: value.code.toLowerCase() === 'kr' ? 'kr' : 'us',
-        });
-      }
-    });
+          const restoredGuest = userName === 'greyd.guest' || userName === 'Guest';
+          this.props.changeGuestStatus(restoredGuest);
+
+          console.log('SignInScreen() - You signed up');
+          // D28: 기로그인 부팅도 게이트/온보딩 미완 분기를 태운다 (로그인 성공과 동일 경로)
+          await resetToMain(this.props.navigation);
+        }
+
+        if (!__DEV__) {
+          const uniqueId = await deviceInfoModule.getUniqueId();
+          APIprovider.getChannelIOMemberHash({ memberId: uniqueId }).then(async (result) => {
+            if (result && result.success) {
+              const userAgent = await deviceInfoModule.getUserAgent();
+              const userfbToken = await pushNotifications.getDeviceToken();
+
+              // ChannelIO.boot({
+              //   pluginKey: Constants.CHANNEL_IO_PLUGIN_KEY,
+              //   memberId: uniqueId,
+              //   memberHash: result.hash,
+              //   profile: {
+              //     name: uniqueId,
+              //     userfbToken,
+              //     userAgent,
+              //   },
+              // }).then(() => console.log('ChannelIO initial booted!'));
+            }
+          });
+        }
+      })
+      .catch((err) => {
+        // 부팅 체인 실패는 수동 로그인 화면으로 떨어지면 된다 — 조용히 멈추지 않는다.
+        console.log('SignInScreen boot chain failed', err?.message);
+        if (this._isMounted) {
+          this.setState({ isLoggingIn: false });
+        }
+      });
+    DeviceCountry.getCountryCode()
+      .then((value) => {
+        if (this._isMounted) {
+          this.setState({
+            location: value?.code?.toLowerCase() === 'kr' ? 'kr' : 'us',
+          });
+        }
+      })
+      .catch(() => {});
     SplashScreen.hide();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
   }
+
+  // 로그인 버튼 연타 방지: isLoggingIn은 네이티브 다이얼로그가 돌아온 뒤에야 켜져
+  // 그 사이 두 번째 탭이 login·persist·reset을 중복 실행한다(게이트 화면에서 겪은 흰 화면).
+  // 취소 경로에서 setLoggingIn(false)가 안 불리는 provider가 있어 시간 기반으로 푼다.
+  _lastLoginTapAt = 0;
+  guardLogin = (fn) => () => {
+    const now = Date.now();
+    if (this.state.isLoggingIn || now - this._lastLoginTapAt < 1500) {
+      return;
+    }
+    this._lastLoginTapAt = now;
+    fn();
+  };
 
   render() {
     return (
@@ -216,29 +239,32 @@ class SignInScreen extends React.Component {
               <View style={styles.signInButtonsContainer}>
                 <LoginButtons
                   location={this.state.location}
-                  appleLogin={() =>
-                    appleLogin(this.props, (value) => this.setState({ isLoggingIn: value }))
-                  }
-                  kakaoLogin={() =>
+                  appleLogin={this.guardLogin(() =>
+                    appleLogin(this.props, (value) => this.setState({ isLoggingIn: value })),
+                  )}
+                  kakaoLogin={this.guardLogin(() =>
                     kakaoLogin(
                       this.props,
                       (auth) => {
-                        this.setState({
-                          'kakao.refreshTokenExpiresAt': auth.refreshTokenExpiresAt,
-                          'kakao.accessTokenExpiresAt': auth.accessTokenExpiresAt,
-                          'kakao.refreshToken': auth.refreshToken,
-                          'kakao.accessToken': auth.accessToken,
-                        });
+                        this.setState((prev) => ({
+                          kakao: {
+                            ...prev.kakao,
+                            refreshTokenExpiresAt: auth.refreshTokenExpiresAt,
+                            accessTokenExpiresAt: auth.accessTokenExpiresAt,
+                            refreshToken: auth.refreshToken,
+                            accessToken: auth.accessToken,
+                          },
+                        }));
                       },
                       (value) => this.setState({ isLoggingIn: value }),
-                    )
-                  }
-                  facebookLogin={() =>
-                    facebookLogin(this.props, (value) => this.setState({ isLoggingIn: value }))
-                  }
-                  googleLogin={() =>
-                    googleLogin(this.props, (value) => this.setState({ isLoggingIn: value }))
-                  }
+                    ),
+                  )}
+                  facebookLogin={this.guardLogin(() =>
+                    facebookLogin(this.props, (value) => this.setState({ isLoggingIn: value })),
+                  )}
+                  googleLogin={this.guardLogin(() =>
+                    googleLogin(this.props, (value) => this.setState({ isLoggingIn: value })),
+                  )}
                 />
               </View>
 
@@ -248,9 +274,9 @@ class SignInScreen extends React.Component {
               {(!FEATURES.INVITE_GATE || __DEV__ || FEATURES.TEST_GUEST_ENTRY) && (
                 <View style={styles.guestButtonsContainer}>
                   <GuestLoginButton
-                    onPress={() =>
-                      guestUser(this.props, (value) => this.setState({ isLoggingIn: value }))
-                    }
+                    onPress={this.guardLogin(() =>
+                      guestUser(this.props, (value) => this.setState({ isLoggingIn: value })),
+                    )}
                   />
                 </View>
               )}

@@ -9,9 +9,11 @@ import { UPLOAD_DAYS, GRACE_DAYS, EXTENSION_DAYS } from './missionLogic';
 
 // campaignId → 고정 숫자 베이스 (알림 id는 문자열 숫자여야 함)
 function baseId(campaignId) {
+  // 32비트 int 범위 안에서 최대한 넓게(×10 후 < 2^31) — 10만 모듈로는 캠페인끼리 쉽게 충돌했다
   let h = 0;
-  for (let i = 0; i < campaignId.length; i++) {
-    h = (h * 31 + campaignId.charCodeAt(i)) % 100000;
+  const id = String(campaignId || '');
+  for (let i = 0; i < id.length; i++) {
+    h = (h * 31 + id.charCodeAt(i)) % 200000000;
   }
   return h * 10;
 }

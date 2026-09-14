@@ -2,6 +2,7 @@ import { CommonActions, useScrollToTop } from '@react-navigation/native';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  TouchableOpacity,
   Dimensions,
   Image,
   NativeModules,
@@ -253,6 +254,8 @@ function MainScreen(props) {
 
   const dispatch = useDispatch();
 
+  const [feedError, setFeedError] = useState(false);
+
   const loadMainData = async ({ isInitial }) => {
     if (isMainRefreshing) {
       return;
@@ -284,6 +287,7 @@ function MainScreen(props) {
       if (recommended.length > 0) {
         setVideoListRecommended(recommended);
       }
+      setFeedError(recommended.length === 0);
       focusedIndexRef.current = 0;
       setFocusedIndex(0);
       setPrevFocusedIndex(0);
@@ -300,6 +304,7 @@ function MainScreen(props) {
       }
     } catch (err) {
       setMainRefreshing(false);
+      setFeedError(true);
       console.log(err);
     }
   };
@@ -677,7 +682,7 @@ function MainScreen(props) {
     }
     const onPushNotification = (notification) => {
       // 알림 클릭을 이용해 바로 링크가 되는 경우
-      const data = notification.data;
+      const data = notification?.data || {};
 
       if (data.isTouchEvent && Constants.PAGE_SCREEN_NAMES.includes(data.navigationParams?.page)) {
         if (Constants.B2B_SCREEN_NAMES.includes(data.navigationParams.page)) {
@@ -736,9 +741,20 @@ function MainScreen(props) {
         };
 
         if (mountedRef.current) {
-          APIprovider.logon(profile)
+          // 로컬 게스트(서버 계정 없음)는 서버 로그온을 건너뛴다 — /users/local-guest/login은 항상 실패.
+          const logonPromise =
+            value === 'local-guest'
+              ? Promise.resolve({ success: true })
+              : APIprovider.logon(profile);
+          logonPromise
             .then((result) => {
-              if (result && !result.success) {
+              // APIprovider.logon은 네트워크 오류를 Error 객체로 resolve한다. 일시 장애로
+              // 세션을 지우면 안 되므로 명시적 거부(success:false)에만 로그아웃한다.
+              if (result instanceof Error) {
+                console.log('logon unreachable, keeping session', result.message);
+                result = {};
+              }
+              if (result && result.success === false) {
                 console.error('result && !result.success logout', result.message);
                 return logout();
               }
@@ -792,7 +808,7 @@ function MainScreen(props) {
                     Preference.set('previousPage', '');
                     const [page, pageId] = previousPage.split('/');
 
-                    return pageRoutingFunctions[page](props.navigation, pageId);
+                    return pageRoutingFunctions[page]?.(props.navigation, pageId);
                   }
                 });
 
@@ -802,15 +818,21 @@ function MainScreen(props) {
                   }
                 });
 
-                if (props.route.params?.initialRoute !== 'Home') {
-                  props.navigation.navigate(props.route.params?.initialRoute);
+                const initialRoute = props.route.params?.initialRoute;
+                if (initialRoute && initialRoute !== 'Home') {
+                  try {
+                    props.navigation.navigate(initialRoute);
+                  } catch (e) {
+                    // 등록되지 않은 라우트(푸시 type 오타 등)는 무시
+                  }
+                  // 소비 후 초기화 — 그대로 두면 피드 재진입마다 같은 화면으로 튕긴다
+                  props.navigation.setParams({ initialRoute: 'Home' });
                 }
               });
             })
             .catch((err) => {
+              // 부팅 데이터 로드 실패는 세션 무효가 아니다 — 다음 포커스에서 재시도된다.
               console.error('logon error', err);
-
-              logout();
             });
         }
       } else {
@@ -1004,8 +1026,27 @@ function MainScreen(props) {
                 <Text style={styles.feedEmptyLogo}>
                   greyd<Text style={{ color: T.COLORS.AMBER }}>.</Text>
                 </Text>
-                <ActivityIndicator size="small" color={T.COLORS.AMBER} />
-                <Text style={styles.feedEmptyText}>{Strings.MAIN_FEED_LOADING}</Text>
+                {feedError ? (
+                  <>
+                    <Text style={styles.feedEmptyText}>{Strings.MAIN_FEED_ERROR}</Text>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setFeedError(false);
+                        loadMainData({ isInitial: true });
+                      }}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                      <Text style={[styles.feedEmptyText, { textDecorationLine: 'underline' }]}>
+                        {Strings.RETRY}
+                      </Text>
+                    </TouchableOpacity>
+                  </>
+                ) : (
+                  <>
+                    <ActivityIndicator size="small" color={T.COLORS.AMBER} />
+                    <Text style={styles.feedEmptyText}>{Strings.MAIN_FEED_LOADING}</Text>
+                  </>
+                )}
               </View>
             }
             onViewableItemsChanged={onViewableItemsChangedRef.current}

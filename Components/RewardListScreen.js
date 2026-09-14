@@ -178,13 +178,15 @@ function RewardList({
   );
 }
 
-function CashOut({ agreementToTermsOfService, navigation, rewards, withdrawalAmount }) {
+function CashOut({ agreementToTermsOfService, navigation, rewards, withdrawalAmount, user }) {
+  // 함수 컴포넌트엔 this가 없고, 값이 undefined/''이면 JSON.parse가 던진다 — 문자열/불리언 모두 수용
+  const agreed = agreementToTermsOfService === true || agreementToTermsOfService === 'true';
   return (
     <Pressable
       onPress={() => {
-        if (JSON.parse(agreementToTermsOfService) !== true) {
+        if (!agreed) {
           navigation.navigate('AgreementToWithdrawal', {
-            user: this.props.user.user.data,
+            user: user?.user?.data,
           });
         } else {
           navigation.navigate('Withdrawal', { rewards, withdrawalAmount });
@@ -278,8 +280,9 @@ class RewardListScreen extends React.Component {
           headerLeft: () => HeaderLeftBackButton({ navigation }),
           headerRight: () =>
             CashOut.bind(this)({
-              agreementToTermsOfService: userReward.userInfo.agreementToTermsOfService,
+              agreementToTermsOfService: userReward?.userInfo?.agreementToTermsOfService,
               navigation,
+              user: this.props.user,
               withdrawalAmount: userReward.withdrawalAmount || 0,
             }),
         });
@@ -397,26 +400,26 @@ class RewardListScreen extends React.Component {
       selectedItem === Strings.POINT_TYPE.ATTENDANCE
         ? Constants.REWARD_TYPE.POINT.ATTENDANCE
         : selectedItem === Strings.POINT_TYPE.COMMENT
-        ? Constants.REWARD_TYPE.POINT.COMMENT
-        : selectedItem === Strings.POINT_TYPE.GRADE
-        ? Constants.REWARD_TYPE.POINT.GRADE
-        : selectedItem === Strings.POINT_TYPE.REVIEW
-        ? Constants.REWARD_TYPE.POINT.REVIEW
-        : selectedItem === Strings.POINT_TYPE.BUY_REWARD
-        ? Constants.REWARD_TYPE.BUY_REWARD
-        : selectedItem === Strings.POINT_TYPE.REWARD
-        ? Constants.REWARD_TYPE.REWARD
-        : selectedItem === Strings.POINT_TYPE.EVENT_REWARD
-        ? Constants.REWARD_TYPE.EVENT_REWARD
-        : selectedItem === Strings.POINT_TYPE.WITHDRAWAL
-        ? Constants.REWARD_TYPE.WITHDRAWAL
-        : selectedItem === Strings.POINT_TYPE.DEDUCT
-        ? Constants.REWARD_TYPE.DEDUCT
-        : selectedItem === Strings.POINT_TYPE.ROLLBACK
-        ? Constants.REWARD_TYPE.ROLLBACK
-        : // : selectedItem === Strings.POINT_TYPE.CERTIFIED_REVIEWER_REWARD
-          // ? Constants.REWARD_TYPE.CERTIFIED_REVIEWER_REWARD
-          undefined;
+          ? Constants.REWARD_TYPE.POINT.COMMENT
+          : selectedItem === Strings.POINT_TYPE.GRADE
+            ? Constants.REWARD_TYPE.POINT.GRADE
+            : selectedItem === Strings.POINT_TYPE.REVIEW
+              ? Constants.REWARD_TYPE.POINT.REVIEW
+              : selectedItem === Strings.POINT_TYPE.BUY_REWARD
+                ? Constants.REWARD_TYPE.BUY_REWARD
+                : selectedItem === Strings.POINT_TYPE.REWARD
+                  ? Constants.REWARD_TYPE.REWARD
+                  : selectedItem === Strings.POINT_TYPE.EVENT_REWARD
+                    ? Constants.REWARD_TYPE.EVENT_REWARD
+                    : selectedItem === Strings.POINT_TYPE.WITHDRAWAL
+                      ? Constants.REWARD_TYPE.WITHDRAWAL
+                      : selectedItem === Strings.POINT_TYPE.DEDUCT
+                        ? Constants.REWARD_TYPE.DEDUCT
+                        : selectedItem === Strings.POINT_TYPE.ROLLBACK
+                          ? Constants.REWARD_TYPE.ROLLBACK
+                          : // : selectedItem === Strings.POINT_TYPE.CERTIFIED_REVIEWER_REWARD
+                            // ? Constants.REWARD_TYPE.CERTIFIED_REVIEWER_REWARD
+                            undefined;
 
     this.setState({
       activeSortingItem: selectedItem,

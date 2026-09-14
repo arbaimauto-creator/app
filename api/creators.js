@@ -8,6 +8,9 @@ import { opsGet } from './opsClient';
 
 const PROFILE_KEY = 'creatorProfileV2';
 
+// v2 §3-②: 활동 국가 선택지 — 게이트·온보딩 공용
+export const COUNTRIES = ['US', 'JP', 'DE', 'IN', 'BR', 'VN', 'TH', 'KR'];
+
 // /me는 프로필 조회마다 부르기엔 잦다(홈·Try·Activity·마이가 포커스마다 호출).
 // 60초 캐시 — 완주 직후에는 refreshServerStats()로 즉시 무효화한다.
 let meCache = { at: 0, data: null };

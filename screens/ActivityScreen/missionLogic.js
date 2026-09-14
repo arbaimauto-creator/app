@@ -26,6 +26,15 @@ export function isNoShowDue(seeding, now = new Date()) {
   return left != null && left <= -GRACE_DAYS;
 }
 
+// 승인 후 48시간 주소 입력 기한 — 남은 시간(시간 단위, 올림). approvedAt 없으면 null.
+export function addressHoursLeft(seeding, now = new Date()) {
+  if (!seeding?.approvedAt) {
+    return null;
+  }
+  const deadline = new Date(seeding.approvedAt).getTime() + ADDRESS_DEADLINE_HOURS * 3600 * 1000;
+  return Math.ceil((deadline - now.getTime()) / (3600 * 1000));
+}
+
 export function isActionable(status) {
   return (
     status === SEEDING_STATUS.APPROVED ||

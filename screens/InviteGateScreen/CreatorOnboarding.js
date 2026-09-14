@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
@@ -14,7 +14,7 @@ import Preference from 'react-native-default-preference';
 import T from '../../Components/Constants/DesignTokens';
 import Strings from '../../Components/Strings';
 import { Badge, Btn, Card, Chips } from '../../Components/UI';
-import { saveCreatorProfile } from '../../api/creators';
+import { COUNTRIES, getCreatorProfile, saveCreatorProfile } from '../../api/creators';
 import { CHANNELS, FOLLOWER_BANDS, normalizeHandle } from '../../api/channels';
 import { opsSyncProfile } from '../../api/opsBridge';
 
@@ -48,6 +48,7 @@ const SKIN_TYPES = [
 const PLATFORM_ITEMS = PLATFORMS.map((p) => ({ key: p, label: p }));
 const AGE_ITEMS = AGE_BANDS.map((a) => ({ key: a, label: a }));
 const CATEGORY_ITEMS = CATEGORIES.map((c) => ({ key: c, label: c }));
+const COUNTRY_ITEMS = COUNTRIES.map((c) => ({ key: c, label: c }));
 
 export default function CreatorOnboarding({ navigation }) {
   const scrollRef = useRef(null);
@@ -67,13 +68,69 @@ export default function CreatorOnboarding({ navigation }) {
   const [gender, setGender] = useState(null);
   const [category, setCategory] = useState('beauty');
   const [skinType, setSkinType] = useState(null);
+  // 활동 국가: 게이트를 거쳤으면 이미 저장돼 있고, 게이트가 꺼진 빌드에선 여기서 받는다.
+  // null = 아직 로드 전, '' = 저장된 값 없음(선택 UI 노출)
+  const [storedCountry, setStoredCountry] = useState(null);
+  const [country, setCountry] = useState(null);
+
+  // 기획서 §5.4 "프로필 완성하기" 재진입: 저장된 프로필이 있으면 채워서 시작 (빈 폼부터 다시 쓰게 하지 않는다)
+  useEffect(() => {
+    let alive = true;
+    getCreatorProfile()
+      .then((p) => {
+        if (!alive || !p) {
+          return;
+        }
+        if (p.primaryPlatform) {
+          setPlatform(p.primaryPlatform);
+        }
+        if (p.channels) {
+          setChannels((prev) => ({ ...prev, ...p.channels }));
+        }
+        if (p.ageBand) {
+          setAgeBand(p.ageBand);
+        }
+        if (p.gender) {
+          setGender(p.gender);
+        }
+        if (p.contentCategories?.[0]) {
+          setCategory(p.contentCategories[0]);
+        }
+        if (p.skinType) {
+          setSkinType(p.skinType);
+        }
+        if (p.onboardedAt) {
+          setTimeout(() => goTo(PAGES.length), 50); // 이미 온보딩을 마친 사용자는 폼으로 바로
+        }
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let alive = true;
+    Preference.get('creatorCountry')
+      .then((c) => alive && setStoredCountry(c || ''))
+      .catch(() => alive && setStoredCountry(''));
+    return () => {
+      alive = false;
+    };
+  }, []);
+  const needsCountry = storedCountry === '';
 
   const setChannel = (key, patch) =>
     setChannels((prev) => ({ ...prev, [key]: { ...prev[key], ...patch } }));
 
   const primary = channels[platform];
   const canFinish =
-    normalizeHandle(primary.handle).length > 1 && primary.followerBand && ageBand && gender;
+    normalizeHandle(primary.handle).length > 1 &&
+    primary.followerBand &&
+    ageBand &&
+    gender &&
+    storedCountry !== null &&
+    (!needsCountry || country);
 
   const goTo = (idx) => {
     setPage(idx);
@@ -88,9 +145,12 @@ export default function CreatorOnboarding({ navigation }) {
     setIsSaving(true);
     setSaveError('');
     try {
-      const country = await Preference.get('creatorCountry');
-      if (!country) {
+      const resolvedCountry = needsCountry ? country : storedCountry;
+      if (!resolvedCountry) {
         throw new Error('country_missing');
+      }
+      if (needsCountry) {
+        await Preference.set('creatorCountry', resolvedCountry);
       }
       // 핸들은 정규화해 저장 (URL 붙여넣기 → 순수 핸들)
       const normalized = {};
@@ -101,7 +161,7 @@ export default function CreatorOnboarding({ navigation }) {
         };
       });
       const profile = {
-        country,
+        country: resolvedCountry,
         primaryPlatform: platform,
         channels: normalized,
         // 하위 호환: 기존 화면들이 참조하는 단일 핸들·밴드는 주력 채널 값으로 유지
@@ -153,6 +213,13 @@ export default function CreatorOnboarding({ navigation }) {
           <ScrollView style={styles.formScroll} contentContainerStyle={styles.formContent}>
             <Text style={styles.formTitle}>{Strings.ONBOARD_PROFILE_TITLE}</Text>
             <Text style={styles.formSub}>{Strings.ONBOARD_PROFILE_BODY}</Text>
+
+            {needsCountry ? (
+              <>
+                <Text style={styles.label}>{Strings.INVITE_COUNTRY_LABEL}</Text>
+                <Chips items={COUNTRY_ITEMS} selected={country} onSelect={setCountry} />
+              </>
+            ) : null}
 
             <Text style={styles.label}>{Strings.PROFILE_PLATFORM}</Text>
             <Chips items={PLATFORM_ITEMS} selected={platform} onSelect={setPlatform} />

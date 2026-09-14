@@ -49,6 +49,42 @@ export default class NotificationNomalizer {
       qnaChat: pushedNotiParams.qnaChat,
     };
 
+    // 캠페인 활동 알림 6xx(P2) — 서버 푸시가 같은 코드를 보내면 로컬 파생 알림과 동일 형태·딥링크로
+    if (notiItem.notificationCode >= 600 && notiItem.notificationCode < 700) {
+      const codeKey = Object.keys(notificationCode).find(
+        (k) => notificationCode[k] === notiItem.notificationCode,
+      );
+      const ctx = {
+        title: pushedNotiParams.campaignTitle || pushedNotiParams.title || '',
+        brand: pushedNotiParams.brand,
+        dayLeft: pushedNotiParams.dayLeft ?? null,
+        points: pushedNotiParams.points ?? null,
+      };
+      const t = Strings[`NOTI_${codeKey}_TITLE`];
+      const b = Strings[`NOTI_${codeKey}_BODY`];
+      const toActivity = { page: 'MainBottom', params: { screen: 'Activity' } };
+      const toLedger = { page: 'RewardLedger', params: undefined };
+      const pageOf = {
+        CAMPAIGN_REVIEW_RECEIVED: toLedger,
+        CAMPAIGN_REWARD_CONFIRMED: toLedger,
+        CAMPAIGN_REWARD_PAID: toLedger,
+      };
+      return {
+        id: notiItem.id,
+        local: true,
+        isRead: notiItem.isRead,
+        notificationCode: notiItem.notificationCode,
+        timestamp: notiItem.createdAt,
+        createdAt: notiItem.createdAt,
+        icon: { imageUrl: pushedNotiParams.thumbnailUrl || Constants.NO_USER_URL, shape: 'square' },
+        contents: {
+          title: typeof t === 'function' ? t(ctx) : t || codeKey,
+          subTitle: typeof b === 'function' ? b(ctx) : b || '',
+        },
+        navigationParams: pageOf[codeKey] || toActivity,
+      };
+    }
+
     const messageTemplete = NotificationProvider.getNotificationByCode(notiItem.notificationCode);
     switch (notiItem.notificationCode) {
       case notificationCode.NEW_RATING_ON_UPLOADED_VIDEO:

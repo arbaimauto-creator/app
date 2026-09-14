@@ -5,6 +5,7 @@ import Preference from 'react-native-default-preference';
 
 import NotificationProvider from '../utils/NotificationProvider';
 import Codes from '../Constants';
+import Strings from '../Strings';
 import { store } from '../../redux/store';
 import {
   setCurrentPushedNotification,
@@ -23,6 +24,28 @@ import * as Sentry from '@sentry/react-native';
 // }
 
 let notificationHandler;
+
+// 캠페인 활동 알림 6xx(P2, 2026-09-14) — 서버 푸시 {messageCode: 601~608, parameters: {campaignTitle, brand, points,
+// dayLeft, thumbnailUrl}}를 NotificationProvider와 같은 {title, body, image} 형태로. 알림함(api/activityNotifications)과 문구 공유.
+const campaignPushContents = (msgCode) => {
+  const codes = Codes.NOTIFICATION_CODE;
+  const key = Object.keys(codes).find((k) => codes[k] === msgCode && k.startsWith('CAMPAIGN_'));
+  if (!key) {
+    return null;
+  }
+  const ctx = (p) => ({
+    title: p?.campaignTitle || p?.title || '',
+    brand: p?.brand,
+    dayLeft: p?.dayLeft ?? null,
+    points: p?.points ?? null,
+  });
+  const pick = (v, p) => (typeof v === 'function' ? v(ctx(p)) : v || '');
+  return {
+    title: (p) => pick(Strings[`NOTI_${key}_TITLE`], p) || key,
+    body: (p) => pick(Strings[`NOTI_${key}_BODY`], p),
+    image: (p) => p?.thumbnailUrl,
+  };
+};
 
 const parseNotificationData = (value, fallback) => {
   if (value === undefined || value === null || value === '') {
@@ -92,8 +115,8 @@ const configure = async (onNotification) => {
         store.dispatch(
           setInitialNotification({
             notification: {
-              qnaId: notification.data?.qnaId,
-              type: notification.data.type,
+              qnaId: notification?.data?.qnaId,
+              type: notification?.data?.type,
             },
           }),
         );
@@ -177,8 +200,9 @@ const configure = async (onNotification) => {
 
     // message structure example : const message = {messageId: {messageType:'NEW_COMMENT_ON_UPLOADED_REVIEW', messageCode: 103}, parameters: params};
 
-    // TODO: remoteMessage 에 따라서 포맷 수정하도록 api 만들 것
-    const contents = NotificationProvider.getNotificationByCode(msgCode);
+    // 레거시 코드표에 없으면 캠페인 활동 알림(6xx) 포맷으로
+    const contents =
+      NotificationProvider.getNotificationByCode(msgCode) || campaignPushContents(msgCode);
 
     let notificationType = '';
 
@@ -273,8 +297,9 @@ const configure = async (onNotification) => {
       return;
     }
 
-    // TODO: remoteMessage 에 따라서 포맷 수정하도록 api 만들 것
-    const contents = NotificationProvider.getNotificationByCode(msgCode);
+    // 레거시 코드표에 없으면 캠페인 활동 알림(6xx) 포맷으로
+    const contents =
+      NotificationProvider.getNotificationByCode(msgCode) || campaignPushContents(msgCode);
 
     let notificationType = '';
 

@@ -18,13 +18,14 @@ import T from '../../Components/Constants/DesignTokens';
 import Strings from '../../Components/Strings';
 import { Btn, Chips, Wordmark } from '../../Components/UI';
 import { verifyInviteCode } from '../../api/invites';
+import { COUNTRIES } from '../../api/creators';
+import { prefGetSafe } from '../../api/prefSafe';
 import { logEvent, resetAnalyticsContext } from '../../api/common/analytics';
 import { trace } from '../../Components/bootTrace';
 
 const { COLORS, FONT } = T;
 
 // v2 §3-①②: 초대 코드 게이트. 필수 입력 3개 이하(코드·국가), 실패는 인라인 에러.
-const COUNTRIES = ['US', 'JP', 'DE', 'IN', 'BR', 'VN', 'TH', 'KR'];
 const COUNTRY_ITEMS = COUNTRIES.map((c) => ({ key: c, label: c }));
 
 // 무차별 대입 완화(보안 감사 M3 — 클라 UX 가드, 실보안은 서버 레이트리밋):
@@ -119,11 +120,16 @@ export default function InviteGateScreen({ navigation }) {
       new Promise((resolve) => setTimeout(() => resolve(VERIFY_TIMEOUT), 15000)),
     ]);
     if (result === VERIFY_TIMEOUT) {
-      logEvent('gate_code_submit', { result: 'timeout' });
-      setError(Strings.INVITE_VERIFY_TIMEOUT);
-      return;
+      // 요청 자체는 계속 돌아가 코드가 소모될 수 있다(ops /auth는 1회용). 토큰이 이미
+      // 저장됐으면 성공으로 이어가고, 아니면 에러로 떨어뜨린다.
+      const tokenAfterTimeout = await prefGetSafe('opsToken');
+      if (!tokenAfterTimeout) {
+        logEvent('gate_code_submit', { result: 'timeout' });
+        setError(Strings.INVITE_VERIFY_TIMEOUT);
+        return;
+      }
     }
-    if (!result.success) {
+    if (result !== VERIFY_TIMEOUT && !result.success) {
       logEvent('gate_code_submit', { result: result.reason === 'expired' ? 'expired' : 'invalid' });
       const nextFails = failCount + 1;
       setFailCount(nextFails);
@@ -140,18 +146,23 @@ export default function InviteGateScreen({ navigation }) {
     setFailCount(0);
     // D26 확정: 앱 초대 코드는 인플루언서 전용 — 브랜드 코드는 발급 개념 자체가 없다.
     // (브랜드=ops 웹 매직링크, 운영=ops 콘솔. 서버 연동 후 role≠influencer 응답은 방어적으로 차단)
-    if (result.role !== 'influencer') {
+    const role = result === VERIFY_TIMEOUT ? 'influencer' : result.role;
+    if (role !== 'influencer') {
       setError(Strings.INVITE_BRAND_WEB_ONLY);
       return;
     }
     // iOS 네이티브 저장 호출을 하나로 묶어 부분 저장과 중복 bridge 호출을 방지한다.
-    const didSaveGate = await saveGatePreferences({
-      inviteRole: result.role,
+    const gatePrefs = {
+      inviteRole: role,
       inviteCode: code.trim().toUpperCase(),
       creatorCountry: country,
-    });
+    };
+    // 이 시점엔 서버가 코드를 이미 소모했다 — 저장 실패로 재검증하면 401로 영구 잠긴다.
+    // 저장을 한 번 더 시도하고 그래도 안 되면 에러(다음 시도는 저장된 opsToken으로 이어간다).
+    const didSaveGate =
+      (await saveGatePreferences(gatePrefs)) || (await saveGatePreferences(gatePrefs));
     if (!didSaveGate) {
-      throw new Error('초대 코드 정보를 저장하지 못했습니다. 다시 시도해주세요.');
+      throw new Error(Strings.GATE_SAVE_FAILED);
     }
     try {
       resetAnalyticsContext(); // role·country 확정 — 공통 파라미터 갱신
@@ -176,7 +187,7 @@ export default function InviteGateScreen({ navigation }) {
       await onSubmit();
     } catch (e) {
       if (aliveRef.current && !isTransitioningRef.current) {
-        setError(`오류: ${e?.message || String(e)}`);
+        setError(Strings.ERROR_WITH_MESSAGE(e?.message || String(e)));
       }
     } finally {
       // 통과해서 화면을 떠난 경우에는 잠금을 풀지 않는다 —

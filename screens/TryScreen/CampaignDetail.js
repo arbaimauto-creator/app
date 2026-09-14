@@ -19,11 +19,24 @@ import { Card, Badge } from '../../Components/UI';
 import { applyToCampaign, selectMyApplications, selectCampaigns } from '../../slices/campaign';
 import { isGuestUser, LogoutAlert } from '../../Components/utils';
 import { getCreatorProfile } from '../../api/creators';
-import { getSeedings, upsertSeeding, setSeedingStatus, SEEDING_STATUS } from '../../api/seedings';
+import {
+  getSeedings,
+  upsertSeeding,
+  setSeedingStatus,
+  isActiveSeeding,
+  ACTIVE_STATUSES,
+  SEEDING_STATUS,
+} from '../../api/seedings';
 import { personalizedPoints, concurrentLimit, canAutoConfirm } from './points';
 import { CURATED_MIN_G } from './points';
 import { logEvent } from '../../api/common/analytics';
 import { opsApply } from '../../api/opsBridge';
+import { getDraft, saveDraft, clearDraft } from '../../api/drafts';
+import { describeError } from '../../api/opsErrors';
+import { isFgiEnabled, estimatedMinutes, uploadDays } from '../../api/campaignMeta';
+import { Linking } from 'react-native';
+
+const PRIVACY_POLICY_URL = 'https://greyd-ops.vercel.app/portal/privacy';
 
 const { COLORS, RADIUS, TYPE } = T;
 
@@ -42,6 +55,22 @@ export default function CampaignDetail({ route, navigation }) {
   const [completedCount, setCompletedCount] = useState(0);
   const submitLockRef = useRef(false);
 
+  // §5.2 임시 저장 — 어필 문구는 화면을 떠나도 남는다
+  useEffect(() => {
+    getDraft('appeal', campaign.id)
+      .then((d) => {
+        if (d?.appeal && !appeal) {
+          setAppeal(d.appeal);
+        }
+      })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const onChangeAppeal = (v) => {
+    setAppeal(v);
+    saveDraft('appeal', campaign.id, { appeal: v });
+  };
+
   useEffect(() => {
     // 이벤트 맵: 카드→상세 전환 (신청 퍼널 2단계)
     logEvent('campaign_open', { campaign_id: campaign.id, apply_mode: campaign.applyMode });
@@ -51,7 +80,10 @@ export default function CampaignDetail({ route, navigation }) {
       }
       setCompletedCount(p?.completedCount ?? 0);
     });
-    getSeedings().then((seedings) => setHasSavedSeeding(seedings[campaign.id] != null));
+    // 취소·만료된 시딩은 "신청됨"이 아니다 — 다시 신청할 수 있어야 한다.
+    getSeedings()
+      .then((seedings) => setHasSavedSeeding(isActiveSeeding(seedings[campaign.id])))
+      .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -74,12 +106,11 @@ export default function CampaignDetail({ route, navigation }) {
     return false;
   };
 
+  // §5.2 제출 직전 최종 확인 — 보상·기한·설문 포함 여부를 한 번 더 보여준다
   const onApply = async () => {
     if (submitLockRef.current || applied) {
       return;
     }
-    submitLockRef.current = true;
-    try {
     if (await guardGuest()) {
       return;
     }
@@ -87,73 +118,112 @@ export default function CampaignDetail({ route, navigation }) {
       Alert.alert(Strings.APPLY_PLEDGE_REQUIRED);
       return;
     }
-    const profile = await getCreatorProfile();
-    if (isCurated && (profile?.gScore ?? 50) < CURATED_MIN_G && (profile?.completedCount ?? 0) < 2) {
-      Alert.alert(Strings.CURATED_LOCKED_HINT(CURATED_MIN_G));
+    Alert.alert(
+      Strings.APPLY_CONFIRM_TITLE,
+      Strings.APPLY_CONFIRM_BODY(points, uploadDays(campaign), isFgiEnabled(campaign)),
+      [
+        { text: Strings.CANCEL, style: 'cancel' },
+        { text: Strings.APPLY_CONFIRM_OK, onPress: () => submitApply() },
+      ],
+    );
+  };
+
+  const submitApply = async () => {
+    if (submitLockRef.current || applied) {
       return;
     }
-    // 동시 진행 한도 (v2 §4-1): 이력 0회 1건 / G50~79 2건 / G80+ 3건
-    const seedings = await getSeedings();
-    if (seedings[campaign.id]) {
+    submitLockRef.current = true;
+    try {
+      const profile = await getCreatorProfile();
+      if (
+        isCurated &&
+        (profile?.gScore ?? 50) < CURATED_MIN_G &&
+        (profile?.completedCount ?? 0) < 2
+      ) {
+        Alert.alert(Strings.CURATED_LOCKED_HINT(CURATED_MIN_G));
+        return;
+      }
+      // 동시 진행 한도 (v2 §4-1): 이력 0회 1건 / G50~79 2건 / G80+ 3건
+      const seedings = await getSeedings();
+      const existing = seedings[campaign.id];
+      if (isActiveSeeding(existing) || existing?.status === SEEDING_STATUS.DONE) {
+        setHasSavedSeeding(true);
+        Alert.alert(Strings.ALREADY_APPLIED_ALERT);
+        return;
+      }
+      const activeStatuses = ACTIVE_STATUSES;
+      // mock 모드에선 현재 캠페인 목록에 없는 시딩(과거 서버 동기화 잔여 등)이 화면에 보이지도,
+      // 취소할 수도 없으므로 한도 계산에서 제외한다. 실연동에선 서버 시딩이 정본이라 전부 센다.
+      const knownCampaignIds = new Set(campaignList.map((c) => c.id));
+      const activeCount = Object.values(seedings).filter(
+        (s) =>
+          activeStatuses.includes(s.status) &&
+          (FEATURES.LIVE_OPS_API || knownCampaignIds.has(s.campaignId)),
+      ).length;
+      const limit = concurrentLimit(profile?.gScore ?? 50, profile?.completedCount ?? 0);
+      if (activeCount >= limit) {
+        logEvent('apply_limit_blocked', { limit });
+        Alert.alert(Strings.CONCURRENT_LIMIT_ALERT(limit));
+        return;
+      }
+      const userId = await Preference.get('userId');
+      const autoConfirmed = !isCurated && canAutoConfirm(profile);
+      // Persist locally only after ops accepts the application.
+      await opsApply({ campaign, appealText: appeal.trim(), autoConfirmed });
+      const action = await dispatch(applyToCampaign({ campaignId: campaign.id, userId }));
+      // thunk 실패 시 완료 알럿을 띄우지 않는다
+      if (action?.error) {
+        Alert.alert(Strings.RETRY_GUIDELINES);
+        return;
+      }
+      // 시딩 인스턴스 생성 (상태머신 시작점)
+      await upsertSeeding(campaign.id, {
+        pledgeChecked: true,
+        appealText: appeal.trim(),
+        brandId: campaign.brandId, // 추천 사유(같은 브랜드와 협업 이력)용
+        // 취소 후 재신청: 이전 종결 스탬프·주소를 비운다
+        cancelledAt: null,
+        noShowAt: null,
+        address: null,
+      });
+      await setSeedingStatus(campaign.id, SEEDING_STATUS.APPLIED);
+      // D24: Open 캠페인은 기준 충족 시 자동 확정 (서버 연동 시 ops가 동일 기준으로 판정)
+      if (autoConfirmed) {
+        await setSeedingStatus(campaign.id, SEEDING_STATUS.APPROVED);
+      }
       setHasSavedSeeding(true);
-      return;
-    }
-    const activeStatuses = [
-      SEEDING_STATUS.APPLIED,
-      SEEDING_STATUS.APPROVED,
-      SEEDING_STATUS.SHIPPED,
-      SEEDING_STATUS.RECEIVED,
-      SEEDING_STATUS.REVIEWING,
-    ];
-    // 현재 캠페인 목록에 없는 시딩(과거 서버 동기화 잔여 등)은 화면에 보이지도,
-    // 취소할 수도 없으므로 한도 계산에서 제외한다 — 서버가 최종 재검증한다(§2-4).
-    const knownCampaignIds = new Set(campaignList.map((c) => c.id));
-    const activeCount = Object.values(seedings).filter(
-      (s) => activeStatuses.includes(s.status) && knownCampaignIds.has(s.campaignId),
-    ).length;
-    const limit = concurrentLimit(profile?.gScore ?? 50, profile?.completedCount ?? 0);
-    if (activeCount >= limit) {
-      logEvent('apply_limit_blocked', { limit });
-      Alert.alert(Strings.CONCURRENT_LIMIT_ALERT(limit));
-      return;
-    }
-    const userId = await Preference.get('userId');
-    const autoConfirmed = !isCurated && canAutoConfirm(profile);
-    // Persist locally only after ops accepts the application.
-    await opsApply({ campaign, appealText: appeal.trim(), autoConfirmed });
-    const action = await dispatch(applyToCampaign({ campaignId: campaign.id, userId }));
-    // thunk 실패 시 완료 알럿을 띄우지 않는다
-    if (action?.error) {
-      Alert.alert(Strings.RETRY_GUIDELINES);
-      return;
-    }
-    // 시딩 인스턴스 생성 (상태머신 시작점)
-    await upsertSeeding(campaign.id, { pledgeChecked: true, appealText: appeal.trim() });
-    await setSeedingStatus(campaign.id, SEEDING_STATUS.APPLIED);
-    // D24: Open 캠페인은 기준 충족 시 자동 확정 (서버 연동 시 ops가 동일 기준으로 판정)
-    if (autoConfirmed) {
-      await setSeedingStatus(campaign.id, SEEDING_STATUS.APPROVED);
-    }
-    setHasSavedSeeding(true);
-    // 이벤트 맵: 신청 퍼널 완성점 — appeal은 길이만 (PII 금지)
-    logEvent('apply_submit', {
-      campaign_id: campaign.id,
-      apply_mode: campaign.applyMode,
-      appeal_len: appeal.trim().length,
-      auto_confirmed: autoConfirmed,
-    });
-    // Phase 1.5 2단계: ops Match 미러링 (실패해도 로컬 진행 무영향)
-    // 신청 완료 전용 화면(시안)으로 이동 — 신청 후 활성 시딩 수 = 기존 카운트 + 1
-    navigation.navigate('ApplyDone', {
-      campaignId: campaign.id,
-      campaignTitle: campaign.title,
-      applyMode: campaign.applyMode,
-      usedCount: activeCount + 1,
-      limit,
-      autoConfirmed,
-    });
+      clearDraft('appeal', campaign.id).catch(() => {});
+      // 이벤트 맵: 신청 퍼널 완성점 — appeal은 길이만 (PII 금지)
+      logEvent('apply_submit', {
+        campaign_id: campaign.id,
+        apply_mode: campaign.applyMode,
+        appeal_len: appeal.trim().length,
+        auto_confirmed: autoConfirmed,
+      });
+      // Phase 1.5 2단계: ops Match 미러링 (실패해도 로컬 진행 무영향)
+      // 신청 완료 전용 화면(시안)으로 이동 — 신청 후 활성 시딩 수 = 기존 카운트 + 1
+      navigation.navigate('ApplyDone', {
+        campaignId: campaign.id,
+        campaignTitle: campaign.title,
+        applyMode: campaign.applyMode,
+        usedCount: activeCount + 1,
+        limit,
+        autoConfirmed,
+        uploadDays: uploadDays(campaign),
+      });
     } catch (e) {
-      Alert.alert(Strings.RETRY_GUIDELINES);
+      if (__DEV__) {
+        console.log('apply failed', e?.status, e?.message, e?.body);
+      }
+      // §5.2 마감·조건·네트워크를 구분하고 다음 행동을 붙인다
+      const d = describeError(e);
+      const buttons = [{ text: Strings.OK }];
+      if (d.action === 'browse') {
+        buttons.unshift({ text: Strings.ERR_ACTION_BROWSE, onPress: () => navigation.goBack() });
+      } else if (d.action === 'activity') {
+        buttons.unshift({ text: Strings.ERR_ACTION_ACTIVITY, onPress: openActivity });
+      }
+      Alert.alert(d.title, d.body, buttons);
     } finally {
       submitLockRef.current = false;
     }
@@ -223,6 +293,48 @@ export default function CampaignDetail({ route, navigation }) {
             </Card>
           ) : null}
 
+          {/* 기획서 §5.2: 목적 · 예상 시간 · 보상 조건 · 개인정보 범위를 참여 전에 고지 */}
+          <Card style={styles.guideCard}>
+            <Text style={styles.discloseTitle}>{Strings.DETAIL_PURPOSE}</Text>
+            <Text style={styles.discloseBody}>
+              {campaign.purpose || Strings.DETAIL_PURPOSE_DEFAULT(campaign.brand)}
+            </Text>
+            <View style={styles.discloseRow}>
+              <Badge tone="amber" text={Strings.DETAIL_TIME(estimatedMinutes(campaign))} />
+              <Badge
+                tone={isFgiEnabled(campaign) ? 'curated' : 'open'}
+                text={isFgiEnabled(campaign) ? Strings.DETAIL_FGI_ON : Strings.DETAIL_FGI_OFF}
+              />
+            </View>
+            <Text style={styles.discloseHint}>{Strings.DETAIL_TIME_HINT}</Text>
+          </Card>
+
+          <Card style={styles.guideCard}>
+            <Text style={styles.discloseTitle}>{Strings.DETAIL_REWARD_RULES}</Text>
+            {[
+              Strings.DETAIL_REWARD_BASE(campaign.basePoints ?? campaign.rewardPoint),
+              Strings.DETAIL_REWARD_GRACE,
+              Strings.DETAIL_REWARD_NOSHOW,
+              Strings.DETAIL_REWARD_ETA,
+            ].map((line) => (
+              <Text key={line} style={styles.discloseBullet}>
+                · {line}
+              </Text>
+            ))}
+          </Card>
+
+          <Card style={styles.guideCard}>
+            <Text style={styles.discloseTitle}>{Strings.DETAIL_DATA_SCOPE}</Text>
+            <Text style={styles.discloseBody}>{Strings.DETAIL_DATA_SCOPE_BODY}</Text>
+            <Text
+              style={styles.discloseLink}
+              accessibilityRole="link"
+              onPress={() => Linking.openURL(PRIVACY_POLICY_URL).catch(() => {})}
+            >
+              {Strings.DETAIL_DATA_SCOPE_LINK}
+            </Text>
+          </Card>
+
           {!applied ? (
             <>
               <TextInput
@@ -231,9 +343,17 @@ export default function CampaignDetail({ route, navigation }) {
                 placeholderTextColor={COLORS.GREY}
                 maxLength={100}
                 value={appeal}
-                onChangeText={setAppeal}
+                onChangeText={onChangeAppeal}
+                accessibilityLabel={Strings.APPLY_APPEAL_PLACEHOLDER}
               />
-              <TouchableOpacity style={styles.pledgeRow} onPress={() => setPledged(!pledged)}>
+              <TouchableOpacity
+                style={styles.pledgeRow}
+                onPress={() => setPledged(!pledged)}
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: pledged }}
+                accessibilityLabel={Strings.APPLY_PLEDGE}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
                 <View style={[styles.checkbox, pledged && styles.checkboxOn]}>
                   {pledged ? <Text style={styles.checkboxMark}>✓</Text> : null}
                 </View>
@@ -256,8 +376,14 @@ export default function CampaignDetail({ route, navigation }) {
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
-            style={[styles.cta, (!pledged || (isCurated && !curatedUnlocked)) && styles.ctaDisabled]}
+            style={[
+              styles.cta,
+              (!pledged || (isCurated && !curatedUnlocked)) && styles.ctaDisabled,
+            ]}
             onPress={onApply}
+            accessibilityRole="button"
+            accessibilityLabel={Strings.CAMPAIGN_APPLY}
+            accessibilityState={{ disabled: !pledged || (isCurated && !curatedUnlocked) }}
           >
             <Text style={styles.ctaText}>{Strings.CAMPAIGN_APPLY}</Text>
           </TouchableOpacity>
@@ -268,6 +394,18 @@ export default function CampaignDetail({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
+  discloseTitle: { ...TYPE.LABEL, marginBottom: 6 },
+  discloseBody: { ...TYPE.BODY, lineHeight: 19 },
+  discloseRow: { flexDirection: 'row', gap: 6, marginTop: 10, flexWrap: 'wrap' },
+  discloseHint: { ...TYPE.XS, marginTop: 6 },
+  discloseBullet: { ...TYPE.BODY, lineHeight: 20 },
+  discloseLink: {
+    ...TYPE.XS,
+    color: COLORS.AMBER_DEEP,
+    textDecorationLine: 'underline',
+    marginTop: 8,
+    paddingVertical: 6,
+  },
   container: { flex: 1, backgroundColor: COLORS.BG },
   hero: { width: '100%', height: 220, backgroundColor: COLORS.TRACK },
   body: { padding: 16 },

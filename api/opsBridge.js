@@ -1,9 +1,8 @@
 // Phase 1.5 2단계 — 로컬 상태머신은 그대로 두고 ops에 미러링하는 브리지.
 // LIVE_OPS_API OFF면 전부 no-op. 실패해도 절대 던지지 않는다 — 로컬 진행이 우선이고,
 // 미전송분은 주간 수동 브리지(29번 플랜)가 잡는다. 3단계(토큰 인증)에서 정본이 ops로 넘어간다.
-import { prefGetSafe, prefSetSafe } from './prefSafe';
 import FEATURES from '../Components/Constants/Features';
-import { opsGet, opsPost } from './opsClient';
+import { getGreydAppId, opsGet, opsPost } from './opsClient';
 import { getCreatorProfile } from './creators';
 import { toChannelPayload } from './channels';
 import { sendOrQueue } from './opsOutbox';
@@ -11,14 +10,8 @@ import { sendOrQueue } from './opsOutbox';
 // 기기 식별자 — 3단계에서 로그인 계정과 매핑된다 (ops Influencer.greydAppId)
 // 저장소가 응답하지 않아도 게이트가 멈추지 않도록 타임아웃 레이스로 접근한다.
 // (읽기 실패 시 새 ID 생성 — 코드 재사용 판정이 갈릴 수 있으나 멈춤보다 낫다)
-export async function getGreydAppId() {
-  let id = await prefGetSafe('greydAppId');
-  if (!id) {
-    id = `app-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-    await prefSetSafe('greydAppId', id);
-  }
-  return id;
-}
+// 기기 식별자는 세션 발급(opsClient.ensureOpsSession)과 공유한다
+export { getGreydAppId };
 
 async function safePost(path, body, tag) {
   if (!FEATURES.LIVE_OPS_API) {
@@ -55,7 +48,8 @@ export async function opsSyncProfile(profile) {
 
 // 신청 → ops Match 생성 (수동 브리지 ① 대체). 제안 수락도 autoConfirmed=true로 동일 경로.
 export async function opsApply({ campaign, appealText, autoConfirmed }) {
-  if (!FEATURES.LIVE_OPS_API) {
+  // 개발용 mock 픽스처(api/campaigns DEV_MOCK_CAMPAIGN)는 ops에 없어 400으로 떨어진다 — 로컬만 진행
+  if (!FEATURES.LIVE_OPS_API || String(campaign?.id || '').startsWith('mock-')) {
     return null;
   }
   const [greydAppId, profile] = await Promise.all([getGreydAppId(), getCreatorProfile()]);

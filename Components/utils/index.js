@@ -19,7 +19,7 @@ import Geolocation from 'react-native-geolocation-service';
 import { getStatusBarHeight } from 'react-native-safearea-height';
 import Share from 'react-native-share';
 import { store } from '../../redux/store';
-import { setCountryCode, setGuest } from '../../slices/user';
+import { setCountryCode, setGuest, setTotalReward, setUser } from '../../slices/user';
 import APIprovider from '../APIprovider';
 import Constants from '../Constants';
 import Codes from '../Constants/Codes';
@@ -918,7 +918,10 @@ export const menuLogout = async function (props) {
     }),
   );
 
+  // 메모리 상태도 비운다 — 다음 계정이 이전 계정의 리워드·프로필을 보지 않게
   store.dispatch(setGuest({ isGuest: false }));
+  store.dispatch(setTotalReward({ totalReward: 0 }));
+  store.dispatch(setUser({ user: {} }));
 };
 
 export const LogoutAlert = (props) => {

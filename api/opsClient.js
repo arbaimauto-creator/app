@@ -11,15 +11,73 @@ export async function setOpsToken(token) {
   await prefSetSafe('opsToken', token || '');
 }
 
-async function authHeaders() {
-  const token = await prefGetSafe('opsToken');
-  if (token) {
-    return { Authorization: `Bearer ${token}` };
+// 기기 식별자 — ops 골든 레코드 연동 키. 최초 1회 생성 후 고정 (계정 삭제 시에만 재발급)
+export async function getGreydAppId() {
+  let id = await prefGetSafe('greydAppId');
+  if (!id) {
+    id = `app-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    await prefSetSafe('greydAppId', id);
   }
+  return id;
+}
+
+function appKeyHeaders() {
   if (!OPS_APP_KEY) {
     throw new Error('GREYD_APP_MOBILE_KEY is not configured');
   }
   return { 'x-greyd-app-key': OPS_APP_KEY };
+}
+
+// 초대 코드 폐지(2026-09-10): 토큰이 없으면 코드 없이 /auth로 세션을 발급받는다.
+// 게이트(초대 코드) 경로는 verifyInviteCode가 별도로 /auth를 호출하며 그대로 유효하다.
+// 동시 호출은 한 번의 /auth로 합친다.
+let sessionPromise = null;
+export async function ensureOpsSession() {
+  const existing = await prefGetSafe('opsToken');
+  if (existing) {
+    return existing;
+  }
+  if (!sessionPromise) {
+    sessionPromise = (async () => {
+      const [greydAppId, country, rawProfile] = await Promise.all([
+        getGreydAppId(),
+        prefGetSafe('creatorCountry'),
+        prefGetSafe('creatorProfileV2'),
+      ]);
+      let handle = null;
+      try {
+        handle = rawProfile ? JSON.parse(rawProfile)?.handleUrl || null : null;
+      } catch (e) {
+        handle = null;
+      }
+      const res = await request('/auth', {
+        method: 'POST',
+        headers: { ...appKeyHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ greydAppId, handle, country: country || null }),
+      });
+      if (!res?.token) {
+        throw new Error('ops auth: no token');
+      }
+      await setOpsToken(res.token);
+      return res.token;
+    })().finally(() => {
+      sessionPromise = null;
+    });
+  }
+  return sessionPromise;
+}
+
+async function authHeaders() {
+  const token = await ensureOpsSession();
+  return { Authorization: `Bearer ${token}` };
+}
+
+// 토큰이 있는데 401이면 세션이 폐기·만료된 것 — 지워서 다음 호출이 재발급하게 한다.
+async function dropSessionOn401(err) {
+  if (err?.status === 401) {
+    await setOpsToken('');
+  }
+  throw err;
 }
 
 // 4xx/5xx는 status를 담아 던진다 — 호출부가 reason 분기(게이트) 또는 무시(브리지)한다
@@ -42,13 +100,21 @@ async function request(path, init) {
 }
 
 export async function opsGet(path) {
-  return request(path, { headers: await authHeaders() });
+  return request(path, { headers: await authHeaders() }).catch(dropSessionOn401);
 }
 
 export async function opsPost(path, body) {
+  // /auth 자체는 앱 키로 — 게이트의 verifyInviteCode 경로
+  if (path === '/auth') {
+    return request(path, {
+      method: 'POST',
+      headers: { ...appKeyHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  }
   return request(path, {
     method: 'POST',
     headers: { ...(await authHeaders()), 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
-  });
+  }).catch(dropSessionOn401);
 }

@@ -12,6 +12,7 @@ import {
 import T from '../../Components/Constants/DesignTokens';
 import { Card, Btn, Badge, ProgressBar, NoteBox } from '../../Components/UI';
 import Strings from '../../Components/Strings';
+import FEATURES from '../../Components/Constants/Features';
 import { referralCodesFor } from '../../api/referral';
 import { CURATED_MIN_G } from '../TryScreen/points';
 import { logEvent } from '../../api/common/analytics';
@@ -53,8 +54,17 @@ export default function MissionDone({ navigation, route }) {
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.hero}>
           <Text style={styles.emoji}>🎉</Text>
-          <Text style={styles.points}>+{pointsGranted}P</Text>
-          <Text style={styles.xs}>{Strings.DONE_POINTS_FORMULA(basePoints, multiplier)}</Text>
+          {pointsGranted != null ? (
+            <>
+              <Text style={styles.points}>+{pointsGranted}P</Text>
+              <Text style={styles.xs}>{Strings.DONE_POINTS_FORMULA(basePoints, multiplier)}</Text>
+            </>
+          ) : (
+            <>
+              <Text style={styles.xs}>{Strings.DONE_POINTS_PENDING}</Text>
+              <Text style={styles.xs}>{Strings.REWARD_ETA_NOTE}</Text>
+            </>
+          )}
           <Text style={[styles.xs, styles.honesty]}>{Strings.APPLY_HONESTY_NOTE}</Text>
         </View>
 
@@ -63,11 +73,8 @@ export default function MissionDone({ navigation, route }) {
             <Badge tone="amber" text={Strings.DONE_BRAND_FEEDBACK} />
             <Text style={styles.xs}>{Strings.DONE_BRAND_VIEWED(brandName)}</Text>
           </View>
-          <View style={[styles.rowStart, styles.mt8]}>
-            <Text style={styles.stars}>★★★★☆</Text>
-            <Text style={styles.xs}>{Strings.DONE_QUALITY_SCORE}</Text>
-          </View>
-          <Text style={styles.feedback}>"{Strings.BRAND_FEEDBACK_MOCK(brandName)}"</Text>
+          {/* 브랜드 평가는 서버 연동 전 — 가짜 별점·문구 대신 대기 안내 */}
+          <Text style={styles.feedback}>{Strings.DONE_BRAND_PENDING}</Text>
         </Card>
 
         <Card>
@@ -78,22 +85,25 @@ export default function MissionDone({ navigation, route }) {
           <Text style={[styles.xs, styles.mt6]}>{Strings.DONE_G_PROGRESS(CURATED_MIN_G)}</Text>
         </Card>
 
-        <Card>
-          <Text style={styles.cardTitle}>{Strings.DONE_CODES_UNLOCKED}</Text>
-          <Text style={[styles.xs, styles.mt4]}>Invited by {handleUrl}</Text>
-          <View style={styles.codeRow}>
-            {codes.map((code) => (
-              <TouchableOpacity
-                key={code}
-                style={styles.codeBox}
-                activeOpacity={0.7}
-                onPress={() => onShareCode(code)}
-              >
-                <Text style={styles.codeText}>{code}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </Card>
+        {/* 추천 코드 3장 — REFERRAL 플래그로 노출 제어 (기능 보존, 플래그 한 줄로 복원) */}
+        {FEATURES.REFERRAL ? (
+          <Card>
+            <Text style={styles.cardTitle}>{Strings.DONE_CODES_UNLOCKED}</Text>
+            <Text style={[styles.xs, styles.mt4]}>Invited by {handleUrl}</Text>
+            <View style={styles.codeRow}>
+              {codes.map((code) => (
+                <TouchableOpacity
+                  key={code}
+                  style={styles.codeBox}
+                  activeOpacity={0.7}
+                  onPress={() => onShareCode(code)}
+                >
+                  <Text style={styles.codeText}>{code}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </Card>
+        ) : null}
 
         <NoteBox tone="amber" text={Strings.DONE_CASHOUT_NOTE} />
 
@@ -124,7 +134,6 @@ const styles = StyleSheet.create({
   mt8: { marginTop: 8 },
   mt6: { marginTop: 6 },
   mt4: { marginTop: 4 },
-  stars: { fontFamily: FONT.Bold, fontSize: 13, color: COLORS.AMBER },
   feedback: {
     fontFamily: FONT.Regular,
     fontSize: 13,

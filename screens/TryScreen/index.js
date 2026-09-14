@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Alert,
   FlatList,
@@ -14,20 +14,30 @@ import { useDispatch, useSelector } from 'react-redux';
 import FastImage from 'react-native-fast-image';
 import Strings from '../../Components/Strings';
 import T from '../../Components/Constants/DesignTokens';
-import { Card, Badge, NoteBox } from '../../Components/UI';
+import { Card, Badge, Btn, NoteBox } from '../../Components/UI';
 import { fetchCampaigns, selectCampaigns, selectMyApplications } from '../../slices/campaign';
 import { getCreatorProfile } from '../../api/creators';
 import { getOffers, respondToOffer } from '../../api/offers';
-import { getSeedings, upsertSeeding, setSeedingStatus, SEEDING_STATUS } from '../../api/seedings';
+import {
+  getSeedings,
+  upsertSeeding,
+  setSeedingStatus,
+  isActiveSeeding,
+  ACTIVE_STATUSES,
+  SEEDING_STATUS,
+} from '../../api/seedings';
 import { personalizedPoints, concurrentLimit, CURATED_MIN_G } from './points';
 import { logEvent } from '../../api/common/analytics';
+import FEATURES from '../../Components/Constants/Features';
+import { closedReason, estimatedMinutes, isFgiEnabled, uploadDays } from '../../api/campaignMeta';
 
 const { COLORS, TYPE } = T;
 
 // v2 §4-1: 신청 유형 2종(applyMode — ops 정합 I1: track은 'SEEDING' 고정 예약어).
 // Curated 미달은 숨기지 말고 잠가서 보여준다.
 function CampaignCard({ campaign, applied, gScore, completedCount, onPress }) {
-  const closed = campaign.status !== 'open' || campaign.remaining <= 0;
+  const reason = closedReason(campaign);
+  const closed = reason != null;
   const isCurated = campaign.applyMode === 'curated';
   const curatedUnlocked = gScore >= CURATED_MIN_G || completedCount >= 2;
   const locked = isCurated && !curatedUnlocked;
@@ -40,7 +50,11 @@ function CampaignCard({ campaign, applied, gScore, completedCount, onPress }) {
   const trackBadge = applied
     ? { tone: 'curated', text: Strings.CAMPAIGN_APPLIED }
     : closed
-      ? { tone: 'curated', text: Strings.CAMPAIGN_CLOSED }
+      ? {
+          tone: 'curated',
+          text:
+            reason === 'deadline' ? Strings.CAMPAIGN_CLOSED_DEADLINE : Strings.CAMPAIGN_CLOSED_FULL,
+        }
       : isCurated
         ? { tone: 'curated', text: locked ? '🔒 Curated' : 'Curated' }
         : { tone: 'open', text: `Open · ${Strings.CAMPAIGN_FIRST_COME(campaign.remaining)}` };
@@ -49,7 +63,14 @@ function CampaignCard({ campaign, applied, gScore, completedCount, onPress }) {
     closed || applied ? null : { tone: locked ? 'curated' : 'amber', text: `+${points}P` };
 
   return (
-    <TouchableOpacity activeOpacity={0.85} onPress={onPress} disabled={closed}>
+    <TouchableOpacity
+      activeOpacity={0.85}
+      onPress={onPress}
+      disabled={closed}
+      accessibilityRole="button"
+      accessibilityLabel={`${campaign.brand}, ${campaign.title}`}
+      accessibilityState={{ disabled: closed }}
+    >
       <Card style={styles.card}>
         <View style={styles.rowBetween}>
           <Badge tone={trackBadge.tone} text={trackBadge.text} />
@@ -63,16 +84,21 @@ function CampaignCard({ campaign, applied, gScore, completedCount, onPress }) {
               {campaign.title}
             </Text>
             <Text style={styles.xs} numberOfLines={1}>
-              {Strings.CAMPAIGN_REMAINING(campaign.remaining)} · {campaign.countries.join(' · ')}
+              {Strings.CAMPAIGN_REMAINING(campaign.remaining ?? 0)} ·{' '}
+              {(campaign.countries || []).join(' · ')}
             </Text>
           </View>
         </View>
-        {pointBadge ? (
-          <View style={styles.pointRow}>
-            <Badge tone={pointBadge.tone} text={pointBadge.text} />
-            {bonus > 0 ? <Text style={styles.bonusText}>+{bonus}P</Text> : null}
-          </View>
-        ) : null}
+        {/* 기획서 §5.1 카드 정보: 소요시간 · 게시 기한 · 설문 여부를 상세 진입 전에 보여준다 */}
+        <View style={styles.pointRow}>
+          {pointBadge ? <Badge tone={pointBadge.tone} text={pointBadge.text} /> : null}
+          {pointBadge && bonus > 0 ? <Text style={styles.bonusText}>+{bonus}P</Text> : null}
+          <Badge tone="curated" text={Strings.CAMPAIGN_CARD_TIME(estimatedMinutes(campaign))} />
+          <Badge tone="curated" text={Strings.CAMPAIGN_CARD_UPLOAD_DAYS(uploadDays(campaign))} />
+          {isFgiEnabled(campaign) ? (
+            <Badge tone="curated" text={Strings.CAMPAIGN_CARD_FGI} />
+          ) : null}
+        </View>
         {locked ? (
           <NoteBox
             tone="amber"
@@ -125,19 +151,23 @@ export default function TryScreen({ navigation }) {
   const campaigns = useSelector(selectCampaigns);
   const applications = useSelector(selectMyApplications);
   const loading = useSelector((s) => s.campaign.loading);
+  const loadError = useSelector((s) => s.campaign.error);
+  const offerLockRef = useRef(false);
   const [gScore, setGScore] = useState(50);
   const [completedCount, setCompletedCount] = useState(0);
   const [pendingOffers, setPendingOffers] = useState([]);
   const [savedSeedings, setSavedSeedings] = useState({});
 
   const refreshOffers = useCallback(() => {
-    getOffers().then((offers) => {
-      const pending = offers.filter((o) => o.status === 'pending');
-      setPendingOffers(pending);
-      if (pending.length) {
-        logEvent('offer_view', { count: pending.length });
-      }
-    });
+    getOffers()
+      .then((offers) => {
+        const pending = offers.filter((o) => o.status === 'pending');
+        setPendingOffers(pending);
+        if (pending.length) {
+          logEvent('offer_view', { count: pending.length });
+        }
+      })
+      .catch(() => setPendingOffers([]));
   }, []);
 
   // 수락 = 서약 확인 → 동시 한도 검사 → approved로 즉시 시작 (D25: applied 스킵)
@@ -150,42 +180,58 @@ export default function TryScreen({ navigation }) {
         {
           text: Strings.OFFER_ACCEPT_CONFIRM_OK,
           onPress: async () => {
-            // 한도 초과 유저에겐 ops가 제안을 보류하지만(I11) mock에선 클라이언트가 이중 방어
-            const seedings = await getSeedings();
-            const activeStatuses = [
-              SEEDING_STATUS.APPLIED,
-              SEEDING_STATUS.APPROVED,
-              SEEDING_STATUS.SHIPPED,
-              SEEDING_STATUS.RECEIVED,
-              SEEDING_STATUS.REVIEWING,
-            ];
-            // 현재 캠페인 목록에 없는 잔여 시딩은 한도에서 제외 (CampaignDetail과 동일 기준)
-            const knownCampaignIds = new Set(campaigns.map((c) => c.id));
-            knownCampaignIds.add(offer.campaignId);
-            const activeCount = Object.values(seedings).filter(
-              (s) => activeStatuses.includes(s.status) && knownCampaignIds.has(s.campaignId),
-            ).length;
-            const limit = concurrentLimit(gScore, completedCount);
-            if (activeCount >= limit) {
-              logEvent('apply_limit_blocked', { limit, source: 'offer' });
-              Alert.alert(Strings.CONCURRENT_LIMIT_ALERT(limit));
+            if (offerLockRef.current) {
               return;
             }
-            await respondToOffer(offer.id, 'accepted');
-            await upsertSeeding(offer.campaignId, { pledgeChecked: true, offerId: offer.id });
-            await setSeedingStatus(offer.campaignId, SEEDING_STATUS.APPROVED);
-            logEvent('offer_accept', { campaign_id: offer.campaignId });
-            // ops 반영은 respondToOffer가 담당 (POST /offers → Match CONFIRMED).
-            // 여기서 opsApply를 또 부르면 Match가 중복 생성된다.
-            refreshOffers();
-            navigation.navigate('ApplyDone', {
-              campaignId: offer.campaignId,
-              campaignTitle: offer.campaign.title,
-              applyMode: offer.campaign.applyMode,
-              usedCount: activeCount + 1,
-              limit,
-              autoConfirmed: true,
-            });
+            offerLockRef.current = true;
+            try {
+              // 한도 초과 유저에겐 ops가 제안을 보류하지만(I11) mock에선 클라이언트가 이중 방어
+              const seedings = await getSeedings();
+              // 이미 신청·진행 중인 캠페인의 제안을 수락하면 승인 없이 approved로 승격된다 — 차단
+              if (isActiveSeeding(seedings[offer.campaignId])) {
+                Alert.alert(Strings.OFFER_ALREADY_ACTIVE);
+                return;
+              }
+              const activeStatuses = ACTIVE_STATUSES;
+              // mock 모드에선 현재 캠페인 목록에 없는 잔여 시딩은 한도에서 제외 (CampaignDetail과 동일 기준)
+              const knownCampaignIds = new Set(campaigns.map((c) => c.id));
+              knownCampaignIds.add(offer.campaignId);
+              const activeCount = Object.values(seedings).filter(
+                (s) =>
+                  activeStatuses.includes(s.status) &&
+                  (FEATURES.LIVE_OPS_API || knownCampaignIds.has(s.campaignId)),
+              ).length;
+              const limit = concurrentLimit(gScore, completedCount);
+              if (activeCount >= limit) {
+                logEvent('apply_limit_blocked', { limit, source: 'offer' });
+                Alert.alert(Strings.CONCURRENT_LIMIT_ALERT(limit));
+                return;
+              }
+              // 로컬 시딩을 먼저 쓰고 응답을 기록한다 — 응답만 남고 시딩이 없는 반쪽 상태 방지
+              await upsertSeeding(offer.campaignId, {
+                pledgeChecked: true,
+                offerId: offer.id,
+                brandId: offer.campaign?.brandId,
+              });
+              await setSeedingStatus(offer.campaignId, SEEDING_STATUS.APPROVED);
+              await respondToOffer(offer.id, 'accepted');
+              logEvent('offer_accept', { campaign_id: offer.campaignId });
+              // ops 반영은 respondToOffer가 담당 (POST /offers → Match CONFIRMED).
+              // 여기서 opsApply를 또 부르면 Match가 중복 생성된다.
+              refreshOffers();
+              navigation.navigate('ApplyDone', {
+                campaignId: offer.campaignId,
+                campaignTitle: offer.campaign.title,
+                applyMode: offer.campaign.applyMode,
+                usedCount: activeCount + 1,
+                limit,
+                autoConfirmed: true,
+              });
+            } catch (e) {
+              Alert.alert(Strings.RETRY_GUIDELINES);
+            } finally {
+              offerLockRef.current = false;
+            }
           },
         },
       ],
@@ -195,8 +241,12 @@ export default function TryScreen({ navigation }) {
   // 거절 — 사유 1탭은 선택 항목 (매칭 학습 재료, G-스코어 무영향)
   const onDeclineOffer = (offer) => {
     const decline = async (reason) => {
-      await respondToOffer(offer.id, 'declined', reason);
-      logEvent('offer_decline', { campaign_id: offer.campaignId, reason });
+      try {
+        await respondToOffer(offer.id, 'declined', reason);
+        logEvent('offer_decline', { campaign_id: offer.campaignId, reason });
+      } catch (e) {
+        Alert.alert(Strings.RETRY_GUIDELINES);
+      }
       refreshOffers();
     };
     Alert.alert(Strings.OFFER_DECLINE_TITLE, Strings.OFFER_DECLINE_BODY, [
@@ -223,13 +273,17 @@ export default function TryScreen({ navigation }) {
   // 완주/평가로 G-스코어가 바뀔 수 있으므로 포커스마다 갱신
   useFocusEffect(
     useCallback(() => {
-      getCreatorProfile().then((profile) => {
-        if (profile) {
-          setGScore(profile.gScore ?? 50);
-          setCompletedCount(profile.completedCount ?? 0);
-        }
-      });
-      getSeedings().then(setSavedSeedings);
+      getCreatorProfile()
+        .then((profile) => {
+          if (profile) {
+            setGScore(profile.gScore ?? 50);
+            setCompletedCount(profile.completedCount ?? 0);
+          }
+        })
+        .catch(() => {});
+      getSeedings()
+        .then(setSavedSeedings)
+        .catch(() => {});
       refreshOffers();
     }, [refreshOffers]),
   );
@@ -271,12 +325,24 @@ export default function TryScreen({ navigation }) {
           ) : null
         }
         ListEmptyComponent={
-          !loading ? <Text style={styles.empty}>{Strings.NO_CAMPAIGNS}</Text> : null
+          loading ? null : loadError ? (
+            <View style={styles.errorWrap}>
+              <Text style={styles.empty}>{Strings.CAMPAIGNS_LOAD_ERROR}</Text>
+              <Btn
+                variant="ghost"
+                small
+                title={Strings.RETRY}
+                onPress={() => dispatch(fetchCampaigns())}
+              />
+            </View>
+          ) : (
+            <Text style={styles.empty}>{Strings.NO_CAMPAIGNS}</Text>
+          )
         }
         renderItem={({ item }) => (
           <CampaignCard
             campaign={item}
-            applied={applications[item.id] != null || savedSeedings[item.id] != null}
+            applied={applications[item.id] != null || isActiveSeeding(savedSeedings[item.id])}
             gScore={gScore}
             completedCount={completedCount}
             onPress={() => navigation.navigate('CampaignDetail', { campaign: item })}
@@ -288,6 +354,7 @@ export default function TryScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  errorWrap: { alignItems: 'center', gap: 8, paddingVertical: 24 },
   container: { flex: 1, backgroundColor: COLORS.BG, paddingTop: T.TOP_INSET },
   headerRow: {
     flexDirection: 'row',
@@ -315,7 +382,7 @@ const styles = StyleSheet.create({
   midBody: { flex: 1, marginLeft: 11 },
   brand: { ...TYPE.XS, marginBottom: 1 },
   title: { ...TYPE.CARD_TITLE },
-  pointRow: { flexDirection: 'row', alignItems: 'center', marginTop: 9, gap: 8 },
+  pointRow: { flexDirection: 'row', alignItems: 'center', marginTop: 9, gap: 6, flexWrap: 'wrap' },
   bonusText: { ...TYPE.XS, fontFamily: T.FONT.ExtraBold, color: COLORS.GREEN },
   lockNote: { marginTop: 9 },
   empty: { ...TYPE.SUB, textAlign: 'center', marginTop: 60 },

@@ -43,32 +43,26 @@ export default function AboutScreen({ navigation }) {
           <Text style={styles.bizText}>{Strings.ABOUT_BIZ_INFO}</Text>
         </Card>
 
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() => openUrl(Strings.TERMS_URL.SERVICE)}
-        >
-        <Card>
-          <View style={styles.row}>
-            <Text style={styles.rowTitle}>{Strings.ABOUT_TERMS}</Text>
-            <Text style={styles.chev}>›</Text>
-          </View>
-        </Card>
+        <TouchableOpacity activeOpacity={0.7} onPress={() => openUrl(Strings.TERMS_URL.SERVICE)}>
+          <Card>
+            <View style={styles.row}>
+              <Text style={styles.rowTitle}>{Strings.ABOUT_TERMS}</Text>
+              <Text style={styles.chev}>›</Text>
+            </View>
+          </Card>
         </TouchableOpacity>
         <TouchableOpacity
           activeOpacity={0.7}
           onPress={() => openUrl(Strings.TERMS_URL.PRIVACY_POLICY)}
         >
-        <Card>
-          <View style={styles.row}>
-            <Text style={styles.rowTitle}>{Strings.ABOUT_PRIVACY}</Text>
-            <Text style={styles.chev}>›</Text>
-          </View>
-        </Card>
+          <Card>
+            <View style={styles.row}>
+              <Text style={styles.rowTitle}>{Strings.ABOUT_PRIVACY}</Text>
+              <Text style={styles.chev}>›</Text>
+            </View>
+          </Card>
         </TouchableOpacity>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() => Linking.openURL('mailto:hello@greyd.app')}
-        >
+        <TouchableOpacity activeOpacity={0.7} onPress={() => openUrl('mailto:hello@greyd.app')}>
           <Card>
             <View style={styles.row}>
               <Text style={styles.rowTitle}>{Strings.ABOUT_CONTACT}</Text>
@@ -77,7 +71,9 @@ export default function AboutScreen({ navigation }) {
           </Card>
         </TouchableOpacity>
 
-        <Text style={styles.version}>v{getVersion()} ({getBuildNumber()})</Text>
+        <Text style={styles.version}>
+          v{getVersion()} ({getBuildNumber()})
+        </Text>
       </ScrollView>
     </SafeAreaView>
   );

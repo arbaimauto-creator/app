@@ -43,15 +43,22 @@ function ActionView({ actionParams, icon }) {
 
 function NotificationItemView({ item, user = undefined, navigation }) {
   // icon : {imageUrl, shape}, contents : {title, subtitle, action}, action : {actionType, actionIconUrl, onAction}
-  const { isRead, icon, contents, timestamp, navigationParams } = item;
-  const timeToAgo = Utils.timestampToAgo(timestamp);
+  const { isRead, icon, contents, navigationParams } = item;
+  // 정규화기는 createdAt만 주므로 timestamp가 없으면 createdAt으로 — 없던 시간 표기가 이제 보인다
+  const stamp = item.timestamp || item.createdAt;
+  const timeToAgo = stamp ? Utils.timestampToAgo(stamp) : '';
 
   const handlePressItem = () => {
-    if (navigationParams) {
+    if (!navigationParams?.page) {
+      return;
+    }
+    // 캠페인 활동 알림(local)은 탭·루트 라우트로 가므로 navigate(중첩 params 지원). 레거시는 기존 push 유지
+    if (item.local) {
+      navigation.navigate(navigationParams.page, navigationParams.params);
+    } else {
       navigation.push(navigationParams.page, navigationParams.params);
     }
   };
-  // isRead 값에 따른 연동 필요, 알림시간 랜더링 추가 필요.
   return (
     <Pressable onPress={handlePressItem} activeOpacity={0.9}>
       <View style={[styles.notiContainer, isRead !== true && styles.notiContainerUnread]}>
@@ -70,8 +77,8 @@ function NotificationItemView({ item, user = undefined, navigation }) {
           }}
         >
           <FastImage
-            style={icon.shape === 'round' ? styles.roundIcon : styles.squareIcon}
-            source={{ uri: icon.imageUrl }}
+            style={icon?.shape === 'round' ? styles.roundIcon : styles.squareIcon}
+            source={icon?.imageUrl ? { uri: icon.imageUrl } : undefined}
           />
         </Pressable>
         {contents.subTitle ? (

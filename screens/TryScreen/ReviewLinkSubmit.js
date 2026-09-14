@@ -22,11 +22,14 @@ import T from '../../Components/Constants/DesignTokens';
 import { Card, Btn, Badge, Chips } from '../../Components/UI';
 import { selectCampaigns } from '../../slices/campaign';
 import { getSeedings, upsertSeeding, setSeedingStatus, SEEDING_STATUS } from '../../api/seedings';
-import { daysLeft } from '../ActivityScreen/missionLogic';
+import { daysLeft, isInGrace, isNoShowDue } from '../ActivityScreen/missionLogic';
 import { cancelUploadReminders } from '../ActivityScreen/reminders';
 import { opsUpload } from '../../api/opsBridge';
 import { refreshServerStats } from '../../api/creators';
 import { logEvent } from '../../api/common/analytics';
+import { getDraft, saveDraft, clearDraft, draftHasContent } from '../../api/drafts';
+import { describeError } from '../../api/opsErrors';
+import { isFgiEnabled } from '../../api/campaignMeta';
 
 const { COLORS, RADIUS, FONT, TYPE } = T;
 
@@ -75,8 +78,25 @@ export default function ReviewLinkSubmit({ route, navigation }) {
   const submitLockRef = useRef(false);
 
   useEffect(() => {
-    getSeedings().then((all) => setSeeding(all[campaignId] || null));
+    getSeedings()
+      .then((all) => setSeeding(all[campaignId] || null))
+      .catch(() => {});
+    // §5.2 임시 저장 복원
+    getDraft('review', campaignId)
+      .then((d) => {
+        if (!draftHasContent(d, ['url', 'format'])) {
+          return;
+        }
+        setUrl(d.url || '');
+        setFormat(d.format || null);
+        setPointsChecked(!!d.pointsChecked);
+        setTaggedBrand(!!d.taggedBrand);
+      })
+      .catch(() => {});
   }, [campaignId]);
+  useEffect(() => {
+    saveDraft('review', campaignId, { url, format, pointsChecked, taggedBrand });
+  }, [url, format, pointsChecked, taggedBrand, campaignId]);
 
   const left = daysLeft(seeding);
   const guide = Array.isArray(campaign?.contentGuide) ? campaign.contentGuide : [];
@@ -105,18 +125,38 @@ export default function ReviewLinkSubmit({ route, navigation }) {
       Alert.alert(Strings.REVIEW_SUBMIT_INCOMPLETE);
       return;
     }
+    // §5.2 제출 직전 최종 확인 — 링크는 제출 후 바꿀 수 없다
+    Alert.alert(Strings.REVIEW_CONFIRM_TITLE, Strings.REVIEW_CONFIRM_BODY(platformUrl), [
+      { text: Strings.CANCEL, style: 'cancel' },
+      { text: Strings.REVIEW_CONFIRM_OK, onPress: () => submitReview(platformUrl) },
+    ]);
+  };
+
+  const submitReview = async (platformUrl) => {
+    if (submitLockRef.current) {
+      return;
+    }
     submitLockRef.current = true;
     setIsSubmitting(true);
     try {
       const all = await getSeedings();
       const current = all[campaignId];
-      if (current?.status !== SEEDING_STATUS.RECEIVED || !current?.fgiSurvey) {
+      // FGI는 캠페인별 선택형(기획서 §2.1) — 켜진 캠페인만 설문 완료를 요구한다
+      const fgiRequired = isFgiEnabled(campaign);
+      if (current?.status !== SEEDING_STATUS.RECEIVED || (fgiRequired && !current?.fgiSurvey)) {
         throw new Error('invalid_seeding_status');
+      }
+      // D+16 이후는 no_show — 제출을 막는다. 유예(D+14~16) 제출은 표시해 서버가 감액할 수 있게 한다.
+      if (isNoShowDue(current)) {
+        Alert.alert(Strings.REVIEW_SUBMIT_EXPIRED);
+        return;
       }
       await upsertSeeding(campaignId, {
         review: { platformUrl, format, hashtagsCopied, taggedBrand },
+        graceUsed: isInGrace(current),
       });
       await setSeedingStatus(campaignId, SEEDING_STATUS.REVIEWING);
+      clearDraft('review', campaignId).catch(() => {});
       try {
         cancelUploadReminders(campaignId);
       } catch (e) {
@@ -127,16 +167,22 @@ export default function ReviewLinkSubmit({ route, navigation }) {
       opsUpload(campaignId, platformUrl, format);
       // 서버가 업로드 시점에 완주 보상을 지급한다 — 다음 프로필 조회에서 새 잔액을 읽게 한다
       refreshServerStats();
-      Alert.alert(Strings.REVIEW_SUBMIT_DONE_TITLE, Strings.REVIEW_SUBMIT_DONE_BODY, [
-        {
-          text: Strings.OK,
-          onPress: () => navigation.navigate('MainBottom', { screen: 'Activity' }),
-        },
-      ], { cancelable: false });
+      Alert.alert(
+        Strings.REVIEW_SUBMIT_DONE_TITLE,
+        Strings.REVIEW_SUBMIT_DONE_BODY,
+        [
+          {
+            text: Strings.OK,
+            onPress: () => navigation.navigate('MainBottom', { screen: 'Activity' }),
+          },
+        ],
+        { cancelable: false },
+      );
     } catch (e) {
       submitLockRef.current = false;
       setIsSubmitting(false);
-      Alert.alert(Strings.RETRY_GUIDELINES);
+      const d = describeError(e);
+      Alert.alert(d.title, d.body);
     }
   };
 
@@ -232,6 +278,7 @@ export default function ReviewLinkSubmit({ route, navigation }) {
           </View>
 
           <Text style={styles.footnote}>{Strings.REVIEW_SUBMIT_FOOTNOTE}</Text>
+          <Text style={styles.footnote}>{Strings.REWARD_ETA_NOTE}</Text>
           <Btn
             title={Strings.REVIEW_SUBMIT_CTA}
             onPress={onSubmit}

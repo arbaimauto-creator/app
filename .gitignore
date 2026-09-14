@@ -88,3 +88,4 @@ credentials.json
 # 빌드 산출·로그
 android/app/src/main/assets/modules.json
 *.log
+.native/

@@ -819,13 +819,25 @@ class AddingNewVideoScreen extends Component {
             };
 
             const missionCampaignId = this.props.route?.params?.campaignId;
+            let missionSeeding = null;
             if (missionCampaignId) {
-              const { getSeedings } = require('../../api/seedings');
-              const mission = (await getSeedings())[missionCampaignId];
-              if (!mission?.fgiSurvey) {
-                this.props.navigation.navigate('FgiSurvey', {
-                  campaign: this.props.route?.params?.campaign,
-                });
+              const { getSeedings, SEEDING_STATUS } = require('../../api/seedings');
+              missionSeeding = (await getSeedings())[missionCampaignId];
+              // received가 아닌 시딩(완료·취소·만료)을 reviewing으로 되돌리지 않는다
+              if (missionSeeding?.status !== SEEDING_STATUS.RECEIVED) {
+                onError(new Error('invalid_seeding_status'));
+                return;
+              }
+              const missionCampaign = this.props.route?.params?.campaign ||
+                (require('../../redux/store').store.getState().campaign?.list || []).find(
+                  (c) => c.id === missionCampaignId,
+                ) || { id: missionCampaignId, title: '' };
+              const { isFgiEnabled } = require('../../api/campaignMeta');
+              // 기획서 §2.1: FGI는 캠페인별 선택형 — 켜진 캠페인만 설문을 요구한다
+              if (isFgiEnabled(missionCampaign) && !missionSeeding?.fgiSurvey) {
+                // 업로드를 중단 상태로 남기지 않는다 — 설문 후 다시 올리도록 에러로 종료
+                onError(new Error('fgi_required'));
+                this.props.navigation.navigate('FgiSurvey', { campaign: missionCampaign });
                 return;
               }
             }
@@ -838,9 +850,7 @@ class AddingNewVideoScreen extends Component {
                 if (missionCampaignId) {
                   const { setSeedingStatus, SEEDING_STATUS } = require('../../api/seedings');
                   const { opsUpload } = require('../../api/opsBridge');
-                  const {
-                    cancelUploadReminders,
-                  } = require('../ActivityScreen/reminders');
+                  const { cancelUploadReminders } = require('../ActivityScreen/reminders');
                   await setSeedingStatus(missionCampaignId, SEEDING_STATUS.REVIEWING);
                   await opsUpload(
                     missionCampaignId,

@@ -3,25 +3,23 @@
 // 스펙: docs/superpowers/specs/2026-08-10-greyd-phase1-v2-design.md
 const FEATURES = {
   // 초대 코드 게이트 (로그인 후 1회). 켜지면 게스트 입장 버튼 숨김.
-  INVITE_GATE: true,
+  INVITE_GATE: false,
+
+  // 크리에이터 프로필 온보딩 (로그인 후 1회). 게이트와 독립 — 게이트가 꺼져도 프로필은 받는다.
+  // 게이트가 꺼져 있으면 온보딩 폼 안에서 활동 국가를 함께 받는다.
+  CREATOR_ONBOARDING: true,
 
   // 커머스 노출 (Products 탭, Buy 버튼/가격, 구매/장바구니, Cart/OrderList)
   COMMERCE: false,
 
-  // 평가 UI의 부정(비추천) 옵션 노출 (데이터 스키마는 유지 — 축적만)
-
-  // B2B 화면 진입점 (셀러 접근은 brand 역할로 대체)
+  // (제거된 플래그 — 이제 코드에 고정: 비추천 옵션 비노출·B2B 진입점은 brand 역할·G-스코어 v2 상시·브랜드 트리아지 상시)
 
   // 브랜드 퍼널 앱 노출 (D26, 2026-08-11 대표 결정: 브랜드는 웹(ops 매직링크)으로 —
   // 일하는 사람들은 데스크톱이 편하다. 앱은 인플루언서 전용. 화면은 보존, 진입만 차단)
   BRAND_APP: false,
 
-  // G-스코어 v2 (2-트랙 잠금·차등 포인트·진행바)
-
-  // 브랜드 평가 트리아지(👍👌👎) 우선 방식
-
   // 추천 코드 (첫 루프 완료 시 3장)
-  REFERRAL: true,
+  REFERRAL: false,
 
   // 좋아요(하트)·좋아요 목록 등 소셜 장식 (회의: "라이크 등 소셜 장식 제거" — 데이터는 유지, UI만 숨김)
   SOCIAL_LIKES: false,

@@ -23,7 +23,11 @@ import { KeyboardAwareScrollView as KeyboardAvoidingView } from 'react-native-ke
 import { getStatusBarHeight } from 'react-native-safearea-height';
 import APIprovider from './APIprovider';
 import { clearGreydLocalData } from '../api/localReset';
+import { resetAnalyticsContext } from '../api/common/analytics';
+import { store } from '../redux/store';
+import { setGuest, setTotalReward, setUser } from '../slices/user';
 import Constants from './Constants';
+import FEATURES from './Constants/Features';
 import HeaderLeftBackButton from './CustomComponents/headerBackButton/headerLeftBackButton';
 import Strings from './Strings';
 import { moderateScale } from './utils/scailing';
@@ -178,32 +182,41 @@ export default class MembershipWithdrawalPage extends PureComponent {
                             }
                           });
                           APIprovider.clearRequester();
-                           await Preference.setMultiple({
-                             userId: '',
-                             userName: '',
-                             userProfilePicUrl: '',
-                             userIsSeller: '',
-                             userAccessToken: '',
-                             userAuthType: '',
-                             makeOrderBuyerName: '',
-                             makeOrderBuyerPhone: '',
-                             makeOrderBuyerEmail: '',
-                             makeOrderBuyerMemo: '',
-                             makeOrderReceiverName: '',
-                             makeOrderReceiverPhone: '',
-                             makeOrderAddress: '',
-                           });
-                           await clearGreydLocalData();
+                          await Preference.setMultiple({
+                            userId: '',
+                            userName: '',
+                            userProfilePicUrl: '',
+                            userIsSeller: '',
+                            userAccessToken: '',
+                            userAuthType: '',
+                            makeOrderBuyerName: '',
+                            makeOrderBuyerPhone: '',
+                            makeOrderBuyerEmail: '',
+                            makeOrderBuyerMemo: '',
+                            makeOrderReceiverName: '',
+                            makeOrderReceiverPhone: '',
+                            makeOrderAddress: '',
+                            isOnboarded: '',
+                            agreementToTermsOfService: '',
+                            previousPage: '',
+                          });
+                          await clearGreydLocalData();
+                          store.dispatch(setGuest({ isGuest: false }));
+                          store.dispatch(setTotalReward({ totalReward: 0 }));
+                          store.dispatch(setUser({ user: {} }));
+                          resetAnalyticsContext();
                           this.props.route.params.setLogonUserId(null);
                           this.props.route.params.setLogonUserName('');
                           this.props.route.params.setLogonUserProfilePicUrl('');
                           // this.props.route.params.setLogonUserIsSeller('false');
                           this.props.route.params.setLogonUserIsSeller('');
-                           this.props.navigation.dispatch(
-                             CommonActions.reset({
-                               index: 0,
-                               routes: [{ name: 'InviteGate' }],
-                             }),
+                          this.props.navigation.dispatch(
+                            CommonActions.reset({
+                              index: 0,
+                              routes: [
+                                { name: FEATURES.INVITE_GATE ? 'InviteGate' : 'NotSignedIn' },
+                              ],
+                            }),
                           );
                         },
                       },

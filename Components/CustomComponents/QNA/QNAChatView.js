@@ -114,7 +114,6 @@ export default function QNAChat(props) {
       isActive = false;
     };
     // 마운트 시 1회만 실행 (deps 추가 시 재실행 위험)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.navigation, props.route.params.logonUserId, props.route.params.qnaId]);
 
   const handlePressRemoveChat = () => {
@@ -434,7 +433,7 @@ export default function QNAChat(props) {
           <View style={{ padding: 8 }}>
             <ChatTextInput
               hashtagItem={item}
-              placeholder={isMyUserPage ? 'Enter Answer' : 'Enter Question'}
+              placeholder={isMyUserPage ? Strings.QNA_ENTER_ANSWER : Strings.QNA_ENTER_QUESTION}
               onPressSend={(text, tagUser) => {
                 addQuestionHashtag(text, tagUser);
               }}

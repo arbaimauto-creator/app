@@ -14,6 +14,7 @@ import { AccessToken, LoginManager } from 'react-native-fbsdk-next';
 import APIprovider from '../../Components/APIprovider';
 import Constants from '../../Components/Constants';
 import FEATURES from '../../Components/Constants/Features';
+import { prefGetSafe } from '../../api/prefSafe';
 import Strings, { getLanguage } from '../../Components/Strings';
 import { pushNotifications } from '../../Components/services';
 import { store } from '../../redux/store';
@@ -22,9 +23,11 @@ import { setGuest } from '../../slices/user';
 
 // 탈퇴 계정 안내 Alert — 5개 로그인 경로에 동일 블록이 복붙돼 있던 것을 통합
 const showDeletedAccountAlert = (onConfirm = () => {}) => {
-  Alert.alert(Strings.SIGNIN_ALERT_CANCEL_MEMBERSHIP_TITLE, Strings.SIGNIN_ALERT_CANCEL_MEMBERSHIP_BODY, [
-    { text: Strings.OK, onPress: onConfirm },
-  ]);
+  Alert.alert(
+    Strings.SIGNIN_ALERT_CANCEL_MEMBERSHIP_TITLE,
+    Strings.SIGNIN_ALERT_CANCEL_MEMBERSHIP_BODY,
+    [{ text: Strings.OK, onPress: onConfirm }],
+  );
 };
 
 // 게스트 로그인용 고정 인증 페이로드 — 두 함수에 1.5KB 리터럴이 복붙돼 있던 것을 상수화
@@ -52,10 +55,15 @@ const persistLoginSession = async (result, { authType, accessToken }) => {
     'agreementToTermsOfService',
     result.agreementToTermsOfService?.toString() ?? 'false',
   );
-  const currency = await APIprovider.getCurrencyRate('USD');
-  // 환율 조회 실패가 로그인 실패로 이어지지 않도록 방어 (기존: currencyRate.toString() TypeError)
-  if (currency?.currencyRate) {
-    await Preference.set('KRW/USD', currency.currencyRate.toString());
+  // 환율 조회 실패가 로그인 실패로 이어지지 않도록 방어 (기존: currencyRate.toString() TypeError,
+  // 네트워크 거부 시 세션은 이미 저장됐는데 LOGIN_FAILED가 뜨던 문제)
+  try {
+    const currency = await APIprovider.getCurrencyRate('USD');
+    if (currency?.currencyRate) {
+      await Preference.set('KRW/USD', currency.currencyRate.toString());
+    }
+  } catch (e) {
+    // 보조 데이터 — 세션 유효성과 무관
   }
 };
 
@@ -96,35 +104,48 @@ const loginGuestWithFallback = async (authData) => {
 
 // D28: 게이트 → 로그인 → 온보딩 → 메인 순서의 분기점.
 // 로그인 성공(또는 기로그인 부팅) 시: 게이트 미통과면 게이트로, 온보딩 미완이면 온보딩으로.
+// 게이트 통과 판정 — MainDrawerNavigator 부팅 판정과 동일 기준(세 키 모두). 한쪽만 보면 게이트 루프.
+export const isGatePassed = async () => {
+  const [inviteRole, inviteCode, creatorCountry] = await Promise.all([
+    prefGetSafe('inviteRole'),
+    prefGetSafe('inviteCode'),
+    prefGetSafe('creatorCountry'),
+  ]);
+  return { passed: Boolean(inviteRole && inviteCode && creatorCountry), inviteRole };
+};
+
+const resetTo = (navigation, name) =>
+  navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name }] }));
+
 export const resetToMain = async (navigation) => {
-  if (FEATURES.INVITE_GATE) {
-    const inviteRole = await Preference.get('inviteRole');
-    if (!inviteRole) {
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: 'InviteGate' }],
-        }),
-      );
-      return;
+  // 저장소 읽기는 타임아웃 레이스(prefGetSafe)로 감싼다 — 무응답이면 메인으로 진행한다.
+  try {
+    let inviteRole = null;
+    if (FEATURES.INVITE_GATE) {
+      const gate = await isGatePassed();
+      if (!gate.passed) {
+        resetTo(navigation, 'InviteGate');
+        return;
+      }
+      inviteRole = gate.inviteRole;
     }
-    // 크리에이터 온보딩(프로필 폼) 미완 — 계정은 연결됐으니 프로필만 받으면 메인
-    const rawProfile = await Preference.get('creatorProfileV2');
-    let onboarded = false;
-    try {
-      onboarded = !!(rawProfile && JSON.parse(rawProfile)?.onboardedAt);
-    } catch (e) {
-      onboarded = false;
+    // 크리에이터 온보딩(프로필 폼) 미완 — 계정은 연결됐으니 프로필만 받으면 메인.
+    // 게이트와 독립(CREATOR_ONBOARDING). 브랜드 역할만 제외.
+    if (FEATURES.CREATOR_ONBOARDING && inviteRole !== 'brand') {
+      let onboarded = false;
+      try {
+        const rawProfile = await prefGetSafe('creatorProfileV2');
+        onboarded = !!(rawProfile && JSON.parse(rawProfile)?.onboardedAt);
+      } catch (e) {
+        onboarded = false;
+      }
+      if (!onboarded) {
+        resetTo(navigation, 'CreatorOnboarding');
+        return;
+      }
     }
-    if (inviteRole === 'influencer' && !onboarded) {
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: 'CreatorOnboarding' }],
-        }),
-      );
-      return;
-    }
+  } catch (e) {
+    console.log('resetToMain: preference read failed, continuing to main', e?.message);
   }
   navigation.dispatch(
     CommonActions.reset({
@@ -239,8 +260,8 @@ export const kakaoLogin = (props, onSucces, setLoggingIn) => {
                 });
               } else if (result.isDeleted) {
                 showDeletedAccountAlert(() => {
-                        KakaoLogout();
-                      });
+                  KakaoLogout();
+                });
               } else {
                 await persistLoginSession(result, {
                   authType: 'kakao',
@@ -380,8 +401,8 @@ export const googleLogin = async (props, setLoggingIn) => {
           });
         } else if (result.isDeleted) {
           showDeletedAccountAlert(() => {
-                  GoogleSignin.signOut();
-                });
+            GoogleSignin.signOut();
+          });
         } else {
           await persistLoginSession(result, {
             authType: 'google',
@@ -448,8 +469,8 @@ export const guestUser = async (props, setLoggingIn, isDynamicLink = false) => {
           });
         } else if (result.isDeleted) {
           showDeletedAccountAlert(() => {
-                  GoogleSignin.signOut();
-                });
+            GoogleSignin.signOut();
+          });
         } else {
           await persistLoginSession(result, { authType: 'google', accessToken: authData.idToken });
           applyLogonUser(result, {

@@ -21,6 +21,12 @@ import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
 import { getCreatorProfile } from '../../api/creators';
 import { getSeedings, SEEDING_STATUS } from '../../api/seedings';
 import { daysLeft } from '../ActivityScreen/missionLogic';
+import {
+  buildActivityNotifications,
+  countUnread,
+  getActivityNotiReadAt,
+} from '../../api/activityNotifications';
+import HomeHero from './HomeHero';
 
 const { COLORS, TYPE } = T;
 const FILTERS = ['For you', 'Following', 'Skincare', 'Makeup', 'Food'];
@@ -151,6 +157,7 @@ export default function CuratedHome({ navigation }) {
   const campaigns = useSelector(selectCampaigns);
   const [gScore, setGScore] = useState(50);
   const [todos, setTodos] = useState([]);
+  const [unreadNoti, setUnreadNoti] = useState(0);
   const [posts, setPosts] = useState(MOCK_POSTS);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('For you');
@@ -180,8 +187,17 @@ export default function CuratedHome({ navigation }) {
 
   useFocusEffect(
     useCallback(() => {
-      getCreatorProfile().then((profile) => setGScore(profile?.gScore ?? 50));
-      getSeedings().then((seedings) => setTodos(buildTodos(seedings, campaigns)));
+      getCreatorProfile()
+        .then((profile) => setGScore(profile?.gScore ?? 50))
+        .catch(() => {});
+      getSeedings()
+        .then(async (seedings) => {
+          setTodos(buildTodos(seedings, campaigns));
+          // 종 아이콘 점 = 아직 안 읽은 캠페인 활동 알림(할 일 개수가 아니라)
+          const readAt = await getActivityNotiReadAt().catch(() => null);
+          setUnreadNoti(countUnread(buildActivityNotifications(seedings, campaigns), readAt));
+        })
+        .catch(() => {});
     }, [campaigns]),
   );
 
@@ -241,13 +257,16 @@ export default function CuratedHome({ navigation }) {
           <RoundIcon name="magnify" onPress={() => navigation.navigate('Search')} />
           <RoundIcon
             name="bell-outline"
-            dot={todos.length > 0}
+            dot={unreadNoti > 0}
             onPress={() => navigation.navigate('Notification')}
           />
         </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {/* 기획서 §5.1 첫 화면: 할 일 → 신청 가능 캠페인 → 보상 현황이 리뷰 피드보다 먼저 */}
+        <HomeHero navigation={navigation} campaigns={campaigns} />
+
         <TouchableOpacity
           style={styles.composer}
           activeOpacity={0.88}
@@ -258,14 +277,16 @@ export default function CuratedHome({ navigation }) {
           </View>
           <View style={styles.composerCopy}>
             <Text style={styles.composerEyebrow}>
-              {todos[0] ? 'DRAFT IN PROGRESS' : 'SHARE A REVIEW'}
+              {todos[0] ? Strings.HOME_COMPOSER_DRAFT : Strings.HOME_COMPOSER_SHARE}
             </Text>
             <Text style={styles.composerTitle} numberOfLines={1}>
-              {todos[0]?.title || 'What did you test today?'}
+              {todos[0]?.title || Strings.HOME_COMPOSER_PROMPT}
             </Text>
           </View>
           <View style={styles.primarySmall}>
-            <Text style={styles.primarySmallText}>{todos[0] ? 'Continue' : 'Create'}</Text>
+            <Text style={styles.primarySmallText}>
+              {todos[0] ? Strings.HOME_COMPOSER_CONTINUE : Strings.HOME_COMPOSER_CREATE}
+            </Text>
           </View>
         </TouchableOpacity>
 

@@ -87,9 +87,10 @@ export default function AddressModal({ visible, initial, onSubmit, onClose }) {
       await saveSavedAddress(address);
       await onSubmit({ ...address, privacyAgree: true });
     } catch (e) {
+      setSaveError(Strings.ADDRESS_SAVE_ERROR);
+    } finally {
       submitLockRef.current = false;
       setIsSaving(false);
-      setSaveError(Strings.ADDRESS_SAVE_ERROR);
     }
   };
 
@@ -111,87 +112,89 @@ export default function AddressModal({ visible, initial, onSubmit, onClose }) {
         <View style={styles.sheet}>
           <View style={styles.grabBar} />
           <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-          <View style={styles.titleRow}>
-            <Text style={styles.title}>{Strings.ADDRESS_MODAL_TITLE}</Text>
-            <Badge tone="red" text={Strings.ADDRESS_48H_BADGE} />
-          </View>
-          <Text style={styles.deadline}>{Strings.ADDRESS_MODAL_DEADLINE}</Text>
+            <View style={styles.titleRow}>
+              <Text style={styles.title}>{Strings.ADDRESS_MODAL_TITLE}</Text>
+              <Badge tone="red" text={Strings.ADDRESS_48H_BADGE} />
+            </View>
+            <Text style={styles.deadline}>{Strings.ADDRESS_MODAL_DEADLINE}</Text>
 
-          <Text style={styles.label}>{Strings.ADDRESS_NAME}</Text>
-          <TextInput style={styles.input} value={name} onChangeText={setName} />
-          <Text style={styles.label}>{Strings.ADDRESS_LINE}</Text>
-          <TextInput style={styles.input} value={line} onChangeText={setLine} />
-          <View style={styles.row}>
-            <View style={styles.rowItem}>
-              <Text style={styles.label}>{Strings.ADDRESS_CITY}</Text>
-              <TextInput style={styles.input} value={city} onChangeText={setCity} />
+            <Text style={styles.label}>{Strings.ADDRESS_NAME}</Text>
+            <TextInput style={styles.input} value={name} onChangeText={setName} />
+            <Text style={styles.label}>{Strings.ADDRESS_LINE}</Text>
+            <TextInput style={styles.input} value={line} onChangeText={setLine} />
+            <View style={styles.row}>
+              <View style={styles.rowItem}>
+                <Text style={styles.label}>{Strings.ADDRESS_CITY}</Text>
+                <TextInput style={styles.input} value={city} onChangeText={setCity} />
+              </View>
+              <View style={styles.rowItem}>
+                <Text style={styles.label}>{Strings.ADDRESS_STATE}</Text>
+                <TextInput
+                  style={styles.input}
+                  value={stateProvince}
+                  onChangeText={setStateProvince}
+                />
+              </View>
             </View>
-            <View style={styles.rowItem}>
-              <Text style={styles.label}>{Strings.ADDRESS_STATE}</Text>
-              <TextInput
-                style={styles.input}
-                value={stateProvince}
-                onChangeText={setStateProvince}
-              />
+            <View style={styles.row}>
+              <View style={styles.rowItem}>
+                <Text style={styles.label}>{Strings.ADDRESS_POSTAL}</Text>
+                <TextInput
+                  style={styles.input}
+                  autoCapitalize="characters"
+                  value={postalCode}
+                  onChangeText={setPostalCode}
+                />
+              </View>
+              <View style={styles.rowItem}>
+                <Text style={styles.label}>{Strings.ADDRESS_PHONE}</Text>
+                <TextInput
+                  style={styles.input}
+                  keyboardType="phone-pad"
+                  value={phone}
+                  onChangeText={setPhone}
+                />
+              </View>
             </View>
-          </View>
-          <View style={styles.row}>
-            <View style={styles.rowItem}>
-              <Text style={styles.label}>{Strings.ADDRESS_POSTAL}</Text>
-              <TextInput
-                style={styles.input}
-                autoCapitalize="characters"
-                value={postalCode}
-                onChangeText={setPostalCode}
-              />
-            </View>
-            <View style={styles.rowItem}>
-              <Text style={styles.label}>{Strings.ADDRESS_PHONE}</Text>
-              <TextInput
-                style={styles.input}
-                keyboardType="phone-pad"
-                value={phone}
-                onChangeText={setPhone}
-              />
-            </View>
-          </View>
 
-          <TouchableOpacity
-            style={styles.consentRow}
-            onPress={() => setPrivacyAgree((v) => !v)}
-            activeOpacity={0.8}
-            accessibilityRole="checkbox"
-            accessibilityState={{ checked: privacyAgree }}
-            testID="address-privacy-consent"
-          >
-            <View style={[styles.checkbox, privacyAgree && styles.checkboxOn]}>
-              {privacyAgree ? <Text style={styles.checkmark}>✓</Text> : null}
-            </View>
-            <Text style={styles.consentText}>
-              {Strings.ADDRESS_PRIVACY_CONSENT}{' '}
-              <Text style={styles.consentLink} onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}>
-                {Strings.ADDRESS_PRIVACY_LINK}
-              </Text>
+            <TouchableOpacity
+              style={styles.consentRow}
+              onPress={() => setPrivacyAgree((v) => !v)}
+              activeOpacity={0.8}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: privacyAgree }}
+              testID="address-privacy-consent"
+            >
+              <View style={[styles.checkbox, privacyAgree && styles.checkboxOn]}>
+                {privacyAgree ? <Text style={styles.checkmark}>✓</Text> : null}
+              </View>
+              <Text style={styles.consentText}>{Strings.ADDRESS_PRIVACY_CONSENT}</Text>
+            </TouchableOpacity>
+            {/* 링크는 체크박스 터치 영역 밖에 둔다 — 안에 있으면 탭 한 번에 열림+토글이 같이 일어난다 */}
+            <Text
+              style={[styles.consentLink, styles.consentLinkRow]}
+              onPress={() => Linking.openURL(PRIVACY_POLICY_URL).catch(() => {})}
+            >
+              {Strings.ADDRESS_PRIVACY_LINK}
             </Text>
-          </TouchableOpacity>
 
-          {saveError ? <Text style={styles.saveError}>{saveError}</Text> : null}
-          <TouchableOpacity
-            style={[styles.submit, (!canSubmit || isSaving) && styles.submitDisabled]}
-            disabled={!canSubmit || isSaving}
-            onPress={submit}
-            activeOpacity={0.8}
-          >
-            {isSaving ? (
-              <ActivityIndicator color={COLORS.ON_AMBER} />
-            ) : (
-              <Text style={styles.submitText}>{Strings.ADDRESS_SAVE_AUTOFILL}</Text>
-            )}
-          </TouchableOpacity>
-          <Text style={styles.customsNote}>{Strings.ADDRESS_CUSTOMS_NOTE}</Text>
-          <TouchableOpacity style={styles.close} onPress={onClose} disabled={isSaving}>
-            <Text style={styles.closeText}>{Strings.CANCEL}</Text>
-          </TouchableOpacity>
+            {saveError ? <Text style={styles.saveError}>{saveError}</Text> : null}
+            <TouchableOpacity
+              style={[styles.submit, (!canSubmit || isSaving) && styles.submitDisabled]}
+              disabled={!canSubmit || isSaving}
+              onPress={submit}
+              activeOpacity={0.8}
+            >
+              {isSaving ? (
+                <ActivityIndicator color={COLORS.ON_AMBER} />
+              ) : (
+                <Text style={styles.submitText}>{Strings.ADDRESS_SAVE_AUTOFILL}</Text>
+              )}
+            </TouchableOpacity>
+            <Text style={styles.customsNote}>{Strings.ADDRESS_CUSTOMS_NOTE}</Text>
+            <TouchableOpacity style={styles.close} onPress={onClose} disabled={isSaving}>
+              <Text style={styles.closeText}>{Strings.CANCEL}</Text>
+            </TouchableOpacity>
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
@@ -200,6 +203,7 @@ export default function AddressModal({ visible, initial, onSubmit, onClose }) {
 }
 
 const styles = StyleSheet.create({
+  consentLinkRow: { marginTop: 4, marginBottom: 4 },
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },
   sheet: {
     backgroundColor: COLORS.SURFACE,
@@ -244,7 +248,13 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   submitDisabled: { opacity: 0.45 },
-  consentRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginTop: 2, marginBottom: 10 },
+  consentRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    marginTop: 2,
+    marginBottom: 10,
+  },
   checkbox: {
     width: 18,
     height: 18,

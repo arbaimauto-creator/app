@@ -1,6 +1,7 @@
 // 배송지 관리 (시안 화면 19) — 기본 배송지 1건 저장·수정·삭제.
 import React, { useCallback, useState } from 'react';
 import {
+  Alert,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -34,7 +35,9 @@ export default function AddressBook({ navigation }) {
   const [form, setForm] = useState(EMPTY_FORM);
 
   const reload = useCallback(() => {
-    getSavedAddress().then(setAddress);
+    getSavedAddress()
+      .then(setAddress)
+      .catch(() => setAddress(null));
   }, []);
 
   useFocusEffect(
@@ -48,16 +51,39 @@ export default function AddressBook({ navigation }) {
     setFormOpen(true);
   };
 
-  const onDelete = async () => {
-    await clearSavedAddress();
-    setFormOpen(false);
-    reload();
+  const onDelete = () => {
+    Alert.alert(Strings.ADDR_DELETE_CONFIRM_TITLE, Strings.ADDR_DELETE_CONFIRM_BODY, [
+      { text: Strings.CANCEL, style: 'cancel' },
+      {
+        text: Strings.ADDR_DELETE,
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await clearSavedAddress();
+            setFormOpen(false);
+            reload();
+          } catch (e) {
+            Alert.alert(Strings.RETRY_GUIDELINES);
+          }
+        },
+      },
+    ]);
   };
 
+  const REQUIRED = ['name', 'line', 'city', 'postalCode', 'phone'];
   const onSave = async () => {
-    await saveSavedAddress(form);
-    setFormOpen(false);
-    reload();
+    const trimmed = Object.fromEntries(Object.entries(form).map(([k, v]) => [k, (v || '').trim()]));
+    if (REQUIRED.some((k) => !trimmed[k])) {
+      Alert.alert(Strings.ADDR_FORM_INCOMPLETE);
+      return;
+    }
+    try {
+      await saveSavedAddress(trimmed);
+      setFormOpen(false);
+      reload();
+    } catch (e) {
+      Alert.alert(Strings.RETRY_GUIDELINES);
+    }
   };
 
   return (

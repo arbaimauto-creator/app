@@ -4,7 +4,7 @@ This app keeps the existing consumer and contract workflows while the UI is rene
 
 ## Core consumer flows — keep active
 
-- Sign-in, sign-up, invite gate, and creator onboarding
+- Sign-in, sign-up, and creator onboarding (the invite gate and referral codes are retired as of 2026-09-10 — code kept behind `INVITE_GATE`/`REFERRAL` flags, both `false`; ops issues sessions without a code)
 - Curated home, vertical review feed, search, notifications, and public profiles
 - Camera, video editing, product linking, and review upload
 - Campaign application, seeding missions, FGI, review-link submission, rewards, and withdrawal

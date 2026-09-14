@@ -3,9 +3,15 @@ const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 const defaultConfig = getDefaultConfig(__dirname);
 
 const config = {
+  ...(process.platform === 'win32' ? { maxWorkers: 2 } : {}),
   resolver: {
     unstable_enablePackageExports: true,
-    blockList: [/[\\/]android[\\/]build[\\/].*/, /[\\/]ios[\\/]build[\\/].*/],
+    blockList: [
+      /[\\/]android[\\/](?:app[\\/])?build[\\/].*/,
+      /[\\/]ios[\\/]build[\\/].*/,
+      /[\\/]\.native[\\/].*/,
+      /[\\/]\.cxx[\\/].*/,
+    ],
   },
   transformer: {
     unstable_allowRequireContext: true,

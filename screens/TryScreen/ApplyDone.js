@@ -1,7 +1,7 @@
 // 신청 완료 (시안 화면 11) — 신청 직후 타임라인 안내.
 import React from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Preference from 'react-native-default-preference';
+import { prefSetSafe } from '../../api/prefSafe';
 import T from '../../Components/Constants/DesignTokens';
 import { Card, Btn, NoteBox } from '../../Components/UI';
 import Strings from '../../Components/Strings';
@@ -9,14 +9,19 @@ import Strings from '../../Components/Strings';
 const { COLORS, FONT, TYPE } = T;
 
 export default function ApplyDone({ navigation, route }) {
-  const { campaignId, campaignTitle, applyMode, usedCount, limit, autoConfirmed } =
+  const { campaignId, campaignTitle, applyMode, usedCount, limit, autoConfirmed, uploadDays } =
     route.params || {};
 
   const openActivity = async () => {
     // 중첩 params({screen, params}) 전달은 커스텀 탭 내비게이터와 조합 시 무한
     // 재디스패치를 일으킨다(ActivityScreen 참조) — Preference 핸드오프로 대체.
+    // 저장소가 무응답이어도 CTA가 죽은 버튼이 되면 안 된다 — 타임아웃 레이스 + 항상 이동
     if (autoConfirmed) {
-      await Preference.set('pendingAddressFor', campaignId);
+      try {
+        await prefSetSafe('pendingAddressFor', campaignId);
+      } catch (e) {
+        // 핸드오프 실패 시 Activity 카드의 주소 CTA로 이어진다
+      }
     }
     navigation.navigate('MainBottom', { screen: 'Activity' });
   };
@@ -63,7 +68,7 @@ export default function ApplyDone({ navigation, route }) {
               done: autoConfirmed,
             },
             { label: Strings.APPLY_STEP_SHIP, done: false },
-            { label: Strings.APPLY_STEP_POST(14), done: false },
+            { label: Strings.APPLY_STEP_POST(uploadDays || 14), done: false },
           ].map((step, i, arr) => (
             <View key={step.label} style={styles.stepRow}>
               <View style={styles.stepRail}>
@@ -76,6 +81,8 @@ export default function ApplyDone({ navigation, route }) {
             </View>
           ))}
         </Card>
+
+        <Text style={styles.etaNote}>{Strings.REWARD_ETA_NOTE}</Text>
 
         <NoteBox tone="amber">
           <Text style={styles.noteText}>
@@ -102,6 +109,7 @@ export default function ApplyDone({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
+  etaNote: { ...TYPE.XS, textAlign: 'center', marginVertical: 4 },
   safe: { flex: 1, backgroundColor: COLORS.BG, paddingTop: T.TOP_INSET },
   header: {
     flexDirection: 'row',

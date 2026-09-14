@@ -49,6 +49,10 @@ export const DEV_MOCK_CAMPAIGN = {
     },
   ],
   status: 'open',
+  fgiEnabled: true,
+  estimatedMinutes: 25,
+  purpose:
+    'Round Lab wants first reactions to the new sun serum from creators outside Korea before the global launch.',
   isMock: true,
 };
 
@@ -62,7 +66,7 @@ const MOCK_CAMPAIGNS = [
     thumbnailUrl: 'https://picsum.photos/seed/greyd-sonplan/800/440',
     remaining: 12,
     total: 30,
-    deadline: '2026-08-20T23:59:59.000Z',
+    deadline: '2026-09-25T23:59:59.000Z',
     countries: ['KR', 'US', 'JP'],
     seedingQuotaPerCountry: { KR: 10, US: 10, JP: 10 },
     rewardPoint: 500, // 하위 호환 (base_points 표시용)
@@ -95,6 +99,9 @@ const MOCK_CAMPAIGNS = [
     applyMode: 'open',
     uploadDays: 14,
     contentGuide: ['젖은 모발 사용법', '비포/애프터'],
+    // 기획서 §2.1: FGI는 선택형 — 이 캠페인은 설문 없이 리뷰만
+    fgiEnabled: false,
+    estimatedMinutes: 15,
     status: 'closed',
   },
   {
@@ -105,7 +112,7 @@ const MOCK_CAMPAIGNS = [
     thumbnailUrl: 'https://picsum.photos/seed/greyd-org/800/440',
     remaining: 25,
     total: 40,
-    deadline: '2026-08-30T23:59:59.000Z',
+    deadline: '2026-10-05T23:59:59.000Z',
     countries: ['KR', 'US', 'JP', 'DE'],
     seedingQuotaPerCountry: { KR: 10, US: 10, JP: 10, DE: 10 },
     rewardPoint: 800,
