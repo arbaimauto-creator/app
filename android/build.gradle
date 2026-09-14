@@ -58,6 +58,17 @@ buildscript {
     }
 }
 
+// Avoid Windows Ninja MAX_PATH failures in deeply nested node_modules builds.
+subprojects { subproject ->
+    if (System.getProperty('os.name').toLowerCase().contains('windows') &&
+            subproject.name == 'react-native-reanimated') {
+        subproject.plugins.withId('com.android.library') {
+            subproject.android.externalNativeBuild.cmake.buildStagingDirectory =
+                rootProject.file('../.native/reanimated')
+        }
+    }
+}
+
 allprojects {
     repositories {
         mavenLocal()
