@@ -14,6 +14,10 @@
 #import <RNKakaoLogins.h>
 #import <React/RCTLinkingManager.h>
 
+@interface AppDelegate ()
+- (void)greydHideDiag;
+@end
+
 // AppCenter 제거 — 서비스 자체가 2025-03 종료되어 시작 시 등록·전송이 전부 실패한다.
 // 죽은 엔드포인트로의 시작 시 활동은 제거 대상 (재실행 흰 화면 조사 과정에서 정리).
 
@@ -40,37 +44,25 @@ static void GreydShowDiagOverlay(void) {
   NSString *navReady = [ud stringForKey:@"bootNavReadyAt"] ?: @"(없음)";
   NSURL *bundleURL = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
   NSMutableString *text = [NSMutableString string];
-  [text appendFormat:@"greyd 부팅 진단 (%@ build %@)
-",
+  [text appendFormat:@"greyd 부팅 진단 (%@ build %@)\n",
     [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"],
     [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"]];
-  [text appendFormat:@"main.jsbundle: %@
-", bundleURL ? @"있음" : @"없음"];
-  [text appendFormat:@"JS 시작 마커: %@
-내비 준비 마커: %@
-", jsStarted, navReady];
+  [text appendFormat:@"main.jsbundle: %@\n", bundleURL ? @"있음" : @"없음"];
+  [text appendFormat:@"JS 시작 마커: %@\n내비 준비 마커: %@\n", jsStarted, navReady];
   UIViewController *rootVC = [UIApplication sharedApplication].delegate.window.rootViewController;
   UIView *rootView = rootVC.view;
-  [text appendFormat:@"rootVC: %@
-rootView 자식 수: %lu, 배경: %@
-",
+  [text appendFormat:@"rootVC: %@\nrootView 자식 수: %lu, 배경: %@\n",
     NSStringFromClass([rootVC class]), (unsigned long)rootView.subviews.count, rootView.backgroundColor];
   UIView *first = rootView.subviews.firstObject;
   if (first) {
-    [text appendFormat:@"첫 자식: %@ frame=%@ 자식 %lu
-", NSStringFromClass([first class]),
+    [text appendFormat:@"첫 자식: %@ frame=%@ 자식 %lu\n", NSStringFromClass([first class]),
       NSStringFromCGRect(first.frame), (unsigned long)first.subviews.count];
   }
-  [text appendString:@"
-── RN 로그 ──
-"];
+  [text appendString:@"\n── RN 로그 ──\n"];
   @synchronized(gGreydBootLog) {
-    [text appendString:[gGreydBootLog componentsJoinedByString:@"
-"]];
+    [text appendString:[gGreydBootLog componentsJoinedByString:@"\n"]];
   }
-  [text appendString:@"
-
-이 화면을 캡처해 개발자에게 보내주세요. (위쪽 '닫기'로 닫힘)"];
+  [text appendString:@"\n\n이 화면을 캡처해 개발자에게 보내주세요. (위쪽 '닫기'로 닫힘)"];
 
   UIWindow *w = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
   w.windowLevel = UIWindowLevelAlert + 100;
