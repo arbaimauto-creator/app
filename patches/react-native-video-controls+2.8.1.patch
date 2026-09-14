@@ -1,5 +1,5 @@
 diff --git a/node_modules/react-native-video-controls/VideoPlayer.js b/node_modules/react-native-video-controls/VideoPlayer.js
-index 7d36b4b..510257f 100644
+index 7d36b4b..6857304 100644
 --- a/node_modules/react-native-video-controls/VideoPlayer.js
 +++ b/node_modules/react-native-video-controls/VideoPlayer.js
 @@ -106,7 +106,10 @@ export default class VideoPlayer extends Component {
@@ -81,16 +81,28 @@ index 7d36b4b..510257f 100644
        },
  
        /**
-@@ -841,6 +882,8 @@ export default class VideoPlayer extends Component {
+@@ -841,6 +882,20 @@ export default class VideoPlayer extends Component {
            state.seeking = false;
          }
          this.setState(state);
 +
 +        this.props.setIsSeekBarMoved(false)
++      },
++
++      // 부모(세로 페이저 등)가 제스처를 가져가면 Release 대신 Terminate가 온다.
++      // 여기서도 잠금을 풀지 않으면 페이저가 영원히 잠긴다 (greyd 2026-09-14).
++      onPanResponderTerminate: () => {
++        let state = this.state;
++        state.seeking = false;
++        state.scrubbing = false;
++        state.paused = state.originallyPaused;
++        this.setState(state);
++        this.setControlTimeout();
++        this.props.setIsSeekBarMoved(false)
        },
      });
    }
-@@ -1037,27 +1080,10 @@ export default class VideoPlayer extends Component {
+@@ -1037,27 +1092,10 @@ export default class VideoPlayer extends Component {
        : this.renderPlayPause();
  
      return (
@@ -122,7 +134,7 @@ index 7d36b4b..510257f 100644
      );
    }
  
-@@ -1081,7 +1107,7 @@ export default class VideoPlayer extends Component {
+@@ -1081,7 +1119,7 @@ export default class VideoPlayer extends Component {
                styles.seekbar.fill,
                {
                  width: this.state.seekerFillWidth,
@@ -131,7 +143,7 @@ index 7d36b4b..510257f 100644
                },
              ]}
              pointerEvents={'none'}
-@@ -1093,7 +1119,7 @@ export default class VideoPlayer extends Component {
+@@ -1093,7 +1131,7 @@ export default class VideoPlayer extends Component {
            <View
              style={[
                styles.seekbar.circle,
@@ -140,7 +152,7 @@ index 7d36b4b..510257f 100644
              ]}
              pointerEvents={'none'}
            />
-@@ -1199,7 +1225,7 @@ export default class VideoPlayer extends Component {
+@@ -1199,7 +1237,7 @@ export default class VideoPlayer extends Component {
        <TouchableWithoutFeedback
          onPress={this.events.onScreenTouch}
          style={[styles.player.container, this.styles.containerStyle]}>
@@ -149,7 +161,7 @@ index 7d36b4b..510257f 100644
            <Video
              {...this.props}
              ref={videoPlayer => (this.player.ref = videoPlayer)}
-@@ -1214,7 +1240,7 @@ export default class VideoPlayer extends Component {
+@@ -1214,7 +1252,7 @@ export default class VideoPlayer extends Component {
              onLoad={this.events.onLoad}
              onEnd={this.events.onEnd}
              onSeek={this.events.onSeek}
@@ -158,7 +170,7 @@ index 7d36b4b..510257f 100644
              source={this.props.source}
            />
            {this.renderError()}
-@@ -1360,13 +1386,20 @@ const styles = {
+@@ -1360,13 +1398,20 @@ const styles = {
        textAlign: 'center',
      },
      timer: {
@@ -181,7 +193,7 @@ index 7d36b4b..510257f 100644
      },
    }),
    volume: StyleSheet.create({
-@@ -1400,20 +1433,20 @@ const styles = {
+@@ -1400,20 +1445,20 @@ const styles = {
    }),
    seekbar: StyleSheet.create({
      container: {
@@ -210,7 +222,7 @@ index 7d36b4b..510257f 100644
        height: 1,
        width: '100%',
      },
-@@ -1422,14 +1455,20 @@ const styles = {
+@@ -1422,14 +1467,20 @@ const styles = {
        marginLeft: -7,
        height: 28,
        width: 28,

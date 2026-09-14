@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Animated,
-  LayoutAnimation,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -104,7 +103,10 @@ function ActionRail({ context }) {
       {/* 하트 대신 '저장' — 참고할 리뷰를 레퍼런스로 모아두고, 나중에 그걸 보고 만든
           리뷰를 원본에 연결한다(인용 계보). 인기 투표가 아니라 창작 재료 보관함. */}
       {FEATURES.REFERENCE_ARCHIVE ? (
-        <RailButton onPress={onPressSave} label={review.isBookmarked ? Strings.REF_SAVED : Strings.REF_SAVE}>
+        <RailButton
+          onPress={onPressSave}
+          label={review.isBookmarked ? Strings.REF_SAVED : Strings.REF_SAVE}
+        >
           <IconMaterialIcons
             name={review.isBookmarked ? 'bookmark' : 'bookmark-border'}
             size={30}
@@ -176,7 +178,6 @@ function ProductCard({ context }) {
             if (isGuestUser(context.props.route.params.logonUserId)) {
               return LogoutAlert(context.props);
             }
-            LayoutAnimation.easeInEaseOut();
             context.setState({ isShowPurchaseUIInReview: true });
           }}
         >
@@ -187,9 +188,33 @@ function ProductCard({ context }) {
   );
 }
 
+// 캡션 본문에서 마크다운 기호만 걷어낸다 (VideoRenderDetails.plainText와 같은 규칙)
+function plainText(s) {
+  if (!s) {
+    return '';
+  }
+  return String(s)
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/(^|\s)\*(\S(?:.*?\S)?)\*(?=\s|$)/g, '$1$2')
+    .replace(/(^|\s)__(.+?)__(?=\s|$)/g, '$1$2')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/^\s*[-*+]\s+/gm, '· ')
+    .trim();
+}
+
+// 펼쳤을 때 캡션 최대 줄 수 — 스크롤 없이 화면 절반 안에 들어오게(세로 제스처는 전부 페이저 몫)
+const CAPTION_LINES_COLLAPSED = 2;
+// LayoutAnimation은 쓰지 않는다 — Android에서 펼친 뒤 바깥 페이저가 터치를 못 받는 현상(2026-09-14 에뮬 실측)
+const CAPTION_LINES_EXPANDED = 12;
+
 function VideoOverlay({ context }) {
   const review = context.state.video;
   const title = (review.titleByCountry || review.title || '').trim();
+  // 인스타그램식: 리뷰 본문이 캡션에 함께 붙는다 — 이전엔 제목만 있고 본문은 별도 스크롤 상세에만 있었다
+  const body = plainText(review.descriptionByCountry || review.description);
+  const hashTags = Array.isArray(review.hashTags) ? [...new Set(review.hashTags)] : [];
+  const captionText = [title, body].filter(Boolean).join('\n');
+  const [captionTruncated, setCaptionTruncated] = useState(false);
   // 인스타그램 릴스식: 영상을 탭하면 오버레이가 통째로 사라졌다 다시 나타난다.
   // 캡션은 기본 2줄로 접고, 캡션만 따로 탭하면 펼쳐진다 (오버레이는 유지).
   const visible = context.state.isShowingVideoInfo !== false;
@@ -222,61 +247,112 @@ function VideoOverlay({ context }) {
         <ActionRail context={context} />
 
         <View style={styles.bottomContainer} pointerEvents="box-none">
-        {review.g6RatingCount > 0 ? (
-          <View style={{ alignSelf: 'flex-start', marginBottom: 8 }}>
-            <ReviewGradeBadgeView
-              g6RatingCount={review.g6RatingCount}
-              g6AvgRatingScore={review.g6AvgRatingScore}
-              type={review.myG6Rating ? 'review_on' : 'review_off'}
-            />
-          </View>
-        ) : null}
-
-        <View style={styles.authorRow}>
-          <Text
-            style={styles.authorName}
-            onPress={() => {
-              context.props.navigation.push('UserPage', {
-                pageOwnerUserId: review.author?.userId,
-                pageOwnerUserName: review.author?.name,
-                pageOwnerUserProfilePicUrl: review.author?.profilePicUrl,
-              });
-            }}
-          >
-            {`@${review.author?.name || ''}`}
-          </Text>
-          <Text style={styles.authorSubText}>{` ・ ${Strings.VIEW_COUNT(review.viewCount)}`}</Text>
-          {review?.isSponsored ? (
-            <Text style={[styles.authorSubText, { color: T.COLORS.AMBER }]}>
-              {` ・ ${Strings.SPONSORED}`}
-            </Text>
+          {review.g6RatingCount > 0 ? (
+            <View style={{ alignSelf: 'flex-start', marginBottom: 8 }}>
+              <ReviewGradeBadgeView
+                g6RatingCount={review.g6RatingCount}
+                g6AvgRatingScore={review.g6AvgRatingScore}
+                type={review.myG6Rating ? 'review_on' : 'review_off'}
+              />
+            </View>
           ) : null}
-        </View>
 
-          {title !== '' ? (
+          <View style={styles.authorRow}>
             <Text
-              style={styles.caption}
-              numberOfLines={captionExpanded ? 8 : 2}
+              style={styles.authorName}
               onPress={() => {
-                LayoutAnimation.easeInEaseOut();
-                setCaptionExpanded((v) => !v);
+                context.props.navigation.push('UserPage', {
+                  pageOwnerUserId: review.author?.userId,
+                  pageOwnerUserName: review.author?.name,
+                  pageOwnerUserProfilePicUrl: review.author?.profilePicUrl,
+                });
               }}
             >
-              {title}
+              {`@${review.author?.name || ''}`}
             </Text>
-          ) : null}
+            <Text
+              style={styles.authorSubText}
+            >{` ・ ${Strings.VIEW_COUNT(review.viewCount)}`}</Text>
+            {review?.isSponsored ? (
+              <Text style={[styles.authorSubText, { color: T.COLORS.AMBER }]}>
+                {` ・ ${Strings.SPONSORED}`}
+              </Text>
+            ) : null}
+          </View>
 
-          {/* 해시태그 줄 제거 — 상세(리뷰)에서 확인 가능. 오버레이는 3줄 이내 유지 */}
+          {captionText !== '' ? (
+            <View style={captionExpanded ? styles.captionExpandedBox : null}>
+              {/* Text.onPress는 Android에서 clickable TextView가 돼 세로 스와이프를 삼킨다(페이저가 못 받음).
+                  Touchable 래퍼는 페이저에 제스처를 넘기므로 캡션 탭은 이걸로 받는다. */}
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  setCaptionExpanded((v) => !v);
+                }}
+              >
+                <View>
+                  <Text
+                    style={styles.caption}
+                    numberOfLines={
+                      captionExpanded ? CAPTION_LINES_EXPANDED : CAPTION_LINES_COLLAPSED
+                    }
+                    onTextLayout={(e) => {
+                      // 접힌 상태에서 잘렸는지 — 잘린 경우에만 "더보기"를 붙인다
+                      if (!captionExpanded) {
+                        setCaptionTruncated(e.nativeEvent.lines.length > CAPTION_LINES_COLLAPSED);
+                      }
+                    }}
+                  >
+                    {captionText}
+                  </Text>
+                </View>
+              </TouchableWithoutFeedback>
+              {captionExpanded && hashTags.length > 0 ? (
+                <View style={styles.hashTagRow}>
+                  {hashTags.map((tag) => (
+                    <TouchableOpacity
+                      key={tag}
+                      activeOpacity={0.7}
+                      onPress={() =>
+                        context.props.navigation.push('Search', {
+                          hashTag: tag,
+                          isHashtagSearch: true,
+                        })
+                      }
+                    >
+                      <Text style={styles.hashTag}>{`#${tag}`}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              ) : null}
+              {captionExpanded || captionTruncated ? (
+                <TouchableOpacity
+                  onPress={() => {
+                    setCaptionExpanded((v) => !v);
+                  }}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 24 }}
+                  accessibilityRole="button"
+                  style={styles.captionToggleHit}
+                >
+                  <Text style={styles.captionToggle}>
+                    {captionExpanded ? Strings.CAPTION_LESS : Strings.CAPTION_MORE}
+                  </Text>
+                </TouchableOpacity>
+              ) : null}
+            </View>
+          ) : null}
 
           <ProductCard context={context} />
 
+          {/* 나머지 상세(댓글·문의·연관 리뷰)는 같은 쇼츠 위의 시트로 — 세로 스와이프는 계속 다음 쇼츠 */}
           <TouchableOpacity
             style={styles.detailHandle}
             activeOpacity={0.7}
             onPress={() => context.openDetails()}
+            accessibilityRole="button"
+            accessibilityLabel={Strings.VIDEO_DETAILS_OPEN}
           >
             <IconMaterialIcons name="keyboard-arrow-up" size={22} color="#fff" />
-            <Text style={styles.detailHandleText}>{Strings.REVIEW}</Text>
+            <Text style={styles.detailHandleText}>{Strings.VIDEO_DETAILS_OPEN}</Text>
           </TouchableOpacity>
         </View>
       </Animated.View>
@@ -357,6 +433,21 @@ const styles = StyleSheet.create({
   authorSubText: {
     color: 'rgba(255, 255, 255, 0.85)',
     fontSize: 13,
+    fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
+  },
+  // 펼친 캡션 — 영상 위에서 읽히도록 반투명 바탕
+  captionExpandedBox: {
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    marginTop: 4,
+  },
+  captionToggleHit: { alignSelf: 'flex-start', minHeight: 32, justifyContent: 'center' },
+  captionToggle: {
+    color: 'rgba(255, 255, 255, 0.75)',
+    fontSize: 13,
+    marginTop: 4,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
   },
   caption: {

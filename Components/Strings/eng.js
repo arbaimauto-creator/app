@@ -2348,4 +2348,10 @@ export default {
   MY_TRUST_GRACE: 'Completed in grace period',
   QNA_ENTER_ANSWER: 'Enter answer',
   QNA_ENTER_QUESTION: 'Enter question',
+  // ── Shorts UX (2026-09-14): caption more/less · details sheet ──
+  CAPTION_MORE: 'more',
+  CAPTION_LESS: 'less',
+  VIDEO_DETAILS_OPEN: 'Comments · Q&A · related reviews',
+  VIDEO_DETAILS_TITLE: 'Review details',
+  VIDEO_DETAILS_CLOSE: 'Close',
 };

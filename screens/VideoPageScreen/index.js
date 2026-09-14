@@ -41,9 +41,11 @@ import Divider from '../../Components/Views/Divider';
 import { Context } from '../../Contexts';
 import { changeReward, setTotalRevenue, setTotalReward } from '../../slices/user';
 import CommentModal from './CommentModal';
+import DetailsSheet from './DetailsSheet';
 import { setStatusColor } from './Header';
 import LinkedProduct from './LinkedProduct';
 import RenderVideoPlayer from './RenderVideoPlayer';
+import VideoRenderDetails from './VideoRenderDetails';
 
 const { UIManager } = NativeModules;
 if (Platform.OS === 'android') {
@@ -52,14 +54,10 @@ if (Platform.OS === 'android') {
   }
 }
 
-const VideoRenderDetails = React.lazy(() => import('./VideoRenderDetails'));
-
+// 상세는 시트가 열릴 때만 렌더되므로 React.lazy가 더는 필요 없다(2026-09-14).
+// lazy를 남기면 개발 모드에서 첫 시트 오픈 시 Metro가 모듈을 추가 번들하며 앱 전체를 리로드한다.
 function LazyVideoRenderDetails({ context, _useIsFocused }) {
-  return (
-    <React.Suspense fallback={<View />}>
-      <VideoRenderDetails context={context} useIsFocused={_useIsFocused} />
-    </React.Suspense>
-  );
+  return <VideoRenderDetails context={context} useIsFocused={_useIsFocused} />;
 }
 class VideoPageScreen extends React.PureComponent {
   videoPlayer;
@@ -113,6 +111,7 @@ class VideoPageScreen extends React.PureComponent {
       isShowingVideoControl: false,
       averageRating: 0,
       isShowingVideoInfo: true,
+      isDetailsOpen: false, // 리뷰 상세 시트(댓글·문의·연관 리뷰) — 2026-09-14
       screenHeight: this.screenHeightNormalScreen,
       videoWidth: 0,
       videoHeight: 0,
@@ -740,9 +739,6 @@ class VideoPageScreen extends React.PureComponent {
     }
   }
 
-
-
-
   menuShareToExport = function () {
     const { videoId, title, description, thumbnailUrl, titleByCountry, descriptionByCountry } =
       this.state.video;
@@ -762,7 +758,6 @@ class VideoPageScreen extends React.PureComponent {
       shareLink({ url, message, description });
     });
   };
-
 
   menuEditVideoClicked = function () {
     const { video } = this.state;
@@ -1561,12 +1556,18 @@ class VideoPageScreen extends React.PureComponent {
     this.props.route.params.setIsDetailAtTop?.(isAtTop);
   };
 
-  // 오버레이의 핸들/캡션 탭 → 영상 아래 리뷰 상세로 스크롤 (틱톡의 "위로 스와이프" 대체 진입점)
+  // 오버레이의 "댓글·문의·연관 리뷰 보기" → 영상 위에 상세 시트를 띄운다 (2026-09-14).
+  // 이전엔 영상 아래로 스크롤해 들어갔는데, 그 상태에선 쇼츠 페이저가 잠겨 화면이 둘로 느껴졌다.
   openDetails = () => {
-    this._detailList?.scrollToOffset({
-      offset: this.getPlayerStyle().height,
-      animated: true,
-    });
+    if (this._isMounted) {
+      this.setState({ isDetailsOpen: true });
+    }
+  };
+
+  closeDetails = () => {
+    if (this._isMounted) {
+      this.setState({ isDetailsOpen: false });
+    }
   };
 
   onDetailTouchStart = () => {
@@ -1607,7 +1608,8 @@ class VideoPageScreen extends React.PureComponent {
               showsVerticalScrollIndicator={false}
               ListHeaderComponentStyle={styles.container}
               initialNumToRender={5}
-              // pagingEnabled={true}
+              // 페이지 안 세로 스크롤 금지 — 세로 제스처는 전부 바깥 쇼츠 페이저의 것 (2026-09-14)
+              scrollEnabled={false}
               legacyImplementation={false}
               disableVirtualization={true}
               maxToRenderPerBatch={5}
@@ -1649,19 +1651,12 @@ class VideoPageScreen extends React.PureComponent {
                 this.reportDetailScrollPosition(scrollY);
               }}
               scrollEventThrottle={16}
-              ListHeaderComponent={
-                <>
-                  <RenderVideoPlayer context={this} />
-                  <View
-                    onTouchStart={this.onDetailTouchStart}
-                    onTouchEnd={this.onDetailTouchEnd}
-                    onTouchCancel={this.onDetailTouchEnd}
-                  >
-                    <LazyVideoRenderDetails context={this} _useIsFocused={useIsFocused} />
-                  </View>
-                </>
-              }
+              ListHeaderComponent={<RenderVideoPlayer context={this} />}
             />
+            {/* 리뷰 상세(댓글·문의·연관 리뷰·상품 리뷰)는 같은 쇼츠 위의 시트로 — 닫으면 그 자리 */}
+            <DetailsSheet visible={this.state.isDetailsOpen} onClose={this.closeDetails}>
+              <LazyVideoRenderDetails context={this} _useIsFocused={useIsFocused} />
+            </DetailsSheet>
             <CommentModal context={this} />
             <ReportModal
               visible={this.state.isInvalidContents}
@@ -1996,9 +1991,7 @@ function PurchasePopup({ context }) {
                 justifyContent: 'center',
               }}
             >
-              <Text style={{ color: T.COLORS.INK, fontSize: 13 }}>
-                {context.state.buyNumber}
-              </Text>
+              <Text style={{ color: T.COLORS.INK, fontSize: 13 }}>{context.state.buyNumber}</Text>
             </View>
             <Button
               containerStyle={{
@@ -2350,8 +2343,8 @@ export const styles = StyleSheet.create({
   /* --------------------------------------------- */
 
   slidePagination: {
-    // 상세를 위로 올리면 썸네일 줄이 상태바(시계·배터리)와 겹쳤다
-    marginTop: 8 + T.TOP_INSET,
+    // 상세는 이제 시트 안에 뜨므로(2026-09-14) 상태바 여백이 필요 없다
+    marginTop: 8,
     marginLeft: 24,
     alignSelf: 'flex-start',
     justifyContent: 'flex-start',

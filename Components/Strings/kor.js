@@ -2263,4 +2263,10 @@ export default {
   MY_TRUST_GRACE: '유예 기간 완주',
   QNA_ENTER_ANSWER: '답변 입력',
   QNA_ENTER_QUESTION: '질문 입력',
+  // ── 쇼츠 UX(2026-09-14): 캡션 더보기/접기 · 상세 시트 ──
+  CAPTION_MORE: '더보기',
+  CAPTION_LESS: '접기',
+  VIDEO_DETAILS_OPEN: '댓글·문의·연관 리뷰 보기',
+  VIDEO_DETAILS_TITLE: '리뷰 상세',
+  VIDEO_DETAILS_CLOSE: '닫기',
 };
