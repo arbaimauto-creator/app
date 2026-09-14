@@ -45,6 +45,9 @@ jobs:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           # eas-build-pre-install 훅(generate-ops-config.js)이 요구
           GREYD_APP_MOBILE_KEY: ${{ secrets.GREYD_APP_MOBILE_KEY }}
+          # 구아키텍처 강제(2026-09-15) — RN 0.76은 미지정 시 New Architecture가 기본값이라 iOS만 새 아키텍처로
+          # 컴파일돼 TestFlight 흰 화면. Podfile·eas.json에도 같은 값이 있지만 로컬 빌드 셸에도 명시한다.
+          RCT_NEW_ARCH_ENABLED: "0"
         run: eas build --platform ios --profile production --local --non-interactive --output ${{ github.workspace }}/greyd.ipa
 
       - name: Submit to TestFlight

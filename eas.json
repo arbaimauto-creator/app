@@ -7,7 +7,8 @@
     "production": {
       "autoIncrement": true,
       "env": {
-        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true",
+        "RCT_NEW_ARCH_ENABLED": "0"
       },
       "ios": {
         "resourceClass": "m-medium",
@@ -21,7 +22,8 @@
         "image": "latest"
       },
       "env": {
-        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true",
+        "RCT_NEW_ARCH_ENABLED": "0"
       },
       "android": {
         "buildType": "apk",

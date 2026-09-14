@@ -1,3 +1,7 @@
+# 구아키텍처 강제 (2026-09-15) — RN 0.76은 이 환경변수가 없으면 New Architecture(bridgeless)가 기본값이라
+# iOS만 새 아키텍처로 컴파일돼 TestFlight가 흰 화면이었다(Android는 gradle newArchEnabled=false). Info.plist의
+# RCTNewArchEnabled 키는 0.76이 읽지 않는다. 양 플랫폼을 구아키텍처로 일치시킨다.
+ENV['RCT_NEW_ARCH_ENABLED'] = '0'
 # Override Firebase SDK Version
 $FirebaseSDKVersion = '10.29.0'
 
@@ -61,8 +65,8 @@ target 'greyd' do
   use_react_native!(
     :path => config[:reactNativePath],
     :hermes_enabled => true,
-    :fabric_enabled => flags[:fabric_enabled],
-		:new_arch_enabled => flags[:new_arch_enabled],
+    :fabric_enabled => false,
+    :new_arch_enabled => false,
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 

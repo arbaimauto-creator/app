@@ -13,11 +13,12 @@ import HomeNavigator from '../navigator/HomeNavigator';
 import TryNavigator from '../navigator/TryNavigator';
 import ActivityNavigator from '../navigator/ActivityNavigator';
 import { tabBarIcon, tabBarLabel } from './renderTabBar';
-import { Platform } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'react-native';
 import Constants from '../../../Components/Constants';
 import T from '../../../Components/Constants/DesignTokens';
 import FEATURES from '../../../Components/Constants/Features';
+import { prefGetSafe } from '../../../api/prefSafe';
 import { useSelector } from 'react-redux';
 import Preference from 'react-native-default-preference';
 import BrandDashboard from '../../../screens/BrandScreen/BrandDashboard';
@@ -51,12 +52,17 @@ function BottomTabNavigator({ route, navigation }) {
       setInitialBottomTabRouteName: setInitialRoute,
     });
 
-    Preference.get('inviteRole')
+    // iOS 릴리스에서 Preference가 응답하지 않는 사례가 있어(api/prefSafe 주석) 타임아웃 레이스로 감싼다.
+    // 이전엔 무응답이면 아래 null 렌더가 영구히 남아 자동 로그인 직후 빈 화면이 됐다(2026-09-15).
+    prefGetSafe('inviteRole')
       .then((role) => setInviteRole(role || 'influencer'))
       .catch(() => setInviteRole('influencer'));
 
-    messaging()
-      .getInitialNotification()
+    // 초기 푸시 조회도 상한을 둔다 — 네이티브 응답이 없으면 5초 뒤 그냥 진행
+    Promise.race([
+      messaging().getInitialNotification(),
+      new Promise((resolve) => setTimeout(() => resolve(null), 5000)),
+    ])
       .then((remoteMessage) => {
         // data 없는(notification-only) 푸시로 실행되면 type이 없다 — 널 가드 없으면
         // 예외로 setLoading(false)가 안 불려 앱이 빈 화면에 영구 정지한다.
@@ -73,7 +79,12 @@ function BottomTabNavigator({ route, navigation }) {
   }, [navigation]);
 
   if (loading || inviteRole == null) {
-    return null;
+    // 빈 화면 금지 — 스피너라도 그린다 (root.js BootFallback과 동일 배경)
+    return (
+      <View style={styles.bootFallback}>
+        <ActivityIndicator size="large" color={T.COLORS.AMBER} />
+      </View>
+    );
   }
 
   const initialParams = {
@@ -208,3 +219,12 @@ function BottomTabNavigator({ route, navigation }) {
 }
 
 export default BottomTabNavigator;
+
+const styles = StyleSheet.create({
+  bootFallback: {
+    flex: 1,
+    backgroundColor: T.COLORS.BG,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
