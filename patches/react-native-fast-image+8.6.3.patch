@@ -88,3 +88,36 @@ index 86ca00d..44f5239 100644
          
          if (imageSource.isResource()) {
              // Every local resource (drawable) in Android has its own unique numeric id, which are
+diff --git a/node_modules/react-native-fast-image/ios/FastImage/FFFastImageView.m b/node_modules/react-native-fast-image/ios/FastImage/FFFastImageView.m
+--- a/node_modules/react-native-fast-image/ios/FastImage/FFFastImageView.m
++++ b/node_modules/react-native-fast-image/ios/FastImage/FFFastImageView.m
+@@ -72,13 +72,23 @@
+ }
+ 
+ - (UIImage*) makeImage: (UIImage*)image withTint: (UIColor*)color {
++    // iOS 26+: UIGraphicsBeginImageContextWithOptions throws on a zero-size context (it used to
++    // return nil silently). A nil/empty image reaching this path (e.g. tintColor set before the
++    // image loads, or a failed load) raised inside a React Native UI block and left the first
++    // screen blank. Guard and fall back to the untinted image.
++    if (image == nil || image.size.width <= 0 || image.size.height <= 0) {
++        return image;
++    }
+     UIImage* newImage = [image imageWithRenderingMode: UIImageRenderingModeAlwaysTemplate];
+-    UIGraphicsBeginImageContextWithOptions(image.size, NO, newImage.scale);
+-    [color set];
+-    [newImage drawInRect: CGRectMake(0, 0, image.size.width, newImage.size.height)];
+-    newImage = UIGraphicsGetImageFromCurrentImageContext();
+-    UIGraphicsEndImageContext();
+-    return newImage;
++    UIGraphicsImageRendererFormat* format = [UIGraphicsImageRendererFormat defaultFormat];
++    format.scale = newImage.scale;
++    format.opaque = NO;
++    UIGraphicsImageRenderer* renderer = [[UIGraphicsImageRenderer alloc] initWithSize: image.size format: format];
++    UIImage* tinted = [renderer imageWithActions: ^(UIGraphicsImageRendererContext* _Nonnull ctx) {
++        [color set];
++        [newImage drawInRect: CGRectMake(0, 0, image.size.width, image.size.height)];
++    }];
++    return tinted ?: image;
+ }
+ 
+ - (void) setImage: (UIImage*)image {

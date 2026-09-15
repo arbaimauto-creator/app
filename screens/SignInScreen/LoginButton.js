@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import { Image, Platform, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import Strings, { getLanguage } from '../../Components/Strings';
 import Constants from '../../Components/Constants';
@@ -20,10 +20,10 @@ const LoginButtons = (props) => {
   const FacebookLoginButton = (
     <TouchableWithoutFeedback key={'FacebookLoginButton'} onPress={() => facebookLogin()}>
       <View style={styles.fbContainer}>
-        <FastImage
+        {/* iOS 26: FastImage tintColor가 크기 0 이미지에서 예외를 던져 첫 화면이 비었다 — 틴트는 RN Image로 (2026-09-15) */}
+        <Image
           source={require('../../Resources/img/icLoginFacebook30.png')}
           style={styles.fbLogo}
-          tintColor={'#1877F2'}
         />
         <Text style={styles.fbLoginText}>{Strings.SIGN_IN_WITH_FACEBOOK}</Text>
       </View>

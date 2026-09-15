@@ -113,8 +113,18 @@ static void GreydShowDiagOverlay(void) {
     prevLog(level, source, fileName, lineNumber, message);
   });
   GreydAppendBootLog(@"[I] didFinishLaunching");
+  // 오류([E] 로그)가 있거나 내비게이션 준비 마커가 없을 때만 띄운다 — 정상 부팅에선 아무것도 안 보인다 (2026-09-15)
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-    GreydShowDiagOverlay();
+    BOOL hadError = NO;
+    @synchronized(gGreydBootLog) {
+      for (NSString *line in gGreydBootLog) {
+        if ([line hasPrefix:@"[E"]) { hadError = YES; break; }
+      }
+    }
+    NSString *navReady = [[NSUserDefaults standardUserDefaults] stringForKey:@"bootNavReadyAt"];
+    if (hadError || navReady == nil) {
+      GreydShowDiagOverlay();
+    }
   });
 
   // Define UNUserNotificationCenter

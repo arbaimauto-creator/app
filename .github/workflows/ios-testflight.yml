@@ -50,11 +50,6 @@ jobs:
           RCT_NEW_ARCH_ENABLED: "0"
         run: eas build --platform ios --profile production --local --non-interactive --output ${{ github.workspace }}/greyd.ipa
 
-      - name: Submit to TestFlight
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: eas submit --platform ios --profile production --path ${{ github.workspace }}/greyd.ipa --non-interactive
-
       - name: Upload ipa artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -62,3 +57,8 @@ jobs:
           name: greyd-ipa
           path: greyd.ipa
           if-no-files-found: ignore
+
+      - name: Submit to TestFlight
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: eas submit --platform ios --profile production --path ${{ github.workspace }}/greyd.ipa --non-interactive
