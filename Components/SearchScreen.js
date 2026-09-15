@@ -1,6 +1,14 @@
 import { useScrollToTop } from '@react-navigation/native';
 import React from 'react';
-import { Alert, Platform, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Keyboard,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { SearchBar } from 'react-native-elements';
 import FastImage from 'react-native-fast-image';
 import APIprovider from './APIprovider';
@@ -19,12 +27,13 @@ export default function SearchScreenWrapper(props) {
   return <SearchScreen {...props} scrollRef={ref} />;
 }
 
-class SearchScreen extends React.Component {
+export class SearchScreen extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
       typingSearchKeyword: '',
+      searching: false,
       searchKeyword: '',
       filterType: '',
       searchResultData: null,
@@ -44,7 +53,8 @@ class SearchScreen extends React.Component {
   }
 
   componentDidMount() {
-    const { hashTag, isHashtagSearch } = this.props.route.params;
+    this.mounted = true;
+    const { hashTag, isHashtagSearch } = this.props.route?.params || {};
     if (hashTag) {
       this.setState({ typingSearchKeyword: '#' + hashTag }, () => {
         if (isHashtagSearch) {
@@ -55,43 +65,60 @@ class SearchScreen extends React.Component {
   }
 
   async onChangeText(typingSearchKeyword) {
-    this.setState({ typingSearchKeyword });
+    this.requestId = (this.requestId || 0) + 1;
+    this.setState({
+      typingSearchKeyword,
+      searching: false,
+      ...(typingSearchKeyword.trim() ? {} : { searchResultData: null, searchKeyword: '' }),
+    });
+  }
+
+  componentWillUnmount() {
+    this.mounted = false;
+    this.requestId = (this.requestId || 0) + 1;
   }
 
   async onSearchSubmit() {
-    const { typingSearchKeyword } = this.state;
-    if (typingSearchKeyword.trim() !== '') {
-      // Call the search API only when the search is submitted
-      if (typingSearchKeyword.startsWith('#')) {
-        const result = await APIprovider.findVideoByHashTag(typingSearchKeyword.slice(1));
-        this.getSearchResultCallback(result);
-      } else {
-        this.getSearchResult(typingSearchKeyword);
+    const keyword = this.state.typingSearchKeyword.trim();
+    if (!keyword || keyword === '#' || this.state.searching) {
+      return;
+    }
+    const requestId = (this.requestId = (this.requestId || 0) + 1);
+    Keyboard.dismiss();
+    this.setState({ searching: true });
+    try {
+      const data = keyword.startsWith('#')
+        ? await APIprovider.findVideoByHashTag(keyword.slice(1).trim())
+        : await APIprovider.getSearchResult(keyword);
+      if (!this.mounted || requestId !== this.requestId) {
+        return;
+      }
+      if (APIprovider.isFailure(data)) {
+        throw data;
+      }
+      this.setState({ searchResultData: data, searchKeyword: keyword });
+    } catch (err) {
+      if (this.mounted && requestId === this.requestId) {
+        Alert.alert(Strings.FAILED_TO_LOAD_DATA, err?.errorMsg || '', [{ text: Strings.OK }]);
+      }
+    } finally {
+      if (this.mounted && requestId === this.requestId) {
+        this.setState({ searching: false });
       }
     }
   }
 
-  getSearchResult(typingSearchKeyword) {
-    APIprovider.getSearchResult(typingSearchKeyword)
-      .then(this.getSearchResultCallback.bind(this))
-      .catch((err) => {
-        Alert.alert(
-          Strings.FAILED_TO_LOAD_DATA,
-          err.errorMsg ? err.errorMsg : '',
-          [{ text: Strings.OK }],
-          { cancelable: true },
-        );
-      });
-  }
-
-  getSearchResultCallback(data) {
-    this.setState({
-      searchResultData: data,
-      searchKeyword: this.state.typingSearchKeyword,
-    });
-  }
-
   renderSearchResult() {
+    if (this.state.searching) {
+      return (
+        <ActivityIndicator
+          accessibilityLabel={Strings.SEARCH_LOADING}
+          style={{ marginTop: 48 }}
+          size="large"
+          color={COLORS.AMBER}
+        />
+      );
+    }
     if (this.state.searchResultData !== null) {
       return (
         <SearchResultTabView
@@ -101,7 +128,7 @@ class SearchScreen extends React.Component {
           scrollRef={this.props.scrollRef}
         />
       );
-    } else if (!this.props.route.params.isHashtagSearch) {
+    } else if (!this.props.route?.params?.isHashtagSearch) {
       return (
         <View style={styles.gridContainer}>
           <InstaGrid columns={3} navigation={this.props.navigation} />
@@ -131,6 +158,9 @@ class SearchScreen extends React.Component {
           <SearchBar
             {...Constants.SEARCH_BAR_COMMON_PROPS}
             showCancel={false}
+            returnKeyType="search"
+            autoCorrect={false}
+            accessibilityLabel={Strings.SEARCH_HASH_TAG_PLACE_HOLDER}
             containerStyle={styles.searchBarContainer}
             inputContainerStyle={styles.searchBarInputContainer}
             inputStyle={styles.searchBarInput}

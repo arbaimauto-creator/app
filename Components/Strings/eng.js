@@ -1,4 +1,8 @@
 export default {
+  FEED_DEMO_NOTICE: 'Preview reviews · Sample content, not real user reviews.',
+  FEED_RETRY: 'Try again',
+  SEARCH_LOADING: 'Loading search results',
+  NAV_BACK: 'Go back',
   TEST: 'test',
   EDIT_PRODUCT: 'Edit Product',
   REGISTER_PRODUCT: 'Register Product',

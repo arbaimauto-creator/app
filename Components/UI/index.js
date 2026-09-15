@@ -1,6 +1,6 @@
 // greyd 시안 공용 컴포넌트 — DesignTokens 기반. 화면 리스타일 시 이 컴포넌트를 우선 사용한다.
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { ActivityIndicator, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import T from '../Constants/DesignTokens';
 
 const { COLORS, RADIUS, TYPE } = T;
@@ -15,7 +15,18 @@ export function Card({ style, children, ...rest }) {
 }
 
 // CTA 버튼 — variant: 'primary'(앰버) | 'ghost'(테두리) | 'dark'
-export function Btn({ title, onPress, variant = 'primary', small, disabled, style, textStyle }) {
+export function Btn({
+  title,
+  onPress,
+  variant = 'primary',
+  small,
+  disabled,
+  loading = false,
+  style,
+  textStyle,
+  accessibilityLabel,
+  ...rest
+}) {
   const base = [
     styles.btn,
     variant === 'ghost' && styles.btnGhost,
@@ -28,11 +39,23 @@ export function Btn({ title, onPress, variant = 'primary', small, disabled, styl
     styles.btnText,
     variant === 'ghost' && styles.btnTextGhost,
     variant === 'dark' && { color: '#FFFFFF' },
-    small && { fontSize: 11.5 },
+    small && { fontSize: 13 },
     textStyle,
   ];
   return (
-    <TouchableOpacity style={base} onPress={onPress} disabled={disabled} activeOpacity={0.8}>
+    <TouchableOpacity
+      {...rest}
+      style={base}
+      onPress={onPress}
+      disabled={disabled || loading}
+      activeOpacity={0.8}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel || title}
+      accessibilityState={{ disabled: !!disabled || loading, busy: loading }}
+    >
+      {loading && (
+        <ActivityIndicator size="small" color={variant === 'dark' ? '#FFFFFF' : COLORS.INK} />
+      )}
       <Text style={text}>{title}</Text>
     </TouchableOpacity>
   );
@@ -41,14 +64,7 @@ export function Btn({ title, onPress, variant = 'primary', small, disabled, styl
 // 브랜드 워드마크 — "greyd" + 앰버 점. 로고 텍스트는 반드시 이 컴포넌트로 (점 누락 방지).
 export function Wordmark({ size = 30, style, center }) {
   return (
-    <Text
-      style={[
-        styles.wordmark,
-        { fontSize: size },
-        center && { textAlign: 'center' },
-        style,
-      ]}
-    >
+    <Text style={[styles.wordmark, { fontSize: size }, center && { textAlign: 'center' }, style]}>
       greyd
       <Text style={styles.wordmarkDot}>.</Text>
     </Text>
@@ -101,9 +117,12 @@ export function Chips({ items, selected, onSelect, style }) {
         return (
           <TouchableOpacity
             key={it.key}
+            accessibilityRole="button"
+            accessibilityState={{ selected: on }}
             style={[styles.chip, on && styles.chipOn]}
             onPress={() => onSelect && onSelect(it.key)}
-            activeOpacity={0.7}>
+            activeOpacity={0.7}
+          >
             <Text style={[styles.chipText, on && styles.chipTextOn]}>{it.label}</Text>
           </TouchableOpacity>
         );
@@ -116,7 +135,11 @@ export function Chips({ items, selected, onSelect, style }) {
 export function ProgressBar({ ratio, height = 7, style }) {
   const w = Math.max(0, Math.min(1, ratio || 0)) * 100;
   return (
-    <View style={[styles.prog, { height, borderRadius: height }, style]}>
+    <View
+      accessibilityRole="progressbar"
+      accessibilityValue={{ min: 0, max: 100, now: Math.round(w) }}
+      style={[styles.prog, { height, borderRadius: height }, style]}
+    >
       <View style={[styles.progFill, { width: `${w}%`, borderRadius: height }]} />
     </View>
   );
@@ -127,11 +150,8 @@ export function NoteBox({ text, tone = 'amber', style, children }) {
   const amber = tone === 'amber';
   return (
     <View
-      style={[
-        styles.note,
-        { backgroundColor: amber ? COLORS.AMBER_SOFT : COLORS.RED_SOFT },
-        style,
-      ]}>
+      style={[styles.note, { backgroundColor: amber ? COLORS.AMBER_SOFT : COLORS.RED_SOFT }, style]}
+    >
       {children || (
         <Text style={[styles.noteText, { color: amber ? COLORS.AMBER_DEEP : COLORS.RED }]}>
           {text}
@@ -150,6 +170,9 @@ const styles = StyleSheet.create({
     ...T.SHADOW_CARD,
   },
   btn: {
+    minHeight: 48,
+    flexDirection: 'row',
+    gap: 8,
     backgroundColor: COLORS.AMBER,
     borderRadius: RADIUS.BTN,
     paddingVertical: 12,
@@ -188,6 +211,8 @@ const styles = StyleSheet.create({
   pillText: { fontFamily: T.FONT.ExtraBold, fontSize: 9.5 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   chip: {
+    minHeight: 44,
+    justifyContent: 'center',
     borderWidth: 1.5,
     borderColor: COLORS.LINE,
     backgroundColor: COLORS.SURFACE,

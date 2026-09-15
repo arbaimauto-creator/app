@@ -1,4 +1,8 @@
 export default {
+  FEED_DEMO_NOTICE: '미리보기 리뷰 · 실제 사용자 리뷰가 아닌 예시 콘텐츠입니다.',
+  FEED_RETRY: '다시 불러오기',
+  SEARCH_LOADING: '검색 결과를 불러오는 중',
+  NAV_BACK: '뒤로 가기',
   TEST: '테스트',
   EDIT_PRODUCT: '상품 정보 수정',
   REGISTER_PRODUCT: '상품 등록',

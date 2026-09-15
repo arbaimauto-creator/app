@@ -26,17 +26,16 @@ import BrandReview from '../../../screens/BrandScreen/BrandReview';
 import BrandMy from '../../../screens/BrandScreen/BrandMy';
 import MyScreen from '../../../screens/MyScreen';
 
+const Stack = createStackNavigator();
+const Tab = createNavigatorFactory(MyMaterialBottomTabNavigator)();
+
 function BottomTabNavigator({ route, navigation }) {
   const [loading, setLoading] = useState(true);
   const [initialRoute, setInitialRoute] = useState('Home');
-  const [logonUserIsSeller, setLogonUserIsSeller] = useState(route.params.logonUserIsSeller);
+  const [logonUserIsSeller, setLogonUserIsSeller] = useState(route.params?.logonUserIsSeller);
   // v2.1 D9: 역할별 탭 셸 — brand는 [대시보드·리뷰 평가·마이] 3탭
   const [inviteRole, setInviteRole] = useState(null);
   const insets = useSafeAreaInsets();
-
-  const Stack = createStackNavigator();
-  const TabNavigationCreator = createNavigatorFactory(MyMaterialBottomTabNavigator);
-  const Tab = TabNavigationCreator();
 
   const { screenType } = useSelector((state) => state.common.mainScreen);
 

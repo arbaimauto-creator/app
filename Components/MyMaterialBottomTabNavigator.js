@@ -50,14 +50,16 @@ export default function MyMaterialBottomTabNavigator({
   const focusedRoute = state.routes[state.index];
   const focusedDescriptor = descriptors[focusedRoute.key];
   const focusedOptions = focusedDescriptor.options;
-  if (focusedOptions.tabBarVisible === false) {
-    rest.barStyle.height = 0;
-  }
 
   return (
     <NavigationHelpersContext.Provider value={navigation}>
       <BottomNavigation
         {...rest}
+        barStyle={[
+          rest.barStyle,
+          tabBarStyle,
+          focusedOptions.tabBarVisible === false && { display: 'none' },
+        ]}
         theme={theme}
         navigationState={state}
         onIndexChange={(index) => {
@@ -65,7 +67,7 @@ export default function MyMaterialBottomTabNavigator({
             ...TabActions.jumpTo(state.routes[index].name),
             target: state.key,
           });
-          rest.onIndexChange(index);
+          rest.onIndexChange?.(index);
         }}
         renderScene={({ route }) => descriptors[route.key].render()}
         renderIcon={({ route, focused, color }) => {
@@ -97,7 +99,7 @@ export default function MyMaterialBottomTabNavigator({
             return options.tabBarLabel({ focused, color });
           } else {
             return (
-              <Text>
+              <Text style={{ color, fontSize: 12, fontWeight: focused ? '700' : '500' }}>
                 {options.tabBarLabel !== undefined
                   ? options.tabBarLabel
                   : options.title !== undefined

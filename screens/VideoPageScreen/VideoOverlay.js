@@ -1,5 +1,5 @@
 import T from '../../Components/Constants/DesignTokens';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Animated,
@@ -9,6 +9,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import FastImage from 'react-native-fast-image';
 import IconMaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import APIprovider from '../../Components/APIprovider';
@@ -215,6 +216,33 @@ function VideoOverlay({ context }) {
   const hashTags = Array.isArray(review.hashTags) ? [...new Set(review.hashTags)] : [];
   const captionText = [title, body].filter(Boolean).join('\n');
   const [captionTruncated, setCaptionTruncated] = useState(false);
+  // 핸들을 위로 쓸어 올리면 시트가 열린다(탭도 그대로). 이 작은 영역에서만 세로 제스처를 가져가므로
+  // 나머지 화면의 세로 스와이프(다음 쇼츠)는 영향 없다.
+  const [handlePressed, setHandlePressed] = useState(false);
+  // 핸들의 위로 쓸기는 네이티브 제스처(RNGH)로 잡는다. JS PanResponder는 응답자 협상이 브리지를 거치는 사이
+  // 네이티브 세로 페이저(ViewPager2)가 먼저 터치를 가로채 다음 쇼츠로 넘어가 버렸다 (에뮬레이터 재현, 9/15).
+  // RNGH 핸들러는 활성화되는 순간 네이티브 뷰의 터치를 취소시키므로 이 작은 영역에서만 페이저를 이긴다.
+  const openGesture = useMemo(() => {
+    const open = () => context.openDetails();
+    const tap = Gesture.Tap()
+      .runOnJS(true)
+      .maxDuration(400)
+      .onBegin(() => setHandlePressed(true))
+      .onFinalize(() => setHandlePressed(false))
+      .onEnd(open);
+    const swipeUp = Gesture.Pan()
+      .runOnJS(true)
+      .activeOffsetY([-6, 6])
+      .failOffsetX([-24, 24])
+      .onBegin(() => setHandlePressed(true))
+      .onFinalize(() => setHandlePressed(false))
+      .onEnd((e) => {
+        if (e.translationY < -24 || e.velocityY < -600) {
+          open();
+        }
+      });
+    return Gesture.Race(swipeUp, tap);
+  }, [context]);
   // 인스타그램 릴스식: 영상을 탭하면 오버레이가 통째로 사라졌다 다시 나타난다.
   // 캡션은 기본 2줄로 접고, 캡션만 따로 탭하면 펼쳐진다 (오버레이는 유지).
   const visible = context.state.isShowingVideoInfo !== false;
@@ -344,16 +372,16 @@ function VideoOverlay({ context }) {
           <ProductCard context={context} />
 
           {/* 나머지 상세(댓글·문의·연관 리뷰)는 같은 쇼츠 위의 시트로 — 세로 스와이프는 계속 다음 쇼츠 */}
-          <TouchableOpacity
-            style={styles.detailHandle}
-            activeOpacity={0.7}
-            onPress={() => context.openDetails()}
-            accessibilityRole="button"
-            accessibilityLabel={Strings.VIDEO_DETAILS_OPEN}
-          >
-            <IconMaterialIcons name="keyboard-arrow-up" size={22} color="#fff" />
-            <Text style={styles.detailHandleText}>{Strings.VIDEO_DETAILS_OPEN}</Text>
-          </TouchableOpacity>
+          <GestureDetector gesture={openGesture}>
+            <View
+              style={[styles.detailHandle, handlePressed && styles.detailHandlePressed]}
+              accessibilityRole="button"
+              accessibilityLabel={Strings.VIDEO_DETAILS_OPEN}
+            >
+              <View style={styles.detailHandleBar} />
+              <Text style={styles.detailHandleText}>{Strings.VIDEO_DETAILS_OPEN}</Text>
+            </View>
+          </GestureDetector>
         </View>
       </Animated.View>
     </View>
@@ -521,15 +549,29 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
   },
+  // 시트 핸들 — 그랩바 + 라벨. 위로 쓸어 올리거나 탭하면 리뷰 상세 시트
   detailHandle: {
     alignSelf: 'center',
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: 10,
+    paddingHorizontal: 18,
+    paddingTop: 8,
+    paddingBottom: 6,
+    minHeight: 44,
+  },
+  detailHandlePressed: { opacity: 0.7 },
+  detailHandleBar: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    marginBottom: 6,
   },
   detailHandleText: {
     color: 'rgba(255, 255, 255, 0.9)',
-    fontSize: 11,
-    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.REGULAR_4,
+    fontSize: 11.5,
+    fontFamily: T.FONT.Bold,
+    letterSpacing: -0.1,
   },
 });
 

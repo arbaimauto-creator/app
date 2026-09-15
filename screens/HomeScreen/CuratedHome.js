@@ -1,7 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   SafeAreaView,
+  RefreshControl,
   ScrollView,
   Share,
   StyleSheet,
@@ -9,14 +10,14 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useScrollToTop } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import FastImage from 'react-native-fast-image';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import APIprovider from '../../Components/APIprovider';
 import T from '../../Components/Constants/DesignTokens';
 import Strings from '../../Components/Strings';
-import { Badge, Wordmark } from '../../Components/UI';
+import { Badge, Btn, NoteBox, Wordmark } from '../../Components/UI';
 import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
 import { getCreatorProfile } from '../../api/creators';
 import { getSeedings, SEEDING_STATUS } from '../../api/seedings';
@@ -160,6 +161,10 @@ export default function CuratedHome({ navigation }) {
   const [unreadNoti, setUnreadNoti] = useState(0);
   const [posts, setPosts] = useState(MOCK_POSTS);
   const [loading, setLoading] = useState(true);
+  const [feedError, setFeedError] = useState(false);
+  const feedRequest = useRef(0);
+  const scrollRef = useRef(null);
+  useScrollToTop(scrollRef);
   const [filter, setFilter] = useState('For you');
   const [sort, setSort] = useState('Latest');
   const [following, setFollowing] = useState({});
@@ -170,19 +175,35 @@ export default function CuratedHome({ navigation }) {
   }, [dispatch]);
 
   const loadPosts = useCallback(async () => {
+    const request = ++feedRequest.current;
     setLoading(true);
-    const response = await APIprovider.getVideoList('main', undefined, '', '', 0, 20);
-    if (APIprovider.isFailure(response)) {
-      setPosts(MOCK_POSTS);
-    } else {
+    setFeedError(false);
+    try {
+      const response = await APIprovider.getVideoList('main', undefined, '', '', 0, 20);
+      if (request !== feedRequest.current) {
+        return;
+      }
+      if (APIprovider.isFailure(response)) {
+        throw new Error('Feed unavailable');
+      }
       const list = (response?.recent?.videoList ?? response?.videoList ?? []).filter(thumb);
       setPosts(list.length ? list : MOCK_POSTS);
+    } catch {
+      if (request === feedRequest.current) {
+        setFeedError(true);
+      }
+    } finally {
+      if (request === feedRequest.current) {
+        setLoading(false);
+      }
     }
-    setLoading(false);
   }, []);
 
   useEffect(() => {
     loadPosts();
+    return () => {
+      feedRequest.current += 1;
+    };
   }, [loadPosts]);
 
   useFocusEffect(
@@ -263,7 +284,33 @@ export default function CuratedHome({ navigation }) {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={() => {
+              loadPosts();
+              dispatch(fetchCampaigns());
+            }}
+            tintColor={COLORS.AMBER}
+            colors={[COLORS.AMBER]}
+          />
+        }
+      >
+        {feedError && (
+          <View style={{ paddingHorizontal: 16, gap: 8 }}>
+            <NoteBox text={Strings.FAILED_TO_LOAD_DATA} tone="red" />
+            <Btn title={Strings.FEED_RETRY} onPress={loadPosts} variant="ghost" small />
+          </View>
+        )}
+        {!loading && posts.some((post) => post.isMock) && (
+          <View style={{ paddingHorizontal: 16 }}>
+            <NoteBox text={Strings.FEED_DEMO_NOTICE} />
+          </View>
+        )}
         {/* 기획서 §5.1 첫 화면: 할 일 → 신청 가능 캠페인 → 보상 현황이 리뷰 피드보다 먼저 */}
         <HomeHero navigation={navigation} campaigns={campaigns} />
 

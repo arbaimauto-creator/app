@@ -1,20 +1,26 @@
 import React from 'react';
+import Strings from '../../Strings';
 import T from '../../Constants/DesignTokens';
 import { StatusBar } from 'react-native';
 import { Platform, Pressable } from 'react-native';
 import FastImage from 'react-native-fast-image';
-import Constants from '../../Constants';
 
 export default function HeaderLeftBackButton({ navigation }) {
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={Strings.NAV_BACK}
+      hitSlop={8}
+      style={{ minWidth: 48, minHeight: 48, justifyContent: 'center' }}
       onPress={() => {
         if (Platform.OS !== 'ios') {
           StatusBar.setBackgroundColor(T.COLORS.INK);
           StatusBar.setBarStyle('default', true);
         }
 
-        navigation.pop();
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+        }
       }}
     >
       <FastImage

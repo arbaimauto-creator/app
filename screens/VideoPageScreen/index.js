@@ -1490,26 +1490,14 @@ class VideoPageScreen extends React.PureComponent {
     }
   };
 
-  showVideoInfo = (duration = 5000) => {
-    // console.log('showVideoInfo called, duration:', duration);
-
-    const wasShowing = this.state.isShowingVideoInfo;
-
-    // 기존 타이머 취소
+  // 인스타그램 릴스식: 오버레이는 자동으로 사라지지 않는다. 숨기는 건 사용자의 탭(toggleVideoInfo)뿐.
+  // 예전엔 마운트 7초 뒤 자동 숨김이었는데, 페이저가 옆 페이지를 미리 그려 두므로
+  // 넘어가 보면 이미 캡션·핸들이 사라진 채였다 (2026-09-15 수정).
+  showVideoInfo = () => {
     this.clearVideoInfoTimer();
-
-    // VideoInfo 표시
-    if (!wasShowing) {
+    if (!this.state.isShowingVideoInfo && this._isMounted) {
       this.setState({ isShowingVideoInfo: true });
     }
-
-    // 새 타이머 시작
-    this.videoInfoTimer = setTimeout(() => {
-      if (this._isMounted) {
-        LayoutAnimation.linear();
-        this.setState({ isShowingVideoInfo: false });
-      }
-    }, duration);
   };
 
   hideVideoInfo = () => {
@@ -1534,6 +1522,8 @@ class VideoPageScreen extends React.PureComponent {
     // 페이지를 벗어났다 돌아오면 상세 스크롤 위치는 그대로 남아 있으므로 잠금 상태를 다시 알려준다.
     if (!prevProps.route.params.isFocused && this.props.route.params.isFocused) {
       this.props.route.params.setIsDetailAtTop?.(this._isDetailAtTop);
+      // 새 쇼츠로 넘어오면 캡션·핸들이 항상 보이는 상태로 시작한다
+      this.showVideoInfo();
     }
   }
 
@@ -1568,6 +1558,34 @@ class VideoPageScreen extends React.PureComponent {
     if (this._isMounted) {
       this.setState({ isDetailsOpen: false });
     }
+  };
+
+  // 시트 헤더의 저장(북마크) — 오버레이 레일과 같은 낙관적 토글
+  toggleBookmarkFromSheet = () => {
+    const review = this.state.video;
+    if (!review?.videoId) {
+      return;
+    }
+    const next = !review.isBookmarked;
+    this.setState({ video: { ...review, isBookmarked: next } });
+    APIprovider.bookmarkVideo(review.videoId, next).catch(() => {
+      if (this._isMounted) {
+        this.setState((prev) => ({ video: { ...prev.video, isBookmarked: !next } }));
+      }
+    });
+  };
+
+  openAuthorFromSheet = () => {
+    const author = this.state.video?.author;
+    if (!author?.userId) {
+      return;
+    }
+    this.closeDetails();
+    this.props.navigation.push('UserPage', {
+      pageOwnerUserId: author.userId,
+      pageOwnerUserName: author.name,
+      pageOwnerUserProfilePicUrl: author.profilePicUrl,
+    });
   };
 
   onDetailTouchStart = () => {
@@ -1654,7 +1672,14 @@ class VideoPageScreen extends React.PureComponent {
               ListHeaderComponent={<RenderVideoPlayer context={this} />}
             />
             {/* 리뷰 상세(댓글·문의·연관 리뷰·상품 리뷰)는 같은 쇼츠 위의 시트로 — 닫으면 그 자리 */}
-            <DetailsSheet visible={this.state.isDetailsOpen} onClose={this.closeDetails}>
+            <DetailsSheet
+              visible={this.state.isDetailsOpen}
+              onClose={this.closeDetails}
+              review={this.state.video}
+              isBookmarked={!!this.state.video?.isBookmarked}
+              onToggleBookmark={this.toggleBookmarkFromSheet}
+              onPressAuthor={this.openAuthorFromSheet}
+            >
               <LazyVideoRenderDetails context={this} _useIsFocused={useIsFocused} />
             </DetailsSheet>
             <CommentModal context={this} />
