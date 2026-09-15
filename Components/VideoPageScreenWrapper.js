@@ -18,6 +18,7 @@ const MemorizedVideoPage = ({
   setIsSeekBarMoved,
   setIsDetailAtTop,
   setIsTouchingDetail,
+  pageBy,
   video,
 }) => {
   return useMemo(
@@ -34,6 +35,7 @@ const MemorizedVideoPage = ({
             setIsSeekBarMoved: (isMoved) => setIsSeekBarMoved(isMoved),
             setIsDetailAtTop,
             setIsTouchingDetail,
+            pageBy,
             video,
           },
         }}
@@ -48,6 +50,7 @@ const MemorizedVideoPage = ({
       setIsSeekBarMoved,
       setIsDetailAtTop,
       setIsTouchingDetail,
+      pageBy,
       video,
     ],
   );
@@ -73,6 +76,17 @@ export default function VideoPageScreenWrapper(props) {
   const [isDetailAtTop, setIsDetailAtTop] = useState(true);
   const [isTouchingDetail, setIsTouchingDetail] = useState(false);
   const pagerRef = useRef(null);
+  // 오버레이가 코드로 한 장 넘길 때 쓴다 (캡션 펼친 카드 위 세로 스와이프 — 2026-09-15).
+  // 펼친 카드 영역에선 Android 네이티브 페이저가 제스처를 못 받는 현상이 있어 RNGH Pan → setPage로 넘긴다.
+  // 참조가 안 바뀌어야 모든 페이지가 다시 그려지지 않으므로 ref로 최신 index/길이를 읽는다.
+  const pageStateRef = useRef({ index: 0, count: 0 });
+  const pageBy = useCallback((delta) => {
+    const { index: current, count } = pageStateRef.current;
+    const next = current + delta;
+    if (next >= 0 && next < count) {
+      pagerRef.current?.setPage(next);
+    }
+  }, []);
 
   // videoId가 목록에 없으면(딥링크·삭제된 영상 등) findIndex가 -1이라
   // videoList[-1].linkedProduct 접근으로 렌더 중 크래시했다 — 널 안전 접근
@@ -259,6 +273,7 @@ export default function VideoPageScreenWrapper(props) {
   // (isDetailAtTop/isTouchingDetail 상태는 호환용으로 남겨두되 판정엔 쓰지 않는다)
   // 상세 모드(마이페이지 > 저장 → 전체 상세)에선 페이지 안 FlatList가 세로 스크롤을 쓰므로 페이저를 잠근다 (2026-09-15)
   const isPagerScrollEnabled = !isSeekBarMoved && !props.route.params.detailMode;
+  pageStateRef.current = { index: Math.max(0, index ?? 0), count: routes.length };
 
   return (
     <KeyboardAvoidingView
@@ -293,6 +308,7 @@ export default function VideoPageScreenWrapper(props) {
                 setIsSeekBarMoved={(isMoved) => setIsSeekBarMoved(isMoved)}
                 setIsDetailAtTop={setIsDetailAtTop}
                 setIsTouchingDetail={setIsTouchingDetail}
+                pageBy={pageBy}
                 nestedProps={props}
                 isFocused={distance === 0}
                 videoId={route.key}

@@ -8,6 +8,14 @@ jest.mock('@react-navigation/native', () => ({ useIsFocused: () => true }));
 jest.mock('../Components/VideoPlayerView', () => 'Video');
 jest.mock('../screens/VideoPageScreen/SliderImage', () => 'SliderImage');
 jest.mock('react-native-fast-image', () => 'FastImage');
+// 테스트 렌더러에는 네이티브 뷰 참조가 없어 GestureDetector가 붙지 못한다 — 자식만 그리는 목으로 대체
+jest.mock('react-native-gesture-handler', () => {
+  const chain = new Proxy({}, { get: () => () => chain });
+  return {
+    GestureDetector: ({ children }) => children,
+    Gesture: { Pan: () => chain, Tap: () => chain, Race: () => chain },
+  };
+});
 jest.mock('react-native-vector-icons/MaterialIcons', () => 'Icon');
 jest.mock('../Components/APIprovider', () => ({}));
 jest.mock('../Components/Constants', () => ({ CUSTOM_FONTS: { SCDREAM: {}, SUIT: {} } }));

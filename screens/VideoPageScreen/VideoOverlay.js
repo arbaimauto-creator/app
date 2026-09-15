@@ -1,5 +1,5 @@
 import T from '../../Components/Constants/DesignTokens';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Alert,
   StyleSheet,
@@ -8,6 +8,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import FastImage from 'react-native-fast-image';
 import IconMaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import APIprovider from '../../Components/APIprovider';
@@ -205,7 +206,7 @@ function plainText(s) {
 // 인스타그램식으로 리뷰 본문이 같은 화면에서 펼쳐진다. Text.onPress·LayoutAnimation은 쓰지 않는다
 // (Android에서 바깥 페이저의 세로 스와이프를 막는다 — 2026-09-14 에뮬 실측).
 const CAPTION_LINES_COLLAPSED = 2;
-const CAPTION_LINES_EXPANDED = 12;
+const CAPTION_LINES_EXPANDED = 6;
 
 function VideoOverlay({ context }) {
   const review = context.state.video;
@@ -214,6 +215,30 @@ function VideoOverlay({ context }) {
   const caption = [title, body].filter(Boolean).join('\n');
   const hashTags = Array.isArray(review.hashTags) ? [...new Set(review.hashTags)] : [];
   const [captionExpanded, setCaptionExpanded] = useState(false);
+  // 펼친 카드 위 세로 스와이프 → 코드로 다음/이전 쇼츠. 펼친 카드 영역에선 네이티브 페이저가
+  // 제스처를 못 받는다(2026-09-15 에뮬 재현: 카드를 터치 통과로 바꿔도 동일). RNGH Pan은 활성화되면
+  // 네이티브 터치를 가져가므로 확실히 동작한다. 탭(해시태그·접기)은 Pan이 활성화되지 않아 그대로 눌린다.
+  const expandedSwipe = useMemo(
+    () =>
+      Gesture.Pan()
+        .runOnJS(true)
+        .activeOffsetY([-14, 14])
+        .failOffsetX([-24, 24])
+        .onEnd((e) => {
+          const pageBy = context.props.route.params.pageBy;
+          if (!pageBy) {
+            return;
+          }
+          if (e.translationY < -48 || e.velocityY < -600) {
+            setCaptionExpanded(false);
+            pageBy(1);
+          } else if (e.translationY > 48 || e.velocityY > 600) {
+            setCaptionExpanded(false);
+            pageBy(-1);
+          }
+        }),
+    [context],
+  );
   const [captionTruncated, setCaptionTruncated] = useState(false);
   const canToggleCaption = captionExpanded || captionTruncated || hashTags.length > 0;
   const openHashTag = (tag) =>
@@ -222,82 +247,100 @@ function VideoOverlay({ context }) {
     <View style={styles.overlayContainer} pointerEvents="box-none">
       <ActionRail context={context} />
       <View style={styles.bottomContainer} pointerEvents="box-none">
-        <View style={styles.reviewSummary}>
-          <View style={styles.summaryHeader}>
-            <Text style={styles.reviewEyebrow}>{Strings.SHORTS_REVIEW_LABEL}</Text>
-            {review.g6RatingCount > 0 ? (
-              <ReviewGradeBadgeView
-                g6RatingCount={review.g6RatingCount}
-                g6AvgRatingScore={review.g6AvgRatingScore}
-                type={review.myG6Rating ? 'review_on' : 'review_off'}
-              />
-            ) : null}
-            {review.isSponsored ? <Text style={styles.sponsored}>{Strings.SPONSORED}</Text> : null}
-          </View>
-          <TouchableOpacity
-            style={styles.authorRow}
-            accessibilityRole="button"
-            onPress={() =>
-              context.props.navigation.push('UserPage', {
-                pageOwnerUserId: review.author?.userId,
-                pageOwnerUserName: review.author?.name,
-                pageOwnerUserProfilePicUrl: review.author?.profilePicUrl,
-              })
-            }
-          >
-            <Text style={styles.authorName} numberOfLines={1}>
-              @{review.author?.name || 'greyd'}
-            </Text>
-          </TouchableOpacity>
-          <TouchableWithoutFeedback
-            onPress={() => canToggleCaption && setCaptionExpanded((v) => !v)}
-            accessibilityRole={canToggleCaption ? 'button' : undefined}
-          >
-            <View>
-              <Text
-                style={styles.caption}
-                numberOfLines={captionExpanded ? CAPTION_LINES_EXPANDED : CAPTION_LINES_COLLAPSED}
-                onTextLayout={(e) => {
-                  if (!captionExpanded) {
-                    setCaptionTruncated(e.nativeEvent.lines.length > CAPTION_LINES_COLLAPSED);
-                  }
-                }}
-              >
-                {caption}
-              </Text>
-              {captionExpanded && hashTags.length > 0 ? (
-                <View style={styles.hashTagRow}>
-                  {hashTags.map((tag) => (
-                    <TouchableOpacity
-                      key={tag}
-                      onPress={() => openHashTag(tag)}
-                      style={styles.hashTagChip}
-                      accessibilityRole="button"
-                    >
-                      <Text style={styles.hashTagText}>#{tag}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
+        {/* 캡션을 펼치면 카드가 화면 절반을 덮는다. 카드가 터치 대상이면 Android에서 바깥 세로 페이저가
+            제스처를 못 받아(2026-09-15 에뮬 재현) 펼친 동안엔 배경·본문을 터치 통과로 두고,
+            해시태그와 '접기'만 누를 수 있게 한다. 영상 위 스와이프는 항상 다음 쇼츠. */}
+        <GestureDetector gesture={expandedSwipe.enabled(captionExpanded)}>
+          <View style={styles.reviewSummary}>
+            <View style={styles.summaryHeader}>
+              <Text style={styles.reviewEyebrow}>{Strings.SHORTS_REVIEW_LABEL}</Text>
+              {review.g6RatingCount > 0 ? (
+                <ReviewGradeBadgeView
+                  g6RatingCount={review.g6RatingCount}
+                  g6AvgRatingScore={review.g6AvgRatingScore}
+                  type={review.myG6Rating ? 'review_on' : 'review_off'}
+                />
               ) : null}
-              {canToggleCaption ? (
-                <Text style={styles.captionToggle}>
-                  {captionExpanded ? Strings.CAPTION_LESS : Strings.CAPTION_MORE}
-                </Text>
+              {review.isSponsored ? (
+                <Text style={styles.sponsored}>{Strings.SPONSORED}</Text>
               ) : null}
             </View>
-          </TouchableWithoutFeedback>
-          <TouchableOpacity
-            style={styles.readReviewButton}
-            onPress={() => context.openDetails()}
-            activeOpacity={0.8}
-            accessibilityRole="button"
-            accessibilityLabel={Strings.SHORTS_READ_REVIEW}
-          >
-            <IconMaterialIcons name="chat-bubble-outline" size={18} color={T.COLORS.ON_AMBER} />
-            <Text style={styles.readReviewText}>{Strings.SHORTS_READ_REVIEW}</Text>
-            <IconMaterialIcons name="chevron-right" size={20} color={T.COLORS.ON_AMBER} />
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity
+              style={styles.authorRow}
+              accessibilityRole="button"
+              onPress={() =>
+                context.props.navigation.push('UserPage', {
+                  pageOwnerUserId: review.author?.userId,
+                  pageOwnerUserName: review.author?.name,
+                  pageOwnerUserProfilePicUrl: review.author?.profilePicUrl,
+                })
+              }
+            >
+              <Text style={styles.authorName} numberOfLines={1}>
+                @{review.author?.name || 'greyd'}
+              </Text>
+            </TouchableOpacity>
+            {captionExpanded ? (
+              <View>
+                <Text style={styles.caption} numberOfLines={CAPTION_LINES_EXPANDED}>
+                  {caption}
+                </Text>
+                {hashTags.length > 0 ? (
+                  <View style={styles.hashTagRow}>
+                    {hashTags.map((tag) => (
+                      <TouchableOpacity
+                        key={tag}
+                        onPress={() => openHashTag(tag)}
+                        style={styles.hashTagChip}
+                        accessibilityRole="button"
+                      >
+                        <Text style={styles.hashTagText}>#{tag}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                ) : null}
+                <TouchableOpacity
+                  onPress={() => setCaptionExpanded(false)}
+                  style={styles.captionToggleHit}
+                  accessibilityRole="button"
+                >
+                  <Text style={styles.captionToggle}>{Strings.CAPTION_LESS}</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableWithoutFeedback
+                onPress={() => canToggleCaption && setCaptionExpanded(true)}
+                accessibilityRole={canToggleCaption ? 'button' : undefined}
+              >
+                <View>
+                  <Text
+                    style={styles.caption}
+                    numberOfLines={CAPTION_LINES_COLLAPSED}
+                    onTextLayout={(e) =>
+                      setCaptionTruncated(e.nativeEvent.lines.length > CAPTION_LINES_COLLAPSED)
+                    }
+                  >
+                    {caption}
+                  </Text>
+                  {canToggleCaption ? (
+                    <Text style={styles.captionToggle}>{Strings.CAPTION_MORE}</Text>
+                  ) : null}
+                </View>
+              </TouchableWithoutFeedback>
+            )}
+            <TouchableOpacity
+              style={styles.readReviewButton}
+              onPress={() => context.openDetails()}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel={Strings.SHORTS_READ_REVIEW}
+            >
+              <IconMaterialIcons name="chat-bubble-outline" size={18} color={T.COLORS.ON_AMBER} />
+              <Text style={styles.readReviewText}>{Strings.SHORTS_READ_REVIEW}</Text>
+              <IconMaterialIcons name="chevron-right" size={20} color={T.COLORS.ON_AMBER} />
+            </TouchableOpacity>
+          </View>
+        </GestureDetector>
         <ProductCard context={context} />
       </View>
     </View>
@@ -411,6 +454,7 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
+  captionToggleHit: { alignSelf: 'flex-start', minHeight: 32, justifyContent: 'center' },
   captionToggle: {
     marginTop: 4,
     color: 'rgba(255, 255, 255, 0.75)',

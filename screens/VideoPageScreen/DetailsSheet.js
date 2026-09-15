@@ -242,7 +242,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingTop: 10,
+    // Android는 모달이 내비게이션 바 아래까지 그려져 안내 문구가 제스처 바에 가렸다 (2026-09-15 에뮬)
+    paddingBottom: Platform.OS === 'android' ? 34 : 10,
     borderTopWidth: 1,
     borderTopColor: COLORS.LINE,
     backgroundColor: COLORS.SURFACE,
