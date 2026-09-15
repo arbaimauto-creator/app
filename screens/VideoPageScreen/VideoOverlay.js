@@ -1,15 +1,6 @@
 import T from '../../Components/Constants/DesignTokens';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Alert,
-  Animated,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
-} from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import React from 'react';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import IconMaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import APIprovider from '../../Components/APIprovider';
@@ -204,191 +195,63 @@ function plainText(s) {
 }
 
 // 펼쳤을 때 캡션 최대 줄 수 — 스크롤 없이 화면 절반 안에 들어오게(세로 제스처는 전부 페이저 몫)
-const CAPTION_LINES_COLLAPSED = 2;
-// LayoutAnimation은 쓰지 않는다 — Android에서 펼친 뒤 바깥 페이저가 터치를 못 받는 현상(2026-09-14 에뮬 실측)
-const CAPTION_LINES_EXPANDED = 12;
-
 function VideoOverlay({ context }) {
   const review = context.state.video;
-  const title = (review.titleByCountry || review.title || '').trim();
-  // 인스타그램식: 리뷰 본문이 캡션에 함께 붙는다 — 이전엔 제목만 있고 본문은 별도 스크롤 상세에만 있었다
-  const body = plainText(review.descriptionByCountry || review.description);
-  const hashTags = Array.isArray(review.hashTags) ? [...new Set(review.hashTags)] : [];
-  const captionText = [title, body].filter(Boolean).join('\n');
-  const [captionTruncated, setCaptionTruncated] = useState(false);
-  // 핸들을 위로 쓸어 올리면 시트가 열린다(탭도 그대로). 이 작은 영역에서만 세로 제스처를 가져가므로
-  // 나머지 화면의 세로 스와이프(다음 쇼츠)는 영향 없다.
-  const [handlePressed, setHandlePressed] = useState(false);
-  // 핸들의 위로 쓸기는 네이티브 제스처(RNGH)로 잡는다. JS PanResponder는 응답자 협상이 브리지를 거치는 사이
-  // 네이티브 세로 페이저(ViewPager2)가 먼저 터치를 가로채 다음 쇼츠로 넘어가 버렸다 (에뮬레이터 재현, 9/15).
-  // RNGH 핸들러는 활성화되는 순간 네이티브 뷰의 터치를 취소시키므로 이 작은 영역에서만 페이저를 이긴다.
-  const openGesture = useMemo(() => {
-    const open = () => context.openDetails();
-    const tap = Gesture.Tap()
-      .runOnJS(true)
-      .maxDuration(400)
-      .onBegin(() => setHandlePressed(true))
-      .onFinalize(() => setHandlePressed(false))
-      .onEnd(open);
-    const swipeUp = Gesture.Pan()
-      .runOnJS(true)
-      .activeOffsetY([-6, 6])
-      .failOffsetX([-24, 24])
-      .onBegin(() => setHandlePressed(true))
-      .onFinalize(() => setHandlePressed(false))
-      .onEnd((e) => {
-        if (e.translationY < -24 || e.velocityY < -600) {
-          open();
-        }
-      });
-    return Gesture.Race(swipeUp, tap);
-  }, [context]);
-  // 인스타그램 릴스식: 영상을 탭하면 오버레이가 통째로 사라졌다 다시 나타난다.
-  // 캡션은 기본 2줄로 접고, 캡션만 따로 탭하면 펼쳐진다 (오버레이는 유지).
-  const visible = context.state.isShowingVideoInfo !== false;
-  const [captionExpanded, setCaptionExpanded] = useState(false);
-  const fade = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    Animated.timing(fade, {
-      toValue: visible ? 1 : 0,
-      duration: 180,
-      useNativeDriver: true,
-    }).start();
-    if (!visible) {
-      setCaptionExpanded(false);
-    }
-  }, [visible, fade]);
-
+  const caption = plainText(
+    review.descriptionByCountry || review.description || review.titleByCountry || review.title,
+  );
   return (
     <View style={styles.overlayContainer} pointerEvents="box-none">
-      {/* 영상 탭 영역 — 오버레이 뒤에 깔려 빈 곳을 누르면 토글된다.
-          레일·캡션 등 실제 컨트롤은 이 위에 있으므로 각자의 onPress가 우선한다. */}
-      <TouchableWithoutFeedback onPress={() => context.toggleVideoInfo?.()}>
-        <View style={StyleSheet.absoluteFill} />
-      </TouchableWithoutFeedback>
-
-      <Animated.View
-        style={[styles.overlayFade, { opacity: fade }]}
-        pointerEvents={visible ? 'box-none' : 'none'}
-      >
-        <ActionRail context={context} />
-
-        <View style={styles.bottomContainer} pointerEvents="box-none">
-          {review.g6RatingCount > 0 ? (
-            <View style={{ alignSelf: 'flex-start', marginBottom: 8 }}>
+      <ActionRail context={context} />
+      <View style={styles.bottomContainer} pointerEvents="box-none">
+        <View style={styles.reviewSummary}>
+          <View style={styles.summaryHeader}>
+            <Text style={styles.reviewEyebrow}>{Strings.SHORTS_REVIEW_LABEL}</Text>
+            {review.g6RatingCount > 0 ? (
               <ReviewGradeBadgeView
                 g6RatingCount={review.g6RatingCount}
                 g6AvgRatingScore={review.g6AvgRatingScore}
                 type={review.myG6Rating ? 'review_on' : 'review_off'}
               />
-            </View>
-          ) : null}
-
-          <View style={styles.authorRow}>
-            <Text
-              style={styles.authorName}
-              onPress={() => {
-                context.props.navigation.push('UserPage', {
-                  pageOwnerUserId: review.author?.userId,
-                  pageOwnerUserName: review.author?.name,
-                  pageOwnerUserProfilePicUrl: review.author?.profilePicUrl,
-                });
-              }}
-            >
-              {`@${review.author?.name || ''}`}
-            </Text>
-            <Text
-              style={styles.authorSubText}
-            >{` ・ ${Strings.VIEW_COUNT(review.viewCount)}`}</Text>
-            {review?.isSponsored ? (
-              <Text style={[styles.authorSubText, { color: T.COLORS.AMBER }]}>
-                {` ・ ${Strings.SPONSORED}`}
-              </Text>
             ) : null}
+            {review.isSponsored ? <Text style={styles.sponsored}>{Strings.SPONSORED}</Text> : null}
           </View>
-
-          {captionText !== '' ? (
-            <View style={captionExpanded ? styles.captionExpandedBox : null}>
-              {/* Text.onPress는 Android에서 clickable TextView가 돼 세로 스와이프를 삼킨다(페이저가 못 받음).
-                  Touchable 래퍼는 페이저에 제스처를 넘기므로 캡션 탭은 이걸로 받는다. */}
-              <TouchableWithoutFeedback
-                onPress={() => {
-                  setCaptionExpanded((v) => !v);
-                }}
-              >
-                <View>
-                  <Text
-                    style={styles.caption}
-                    numberOfLines={
-                      captionExpanded ? CAPTION_LINES_EXPANDED : CAPTION_LINES_COLLAPSED
-                    }
-                    onTextLayout={(e) => {
-                      // 접힌 상태에서 잘렸는지 — 잘린 경우에만 "더보기"를 붙인다
-                      if (!captionExpanded) {
-                        setCaptionTruncated(e.nativeEvent.lines.length > CAPTION_LINES_COLLAPSED);
-                      }
-                    }}
-                  >
-                    {captionText}
-                  </Text>
-                </View>
-              </TouchableWithoutFeedback>
-              {captionExpanded && hashTags.length > 0 ? (
-                <View style={styles.hashTagRow}>
-                  {hashTags.map((tag) => (
-                    <TouchableOpacity
-                      key={tag}
-                      activeOpacity={0.7}
-                      onPress={() =>
-                        context.props.navigation.push('Search', {
-                          hashTag: tag,
-                          isHashtagSearch: true,
-                        })
-                      }
-                    >
-                      <Text style={styles.hashTag}>{`#${tag}`}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              ) : null}
-              {captionExpanded || captionTruncated ? (
-                <TouchableOpacity
-                  onPress={() => {
-                    setCaptionExpanded((v) => !v);
-                  }}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 24 }}
-                  accessibilityRole="button"
-                  style={styles.captionToggleHit}
-                >
-                  <Text style={styles.captionToggle}>
-                    {captionExpanded ? Strings.CAPTION_LESS : Strings.CAPTION_MORE}
-                  </Text>
-                </TouchableOpacity>
-              ) : null}
-            </View>
-          ) : null}
-
-          <ProductCard context={context} />
-
-          {/* 나머지 상세(댓글·문의·연관 리뷰)는 같은 쇼츠 위의 시트로 — 세로 스와이프는 계속 다음 쇼츠 */}
-          <GestureDetector gesture={openGesture}>
-            <View
-              style={[styles.detailHandle, handlePressed && styles.detailHandlePressed]}
-              accessibilityRole="button"
-              accessibilityLabel={Strings.VIDEO_DETAILS_OPEN}
-            >
-              <View style={styles.detailHandleBar} />
-              <Text style={styles.detailHandleText}>{Strings.VIDEO_DETAILS_OPEN}</Text>
-            </View>
-          </GestureDetector>
+          <TouchableOpacity
+            style={styles.authorRow}
+            accessibilityRole="button"
+            onPress={() =>
+              context.props.navigation.push('UserPage', {
+                pageOwnerUserId: review.author?.userId,
+                pageOwnerUserName: review.author?.name,
+                pageOwnerUserProfilePicUrl: review.author?.profilePicUrl,
+              })
+            }
+          >
+            <Text style={styles.authorName} numberOfLines={1}>
+              @{review.author?.name || 'greyd'}
+            </Text>
+          </TouchableOpacity>
+          <Text style={styles.caption} numberOfLines={2}>
+            {caption}
+          </Text>
+          <TouchableOpacity
+            style={styles.readReviewButton}
+            onPress={() => context.openDetails()}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel={Strings.SHORTS_READ_REVIEW}
+          >
+            <IconMaterialIcons name="article" size={18} color={T.COLORS.ON_AMBER} />
+            <Text style={styles.readReviewText}>{Strings.SHORTS_READ_REVIEW}</Text>
+            <IconMaterialIcons name="chevron-right" size={20} color={T.COLORS.ON_AMBER} />
+          </TouchableOpacity>
         </View>
-      </Animated.View>
+        <ProductCard context={context} />
+      </View>
     </View>
   );
 }
 
-// 피드는 하단 탭 네비게이터 안에서 열린다 — 탭바 높이만큼 오버레이를 올린다.
 const TAB_BAR_INSET = 76;
 
 const styles = StyleSheet.create({
@@ -399,6 +262,32 @@ const styles = StyleSheet.create({
   overlayFade: {
     ...StyleSheet.absoluteFillObject,
   },
+  reviewSummary: {
+    backgroundColor: 'rgba(18,18,20,0.82)',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.14)',
+    padding: 14,
+  },
+  summaryHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
+  reviewEyebrow: {
+    fontFamily: T.FONT.Bold,
+    fontSize: 10,
+    letterSpacing: 1.5,
+    color: T.COLORS.AMBER,
+  },
+  sponsored: { fontFamily: T.FONT.Medium, fontSize: 10, color: '#E2E2E2', flexShrink: 1 },
+  readReviewButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    minHeight: 44,
+    paddingHorizontal: 12,
+    marginTop: 12,
+    backgroundColor: T.COLORS.AMBER,
+    borderRadius: 10,
+  },
+  readReviewText: { flex: 1, fontFamily: T.FONT.Bold, fontSize: 13, color: T.COLORS.ON_AMBER },
   rail: {
     position: 'absolute',
     right: 8,
@@ -419,7 +308,9 @@ const styles = StyleSheet.create({
   railButton: {
     alignItems: 'center',
     marginBottom: 16,
-    minWidth: 52,
+    minWidth: 48,
+    minHeight: 48,
+    justifyContent: 'center',
   },
   railIconImage: {
     width: 30,
@@ -458,46 +349,13 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
-  authorSubText: {
-    color: 'rgba(255, 255, 255, 0.85)',
-    fontSize: 13,
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
-  },
-  // 펼친 캡션 — 영상 위에서 읽히도록 반투명 바탕
-  captionExpandedBox: {
-    backgroundColor: 'rgba(0, 0, 0, 0.45)',
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    marginTop: 4,
-  },
-  captionToggleHit: { alignSelf: 'flex-start', minHeight: 32, justifyContent: 'center' },
-  captionToggle: {
-    color: 'rgba(255, 255, 255, 0.75)',
-    fontSize: 13,
-    marginTop: 4,
-    fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
-  },
   caption: {
     color: '#fff',
     fontSize: 15,
-    lineHeight: 21,
+    lineHeight: 22,
+    minHeight: 44,
     marginTop: 6,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
-  hashTagRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: 6,
-  },
-  hashTag: {
-    color: '#fff',
-    fontSize: 14,
-    marginRight: 10,
-    fontFamily: Constants.CUSTOM_FONTS.SCDREAM.MEDIUM_5,
     textShadowColor: 'rgba(0, 0, 0, 0.4)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,

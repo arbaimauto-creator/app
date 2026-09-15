@@ -76,9 +76,16 @@ export default function RenderSlide({ context, item, index }) {
     () =>
       context.state.isLoading ||
       context.state.paused ||
+      context.state.isDetailsOpen ||
       context.state.isBlurred ||
       !isCurrentlyFocused,
-    [context.state.isLoading, context.state.paused, context.state.isBlurred, isCurrentlyFocused],
+    [
+      context.state.isLoading,
+      context.state.paused,
+      context.state.isDetailsOpen,
+      context.state.isBlurred,
+      isCurrentlyFocused,
+    ],
   );
 
   if (item.type === 'video') {
