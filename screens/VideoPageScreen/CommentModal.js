@@ -48,6 +48,25 @@ function CommentModal({ context }) {
                 value={context.state.isSecretComment}
               />
             </View>
+            {/* 댓글과 "리뷰어에게 물어보기"를 합쳤다 — 별도 Q&A 화면 대신 댓글에 질문 표시 (2026-09-15) */}
+            <View style={styles.secretCommentContainer}>
+              <View style={styles.toggleTextWrap}>
+                <Text style={styles.secretCommentLabel}>{Strings.ASK_REVIEWER_TOGGLE}</Text>
+                <Text style={styles.toggleDesc}>{Strings.ASK_REVIEWER_TOGGLE_DESC}</Text>
+              </View>
+              <Switch
+                trackColor={{
+                  false: COLORS.TRACK,
+                  true: COLORS.AMBER,
+                }}
+                thumbColor={COLORS.SURFACE}
+                ios_backgroundColor={COLORS.TRACK}
+                onValueChange={(value) => {
+                  context.setState({ isQuestionComment: value });
+                }}
+                value={context.state.isQuestionComment}
+              />
+            </View>
             <View style={styles.addCommentInputContainer}>
               <FastImage
                 style={styles.userProfilePic}
@@ -94,6 +113,7 @@ function CommentModal({ context }) {
       context.state.newComment,
       context.state.isShowingCommentInput,
       context.state.isSecretComment,
+      context.state.isQuestionComment,
     ],
   );
 }
@@ -149,6 +169,8 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: COLORS.INK,
   },
+  toggleTextWrap: { flex: 1, paddingRight: 12 },
+  toggleDesc: { marginTop: 2, fontFamily: FONT.Regular, fontSize: 10.5, color: COLORS.GREY },
   userProfilePic: {
     width: 32,
     height: 32,

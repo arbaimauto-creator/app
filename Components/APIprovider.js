@@ -502,11 +502,13 @@ export default class APIprovider {
     });
   };
 
-  static addNewVideoComment = ({ comment, videoId, targetId, isSecret }) => {
+  static addNewVideoComment = ({ comment, videoId, targetId, isSecret, isQuestion }) => {
     return this.request(API_ROOT_URL + '/videos/' + videoId + '/comments', 'POST', {
       comment,
       targetId,
       isSecret,
+      // 리뷰어에게 질문 표시 (2026-09-15). 서버가 모르는 필드면 무시되고 일반 댓글로 저장된다.
+      isQuestion: !!isQuestion,
     });
   };
 

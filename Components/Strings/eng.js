@@ -1,4 +1,7 @@
 export default {
+  SHORTS_REVIEW_LABEL: 'REVIEW',
+  SHORTS_READ_REVIEW: 'Read review',
+  SHORTS_SHARE: 'Share',
   FEED_DEMO_NOTICE: 'Preview reviews · Sample content, not real user reviews.',
   FEED_RETRY: 'Try again',
   SEARCH_LOADING: 'Loading search results',
@@ -2313,13 +2316,20 @@ export default {
   NOTI_CAMPAIGN_SHIPPED_BODY: 'Tap "Received" in Activity when it arrives.',
   NOTI_CAMPAIGN_UPLOAD_DUE_TITLE: ({ title }) => `${title} review deadline`,
   NOTI_CAMPAIGN_UPLOAD_DUE_BODY: ({ dayLeft }) =>
-    dayLeft == null ? 'Post your review within 14 days of delivery.' : dayLeft > 0 ? `${dayLeft} day(s) left.` : 'Deadline passed — grace-period uploads earn ×0.7 points.',
+    dayLeft == null
+      ? 'Post your review within 14 days of delivery.'
+      : dayLeft > 0
+        ? `${dayLeft} day(s) left.`
+        : 'Deadline passed — grace-period uploads earn ×0.7 points.',
   NOTI_CAMPAIGN_REVIEW_RECEIVED_TITLE: ({ title }) => `Review received: ${title}`,
-  NOTI_CAMPAIGN_REVIEW_RECEIVED_BODY: 'The brand confirms within 7 days, then your reward is locked in.',
+  NOTI_CAMPAIGN_REVIEW_RECEIVED_BODY:
+    'The brand confirms within 7 days, then your reward is locked in.',
   NOTI_CAMPAIGN_REWARD_CONFIRMED_TITLE: ({ title }) => `Reward confirmed: ${title}`,
-  NOTI_CAMPAIGN_REWARD_CONFIRMED_BODY: ({ points }) => (points != null ? `+${points}P · see Rewards` : 'See Rewards'),
+  NOTI_CAMPAIGN_REWARD_CONFIRMED_BODY: ({ points }) =>
+    points != null ? `+${points}P · see Rewards` : 'See Rewards',
   NOTI_CAMPAIGN_REWARD_PAID_TITLE: ({ title }) => `Points paid: ${title}`,
-  NOTI_CAMPAIGN_REWARD_PAID_BODY: ({ points }) => (points != null ? `+${points}P paid out` : 'Paid out'),
+  NOTI_CAMPAIGN_REWARD_PAID_BODY: ({ points }) =>
+    points != null ? `+${points}P paid out` : 'Paid out',
   NOTI_CAMPAIGN_CANCELLED_TITLE: ({ title }) => `Participation cancelled: ${title}`,
   NOTI_CAMPAIGN_CANCELLED_BODY: 'Cancelled before shipping · no penalty',
   NOTI_CAMPAIGN_NO_SHOW_TITLE: ({ title }) => `Deadline missed: ${title}`,
@@ -2329,7 +2339,8 @@ export default {
   MY_NOTI_UNREAD: (n) => (n > 0 ? `${n} new` : 'No new notifications'),
   MY_REWARD_VIEW_ALL: 'View all ›',
   REWARD_LEDGER_TITLE: 'Rewards',
-  REWARD_LEDGER_INTRO: 'Rewards move from Expected → Reviewing → Confirmed → Paid, and every change records its reason.',
+  REWARD_LEDGER_INTRO:
+    'Rewards move from Expected → Reviewing → Confirmed → Paid, and every change records its reason.',
   REWARD_FILTER_ALL: 'All',
   REWARD_LEDGER_EMPTY_FILTER: 'No rewards in this state.',
   REWARD_LEDGER_TOTAL_PENDING: (n) => `${n} in review`,
@@ -2347,7 +2358,8 @@ export default {
   HOME_COMPOSER_CONTINUE: 'Continue',
   HOME_COMPOSER_CREATE: 'Create',
   ACT_BRAND_CONFIRMED: (brand) => `${brand} reviewed your post · reward confirmed`,
-  ACT_BRAND_REVIEWING: (brand) => `${brand} is reviewing your post · reward confirmed within 7 days`,
+  ACT_BRAND_REVIEWING: (brand) =>
+    `${brand} is reviewing your post · reward confirmed within 7 days`,
   DONE_BRAND_PENDING: 'Brand feedback appears here once the brand has reviewed your post.',
   MY_TRUST_GRACE: 'Completed in grace period',
   QNA_ENTER_ANSWER: 'Enter answer',
@@ -2355,7 +2367,13 @@ export default {
   // ── Shorts UX (2026-09-14): caption more/less · details sheet ──
   CAPTION_MORE: 'more',
   CAPTION_LESS: 'less',
-  VIDEO_DETAILS_OPEN: 'Comments · Q&A · related reviews',
-  VIDEO_DETAILS_TITLE: 'Review details',
+  VIDEO_DETAILS_OPEN: 'Comments · Ask the reviewer',
+  VIDEO_DETAILS_TITLE: 'Comments',
+  VIDEO_DETAILS_SAVE_HINT:
+    'Save this review to see photos, the rating table and related reviews in My Page > Saved.',
+  VIDEO_DETAILS_OPEN_SAVED: 'Open saved',
+  ASK_REVIEWER_TOGGLE: 'Ask the reviewer',
+  ASK_REVIEWER_TOGGLE_DESC: 'The reviewer gets notified and the comment is marked as a question.',
+  COMMENT_QUESTION_BADGE: 'Question',
   VIDEO_DETAILS_CLOSE: 'Close',
 };

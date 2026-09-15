@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 import { styles } from '.';
+import T from '../../Components/Constants/DesignTokens';
 import FEATURES from '../../Components/Constants/Features';
 import LikedBy from './LikedBy';
 import LinkedProduct from './LinkedProduct';
 import LinkedProductReviews from './LinkedProductReviews';
-import QuestionToReviewer from './QuestionToReviewer';
 import RelayReviews from './RelayReviews';
 import RenderImage from './RenderImage';
 import ReviewComments from './ReviewComments';
@@ -56,6 +56,29 @@ export default function VideoRenderDetails({ context, useIsFocused }) {
   if (!context.state.isFullScreen) {
     return (
       <View style={styles.detailsContainer}>
+        <View style={{ paddingHorizontal: 20, paddingTop: 24, paddingBottom: 20 }}>
+          <Text
+            style={{
+              fontFamily: T.FONT.Bold,
+              fontSize: 22,
+              lineHeight: 30,
+              color: T.COLORS.INK,
+              marginBottom: 12,
+            }}
+          >
+            {plainText(video.titleByCountry || video.title)}
+          </Text>
+          <Text
+            style={{
+              fontFamily: T.FONT.Regular,
+              fontSize: 16,
+              lineHeight: 27,
+              color: T.COLORS.DARK,
+            }}
+          >
+            {plainText(video.descriptionByCountry || video.description)}
+          </Text>
+        </View>
         <View style={styles.slidePagination}>
           <View style={styles.sliderViewStyle}>
             {context.state.slides.map((item, index) => (
@@ -77,9 +100,6 @@ export default function VideoRenderDetails({ context, useIsFocused }) {
             navigation={context.props.navigation}
           />
         ) : null}
-        <Text style={styles.description}>
-          {plainText(video.description || video.descriptionByCountry)}
-        </Text>
 
         <View>
           {video.hashTags ? (
@@ -91,8 +111,7 @@ export default function VideoRenderDetails({ context, useIsFocused }) {
           ) : null}
         </View>
 
-        <QuestionToReviewer context={context} navigation={context.props.navigation} />
-
+        {/* "리뷰어에게 직접 물어보기"는 댓글 입력의 질문 토글로 합쳤다 (2026-09-15) */}
         {video.relayingVideo ? <UpperRelayReview context={context} /> : <View />}
         {context.props.route.params.isFocused && useIsFocused && !context.state.isBlurred && (
           <View style={styles.relatedInfoContainer}>

@@ -203,6 +203,11 @@ export default class CommentListItemView extends PureComponent {
                     source={require('../Resources/img/iconRenewal/secret.png')}
                   />
                 ) : null}
+                {data.isQuestion ? (
+                  <View style={styles.questionBadge}>
+                    <Text style={styles.questionBadgeText}>{Strings.COMMENT_QUESTION_BADGE}</Text>
+                  </View>
+                ) : null}
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 {isSecret ? null : (
@@ -325,6 +330,15 @@ export default class CommentListItemView extends PureComponent {
 }
 
 const styles = StyleSheet.create({
+  // 리뷰어에게 질문 표시 (2026-09-15)
+  questionBadge: {
+    marginLeft: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: T.RADIUS.BADGE,
+    backgroundColor: T.COLORS.AMBER_SOFT,
+  },
+  questionBadgeText: { fontFamily: T.FONT.Bold, fontSize: 9.5, color: T.COLORS.AMBER_DEEP },
   userActionButtonTitle: {
     fontWeight: 'bold',
     color: Constants.COLOR_MAIN,

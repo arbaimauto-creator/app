@@ -314,6 +314,8 @@ export default class VideoListItemView extends PureComponent {
     if (data && (data.videoId || data._id) && this.props.onPress(this.props.data) !== false) {
       this.props.navigation.push('VideoPage', {
         videoId: this.props.data._id,
+        // 저장 목록에서 열면 쇼츠 대신 전체 상세(사진·평점표·연관 리뷰) 모드 (2026-09-15)
+        detailMode: !!this.props.detailMode,
         videoType: this.props.dataType,
         videoList: this.props.dataList,
         videoSortType: this.props.dataSortType,
@@ -707,10 +709,7 @@ export default class VideoListItemView extends PureComponent {
 
                   <View style={{ flex: 1 }} />
                   {this.props.showDescription && (
-                    <Text
-                      numberOfLines={4}
-                      style={{ color: T.COLORS.INK, fontWeight: 'bold' }}
-                    >
+                    <Text numberOfLines={4} style={{ color: T.COLORS.INK, fontWeight: 'bold' }}>
                       {this.props.data.description}
                     </Text>
                   )}
@@ -797,10 +796,7 @@ export default class VideoListItemView extends PureComponent {
 
                   <View style={{ flex: 1 }} />
                   {this.props.showDescription && (
-                    <Text
-                      numberOfLines={4}
-                      style={{ color: T.COLORS.INK, fontWeight: 'bold' }}
-                    >
+                    <Text numberOfLines={4} style={{ color: T.COLORS.INK, fontWeight: 'bold' }}>
                       {this.props.data.description}
                     </Text>
                   )}

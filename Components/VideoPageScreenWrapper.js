@@ -257,7 +257,8 @@ export default function VideoPageScreenWrapper(props) {
   // 2026-09-14 쇼츠 UX: 리뷰 상세가 더 이상 세로 스크롤 위치가 아니라(캡션 더보기 + 시트) 페이저를 잠글 이유가 없다.
   // 캡션을 접든 펼치든 세로 스와이프는 항상 다음/이전 쇼츠. 시크바 드래그 중에만 잠근다.
   // (isDetailAtTop/isTouchingDetail 상태는 호환용으로 남겨두되 판정엔 쓰지 않는다)
-  const isPagerScrollEnabled = !isSeekBarMoved;
+  // 상세 모드(마이페이지 > 저장 → 전체 상세)에선 페이지 안 FlatList가 세로 스크롤을 쓰므로 페이저를 잠근다 (2026-09-15)
+  const isPagerScrollEnabled = !isSeekBarMoved && !props.route.params.detailMode;
 
   return (
     <KeyboardAvoidingView

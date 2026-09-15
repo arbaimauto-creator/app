@@ -1,4 +1,7 @@
 export default {
+  SHORTS_REVIEW_LABEL: 'REVIEW',
+  SHORTS_READ_REVIEW: '리뷰 읽기',
+  SHORTS_SHARE: '공유',
   FEED_DEMO_NOTICE: '미리보기 리뷰 · 실제 사용자 리뷰가 아닌 예시 콘텐츠입니다.',
   FEED_RETRY: '다시 불러오기',
   SEARCH_LOADING: '검색 결과를 불러오는 중',
@@ -2228,13 +2231,19 @@ export default {
   NOTI_CAMPAIGN_SHIPPED_BODY: '받으시면 Activity에서 수령 확인을 눌러 주세요.',
   NOTI_CAMPAIGN_UPLOAD_DUE_TITLE: ({ title }) => `${title} 리뷰 업로드 기한`,
   NOTI_CAMPAIGN_UPLOAD_DUE_BODY: ({ dayLeft }) =>
-    dayLeft == null ? '수령 후 14일 안에 리뷰를 올려 주세요.' : dayLeft > 0 ? `${dayLeft}일 남았어요.` : '기한이 지났어요 — 유예 기간에 올리면 ×0.7 포인트.',
+    dayLeft == null
+      ? '수령 후 14일 안에 리뷰를 올려 주세요.'
+      : dayLeft > 0
+        ? `${dayLeft}일 남았어요.`
+        : '기한이 지났어요 — 유예 기간에 올리면 ×0.7 포인트.',
   NOTI_CAMPAIGN_REVIEW_RECEIVED_TITLE: ({ title }) => `${title} 리뷰를 받았어요`,
   NOTI_CAMPAIGN_REVIEW_RECEIVED_BODY: '브랜드 확인 후 7일 안에 보상이 확정돼요.',
   NOTI_CAMPAIGN_REWARD_CONFIRMED_TITLE: ({ title }) => `${title} 보상이 확정됐어요`,
-  NOTI_CAMPAIGN_REWARD_CONFIRMED_BODY: ({ points }) => (points != null ? `+${points}P · 보상 내역에서 확인` : '보상 내역에서 확인'),
+  NOTI_CAMPAIGN_REWARD_CONFIRMED_BODY: ({ points }) =>
+    points != null ? `+${points}P · 보상 내역에서 확인` : '보상 내역에서 확인',
   NOTI_CAMPAIGN_REWARD_PAID_TITLE: ({ title }) => `${title} 포인트가 지급됐어요`,
-  NOTI_CAMPAIGN_REWARD_PAID_BODY: ({ points }) => (points != null ? `+${points}P 지급 완료` : '지급 완료'),
+  NOTI_CAMPAIGN_REWARD_PAID_BODY: ({ points }) =>
+    points != null ? `+${points}P 지급 완료` : '지급 완료',
   NOTI_CAMPAIGN_CANCELLED_TITLE: ({ title }) => `${title} 참여가 취소됐어요`,
   NOTI_CAMPAIGN_CANCELLED_BODY: '발송 전 취소 · 페널티 없음',
   NOTI_CAMPAIGN_NO_SHOW_TITLE: ({ title }) => `${title} 업로드 기한이 지났어요`,
@@ -2270,7 +2279,13 @@ export default {
   // ── 쇼츠 UX(2026-09-14): 캡션 더보기/접기 · 상세 시트 ──
   CAPTION_MORE: '더보기',
   CAPTION_LESS: '접기',
-  VIDEO_DETAILS_OPEN: '댓글·문의·연관 리뷰 보기',
-  VIDEO_DETAILS_TITLE: '리뷰 상세',
+  VIDEO_DETAILS_OPEN: '댓글 · 리뷰어에게 질문',
+  VIDEO_DETAILS_TITLE: '댓글',
+  VIDEO_DETAILS_SAVE_HINT:
+    '사진·평점표·연관 리뷰는 저장해 두면 마이페이지 > 저장에서 볼 수 있어요.',
+  VIDEO_DETAILS_OPEN_SAVED: '저장 목록 열기',
+  ASK_REVIEWER_TOGGLE: '리뷰어에게 질문',
+  ASK_REVIEWER_TOGGLE_DESC: '리뷰어에게 알림이 가고 댓글에 질문 표시가 붙어요.',
+  COMMENT_QUESTION_BADGE: '질문',
   VIDEO_DETAILS_CLOSE: '닫기',
 };

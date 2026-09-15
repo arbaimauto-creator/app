@@ -45,6 +45,7 @@ import DetailsSheet from './DetailsSheet';
 import { setStatusColor } from './Header';
 import LinkedProduct from './LinkedProduct';
 import RenderVideoPlayer from './RenderVideoPlayer';
+import ReviewComments from './ReviewComments';
 import VideoRenderDetails from './VideoRenderDetails';
 
 const { UIManager } = NativeModules;
@@ -54,11 +55,6 @@ if (Platform.OS === 'android') {
   }
 }
 
-// 상세는 시트가 열릴 때만 렌더되므로 React.lazy가 더는 필요 없다(2026-09-14).
-// lazy를 남기면 개발 모드에서 첫 시트 오픈 시 Metro가 모듈을 추가 번들하며 앱 전체를 리로드한다.
-function LazyVideoRenderDetails({ context, _useIsFocused }) {
-  return <VideoRenderDetails context={context} useIsFocused={_useIsFocused} />;
-}
 class VideoPageScreen extends React.PureComponent {
   videoPlayer;
   screenHeightNormalScreen;
@@ -236,6 +232,7 @@ class VideoPageScreen extends React.PureComponent {
       totalReward,
       speed: 1,
       isSecretComment: false,
+      isQuestionComment: false, // 리뷰어에게 질문 토글 (2026-09-15, 댓글과 Q&A 통합)
       helpBubbleIndex: null,
       isLikeLoading: false,
 
@@ -1106,8 +1103,16 @@ class VideoPageScreen extends React.PureComponent {
       videoId: this.state.video.videoId,
       targetId: this.state.video.videoId,
       isSecret: this.state.isSecretComment,
+      isQuestion: this.state.isQuestionComment,
     })
-      .then(this.addNewVideoCommentCallback.bind(this))
+      .then((data) =>
+        // 서버가 아직 isQuestion을 돌려주지 않아도 방금 쓴 댓글엔 질문 표시가 보이게 한다
+        this.addNewVideoCommentCallback(
+          data && typeof data === 'object'
+            ? { isQuestion: this.state.isQuestionComment, ...data }
+            : data,
+        ),
+      )
       .catch((err) => {
         this.setState({ isNewCommentSubmitting: false });
         Alert.alert(
@@ -1132,6 +1137,7 @@ class VideoPageScreen extends React.PureComponent {
         isNewCommentSubmitting: false,
         newComment: '',
         isSecretComment: false,
+        isQuestionComment: false,
       });
 
       this.props.setReward(data.totalReward);
@@ -1588,6 +1594,12 @@ class VideoPageScreen extends React.PureComponent {
     });
   };
 
+  // 시트 안내 → 마이페이지 > 저장 (전체 상세는 거기서 detailMode로 연다)
+  openSavedList = () => {
+    this.closeDetails();
+    this.props.navigation.navigate('BookmarkList');
+  };
+
   onDetailTouchStart = () => {
     if (this.props.route.params.isFocused) {
       this.props.route.params.setIsTouchingDetail?.(true);
@@ -1601,6 +1613,7 @@ class VideoPageScreen extends React.PureComponent {
   };
 
   render() {
+    const isDetailMode = !!this.props.route.params.detailMode;
     return (
       <>
         <KeyboardAvoidingView
@@ -1626,8 +1639,9 @@ class VideoPageScreen extends React.PureComponent {
               showsVerticalScrollIndicator={false}
               ListHeaderComponentStyle={styles.container}
               initialNumToRender={5}
-              // 페이지 안 세로 스크롤 금지 — 세로 제스처는 전부 바깥 쇼츠 페이저의 것 (2026-09-14)
-              scrollEnabled={false}
+              // 쇼츠 모드: 페이지 안 세로 스크롤 금지 — 세로 제스처는 전부 바깥 쇼츠 페이저의 것 (2026-09-14)
+              // 상세 모드(마이페이지 > 저장에서 진입): 영상 아래로 사진·평점표·연관 리뷰를 스크롤 (2026-09-15)
+              scrollEnabled={isDetailMode}
               legacyImplementation={false}
               disableVirtualization={true}
               maxToRenderPerBatch={5}
@@ -1670,6 +1684,11 @@ class VideoPageScreen extends React.PureComponent {
               }}
               scrollEventThrottle={16}
               ListHeaderComponent={<RenderVideoPlayer context={this} />}
+              ListFooterComponent={
+                isDetailMode ? (
+                  <VideoRenderDetails context={this} useIsFocused={useIsFocused} />
+                ) : null
+              }
             />
             {/* 리뷰 상세(댓글·문의·연관 리뷰·상품 리뷰)는 같은 쇼츠 위의 시트로 — 닫으면 그 자리 */}
             <DetailsSheet
@@ -1679,8 +1698,9 @@ class VideoPageScreen extends React.PureComponent {
               isBookmarked={!!this.state.video?.isBookmarked}
               onToggleBookmark={this.toggleBookmarkFromSheet}
               onPressAuthor={this.openAuthorFromSheet}
+              onOpenSaved={this.openSavedList}
             >
-              <LazyVideoRenderDetails context={this} _useIsFocused={useIsFocused} />
+              <ReviewComments context={this} />
             </DetailsSheet>
             <CommentModal context={this} />
             <ReportModal

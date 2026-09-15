@@ -30,6 +30,7 @@ const VideoTabScene = (props) => (
           navigation={props.navigation}
           data={item}
           type={'list_vertical'}
+          detailMode
         />
       )}
       keyExtractor={(item) => item.videoId}
