@@ -1,6 +1,6 @@
 export default {
   SHORTS_REVIEW_LABEL: 'REVIEW',
-  SHORTS_READ_REVIEW: 'Read review',
+  SHORTS_READ_REVIEW: 'Comments · Ask the reviewer',
   SHORTS_SHARE: 'Share',
   FEED_DEMO_NOTICE: 'Preview reviews · Sample content, not real user reviews.',
   FEED_RETRY: 'Try again',

@@ -1,6 +1,13 @@
 import T from '../../Components/Constants/DesignTokens';
-import React from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import {
+  Alert,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 import FastImage from 'react-native-fast-image';
 import IconMaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import APIprovider from '../../Components/APIprovider';
@@ -194,12 +201,23 @@ function plainText(s) {
     .trim();
 }
 
-// 펼쳤을 때 캡션 최대 줄 수 — 스크롤 없이 화면 절반 안에 들어오게(세로 제스처는 전부 페이저 몫)
+// 캡션 줄 수: 접힘 2줄, 펼침 12줄 — 스크롤 없이 화면 절반 안에 들어오게(세로 제스처는 전부 페이저 몫).
+// 인스타그램식으로 리뷰 본문이 같은 화면에서 펼쳐진다. Text.onPress·LayoutAnimation은 쓰지 않는다
+// (Android에서 바깥 페이저의 세로 스와이프를 막는다 — 2026-09-14 에뮬 실측).
+const CAPTION_LINES_COLLAPSED = 2;
+const CAPTION_LINES_EXPANDED = 12;
+
 function VideoOverlay({ context }) {
   const review = context.state.video;
-  const caption = plainText(
-    review.descriptionByCountry || review.description || review.titleByCountry || review.title,
-  );
+  const title = (review.titleByCountry || review.title || '').trim();
+  const body = plainText(review.descriptionByCountry || review.description);
+  const caption = [title, body].filter(Boolean).join('\n');
+  const hashTags = Array.isArray(review.hashTags) ? [...new Set(review.hashTags)] : [];
+  const [captionExpanded, setCaptionExpanded] = useState(false);
+  const [captionTruncated, setCaptionTruncated] = useState(false);
+  const canToggleCaption = captionExpanded || captionTruncated || hashTags.length > 0;
+  const openHashTag = (tag) =>
+    context.props.navigation.push('Search', { hashTag: tag, isHashtagSearch: true });
   return (
     <View style={styles.overlayContainer} pointerEvents="box-none">
       <ActionRail context={context} />
@@ -231,9 +249,43 @@ function VideoOverlay({ context }) {
               @{review.author?.name || 'greyd'}
             </Text>
           </TouchableOpacity>
-          <Text style={styles.caption} numberOfLines={2}>
-            {caption}
-          </Text>
+          <TouchableWithoutFeedback
+            onPress={() => canToggleCaption && setCaptionExpanded((v) => !v)}
+            accessibilityRole={canToggleCaption ? 'button' : undefined}
+          >
+            <View>
+              <Text
+                style={styles.caption}
+                numberOfLines={captionExpanded ? CAPTION_LINES_EXPANDED : CAPTION_LINES_COLLAPSED}
+                onTextLayout={(e) => {
+                  if (!captionExpanded) {
+                    setCaptionTruncated(e.nativeEvent.lines.length > CAPTION_LINES_COLLAPSED);
+                  }
+                }}
+              >
+                {caption}
+              </Text>
+              {captionExpanded && hashTags.length > 0 ? (
+                <View style={styles.hashTagRow}>
+                  {hashTags.map((tag) => (
+                    <TouchableOpacity
+                      key={tag}
+                      onPress={() => openHashTag(tag)}
+                      style={styles.hashTagChip}
+                      accessibilityRole="button"
+                    >
+                      <Text style={styles.hashTagText}>#{tag}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              ) : null}
+              {canToggleCaption ? (
+                <Text style={styles.captionToggle}>
+                  {captionExpanded ? Strings.CAPTION_LESS : Strings.CAPTION_MORE}
+                </Text>
+              ) : null}
+            </View>
+          </TouchableWithoutFeedback>
           <TouchableOpacity
             style={styles.readReviewButton}
             onPress={() => context.openDetails()}
@@ -241,7 +293,7 @@ function VideoOverlay({ context }) {
             accessibilityRole="button"
             accessibilityLabel={Strings.SHORTS_READ_REVIEW}
           >
-            <IconMaterialIcons name="article" size={18} color={T.COLORS.ON_AMBER} />
+            <IconMaterialIcons name="chat-bubble-outline" size={18} color={T.COLORS.ON_AMBER} />
             <Text style={styles.readReviewText}>{Strings.SHORTS_READ_REVIEW}</Text>
             <IconMaterialIcons name="chevron-right" size={20} color={T.COLORS.ON_AMBER} />
           </TouchableOpacity>
@@ -353,13 +405,26 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 15,
     lineHeight: 22,
-    minHeight: 44,
     marginTop: 6,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.REGULAR,
     textShadowColor: 'rgba(0, 0, 0, 0.4)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
+  captionToggle: {
+    marginTop: 4,
+    color: 'rgba(255, 255, 255, 0.75)',
+    fontSize: 13,
+    fontFamily: T.FONT.Medium,
+  },
+  hashTagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 },
+  hashTagChip: {
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255, 255, 255, 0.14)',
+  },
+  hashTagText: { color: '#fff', fontSize: 12, fontFamily: T.FONT.Medium },
   productCard: {
     flexDirection: 'row',
     alignItems: 'center',

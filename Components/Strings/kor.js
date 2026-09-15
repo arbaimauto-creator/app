@@ -1,6 +1,6 @@
 export default {
   SHORTS_REVIEW_LABEL: 'REVIEW',
-  SHORTS_READ_REVIEW: '리뷰 읽기',
+  SHORTS_READ_REVIEW: '댓글 · 리뷰어에게 질문',
   SHORTS_SHARE: '공유',
   FEED_DEMO_NOTICE: '미리보기 리뷰 · 실제 사용자 리뷰가 아닌 예시 콘텐츠입니다.',
   FEED_RETRY: '다시 불러오기',
