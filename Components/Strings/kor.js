@@ -2295,6 +2295,10 @@ export default {
   PRODUCT_IN_APP_SOON_BODY: '지금은 앱에서 바로 결제할 수 없어요. 준비되면 알려드릴게요.',
   PRODUCT_LINK_OPEN_FAILED: '링크를 열 수 없어요',
   CHECKOUT_TITLE: '결제',
+  ORDER_SHEET_PRODUCT: '주문 상품',
+  ORDER_SHEET_QUANTITY: (n) => `수량 ${n}개`,
+  ORDER_SHEET_SHIPPING_NOTE: '배송비는 결제 단계에서 최종 계산돼요.',
+  ORDER_SHEET_MISSING: (n) => `입력이 ${n}곳 비어 있어요.`,
   CHECKOUT_PREPARING: '결제창을 여는 중이에요',
   CHECKOUT_FAILED_TO_START: '결제창을 열지 못했어요. 잠시 후 다시 시도해 주세요.',
 };

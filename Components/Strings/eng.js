@@ -2384,6 +2384,10 @@ export default {
     'You cannot pay inside the app yet. We will let you know when it is ready.',
   PRODUCT_LINK_OPEN_FAILED: 'Could not open the link',
   CHECKOUT_TITLE: 'Payment',
+  ORDER_SHEET_PRODUCT: 'Your order',
+  ORDER_SHEET_QUANTITY: (n) => `Quantity ${n}`,
+  ORDER_SHEET_SHIPPING_NOTE: 'Shipping is calculated at the payment step.',
+  ORDER_SHEET_MISSING: (n) => `${n} field(s) still empty.`,
   CHECKOUT_PREPARING: 'Opening the payment page',
   CHECKOUT_FAILED_TO_START: 'Could not open the payment page. Please try again in a moment.',
 };

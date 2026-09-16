@@ -100,7 +100,10 @@
 **남은 작업**
 1. 서버 저장소 접근(현재 `rueseo92-create` 계정으로 `RenovJ/greyd_server` 조회 불가) → 권한 후 패치 적용·배포.
 2. Stripe 계정 키 3개: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, (선택) `STRIPE_CURRENCY`·`APP_CHECKOUT_RETURN_URL`.
-3. **주문서 화면**(배송지·수량·옵션·금액)이 앱에 없다. 결제창 앞 단계라 이게 있어야 실제 구매가 완성된다.
+3. ~~주문서 화면~~ → **완료**: `Components/OrderSheetScreen.js`(배송지·수량·옵션·금액 → 장바구니 생성 → 주문 생성 → Checkout 세션),
+   `Components/utils/orderSheet.js`(필수값·국내외 판정·금액·주문 본문 조립) + 테스트 5개. `OrderSheet` 라우트 등록.
+   확인된 결함 하나를 함께 고쳤다: **`APIprovider.newCartItem` 정의가 없어** 호출부 4곳이 전부 끊겨 있었다(이제 `POST /cart`로 연결).
+   남은 연결: 구매 버튼(쇼츠 카드·상품 상세)에서 OrderSheet로 보내는 배선은 `FEATURES.COMMERCE`를 켜는 시점에 맞춘다.
 4. 커머스 노출 플래그(`FEATURES.COMMERCE`)를 켜는 시점 결정 — 켜기 전까지 버튼은 '앱 내 구매 준비 중'.
 5. 판매 국가 확정 → 배송 가능 국가 필드와 '구매 희망'(P3).
 6. 판매자 웹(P2): ops 포털 `/portal/store/<token>` — Prisma `MagicPurpose`에 STORE 추가 + ops 배포 승인 필요.

@@ -1031,6 +1031,18 @@ export default class APIprovider {
     });
   };
 
+  // 장바구니 항목 생성 (2026-09-16). 호출부는 있었는데 정의가 없어 구매 흐름이 첫 단계에서 끊겨 있었다.
+  // cartOrBuy=BUY면 장바구니에 쌓지 않고 바로 주문서로 가는 단건이다.
+  static newCartItem = (productId, number, options, reviewerVideoId, cartOrBuy) => {
+    return this.request(API_ROOT_URL + '/cart', 'POST', {
+      productId,
+      number,
+      options,
+      reviewerVideoId,
+      cartOrBuy,
+    });
+  };
+
   static newOrder = (params) => {
     return this.request(API_ROOT_URL + '/orders', 'POST', params);
   };

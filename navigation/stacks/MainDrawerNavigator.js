@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux';
 import headerBackButton from '../../Components/CustomComponents/headerBackButton';
 import { horizontalAnimation } from '../../Components/CustomComponents/horizontalAnimation';
 import CheckoutScreen from '../../Components/CheckoutScreen';
+import OrderSheetScreen from '../../Components/OrderSheetScreen';
 import QNAChat from '../../Components/CustomComponents/QNA/QNAChatView';
 import {
   AddExternalProductLinkScreen,
@@ -467,6 +468,17 @@ function MainDrawerNavigator({ route, navigation }) {
         initialParams={initialParams}
         options={{
           headerShown: false,
+          tabBarVisible: false,
+        }}
+      />
+      {/* 주문서 (2026-09-16) — 배송지·수량·옵션 확인 후 결제창으로 */}
+      <Stack.Screen
+        name="OrderSheet"
+        component={OrderSheetScreen}
+        initialParams={initialParams}
+        options={{
+          title: null,
+          ...headerBackButton,
           tabBarVisible: false,
         }}
       />
