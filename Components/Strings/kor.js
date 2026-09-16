@@ -2294,4 +2294,7 @@ export default {
   PRODUCT_IN_APP_SOON: '앱 내 구매 준비 중',
   PRODUCT_IN_APP_SOON_BODY: '지금은 앱에서 바로 결제할 수 없어요. 준비되면 알려드릴게요.',
   PRODUCT_LINK_OPEN_FAILED: '링크를 열 수 없어요',
+  CHECKOUT_TITLE: '결제',
+  CHECKOUT_PREPARING: '결제창을 여는 중이에요',
+  CHECKOUT_FAILED_TO_START: '결제창을 열지 못했어요. 잠시 후 다시 시도해 주세요.',
 };

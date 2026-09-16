@@ -80,6 +80,27 @@
 3. **사업자 요건.** 국내 판매를 열면 통신판매업 신고·전자상거래 표시(청약철회·교환반품 안내)가 앱 화면에 필요하다.
 4. **1차 판매 국가.** 배송 가능 국가 목록이 정해져야 P0의 버튼 분기와 P3의 희망 집계가 의미를 가진다.
 
-## 5. 이번에 바로 착수하는 범위
+## 5. 진행 상태 (2026-09-16 오후 갱신)
 
-P0(앱 단독)만 먼저 구현한다. P1~P3는 위 결정 1·2가 정해지는 즉시 착수한다.
+대표 결정(9/16): **greyd가 판매자(MoR)**, **Stripe 먼저**, 판매 국가 미정, 서버 저장소는 **권한 받아 우리가 작업**.
+
+**완료 — 앱 (커밋됨)**
+- P0 구매 CTA 상태 정리(`Components/utils/productCta.js`), 영어 알럿 제거, 한/영 문구, 테스트 5개.
+- 결제 웹뷰 화면 `Components/CheckoutScreen.js` + 복귀 판정 `Components/utils/checkout.js` + 테스트 5개.
+  `Checkout` 라우트 등록. 카드정보는 앱이 만지지 않는다(호스티드 Checkout).
+- `APIprovider.createStripeCheckoutSession` / `confirmStripePayment`.
+
+**작성 완료, 적용 대기 — 서버 (`docs/server-patches/`)**
+로컬 스냅샷(2026-08-03)에 구현하고 패치로 떠 두었다. 저장소 권한이 열리면 최신 HEAD에 다시 맞춰 적용한다.
+- `stripe-checkout-2026-09-16.patch` — 수수료 상수 `PG_STRIPE`, Payment 스키마 `stripe` 필드 + `createStripeNew`(세션 서버 검증·중복 차단·금액 대조),
+  `payOrderNew`의 stripe 분기, 주문 라우트 3개(세션 생성·확정·복귀 페이지), 웹훅 raw 마운트, `stripe` 의존성.
+- `stripeWebhook.js.new` — `POST /webhooks/stripe`. 서명 검증 후 `checkout.session.completed`에서 주문을 결제완료로 전이.
+  앱 확정 경로와 웹훅이 겹치면 중복 검사에 막힌다(정상).
+
+**남은 작업**
+1. 서버 저장소 접근(현재 `rueseo92-create` 계정으로 `RenovJ/greyd_server` 조회 불가) → 권한 후 패치 적용·배포.
+2. Stripe 계정 키 3개: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, (선택) `STRIPE_CURRENCY`·`APP_CHECKOUT_RETURN_URL`.
+3. **주문서 화면**(배송지·수량·옵션·금액)이 앱에 없다. 결제창 앞 단계라 이게 있어야 실제 구매가 완성된다.
+4. 커머스 노출 플래그(`FEATURES.COMMERCE`)를 켜는 시점 결정 — 켜기 전까지 버튼은 '앱 내 구매 준비 중'.
+5. 판매 국가 확정 → 배송 가능 국가 필드와 '구매 희망'(P3).
+6. 판매자 웹(P2): ops 포털 `/portal/store/<token>` — Prisma `MagicPurpose`에 STORE 추가 + ops 배포 승인 필요.

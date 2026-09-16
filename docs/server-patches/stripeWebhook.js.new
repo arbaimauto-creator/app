@@ -1,0 +1,60 @@
+// Stripe 웹훅 (2026-09-16) — 앱 내 결제. docs(app): commerce-and-seller-2026-09-16.md P1
+// index.js에서 express.json 앞에 raw 바디로 등록된다. 서명 검증 없이는 아무 것도 처리하지 않는다.
+//
+// 결제 확정 경로는 둘이다.
+//  1) 앱이 결제창을 닫고 보내는 POST /orders/:orderId/pay/stripe
+//  2) 이 웹훅 (앱이 꺼지거나 네트워크가 끊겨도 주문이 결제완료로 전이되게)
+// 둘 중 먼저 온 쪽이 처리하고, 나중 쪽은 Payment 중복 검사에 막힌다(정상).
+const orderController = require('../controller/orderController');
+
+module.exports = async function stripeWebhook(req, res) {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  const signature = req.headers['stripe-signature'];
+
+  if (!secret || !signature) {
+    console.log('[stripe:webhook] missing secret or signature');
+    return res.status(400).send('bad request');
+  }
+
+  const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, signature, secret);
+  } catch (err) {
+    console.log('[stripe:webhook] signature verification failed', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  // 200을 먼저 돌려주지 않으면 Stripe가 재시도한다. 처리 실패는 로그로 남기고 재시도에 맡긴다.
+  if (event.type !== 'checkout.session.completed') {
+    return res.send({ received: true });
+  }
+
+  const session = event.data.object;
+  const orderId = session.metadata && session.metadata.orderId;
+
+  if (!orderId) {
+    console.log('[stripe:webhook] session without orderId', session.id);
+    return res.send({ received: true });
+  }
+
+  try {
+    await orderController.payOrderNew(
+      { orderId, stripeData: { sessionId: session.id } },
+      'stripe',
+    );
+    console.log('[stripe:webhook] order paid', orderId, session.id);
+  } catch (err) {
+    const message = (err && (err.errorMsg || err.message)) || String(err);
+    // 앱 경로가 먼저 확정한 경우 — 정상이다
+    if (message.indexOf('already processed') >= 0) {
+      console.log('[stripe:webhook] already processed', orderId);
+    } else {
+      console.log('[stripe:webhook] failed to complete order', orderId, message);
+      return res.status(500).send({ received: false });
+    }
+  }
+
+  return res.send({ received: true });
+};

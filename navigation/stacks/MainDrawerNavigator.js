@@ -5,6 +5,7 @@ import Preference from 'react-native-default-preference';
 import { useDispatch } from 'react-redux';
 import headerBackButton from '../../Components/CustomComponents/headerBackButton';
 import { horizontalAnimation } from '../../Components/CustomComponents/horizontalAnimation';
+import CheckoutScreen from '../../Components/CheckoutScreen';
 import QNAChat from '../../Components/CustomComponents/QNA/QNAChatView';
 import {
   AddExternalProductLinkScreen,
@@ -466,6 +467,17 @@ function MainDrawerNavigator({ route, navigation }) {
         initialParams={initialParams}
         options={{
           headerShown: false,
+          tabBarVisible: false,
+        }}
+      />
+      {/* 앱 내 결제 (2026-09-16) — 서버가 만든 Stripe Checkout URL을 웹뷰로 연다 */}
+      <Stack.Screen
+        name="Checkout"
+        component={CheckoutScreen}
+        initialParams={initialParams}
+        options={{
+          title: null,
+          ...headerBackButton,
           tabBarVisible: false,
         }}
       />

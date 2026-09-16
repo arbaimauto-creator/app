@@ -1035,6 +1035,20 @@ export default class APIprovider {
     return this.request(API_ROOT_URL + '/orders', 'POST', params);
   };
 
+  // Stripe Checkout (2026-09-16) — 서버가 금액을 계산해 결제창 URL을 준다. 앱은 그 URL만 웹뷰로 연다.
+  static createStripeCheckoutSession = (orderId, locale = undefined) => {
+    return this.request(API_ROOT_URL + '/orders/' + orderId + '/pay/stripe/session', 'POST', {
+      locale,
+    });
+  };
+
+  // 결제창을 닫고 돌아왔을 때 확정 요청. 웹훅이 먼저 처리했으면 서버가 중복으로 막는다(정상).
+  static confirmStripePayment = (orderId, sessionId) => {
+    return this.request(API_ROOT_URL + '/orders/' + orderId + '/pay/stripe', 'POST', {
+      stripeData: { sessionId },
+    });
+  };
+
   static actionOrder = (
     orderId,
     actionCode = undefined,

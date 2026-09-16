@@ -2383,4 +2383,7 @@ export default {
   PRODUCT_IN_APP_SOON_BODY:
     'You cannot pay inside the app yet. We will let you know when it is ready.',
   PRODUCT_LINK_OPEN_FAILED: 'Could not open the link',
+  CHECKOUT_TITLE: 'Payment',
+  CHECKOUT_PREPARING: 'Opening the payment page',
+  CHECKOUT_FAILED_TO_START: 'Could not open the payment page. Please try again in a moment.',
 };
