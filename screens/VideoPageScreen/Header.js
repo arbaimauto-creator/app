@@ -81,6 +81,8 @@ const styles = StyleSheet.create({
   headerBarContainer: {
     width: '100%',
     position: 'absolute',
+    top: 0,
+    left: 0,
     marginTop: getIPhoneHeaderMarginTop(),
     paddingHorizontal: 20,
     flexDirection: 'row',

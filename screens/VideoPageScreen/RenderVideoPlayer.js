@@ -10,7 +10,7 @@ import RenderSlide from './RenderSlide';
 
 export default function RenderVideoPlayer({ context }) {
   return (
-    <View>
+    <View style={context.getPlayerStyle()}>
       <GestureHandlerScrollView
         ref={(ref) => {
           context._carousel = ref;

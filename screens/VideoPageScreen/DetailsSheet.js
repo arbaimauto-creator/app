@@ -91,6 +91,7 @@ export default function DetailsSheet({
 
   return (
     <Modal
+      hardwareAccelerated
       visible={visible}
       transparent
       animationType="none"

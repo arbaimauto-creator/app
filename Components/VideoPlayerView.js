@@ -312,6 +312,7 @@ export default function VideoPlayerView({
 const styles = StyleSheet.create({
   customVideoControl: {
     position: 'absolute',
+    top: 0,
     flexDirection: 'row',
     width: '100%',
     justifyContent: 'center',
