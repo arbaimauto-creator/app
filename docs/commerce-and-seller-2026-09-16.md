@@ -106,4 +106,9 @@
    남은 연결: 구매 버튼(쇼츠 카드·상품 상세)에서 OrderSheet로 보내는 배선은 `FEATURES.COMMERCE`를 켜는 시점에 맞춘다.
 4. 커머스 노출 플래그(`FEATURES.COMMERCE`)를 켜는 시점 결정 — 켜기 전까지 버튼은 '앱 내 구매 준비 중'.
 5. 판매 국가 확정 → 배송 가능 국가 필드와 '구매 희망'(P3).
-6. 판매자 웹(P2): ops 포털 `/portal/store/<token>` — Prisma `MagicPurpose`에 STORE 추가 + ops 배포 승인 필요.
+6. 판매자 웹(P2): **ops에 구현 완료, 배포는 보류**(자동화 시스템 영향 때문에 승인 후 배포).
+   - `MagicPurpose.STORE` + 상주 토큰, 포털 `/portal/store/[token]`(상품 등록 폼 + 등록 목록·상태),
+     서버액션 `submitSellerProduct`, 콘솔 캠페인 화면에 "③ 판매자 상품 등록" 링크와 제출 건수.
+   - 모델 `SellerProduct`(이름 한/영, 설명, 정가·할인가·통화, 재고, **배송 가능 국가**, 배송비, 외부 판매 링크, 옵션 설명, 상태, appProductId).
+   - **정본은 앱 API 서버 products**다. 지금은 제출을 ops에 보관하고, 서버 접근이 열리면 승인 시 `/products`로 발행하고 `appProductId`를 적는다.
+   - 배포 시 필요한 것: ops DB 스키마 반영(`prisma db push` 또는 마이그레이션) + Vercel 배포. 둘 다 승인 후 진행.
