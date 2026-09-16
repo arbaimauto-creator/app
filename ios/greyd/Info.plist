@@ -197,6 +197,16 @@
 		<string>Pretendard-Regular.ttf</string>
 		<string>Pretendard-SemiBold.ttf</string>
 		<string>Pretendard-Thin.ttf</string>
+			<string>fonts/InterTight-Regular.ttf</string>
+		<string>fonts/InterTight-Medium.ttf</string>
+		<string>fonts/InterTight-SemiBold.ttf</string>
+		<string>fonts/InterTight-Bold.ttf</string>
+		<string>fonts/InterTight-ExtraBold.ttf</string>
+		<string>fonts/Onest-Regular.ttf</string>
+		<string>fonts/Onest-Medium.ttf</string>
+		<string>fonts/Onest-SemiBold.ttf</string>
+		<string>fonts/Onest-Bold.ttf</string>
+		<string>fonts/Onest-ExtraBold.ttf</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>

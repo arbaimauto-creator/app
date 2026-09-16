@@ -386,9 +386,10 @@ const styles = StyleSheet.create({
   },
   summaryHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
   reviewEyebrow: {
-    fontFamily: T.FONT.Bold,
+    // 라틴 전용 라벨 — Inter Tight (2026-09-16)
+    fontFamily: T.LATIN.Bold,
     fontSize: 10,
-    letterSpacing: 1.5,
+    letterSpacing: 1.4,
     color: T.COLORS.AMBER,
   },
   sponsored: { fontFamily: T.FONT.Medium, fontSize: 10, color: '#E2E2E2', flexShrink: 1 },

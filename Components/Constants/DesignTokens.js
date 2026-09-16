@@ -74,6 +74,25 @@ const FONT = {
   Thin: 'Pretendard-Thin',
 };
 
+// 라틴·숫자 전용 패밀리 (2026-09-16).
+// Onest는 제목·수치처럼 "읽는 것보다 보는 것"에 가까운 자리, Inter Tight는 라벨·버튼·표 같은 좁은 자리에 쓴다.
+// 둘 다 한글 글리프가 없다 — 한글이 섞이는 본문·버튼 문구는 반드시 Pretendard(FONT)를 유지한다.
+const DISPLAY = {
+  Regular: 'Onest-Regular',
+  Medium: 'Onest-Medium',
+  SemiBold: 'Onest-SemiBold',
+  Bold: 'Onest-Bold',
+  ExtraBold: 'Onest-ExtraBold',
+};
+
+const LATIN = {
+  Regular: 'InterTight-Regular',
+  Medium: 'InterTight-Medium',
+  SemiBold: 'InterTight-SemiBold',
+  Bold: 'InterTight-Bold',
+  ExtraBold: 'InterTight-ExtraBold',
+};
+
 const TYPE = {
   H_TITLE: { fontFamily: FONT.ExtraBold, fontSize: 20, color: COLORS.INK, letterSpacing: -0.2 },
   CARD_TITLE: { fontFamily: FONT.Bold, fontSize: 14, color: COLORS.INK, letterSpacing: -0.1 },
@@ -84,6 +103,18 @@ const TYPE = {
   BTN: { fontFamily: FONT.ExtraBold, fontSize: 13.5, color: COLORS.ON_AMBER },
   BADGE: { fontFamily: FONT.ExtraBold, fontSize: 10 },
   KPI: { fontFamily: FONT.ExtraBold, fontSize: 19, color: COLORS.INK },
+
+  // 라틴·숫자 전용 (2026-09-16) — 한글이 섞이지 않는 자리에만 쓴다
+  DISPLAY_XL: {
+    fontFamily: DISPLAY.ExtraBold,
+    fontSize: 30,
+    color: COLORS.INK,
+    letterSpacing: -0.6,
+  },
+  DISPLAY_L: { fontFamily: DISPLAY.Bold, fontSize: 22, color: COLORS.INK, letterSpacing: -0.4 },
+  NUM_XL: { fontFamily: LATIN.ExtraBold, fontSize: 26, color: COLORS.INK, letterSpacing: -0.5 },
+  NUM: { fontFamily: LATIN.Bold, fontSize: 15, color: COLORS.INK, letterSpacing: -0.2 },
+  EYEBROW: { fontFamily: LATIN.Bold, fontSize: 10, letterSpacing: 1.4, color: COLORS.AMBER_DEEP },
 };
 
 const SHADOW_CARD = {
@@ -102,4 +133,4 @@ const SHADOW_SHEET = {
   elevation: 12,
 };
 
-export default { COLORS, RADIUS, FONT, TYPE, SHADOW_CARD, SHADOW_SHEET, TOP_INSET };
+export default { COLORS, RADIUS, FONT, DISPLAY, LATIN, TYPE, SHADOW_CARD, SHADOW_SHEET, TOP_INSET };

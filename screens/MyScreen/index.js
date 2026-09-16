@@ -394,7 +394,7 @@ const styles = StyleSheet.create({
   handle: { fontFamily: FONT.Bold, fontSize: 14, color: COLORS.INK, marginBottom: 2 },
   xs: { ...TYPE.XS },
   gScore: {
-    fontFamily: FONT.ExtraBold,
+    fontFamily: T.LATIN.ExtraBold,
     fontSize: 30,
     color: COLORS.INK,
     marginTop: 10,
@@ -413,7 +413,7 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   rowRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   rowTitle: { fontFamily: FONT.Bold, fontSize: 12.5, color: COLORS.INK },
-  pointValue: { fontFamily: FONT.ExtraBold, fontSize: 14, color: COLORS.AMBER_DEEP },
+  pointValue: { fontFamily: T.LATIN.ExtraBold, fontSize: 14, color: COLORS.AMBER_DEEP },
   mt4: { marginTop: 4 },
   codeRow: { flexDirection: 'row', gap: 7, marginTop: 10 },
   codeBoxLocked: {

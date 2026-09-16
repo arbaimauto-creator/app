@@ -633,7 +633,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.AMBER_SOFT,
   },
   gLabel: { fontFamily: T.FONT.ExtraBold, fontSize: 10, color: COLORS.AMBER_DEEP },
-  gValue: { fontFamily: T.FONT.ExtraBold, fontSize: 12, color: COLORS.AMBER_DEEP },
+  gValue: { fontFamily: T.LATIN.ExtraBold, fontSize: 12, color: COLORS.AMBER_DEEP },
   headerActions: { marginLeft: 'auto', flexDirection: 'row', gap: 10 },
   iconButton: {
     width: 34,

@@ -39,7 +39,7 @@ import { scheduleUploadReminders, cancelUploadReminders } from './reminders';
 import { opsAddress, opsCancel, opsReceived } from '../../api/opsBridge';
 import { flush as flushOpsOutbox } from '../../api/opsOutbox';
 
-const { COLORS, RADIUS, FONT, TYPE } = T;
+const { COLORS, RADIUS, FONT, LATIN, TYPE } = T;
 
 // 운영 수동 전이(승인·발송)를 에뮬레이터에서 확인하기 위한 개발 전용 시뮬 버튼
 const DEV_NEXT = {
@@ -766,14 +766,14 @@ const styles = StyleSheet.create({
   topRow: { flexDirection: 'row', gap: 10, margin: 16 },
   topCard: { flex: 1 },
   topLabel: { fontFamily: FONT.Bold, fontSize: 11, color: COLORS.GREY },
-  gValue: { fontFamily: FONT.ExtraBold, fontSize: 30, color: COLORS.INK, letterSpacing: -0.4 },
+  gValue: { fontFamily: LATIN.ExtraBold, fontSize: 30, color: COLORS.INK, letterSpacing: -0.6 },
   gBar: { marginTop: 7 },
   topNote: { ...TYPE.XS, marginTop: 6 },
   pointValue: {
-    fontFamily: FONT.ExtraBold,
+    fontFamily: LATIN.ExtraBold,
     fontSize: 30,
     color: COLORS.AMBER_DEEP,
-    letterSpacing: -0.4,
+    letterSpacing: -0.6,
   },
 
   section: {

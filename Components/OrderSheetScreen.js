@@ -262,7 +262,8 @@ const styles = StyleSheet.create({
   totalCard: { padding: 14, gap: 6 },
   totalRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   totalLabel: { fontFamily: FONT.Medium, fontSize: 12.5, color: COLORS.GREY },
-  totalValue: { fontFamily: FONT.ExtraBold, fontSize: 17, color: COLORS.INK },
+  // 금액은 숫자뿐 — Inter Tight (2026-09-16)
+  totalValue: { fontFamily: T.LATIN.ExtraBold, fontSize: 18, color: COLORS.INK },
   totalNote: { fontFamily: FONT.Regular, fontSize: 11, color: COLORS.GREY },
   footer: {
     padding: 16,
