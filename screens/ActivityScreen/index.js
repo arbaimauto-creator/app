@@ -23,6 +23,7 @@ import { getSeedings, setSeedingStatus, upsertSeeding, SEEDING_STATUS } from '..
 import { seedingStatusLabel, ONGOING_STATUSES, gProgressRatio } from '../../api/statusModel';
 import { logEvent } from '../../api/common/analytics';
 import { getCreatorProfile, refreshServerStats, saveCreatorProfile } from '../../api/creators';
+import { getMyConsents, pendingConsents } from '../../api/consents';
 import { referralCodesFor } from '../../api/referral';
 import {
   personalizedPoints,
@@ -65,6 +66,18 @@ export default function ActivityScreen({ navigation, route }) {
   const actionLocksRef = useRef(new Set());
 
   const [bonusPoints, setBonusPoints] = useState(0);
+
+  // 2차 가공 요청 (2026-09-16) — 브랜드가 리뷰 재활용을 요청하면 여기 카드로 뜬다.
+  // 서버가 조용히 실패해도 빈 배열이라 화면은 그대로 뜬다.
+  const [consents, setConsents] = useState([]);
+  const loadConsents = useCallback(async () => {
+    setConsents(await getMyConsents());
+  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadConsents();
+    }, [loadConsents]),
+  );
 
   // 수령 후 D+16 미업로드 → no_show(Strike). 서버 스냅샷·로컬 어느 쪽이든 한 번만 적용한다.
   // 이게 없으면 만료 미션이 영원히 "진행 중"으로 남아 동시 한도를 차지한다.
@@ -629,6 +642,27 @@ export default function ActivityScreen({ navigation, route }) {
         </Card>
       </View>
 
+      {/* 2차 가공 요청 (2026-09-16) — 동의는 앱에서, 제작·유통은 브랜드·greyd가 한다 */}
+      {pendingConsents(consents).length > 0 ? (
+        <Card style={styles.consentCard}>
+          <Text style={styles.consentTitle}>
+            {Strings.CONSENT_CARD_TITLE(pendingConsents(consents).length)}
+          </Text>
+          <Text style={styles.consentDesc}>{Strings.CONSENT_CARD_DESC}</Text>
+          <Btn
+            title={Strings.CONSENT_CARD_CTA}
+            small
+            onPress={() =>
+              navigation.navigate('SecondaryUseConsent', {
+                consent: pendingConsents(consents)[0],
+                onDone: loadConsents,
+              })
+            }
+            style={styles.consentBtn}
+          />
+        </Card>
+      ) : null}
+
       {/* v2 §7-4 (D6): 첫 검증 루프 완료 시 추천 코드 3장 — 발급자 핸들 각인 */}
       {FEATURES.REFERRAL && (profile?.completedCount ?? 0) >= 1 ? (
         <Card style={styles.referralCard}>
@@ -785,6 +819,10 @@ const styles = StyleSheet.create({
   emptyTitle: { fontFamily: FONT.Bold, fontSize: 14.5, color: COLORS.INK },
 
   // 추천 코드 카드
+  consentCard: { marginHorizontal: 16, marginBottom: 14 },
+  consentTitle: { ...TYPE.CARD_TITLE, fontSize: 13.5 },
+  consentDesc: { ...TYPE.BODY, marginTop: 6, color: COLORS.GREY },
+  consentBtn: { marginTop: 10, alignSelf: 'flex-start' },
   referralCard: { marginHorizontal: 16, marginBottom: 14 },
   referralTitle: { ...TYPE.CARD_TITLE, fontSize: 13.5 },
   referralCodes: { flexDirection: 'row', marginTop: 10, gap: 8 },

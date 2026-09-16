@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux';
 import headerBackButton from '../../Components/CustomComponents/headerBackButton';
 import { horizontalAnimation } from '../../Components/CustomComponents/horizontalAnimation';
 import CheckoutScreen from '../../Components/CheckoutScreen';
+import SecondaryUseConsentScreen from '../../Components/SecondaryUseConsentScreen';
 import OrderSheetScreen from '../../Components/OrderSheetScreen';
 import QNAChat from '../../Components/CustomComponents/QNA/QNAChatView';
 import {
@@ -468,6 +469,17 @@ function MainDrawerNavigator({ route, navigation }) {
         initialParams={initialParams}
         options={{
           headerShown: false,
+          tabBarVisible: false,
+        }}
+      />
+      {/* 2차 가공 동의 (2026-09-16) — 브랜드 요청을 확인하고 혜택을 고른다 */}
+      <Stack.Screen
+        name="SecondaryUseConsent"
+        component={SecondaryUseConsentScreen}
+        initialParams={initialParams}
+        options={{
+          title: null,
+          ...headerBackButton,
           tabBarVisible: false,
         }}
       />
