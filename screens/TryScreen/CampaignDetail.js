@@ -31,6 +31,7 @@ import { personalizedPoints, concurrentLimit, canAutoConfirm } from './points';
 import { CURATED_MIN_G } from './points';
 import { logEvent } from '../../api/common/analytics';
 import { opsApply } from '../../api/opsBridge';
+import { EXPERIMENTS, trackConversion, variantFor } from '../../api/experiments';
 import { getDraft, saveDraft, clearDraft } from '../../api/drafts';
 import { describeError } from '../../api/opsErrors';
 import { isFgiEnabled, estimatedMinutes, uploadDays } from '../../api/campaignMeta';
@@ -170,6 +171,10 @@ export default function CampaignDetail({ route, navigation }) {
       const autoConfirmed = !isCurated && canAutoConfirm(profile);
       // Persist locally only after ops accepts the application.
       await opsApply({ campaign, appealText: appeal.trim(), autoConfirmed });
+      // P4: 홈 정렬 실험의 전환(신청) — variant는 배정이 결정적이라 여기서 다시 읽어도 같다
+      variantFor(EXPERIMENTS.HOME_RANKING)
+        .then((v) => trackConversion(EXPERIMENTS.HOME_RANKING, v, { campaignId: campaign.id }))
+        .catch(() => {});
       const action = await dispatch(applyToCampaign({ campaignId: campaign.id, userId }));
       // thunk 실패 시 완료 알럿을 띄우지 않는다
       if (action?.error) {

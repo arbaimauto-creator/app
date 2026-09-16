@@ -7,6 +7,10 @@ import APIprovider from '../APIprovider';
 import { loginWithGuest } from '../../screens/SignInScreen/commonHelperFunction';
 import Strings from '../Strings';
 import { trace } from '../bootTrace';
+import FEATURES from '../Constants/Features';
+import { reportTrackingClick } from '../../api/tracking';
+import { trackEvent } from '../../api/experiments';
+import { rememberTrackingCode, stripQuery, trackingCodeFromUrl } from './tracking';
 
 // getInitialURL은 NavigationContainer가 자식 렌더 전에 await 한다.
 // 여기서 무응답이면 앱은 영원히 빈 화면이 되므로 반드시 상한을 둔다.
@@ -37,6 +41,8 @@ const config = {
         // QNAChat: 'users/:pageOwnerUserId/qna/:qnaId',
         QNAChat: 'qnas/:qnaId',
         NoticeList: 'events',
+        // 공동구매 (2026-09-16 P3) — 소재·초대 링크 greyd://groupbuy/gb-xxxx 또는 https://greyd.app/groupbuy/gb-xxxx
+        GroupBuy: 'groupbuy/:code',
       },
     },
   },
@@ -58,9 +64,33 @@ const extractDeepLinkPath = (url) => {
 // 딥링크 경로 화이트리스트 (보안 감사 M2) — config에 정의된 라우트 프리픽스만 수용.
 // 커스텀 스킴(greyd://)은 타 앱이 임의 발신 가능하므로 미등록 경로는 버린다.
 // 기능 다이어트: 커머스 경로(products/orders/myorders)는 COMMERCE 플래그 복원 시 함께 되살린다
-const ALLOWED_LINK_PREFIXES = ['videos/', 'users/', 'notifications', 'mypage/', 'qnas/', 'events'];
-const isAllowedLinkPath = (path) =>
-  typeof path === 'string' && ALLOWED_LINK_PREFIXES.some((prefix) => path.startsWith(prefix));
+const ALLOWED_LINK_PREFIXES = ['videos/', 'users/', 'notifications', 'mypage/', 'qnas/', 'events', 'groupbuy/'];
+// 커머스 경로는 플래그가 켜진 빌드에서만 (products/:productId → 상품 상세)
+const COMMERCE_LINK_PREFIXES = ['products/'];
+const isAllowedLinkPath = (path) => {
+  if (typeof path !== 'string') {
+    return false;
+  }
+  const bare = stripQuery(path);
+  if (ALLOWED_LINK_PREFIXES.some((prefix) => bare.startsWith(prefix))) {
+    return true;
+  }
+  return FEATURES.COMMERCE && COMMERCE_LINK_PREFIXES.some((prefix) => bare.startsWith(prefix));
+};
+
+// 추적 코드(?tc=ra-xxxx / gb-xxxx) — 2차 가공물·공동구매 링크로 들어온 진입을 기기에 기억하고 클릭을 집계한다.
+// 경로 화이트리스트와 무관하게 먼저 처리한다: 홈으로 떨어져도 7일 안의 주문은 귀속된다.
+const captureTrackingCode = (url) => {
+  const code = trackingCodeFromUrl(url);
+  if (!code) {
+    return null;
+  }
+  rememberTrackingCode(code)
+    .then(() => reportTrackingClick(code))
+    .catch(() => {});
+  trackEvent('tc.enter', { kind: code.startsWith('gb-') ? 'groupbuy' : 'asset' });
+  return code;
+};
 
 // 실제 초기 URL 해석. 아래 getInitialURL이 타임아웃·에러를 감싼다.
 async function resolveInitialURL() {
@@ -73,6 +103,7 @@ async function resolveInitialURL() {
   console.log('deeplink getInitialURL', url, dynamicLink);
 
   if (dynamicLink) {
+    captureTrackingCode(dynamicLink.url);
     const dynamicLinkParams = extractDeepLinkPath(dynamicLink.url);
     if (!dynamicLinkParams || !isAllowedLinkPath(dynamicLinkParams)) {
       return DEFAULT_URL;
@@ -122,6 +153,7 @@ async function resolveInitialURL() {
 
   if (url) {
     // 직접 스킴 진입도 동일 화이트리스트 적용
+    captureTrackingCode(url);
     const path = extractDeepLinkPath(url);
     return path && isAllowedLinkPath(path) ? url : DEFAULT_URL;
   }
@@ -165,7 +197,14 @@ const linking = {
   // Custom function to subscribe to incoming links
   subscribe(listener) {
     // First, you may want to do the default deep link handling
-    const onReceiveURL = ({ url }) => listener(url);
+    const onReceiveURL = ({ url }) => {
+      captureTrackingCode(url);
+      const path = extractDeepLinkPath(url);
+      if (!path || !isAllowedLinkPath(path)) {
+        return;
+      }
+      listener(url);
+    };
 
     // Listen to incoming links from deep linking
     // Linking.addEventListener('url', onReceiveURL);
@@ -180,6 +219,7 @@ const linking = {
 
       // const url = 'greyd://' + pathArray.join('/');
 
+      captureTrackingCode(dynamicLink.url);
       const dynamicLinkParams = extractDeepLinkPath(dynamicLink.url);
       if (!dynamicLinkParams || !isAllowedLinkPath(dynamicLinkParams)) {
         return;

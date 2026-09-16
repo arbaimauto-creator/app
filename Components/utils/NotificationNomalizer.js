@@ -64,10 +64,15 @@ export default class NotificationNomalizer {
       const b = Strings[`NOTI_${codeKey}_BODY`];
       const toActivity = { page: 'MainBottom', params: { screen: 'Activity' } };
       const toLedger = { page: 'RewardLedger', params: undefined };
+      const toConsent = { page: 'SecondaryUseConsent', params: undefined };
+      const toReuse = { page: 'SecondaryUseStatus', params: undefined };
       const pageOf = {
         CAMPAIGN_REVIEW_RECEIVED: toLedger,
         CAMPAIGN_REWARD_CONFIRMED: toLedger,
         CAMPAIGN_REWARD_PAID: toLedger,
+        CAMPAIGN_CONSENT_REQUESTED: toConsent,
+        CAMPAIGN_INCENTIVE_APPROVED: toReuse,
+        CAMPAIGN_GROUPBUY_REACHED: toReuse,
       };
       return {
         id: notiItem.id,

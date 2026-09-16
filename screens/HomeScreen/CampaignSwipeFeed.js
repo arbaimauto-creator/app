@@ -23,6 +23,7 @@ import { getCreatorProfile } from '../../api/creators';
 import { getSeedings } from '../../api/seedings';
 import { getHiddenCampaigns, hideCampaign, unhideCampaign } from '../../api/hiddenCampaigns';
 import { rankCampaigns } from '../../api/recommend';
+import { EXPERIMENTS, trackExposure, variantFor } from '../../api/experiments';
 import { estimatedMinutes, isFgiEnabled, uploadDays, daysToDeadline } from '../../api/campaignMeta';
 import { personalizedPoints, CURATED_MIN_G } from '../TryScreen/points';
 import { logEvent } from '../../api/common/analytics';
@@ -63,10 +64,34 @@ export default function CampaignSwipeFeed({ navigation, route }) {
 
   const gScore = profile?.gScore ?? 50;
   const completedCount = profile?.completedCount ?? 0;
-  const ranked = useMemo(
-    () => rankCampaigns(campaigns, { profile, seedings, hidden }),
-    [campaigns, profile, seedings, hidden],
-  );
+
+  // P4 A/B(2026-09-16): 개인화 정렬 vs 최신순. 서버 실험이 없으면 개인화(기본). 노출은 한 번만 기록.
+  const [rankingVariant, setRankingVariant] = useState(EXPERIMENTS.HOME_RANKING.variants[0]);
+  useEffect(() => {
+    let alive = true;
+    variantFor(EXPERIMENTS.HOME_RANKING).then((v) => {
+      if (alive) {
+        setRankingVariant(v);
+        trackExposure(EXPERIMENTS.HOME_RANKING, v);
+      }
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const ranked = useMemo(() => {
+    const personalized = rankCampaigns(campaigns, { profile, seedings, hidden });
+    if (rankingVariant !== 'latest') {
+      return personalized;
+    }
+    // 최신순: 추천 이유·점수는 유지하되 마감이 먼 순(=최근 개설)으로. 숨김·종료 필터는 개인화 결과를 재사용
+    return [...personalized].sort((a, b) => {
+      const da = a.deadline ? new Date(a.deadline).getTime() : 0;
+      const db = b.deadline ? new Date(b.deadline).getTime() : 0;
+      return db - da;
+    });
+  }, [campaigns, profile, seedings, hidden, rankingVariant]);
 
   // 헤더(56) 제외 전체 높이를 카드 한 장에 준다
   const HEADER_H = 56;

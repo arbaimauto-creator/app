@@ -22,6 +22,8 @@ import T from './Constants/DesignTokens';
 import Strings from './Strings';
 import { Btn, Card } from './UI';
 import utils from './utils';
+import { clearTrackingCode, getActiveTrackingCode } from './utils/tracking';
+import { trackEvent } from '../api/experiments';
 import {
   buildOrderParams,
   isAddressComplete,
@@ -109,13 +111,17 @@ export default class OrderSheetScreen extends React.Component {
       return this.fail(cartItem?.errorMsg);
     }
 
+    // 추적 코드: 화면 파라미터(공동구매 화면에서 진입) > 딥링크로 들어온 뒤 7일 안의 코드
+    const trackingCode =
+      this.props.route.params?.trackingCode || (await getActiveTrackingCode().catch(() => null));
+
     const order = await APIprovider.newOrder(
       buildOrderParams({
         cartItemId: cartItem.cartItemId || cartItem._id,
         address,
         memo,
         buyer: this.props.route.params?.buyer || {},
-        trackingCode: this.props.route.params?.trackingCode,
+        trackingCode,
       }),
     ).catch((e) => e);
 
@@ -136,7 +142,16 @@ export default class OrderSheetScreen extends React.Component {
       orderId,
       // 서버가 만든 복귀 주소. 이 주소로 돌아오면 결제 결과로 인정한다.
       returnBase: session.returnBase || 'https://api.greyd.app/orders/checkout',
-      onPaid: this.props.route.params?.onPaid,
+      onPaid: (paidOrderId) => {
+        // 귀속된 코드는 한 번만 — 다음 주문에 다시 붙지 않게 지운다
+        if (trackingCode) {
+          clearTrackingCode().catch(() => {});
+        }
+        trackEvent('order.paid', { attributed: !!trackingCode });
+        if (this.props.route.params?.onPaid) {
+          this.props.route.params.onPaid(paidOrderId);
+        }
+      },
     });
   };
 

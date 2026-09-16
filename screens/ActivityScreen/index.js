@@ -542,7 +542,8 @@ export default function ActivityScreen({ navigation, route }) {
                     ? Strings.FGI_REJECTED
                     : Strings.FGI_SELECTION_PENDING}
             </Text>
-            {seeding.fgiSelection === 'SELECTED' ? (
+            {seeding.fgiNoShowAt ? <Badge tone="red" text={Strings.FGI_NO_SHOW} /> : null}
+            {seeding.fgiSelection === 'SELECTED' && !seeding.fgiNoShowAt ? (
               <View style={styles.fgiActions}>
                 {campaign.fgiSession.link ? (
                   <Btn

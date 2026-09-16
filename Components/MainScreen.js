@@ -47,6 +47,7 @@ import Strings from './Strings';
 import VideoListItemView from './VideoListItemView';
 import MainBottomSheet from './Views/MainBottomSheet';
 import { pushNotifications } from './services';
+import { opsRegisterPushToken } from '../api/opsBridge';
 import { LogoutAlert, getIPhoneHeaderMarginTop, isGuestUser, pageRoutingFunctions } from './utils';
 import { getDeviceHeight } from './utils/scailing';
 
@@ -723,6 +724,8 @@ function MainScreen(props) {
         // Check user token
         const dispatchContext = global.dispatch;
         const userfbToken = await pushNotifications.getDeviceToken();
+        // ops 직접 푸시 수신처 등록 — 실패해도 로그온은 계속
+        opsRegisterPushToken(userfbToken, Platform.OS).catch(() => {});
         const deviceLanguage =
           Platform.OS === 'ios'
             ? NativeModules.SettingsManager.settings.AppleLocale ||

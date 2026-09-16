@@ -26,6 +26,15 @@ async function safePost(path, body, tag) {
   }
 }
 
+// 푸시 토큰 등록 (2026-09-16) — ops가 FCM v1로 직접 보내는 알림(2차 활용 요청·FGI 선정·인센티브 확정·공동구매 성사·노쇼)의 수신처.
+// 앱 서버(greyd_server)도 같은 토큰을 따로 갖고 있다(레거시 알림). 토큰이 바뀌면 다음 실행 때 다시 등록된다.
+export async function opsRegisterPushToken(token, platform) {
+  if (!token || typeof token !== 'string') {
+    return;
+  }
+  await safePost('/push-token', { token, platform }, 'push-token');
+}
+
 // D29: 온보딩 완료 → ops 골든 레코드에 채널 3종·인구통계 동기화.
 // 이게 있어야 앱 가입자가 ops 매칭 후보로 실제 계산된다 (핸들 없으면 지표 수집도 불가).
 export async function opsSyncProfile(profile) {

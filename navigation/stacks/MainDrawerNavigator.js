@@ -8,6 +8,7 @@ import { horizontalAnimation } from '../../Components/CustomComponents/horizonta
 import CheckoutScreen from '../../Components/CheckoutScreen';
 import SecondaryUseConsentScreen from '../../Components/SecondaryUseConsentScreen';
 import SecondaryUseStatusScreen from '../../Components/SecondaryUseStatusScreen';
+import GroupBuyScreen from '../../Components/GroupBuyScreen';
 import IdentityVerifyScreen from '../../Components/IdentityVerifyScreen';
 import CartScreen from '../../Components/CartScreen';
 import OrderListScreen from '../../Components/OrderListScreen';
@@ -524,6 +525,13 @@ function MainDrawerNavigator({ route, navigation }) {
           ...headerBackButton,
           tabBarVisible: false,
         }}
+      />
+      {/* 공동구매 참여 (2026-09-16 P3) — 딥링크 groupbuy/:code. 결제 전엔 참여 희망만 */}
+      <Stack.Screen
+        name="GroupBuy"
+        component={GroupBuyScreen}
+        initialParams={initialParams}
+        options={{ title: null, ...headerBackButton, tabBarVisible: false }}
       />
       {/* 앱 내 결제 (2026-09-16) — 서버가 만든 Stripe Checkout URL을 웹뷰로 연다 */}
       <Stack.Screen
