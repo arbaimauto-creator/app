@@ -16,7 +16,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import Preference from 'react-native-default-preference';
 import T from '../../Components/Constants/DesignTokens';
-import { Card, Btn, Badge, StatusPill, ProgressBar, NoteBox } from '../../Components/UI';
+import { Card, GlowCard, Btn, Badge, StatusPill, ProgressBar, NoteBox } from '../../Components/UI';
 import Strings from '../../Components/Strings';
 import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
 import { getSeedings, setSeedingStatus, upsertSeeding, SEEDING_STATUS } from '../../api/seedings';
@@ -625,7 +625,8 @@ export default function ActivityScreen({ navigation, route }) {
       </View>
 
       <View style={styles.topRow}>
-        <Card style={styles.topCard}>
+        {/* 2026-09-16 컨셉: G-스코어 카드는 앰버 글로우 */}
+        <GlowCard style={styles.topCard} glow={0.5}>
           <Text style={styles.topLabel}>G-Score</Text>
           <Text style={styles.gValue}>G{gScore}</Text>
           <ProgressBar ratio={gProgressRatio(gScore)} style={styles.gBar} />
@@ -634,7 +635,7 @@ export default function ActivityScreen({ navigation, route }) {
               ? Strings.G_NEXT_UNLOCK(CURATED_MIN_G - gScore)
               : Strings.G_UNLOCKED}
           </Text>
-        </Card>
+        </GlowCard>
         <Card style={styles.topCard}>
           <Text style={styles.topLabel}>Point</Text>
           <Text style={styles.pointValue}>{points}P</Text>

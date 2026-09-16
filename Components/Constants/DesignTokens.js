@@ -51,8 +51,8 @@ const COLORS = {
 };
 
 const RADIUS = {
-  CARD: 14,
-  BTN: 11,
+  CARD: 18, // 2026-09-16 컨셉: 더 둥글게(14→18)
+  BTN: 14,
   BTN_SM: 8,
   FIELD: 10,
   BADGE: 5,
@@ -133,4 +133,43 @@ const SHADOW_SHEET = {
   elevation: 12,
 };
 
-export default { COLORS, RADIUS, FONT, DISPLAY, LATIN, TYPE, SHADOW_CARD, SHADOW_SHEET, TOP_INSET };
+// 2026-09-16 컨셉 반영 — 세 시안의 공통점: 둥근 면이 살짝 떠 있고(뉴모피즘), 광택이 있는 버튼(글라스),
+// 은은한 앰버 글로우(따뜻한 빛). 그림자는 넓고 옅게, 모서리는 더 둥글게.
+const SHADOW_SOFT = {
+  shadowColor: '#140F05',
+  shadowOpacity: 0.07,
+  shadowOffset: { width: 0, height: 8 },
+  shadowRadius: 18,
+  elevation: 4,
+};
+
+const SHADOW_GLOW = {
+  shadowColor: '#FFB731',
+  shadowOpacity: 0.35,
+  shadowOffset: { width: 0, height: 6 },
+  shadowRadius: 14,
+  elevation: 5,
+};
+
+// 광택 버튼 그라데이션(위 밝음 → 아래 본색) + 상단 하이라이트 띠
+const GRADIENT = {
+  AMBER: ['#FFD37A', '#FFB731', '#F5A51C'],
+  AMBER_GLOW: ['rgba(255,183,49,0)', 'rgba(255,183,49,0.55)', 'rgba(255,150,20,0.85)'],
+  GLOSS: ['rgba(255,255,255,0.55)', 'rgba(255,255,255,0.0)'],
+  INK: ['#3A3A3A', '#171717'],
+};
+
+export default {
+  COLORS,
+  RADIUS,
+  FONT,
+  DISPLAY,
+  LATIN,
+  TYPE,
+  GRADIENT,
+  SHADOW_CARD,
+  SHADOW_SOFT,
+  SHADOW_GLOW,
+  SHADOW_SHEET,
+  TOP_INSET,
+};

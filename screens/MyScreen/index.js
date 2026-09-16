@@ -16,7 +16,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import Preference from 'react-native-default-preference';
 import T from '../../Components/Constants/DesignTokens';
 import FEATURES from '../../Components/Constants/Features';
-import { Card, ProgressBar } from '../../Components/UI';
+import { Card, GlowCard, ProgressBar } from '../../Components/UI';
 import Strings from '../../Components/Strings';
 import { getCreatorProfile } from '../../api/creators';
 import { referralCodesFor } from '../../api/referral';
@@ -123,7 +123,8 @@ export default function MyScreen({ navigation }) {
         </View>
 
         {/* 프로필 카드 */}
-        <Card style={styles.profileCard}>
+        {/* 2026-09-16 컨셉: 큰 수치 카드는 아래에서 앰버 빛이 번진다 */}
+        <GlowCard style={styles.profileCard} contentStyle={styles.profileInner} glow={0.55}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>
               {handle
@@ -147,7 +148,7 @@ export default function MyScreen({ navigation }) {
             </Text>
             <Text style={styles.xs}>{Strings.MY_CONCURRENT_LIMIT(limit)}</Text>
           </View>
-        </Card>
+        </GlowCard>
 
         {/* 기획서 §5.4 프로필 완성도 — 어떤 정보가 추천·선정에 쓰이는지 설명 */}
         <Card>
@@ -380,7 +381,8 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   gear: { width: 22, height: 22, tintColor: COLORS.INK },
-  profileCard: { alignItems: 'center', paddingVertical: 18 },
+  profileCard: { paddingVertical: 18 },
+  profileInner: { alignItems: 'center' },
   avatar: {
     width: 44,
     height: 44,

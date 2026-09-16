@@ -1,11 +1,15 @@
 // greyd 시안 공용 컴포넌트 — DesignTokens 기반. 화면 리스타일 시 이 컴포넌트를 우선 사용한다.
+// 2026-09-16 컨셉 반영: 카드는 넓고 옅은 그림자로 살짝 떠 있고, 기본 버튼은 광택이 있는 앰버 그라데이션,
+// 강조 카드(GlowCard)는 아래쪽에서 앰버 빛이 번진다. 세 시안(따뜻한 글로우·글라스·뉴모피즘)의 공통 어휘.
 import React from 'react';
 import { ActivityIndicator, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
+import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import T from '../Constants/DesignTokens';
 
-const { COLORS, RADIUS, TYPE } = T;
+const { COLORS, RADIUS, TYPE, GRADIENT } = T;
 
-// 흰 카드 (radius 14 + 얕은 그림자)
+// 흰 카드 (radius 18 + 넓고 옅은 그림자). 살짝 떠 있는 느낌은 그림자 반경으로 낸다.
 export function Card({ style, children, ...rest }) {
   return (
     <View style={[styles.card, style]} {...rest}>
@@ -14,7 +18,28 @@ export function Card({ style, children, ...rest }) {
   );
 }
 
-// CTA 버튼 — variant: 'primary'(앰버) | 'ghost'(테두리) | 'dark'
+// 앰버 글로우 카드 — 시안 1의 "아래에서 번지는 따뜻한 빛". 큰 수치·상태 요약(G-스코어·포인트)에 쓴다.
+// glow: 0~1 (빛 세기). 자식은 빛 위에 그려진다.
+// contentStyle: 자식 컨테이너 스타일(가운데 정렬 등) — 바깥 카드의 alignItems는 안쪽까지 전달되지 않는다.
+export function GlowCard({ style, contentStyle, children, glow = 0.9, ...rest }) {
+  return (
+    <View style={[styles.card, styles.glowCard, style]} {...rest}>
+      <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
+        <Defs>
+          <RadialGradient id="greydGlow" cx="50%" cy="115%" rx="70%" ry="95%">
+            <Stop offset="0" stopColor={COLORS.AMBER} stopOpacity={glow} />
+            <Stop offset="0.55" stopColor={COLORS.AMBER} stopOpacity={glow * 0.28} />
+            <Stop offset="1" stopColor={COLORS.AMBER} stopOpacity={0} />
+          </RadialGradient>
+        </Defs>
+        <Rect x="0" y="0" width="100%" height="100%" fill="url(#greydGlow)" />
+      </Svg>
+      <View style={[styles.glowInner, contentStyle]}>{children}</View>
+    </View>
+  );
+}
+
+// CTA 버튼 — variant: 'primary'(광택 앰버) | 'ghost'(테두리) | 'dark'
 export function Btn({
   title,
   onPress,
@@ -27,10 +52,12 @@ export function Btn({
   accessibilityLabel,
   ...rest
 }) {
+  const glossy = variant === 'primary' || variant === 'dark';
   const base = [
     styles.btn,
     variant === 'ghost' && styles.btnGhost,
     variant === 'dark' && styles.btnDark,
+    glossy && !disabled && (variant === 'dark' ? styles.btnDarkShadow : styles.btnPrimaryShadow),
     small && styles.btnSm,
     disabled && { opacity: 0.45 },
     style,
@@ -48,11 +75,30 @@ export function Btn({
       style={base}
       onPress={onPress}
       disabled={disabled || loading}
-      activeOpacity={0.8}
+      activeOpacity={0.85}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel || title}
       accessibilityState={{ disabled: !!disabled || loading, busy: loading }}
     >
+      {glossy ? (
+        <>
+          <LinearGradient
+            pointerEvents="none"
+            colors={variant === 'dark' ? GRADIENT.INK : GRADIENT.AMBER}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+            style={[StyleSheet.absoluteFill, styles.btnFill, small && styles.btnFillSm]}
+          />
+          {/* 위쪽 광택 띠 — 유리·젤 질감(시안 2) */}
+          <LinearGradient
+            pointerEvents="none"
+            colors={GRADIENT.GLOSS}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+            style={[styles.btnGloss, small && styles.btnGlossSm]}
+          />
+        </>
+      ) : null}
       {loading && (
         <ActivityIndicator size="small" color={variant === 'dark' ? '#FFFFFF' : COLORS.INK} />
       )}
@@ -167,8 +213,13 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.CARD,
     paddingVertical: 13,
     paddingHorizontal: 14,
-    ...T.SHADOW_CARD,
+    // 뉴모피즘(시안 3): 옅고 넓은 그림자 + 흰 테두리 한 줄로 면이 들려 보이게
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.9)',
+    ...T.SHADOW_SOFT,
   },
+  glowCard: { overflow: 'hidden' },
+  glowInner: { position: 'relative', alignSelf: 'stretch' },
   btn: {
     minHeight: 48,
     flexDirection: 'row',
@@ -179,7 +230,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
+  btnFill: { borderRadius: RADIUS.BTN },
+  btnFillSm: { borderRadius: RADIUS.BTN_SM },
+  btnGloss: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '48%',
+    borderTopLeftRadius: RADIUS.BTN,
+    borderTopRightRadius: RADIUS.BTN,
+  },
+  btnGlossSm: { borderTopLeftRadius: RADIUS.BTN_SM, borderTopRightRadius: RADIUS.BTN_SM },
+  btnPrimaryShadow: { ...T.SHADOW_GLOW },
+  btnDarkShadow: { ...T.SHADOW_SOFT },
   btnGhost: {
     backgroundColor: COLORS.SURFACE,
     borderWidth: 1.5,
@@ -229,4 +295,4 @@ const styles = StyleSheet.create({
   noteText: { fontFamily: T.FONT.Regular, fontSize: 11, lineHeight: 16.5 },
 });
 
-export default { Card, Btn, Badge, StatusPill, Chips, ProgressBar, NoteBox };
+export default { Card, GlowCard, Btn, Badge, StatusPill, Chips, ProgressBar, NoteBox };

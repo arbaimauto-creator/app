@@ -7,7 +7,7 @@ import FastImage from 'react-native-fast-image';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import T from '../../Components/Constants/DesignTokens';
 import Strings from '../../Components/Strings';
-import { Badge, StatusPill } from '../../Components/UI';
+import { Badge, GlowCard, StatusPill } from '../../Components/UI';
 import { getCreatorProfile } from '../../api/creators';
 import { getSeedings } from '../../api/seedings';
 import { seedingStatusLabel } from '../../api/statusModel';
@@ -254,26 +254,31 @@ export default function HomeHero({ navigation, campaigns }) {
         accessibilityRole="button"
         accessibilityLabel={`${Strings.HOME_REWARD_TITLE}, ${points}P, G${gScore}`}
       >
-        <View style={styles.rewardCol}>
-          <Text style={styles.rewardLabel}>{Strings.HOME_REWARD_POINTS}</Text>
-          <Text style={styles.rewardValue}>{points}P</Text>
-          {pendingCount > 0 ? (
-            <Text style={styles.rewardSub}>{Strings.HOME_REWARD_PENDING(pendingCount)}</Text>
-          ) : (
-            <Text style={styles.rewardSub}>{Strings.HOME_REWARD_NO_PENDING}</Text>
-          )}
-        </View>
-        <View style={styles.rewardDivider} />
-        <View style={styles.rewardCol}>
-          <Text style={styles.rewardLabel}>G-Score</Text>
-          <Text style={styles.rewardValue}>G{gScore}</Text>
-          <Text style={styles.rewardSub}>
-            {gScore < CURATED_MIN_G
-              ? Strings.G_NEXT_UNLOCK(CURATED_MIN_G - gScore)
-              : Strings.G_UNLOCKED}
-          </Text>
-        </View>
-        <MaterialCommunityIcons name="chevron-right" size={20} color={COLORS.GREY} />
+        {/* 2026-09-16 컨셉: 포인트·G 요약은 아래에서 앰버 빛이 번지는 카드 */}
+        <GlowCard style={styles.rewardGlow} glow={0.45}>
+          <View style={styles.rewardRowInner}>
+            <View style={styles.rewardCol}>
+              <Text style={styles.rewardLabel}>{Strings.HOME_REWARD_POINTS}</Text>
+              <Text style={styles.rewardValue}>{points}P</Text>
+              {pendingCount > 0 ? (
+                <Text style={styles.rewardSub}>{Strings.HOME_REWARD_PENDING(pendingCount)}</Text>
+              ) : (
+                <Text style={styles.rewardSub}>{Strings.HOME_REWARD_NO_PENDING}</Text>
+              )}
+            </View>
+            <View style={styles.rewardDivider} />
+            <View style={styles.rewardCol}>
+              <Text style={styles.rewardLabel}>G-Score</Text>
+              <Text style={styles.rewardValue}>G{gScore}</Text>
+              <Text style={styles.rewardSub}>
+                {gScore < CURATED_MIN_G
+                  ? Strings.G_NEXT_UNLOCK(CURATED_MIN_G - gScore)
+                  : Strings.G_UNLOCKED}
+              </Text>
+            </View>
+            <MaterialCommunityIcons name="chevron-right" size={20} color={COLORS.GREY} />
+          </View>
+        </GlowCard>
       </TouchableOpacity>
     </View>
   );
@@ -388,20 +393,18 @@ const styles = StyleSheet.create({
   },
   emptyText: { ...TYPE.BODY, color: COLORS.GREY },
 
-  rewardTile: {
-    marginHorizontal: 16,
-    marginBottom: 14,
-    backgroundColor: COLORS.SURFACE,
-    borderRadius: RADIUS.CARD,
-    padding: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.LINE,
-  },
+  rewardTile: { marginHorizontal: 16, marginBottom: 14 },
+  rewardGlow: { paddingVertical: 14, paddingHorizontal: 16 },
+  rewardRowInner: { flexDirection: 'row', alignItems: 'center' },
   rewardCol: { flex: 1 },
   rewardDivider: { width: 1, height: 40, backgroundColor: COLORS.LINE, marginHorizontal: 12 },
   rewardLabel: { ...TYPE.LABEL, color: COLORS.GREY },
-  rewardValue: { fontFamily: FONT.ExtraBold, fontSize: 22, color: COLORS.INK, marginTop: 2 },
+  rewardValue: {
+    fontFamily: T.LATIN.ExtraBold,
+    fontSize: 24,
+    color: COLORS.INK,
+    marginTop: 2,
+    letterSpacing: -0.4,
+  },
   rewardSub: { ...TYPE.XS, marginTop: 2 },
 });
