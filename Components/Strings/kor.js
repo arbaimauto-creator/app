@@ -2288,4 +2288,10 @@ export default {
   ASK_REVIEWER_TOGGLE_DESC: '리뷰어에게 알림이 가고 댓글에 질문 표시가 붙어요.',
   COMMENT_QUESTION_BADGE: '질문',
   VIDEO_DETAILS_CLOSE: '닫기',
+  // 상품 구매 CTA 상태 (2026-09-16) — docs/commerce-and-seller-2026-09-16.md P0
+  PRODUCT_GO_TO_STORE: '사러 가기',
+  PRODUCT_EXTERNAL_BADGE: '외부 사이트',
+  PRODUCT_IN_APP_SOON: '앱 내 구매 준비 중',
+  PRODUCT_IN_APP_SOON_BODY: '지금은 앱에서 바로 결제할 수 없어요. 준비되면 알려드릴게요.',
+  PRODUCT_LINK_OPEN_FAILED: '링크를 열 수 없어요',
 };

@@ -53,6 +53,7 @@ import VideoListItemView from './VideoListItemView';
 import { CheckBox, ImageModal } from './Views';
 import { PricePrivate } from './Views/ProductItemVerticalView';
 import Utils, { LogoutAlert, getIPhoneHeaderMarginTop, isGuestUser } from './utils';
+import { alertInAppPurchaseSoon } from './utils/productCta';
 import { shareLink } from './utils/share';
 const { UIManager } = NativeModules;
 
@@ -237,7 +238,9 @@ function Price({ context }) {
         ) : (
           <>
             <View style={styles.discountPriceContainer}>
-              <Text style={styles.discountRate}>-{Utils.displayDiscountRate(product.discountRate)}%</Text>
+              <Text style={styles.discountRate}>
+                -{Utils.displayDiscountRate(product.discountRate)}%
+              </Text>
               <Text style={styles.discountPrice}>
                 {Utils.displayPrice(
                   product.discountPrice,
@@ -545,7 +548,11 @@ function AskQuestionButton({ context, product }) {
   // B2B는 iOS에서 TouchableOpacity를 쓴다 (포크 시절 동작 유지)
   if (isB2B(context) && Platform.OS !== 'android') {
     return (
-      <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={styles.addCommentButtonContainer}>
+      <TouchableOpacity
+        onPress={onPress}
+        activeOpacity={0.7}
+        style={styles.addCommentButtonContainer}
+      >
         {content}
       </TouchableOpacity>
     );
@@ -982,7 +989,7 @@ function PurchasePopup({ context }) {
 
   const handlePressBuy = () => {
     if (!FEATURES.COMMERCE) {
-      Alert.alert('Unavailable', 'Ordering is not available in this version.');
+      alertInAppPurchaseSoon();
       return;
     }
     APIprovider.newCartItem(

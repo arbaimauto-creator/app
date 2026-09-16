@@ -17,6 +17,11 @@ import FEATURES from '../../Components/Constants/Features';
 import VideoLikeButton from '../../Components/CustomComponents/VideoLikeButton';
 import Strings from '../../Components/Strings';
 import utils, { isGuestUser, LogoutAlert } from '../../Components/utils';
+import {
+  PRODUCT_CTA,
+  openExternalProduct,
+  productCtaState,
+} from '../../Components/utils/productCta';
 import { ReviewGradeBadgeView } from '../../Components/Views';
 import UserProfilePicView from '../UserPageScreen/UserProfilePicView';
 
@@ -142,7 +147,8 @@ function ProductCard({ context }) {
   const product = linkedProduct.productId;
   const priceSource = typeof product === 'object' && product ? product : linkedProduct;
   const price = priceSource.discountPrice > 0 ? priceSource.discountPrice : priceSource.price;
-  const isPurchasable = !linkedProduct.externalLink && linkedProduct.productId;
+  // 버튼 상태 규칙은 Components/utils/productCta 한 곳에 있다 (2026-09-16)
+  const ctaState = productCtaState(linkedProduct);
 
   const onPressCard = () => {
     context.props.navigation.push('ProductPage', {
@@ -171,7 +177,7 @@ function ProductCard({ context }) {
           ) : null}
         </View>
       </View>
-      {isPurchasable ? (
+      {ctaState === PRODUCT_CTA.IN_APP ? (
         <TouchableOpacity
           style={styles.productBuyButton}
           onPress={() => {
@@ -180,9 +186,23 @@ function ProductCard({ context }) {
             }
             context.setState({ isShowPurchaseUIInReview: true });
           }}
+          accessibilityRole="button"
         >
           <Text style={styles.productBuyButtonText}>{Strings.BUY}</Text>
         </TouchableOpacity>
+      ) : null}
+      {ctaState === PRODUCT_CTA.EXTERNAL ? (
+        <TouchableOpacity
+          style={styles.productBuyButton}
+          onPress={() => openExternalProduct(linkedProduct)}
+          accessibilityRole="button"
+          accessibilityLabel={Strings.PRODUCT_GO_TO_STORE}
+        >
+          <Text style={styles.productBuyButtonText}>{Strings.PRODUCT_GO_TO_STORE}</Text>
+        </TouchableOpacity>
+      ) : null}
+      {ctaState === PRODUCT_CTA.SOON ? (
+        <Text style={styles.productSoonText}>{Strings.PRODUCT_IN_APP_SOON}</Text>
       ) : null}
     </TouchableOpacity>
   );
@@ -476,6 +496,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 8,
     marginTop: 10,
+  },
+  productSoonText: {
+    marginLeft: 8,
+    color: 'rgba(255, 255, 255, 0.72)',
+    fontSize: 11.5,
+    fontFamily: T.FONT.Medium,
   },
   productThumb: {
     width: 42,

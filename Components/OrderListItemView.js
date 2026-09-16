@@ -17,6 +17,7 @@ import { Context } from '../Contexts';
 import APIprovider from './APIprovider';
 import Constants from './Constants';
 import FEATURES from './Constants/Features';
+import { alertInAppPurchaseSoon } from './utils/productCta';
 import CourierCompanySelectionModal from './CourierCompanySelectionModal';
 import ModalMenuButton from './ModalMenuButton';
 import Strings from './Strings';
@@ -25,7 +26,7 @@ import CourierTrackingLinkUrls from './utils/CourierTrackingLinkUrls';
 
 function navigateLegacyCommerce(context, routeName, params) {
   if (!FEATURES.COMMERCE) {
-    Alert.alert('Unavailable', 'Ordering is not available in this version.');
+    alertInAppPurchaseSoon();
     return;
   }
   context.props.navigation.navigate(routeName, params);
@@ -154,7 +155,9 @@ function CartItem({ cartItem, context, region, KRWPerUSD }) {
         </Text>
         <OrderOptions options={cartItem.options} />
         <Text style={styles.optionName}>
-          {context.props?.isB2BInquiry ? 'Inquire' : `${Strings.NUMBER_PRODUCTS}: ${cartItem.number}`}
+          {context.props?.isB2BInquiry
+            ? 'Inquire'
+            : `${Strings.NUMBER_PRODUCTS}: ${cartItem.number}`}
         </Text>
         <Text style={styles.price}>
           {Utils.displayPrice(cartItem.price, region, context?.props?.KRWPerUSD)}
@@ -366,7 +369,7 @@ function UserActionButtons({ order, context, disable = false }) {
     actionData.onAction1 = () => {
       // insert address and pay
       APIprovider.getOrder(order.orderId, order.buyer.userId, null).then((order) => {
-      navigateLegacyCommerce(context, 'MakeOrder', {
+        navigateLegacyCommerce(context, 'MakeOrder', {
           order: order,
           onSucceedToPay: () => {
             order.statusCode = Constants.ORDER_STATUS_CODE.NOT_ACCEPTED;

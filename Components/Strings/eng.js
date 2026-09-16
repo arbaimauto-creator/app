@@ -2376,4 +2376,11 @@ export default {
   ASK_REVIEWER_TOGGLE_DESC: 'The reviewer gets notified and the comment is marked as a question.',
   COMMENT_QUESTION_BADGE: 'Question',
   VIDEO_DETAILS_CLOSE: 'Close',
+  // Product purchase CTA states (2026-09-16) — docs/commerce-and-seller-2026-09-16.md P0
+  PRODUCT_GO_TO_STORE: 'Go to store',
+  PRODUCT_EXTERNAL_BADGE: 'External site',
+  PRODUCT_IN_APP_SOON: 'In-app purchase coming soon',
+  PRODUCT_IN_APP_SOON_BODY:
+    'You cannot pay inside the app yet. We will let you know when it is ready.',
+  PRODUCT_LINK_OPEN_FAILED: 'Could not open the link',
 };
