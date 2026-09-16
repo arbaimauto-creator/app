@@ -1874,69 +1874,21 @@ function PurchasePopup({ context }) {
       return;
     }
 
-    APIprovider.newCartItem(
-      product._id,
-      context.state.buyNumber,
-      product.options,
-      context.state.video._id,
-      Constants.CART_FROM.BUY,
-    )
-      .then((result) => {
-        if (result) {
-          context.setState({ isShowPurchaseUIInReview: false });
-          result.product = product;
-          result.product.title = product.titleByCountry;
-          result.shipmentCost =
-            context.state.video.globalGroupBuyingShipmentCost > 0
-              ? context.state.video.globalGroupBuyingShipmentCost
-              : result.shipmentCost;
-          result.globalGroupBuyingDiscountRate = context.state.video.globalGroupBuyingDiscountRate;
-          result.globalGroupBuyingDiscountAmount = 0;
-
-          let price = context.getPriceToPay();
-          const discountRate = result.globalGroupBuyingDiscountRate;
-          if (discountRate > 0) {
-            result.globalGroupBuyingDiscountAmount = price * discountRate;
-          }
-
-          const totalPrice = result.shipmentCost + context.getPriceToPay();
-
-          context.props.navigation.navigate('GlobalMakeOrder', {
-            cartItems: [result],
-            totalPrice: totalPrice,
-            shipmentCost: result.shipmentCost,
-
-            shipmentCostUS: result.shipmentCostUS,
-            lowestOrderPriceForFreeDeliveryKR: result.lowestOrderPriceForFreeDeliveryKR,
-            lowestOrderPriceForFreeDeliveryUS: result.lowestOrderPriceForFreeDeliveryUS,
-            productId: result.product.productId,
-            fetchData: async () => {
-              context.loadData();
-              (context.props.fetchData || context.props.route.params.fetchData)();
-
-              const getTotalReward = await APIprovider.getUserTotalReward(
-                context.props.route.params.logonUserId,
-              );
-              if (getTotalReward.success) {
-                dispatch(setTotalReward({ totalReward: getTotalReward.totalReward }));
-                dispatch(setTotalRevenue({ totalRevenue: getTotalReward.totalRevenue }));
-              }
-            },
-            categoryCode: result.product.categoryCode,
-            globalGroupBuyingDiscountAmount: result.globalGroupBuyingDiscountAmount,
-          });
-        }
-      })
-      .catch((err) => {
-        console.error('Failed to make order', err);
-
-        Alert.alert(
-          'Failed to make order',
-          err.errorMsg ? err.errorMsg : '',
-          [{ text: Strings.OK }],
-          { cancelable: true },
-        );
-      });
+    // 주문서로 이동 (2026-09-16) — 장바구니 생성·주문 생성·결제창 열기는 OrderSheet가 한 흐름으로 한다.
+    // 예전엔 여기서 장바구니를 만든 뒤 지금은 없는 화면(GlobalMakeOrder)으로 보내 흐름이 끊겨 있었다.
+    context.setState({ isShowPurchaseUIInReview: false });
+    context.props.navigation.navigate('OrderSheet', {
+      product: {
+        productId: product._id || product.productId,
+        titleByCountry: product.titleByCountry || product.title,
+        thumbnailUrl: product.thumbnailUrl,
+        price: product.price,
+        discountPrice: product.discountPrice,
+      },
+      quantity: context.state.buyNumber,
+      options: product.options,
+      reviewerVideoId: context.state.video?._id,
+    });
   };
 
   return (
@@ -2221,16 +2173,10 @@ function PurchasePopup({ context }) {
             )
               .then((result) => {
                 if (result) {
-                  Alert.alert(Strings.SUCCEED_TO_CART, Strings.ASK_CHECK_CART, [
+                  // 장바구니 화면은 아직 없다 (2026-09-16) — 등록되지 않은 라우트로 보내던 분기를 지운다.
+                  Alert.alert(Strings.SUCCEED_TO_CART, '', [
                     {
-                      text: Strings.YES,
-                      onPress: () => {
-                        context.props.navigation.push('Cart');
-                        context.setState({ isShowPurchaseUIInReview: false });
-                      },
-                    },
-                    {
-                      text: Strings.NO,
+                      text: Strings.OK,
                       onPress: () => {
                         context.setState({ isShowPurchaseUIInReview: false });
                       },

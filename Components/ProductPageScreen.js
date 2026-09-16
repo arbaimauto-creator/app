@@ -992,62 +992,23 @@ function PurchasePopup({ context }) {
       alertInAppPurchaseSoon();
       return;
     }
-    APIprovider.newCartItem(
-      product.productId,
-      context.state.buyNumber,
-      product.options,
-      context.state.reviewerVideoId,
-      Constants.CART_FROM.BUY,
-    )
-      .then((result) => {
-        // Error 객체도 truthy이므로 명시적으로 실패 판정
-        if (APIprovider.isFailure(result)) {
-          Alert.alert(Strings.FAILED_TO_MAKE_ORDER, result?.errorMsg || '');
-          return;
-        }
-        if (result) {
-          context.setState({ isShowPurchaseUI: false });
-          result.product = context.state.product;
-          const totalPrice = result.product.shipmentCost + context.getPriceToPay();
 
-          context.props.navigation.navigate('MakeOrder', {
-            cartItems: [result],
-            totalPrice: totalPrice,
-            shipmentCost: result.product.shipmentCost,
-
-            shipmentCostUS: result.product.shipmentCostUS,
-            lowestOrderPriceForFreeDeliveryKR: result.product.lowestOrderPriceForFreeDeliveryKR,
-            lowestOrderPriceForFreeDeliveryUS: result.product.lowestOrderPriceForFreeDeliveryUS,
-            productId: result.product.productId,
-            fetchData: async () => {
-              context.loadData();
-              (context.props.fetchData || context.props.route.params.fetchData)();
-
-              const getTotalReward = await APIprovider.getUserTotalReward(
-                context.props.route.params.logonUserId,
-              );
-              if (getTotalReward.success) {
-                dispatch(setTotalReward({ totalReward: getTotalReward.totalReward }));
-                dispatch(setTotalRevenue({ totalRevenue: getTotalReward.totalRevenue }));
-              }
-
-              // APIprovider.addBuyerToProduct({
-              //   userId: context.props.route.params.logonUserId,
-              //   productId: result.product.productId,
-              // });
-            },
-            categoryCode: result.product.categoryCode,
-          });
-        }
-      })
-      .catch((err) => {
-        Alert.alert(
-          'Failed to make order',
-          err.errorMsg ? err.errorMsg : '',
-          [{ text: Strings.OK }],
-          { cancelable: true },
-        );
-      });
+    // 주문서로 이동 (2026-09-16) — 장바구니·주문·결제창은 OrderSheet가 한 흐름으로 처리한다.
+    // 예전엔 장바구니만 만들고 등록되지 않은 화면(MakeOrder)으로 보내 흐름이 끊겨 있었다.
+    context.setState({ isShowPurchaseUI: false });
+    context.props.navigation.navigate('OrderSheet', {
+      product: {
+        productId: product.productId,
+        titleByCountry: product.titleByCountry || product.title,
+        thumbnailUrl: product.thumbnailUrl,
+        price: product.price,
+        discountPrice: product.discountPrice,
+      },
+      quantity: context.state.buyNumber,
+      options: product.options,
+      reviewerVideoId: context.state.reviewerVideoId,
+      onPaid: () => context.loadData(),
+    });
   };
 
   return (
@@ -1358,16 +1319,11 @@ function PurchasePopup({ context }) {
             )
               .then((result) => {
                 if (result) {
-                  Alert.alert(Strings.SUCCEED_TO_CART, Strings.ASK_CHECK_CART, [
+                  // 장바구니 화면은 아직 없다 (2026-09-16) — "확인하러 가기"를 누르면 등록되지 않은
+                  // 라우트로 보내 아무 일도 일어나지 않았다. 담긴 사실만 알리고 팝업을 닫는다.
+                  Alert.alert(Strings.SUCCEED_TO_CART, '', [
                     {
-                      text: Strings.YES,
-                      onPress: () => {
-                        context.props.navigation.push('Cart');
-                        context.setState({ isShowPurchaseUI: false });
-                      },
-                    },
-                    {
-                      text: Strings.NO,
+                      text: Strings.OK,
                       onPress: () => {
                         context.setState({ isShowPurchaseUI: false });
                       },
