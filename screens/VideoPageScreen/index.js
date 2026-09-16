@@ -45,6 +45,7 @@ import DetailsSheet from './DetailsSheet';
 import { setStatusColor } from './Header';
 import LinkedProduct from './LinkedProduct';
 import RenderVideoPlayer from './RenderVideoPlayer';
+import { alertInAppPurchaseSoon } from '../../Components/utils/productCta';
 import ReviewComments from './ReviewComments';
 import VideoRenderDetails from './VideoRenderDetails';
 
@@ -1865,7 +1866,7 @@ function PurchasePopup({ context }) {
 
   const handlePressBuy = () => {
     if (!FEATURES.COMMERCE) {
-      Alert.alert('Unavailable', 'Ordering is not available in this version.');
+      alertInAppPurchaseSoon();
       return;
     }
     if (options.lists.length && !options.lists.find((option) => option.selectedItemName)) {
