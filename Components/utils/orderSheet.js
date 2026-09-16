@@ -41,7 +41,13 @@ export function itemTotal({ price = 0, quantity = 1, options } = {}) {
 }
 
 // 서버 POST /orders 본문 조립. 주소는 한 줄로 합쳐 보낸다(서버 order.address가 문자열).
-export function buildOrderParams({ cartItemId, address, memo = '', buyer = {} }) {
+export function buildOrderParams({
+  cartItemId,
+  address,
+  memo = '',
+  buyer = {},
+  trackingCode = '',
+}) {
   const a = address || {};
   const addressLine = [a.line, a.city, a.state, a.postalCode].filter(Boolean).join(' ').trim();
 
@@ -55,5 +61,7 @@ export function buildOrderParams({ cartItemId, address, memo = '', buyer = {} })
     buyerEmail: buyer.email || '',
     buyerMemo: memo || '',
     isAbroad: isAbroadAddress(a),
+    // 2차 가공물·공동구매 귀속 (2026-09-16 P2) — 서버가 주문에 저장하고 결제 완료 시 ops로 보낸다
+    ...(trackingCode ? { trackingCode: String(trackingCode).trim() } : {}),
   };
 }

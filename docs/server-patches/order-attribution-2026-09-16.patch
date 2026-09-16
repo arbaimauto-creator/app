@@ -1,0 +1,102 @@
+--- a/controller/orderController.js
++++ b/controller/orderController.js
+@@ -1508,6 +1508,69 @@
+   return true;
+ };
+ 
++// Stripe Checkout 세션 생성 (2026-09-16) — 금액·통화는 서버가 계산한다(앱이 보낸 값은 신뢰하지 않는다).
++const createStripeCheckoutSession = async (params) => {
++  const order = await Order.findById(params.orderId);
++  if (!order) {
++    throw { errorMsg: 'Order not found' };
++  }
++  if (order.statusCode !== Const.ORDER_STATUS_CODE.OUTSTANDING) {
++    throw { errorMsg: 'Order is not payable' };
++  }
++
++  const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
++  const currency = (process.env.STRIPE_CURRENCY || 'krw').toLowerCase();
++  const zeroDecimal = currency === 'krw';
++  const unitAmount = zeroDecimal
++    ? Math.round(Number(order.totalPrice))
++    : Math.round(Number(Utils.changeCurrencySync(order.totalPrice, 'KRW')) * 100);
++
++  const returnBase = process.env.APP_CHECKOUT_RETURN_URL || 'https://api.greyd.app/orders/checkout';
++
++  const checkout = await stripe.checkout.sessions.create({
++    mode: 'payment',
++    metadata: { orderId: String(order._id) },
++    line_items: [
++      {
++        quantity: 1,
++        price_data: {
++          currency,
++          unit_amount: unitAmount,
++          product_data: { name: `greyd order ${order.orderId || order._id}` },
++        },
++      },
++    ],
++    success_url: `${returnBase}/success?orderId=${order._id}&session_id={CHECKOUT_SESSION_ID}`,
++    cancel_url: `${returnBase}/cancel?orderId=${order._id}`,
++  });
++
++  return { success: true, sessionId: checkout.id, url: checkout.url };
++};
++
++// ops(greyd-ops) 판매 이벤트 전송 (2026-09-16). env: OPS_BASE_URL, GREYD_APP_MOBILE_KEY
++const notifyOpsOrderPaid = async (order) => {
++  const base = process.env.OPS_BASE_URL;
++  const key = process.env.GREYD_APP_MOBILE_KEY;
++  if (!base || !key) return;
++  const res = await fetch(`${base.replace(/\/$/, '')}/api/webhooks/app-order`, {
++    method: 'POST',
++    headers: { 'Content-Type': 'application/json', 'x-greyd-app-key': key },
++    body: JSON.stringify({
++      orderId: String(order._id),
++      trackingCode: order.trackingCode || null,
++      amount: Number(order.totalPrice) || 0,
++      currency: 'KRW',
++      buyerRef: order.buyer && order.buyer._id ? String(order.buyer._id) : null,
++      productRef:
++        order.cartItems && order.cartItems[0] && order.cartItems[0].product
++          ? String(order.cartItems[0].product._id || order.cartItems[0].product)
++          : null,
++      paidAt: order.paidAt ? new Date(order.paidAt).toISOString() : new Date().toISOString(),
++    }),
++  });
++  if (!res.ok) throw new Error(`ops responded ${res.status}`);
++};
++
+ const payOrderNew = async (params, method = null) => {
+   const session = await startSession();
+ 
+@@ -1522,7 +1585,10 @@
+     params.order = order;
+ 
+     let payment = null;
+-    if (method === 'paypal') {
++    if (method === 'stripe') {
++      // Stripe Checkout (2026-09-16) — 세션을 서버가 직접 조회해 검증한다
++      payment = await Payment.createStripeNew(params, session);
++    } else if (method === 'paypal') {
+       // console.log('Paypal response', params);
+       payment = await Payment.createPayPalNew(params, session);
+     } else {
+@@ -1623,6 +1689,9 @@
+     params.paymentId = payment._id;
+     await order.pay(params, session);
+ 
++    // ops 판매 이벤트 (2026-09-16) — 2차 가공물·공동구매 귀속과 인센티브 집계. 실패해도 결제는 완료다(로그만).
++    notifyOpsOrderPaid(order).catch((e) => console.log('[ops:order] notify failed', e && e.message));
++
+     const seller = await User.findById(order.seller._id).session(session);
+     seller.store.orderCount++;
+     seller.store.newOrderCount++;
+@@ -2903,6 +2972,7 @@
+ // };
+ 
+ module.exports = {
++  createStripeCheckoutSession,
+   getOrderList,
+   getOrder,
+   createOrder,

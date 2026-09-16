@@ -115,6 +115,7 @@ export default class OrderSheetScreen extends React.Component {
         address,
         memo,
         buyer: this.props.route.params?.buyer || {},
+        trackingCode: this.props.route.params?.trackingCode,
       }),
     ).catch((e) => e);
 

@@ -25,6 +25,7 @@ import { seedingStatusLabel, ONGOING_STATUSES, gProgressRatio } from '../../api/
 import { logEvent } from '../../api/common/analytics';
 import { getCreatorProfile, refreshServerStats, saveCreatorProfile } from '../../api/creators';
 import { getMyConsents, pendingConsents } from '../../api/consents';
+import { EMPTY_INCENTIVES, getMyIncentives, hasAnyIncentiveActivity } from '../../api/incentives';
 import { opsFgiCheckIn } from '../../api/opsBridge';
 import { referralCodesFor } from '../../api/referral';
 import {
@@ -72,8 +73,11 @@ export default function ActivityScreen({ navigation, route }) {
   // 2차 가공 요청 (2026-09-16) — 브랜드가 리뷰 재활용을 요청하면 여기 카드로 뜬다.
   // 서버가 조용히 실패해도 빈 배열이라 화면은 그대로 뜬다.
   const [consents, setConsents] = useState([]);
+  const [incentives, setIncentives] = useState(EMPTY_INCENTIVES);
   const loadConsents = useCallback(async () => {
-    setConsents(await getMyConsents());
+    const [c, inc] = await Promise.all([getMyConsents(), getMyIncentives()]);
+    setConsents(c);
+    setIncentives(inc);
   }, []);
   useFocusEffect(
     useCallback(() => {
@@ -731,6 +735,25 @@ export default function ActivityScreen({ navigation, route }) {
         </Card>
       ) : null}
 
+      {/* 내 2차 활용 현황 (2026-09-16 P2·P3) — 가공물·인센티브·공동구매가 하나라도 있으면 */}
+      {hasAnyIncentiveActivity(incentives) ? (
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('SecondaryUseStatus')}
+        >
+          <Card style={styles.consentCard}>
+            <Text style={styles.consentTitle}>{Strings.INC_CARD_TITLE}</Text>
+            <Text style={styles.consentDesc}>
+              {Strings.INC_CARD_DESC(
+                incentives.totals.pending + incentives.totals.approved,
+                incentives.totals.paid,
+              )}
+            </Text>
+            <Text style={styles.incCta}>{Strings.INC_CARD_CTA} ›</Text>
+          </Card>
+        </TouchableOpacity>
+      ) : null}
+
       {/* v2 §7-4 (D6): 첫 검증 루프 완료 시 추천 코드 3장 — 발급자 핸들 각인 */}
       {FEATURES.REFERRAL && (profile?.completedCount ?? 0) >= 1 ? (
         <Card style={styles.referralCard}>
@@ -907,6 +930,7 @@ const styles = StyleSheet.create({
   consentTitle: { ...TYPE.CARD_TITLE, fontSize: 13.5 },
   consentDesc: { ...TYPE.BODY, marginTop: 6, color: COLORS.GREY },
   consentBtn: { marginTop: 10, alignSelf: 'flex-start' },
+  incCta: { fontFamily: FONT.Bold, fontSize: 12, color: COLORS.AMBER_DEEP, marginTop: 8 },
   referralCard: { marginHorizontal: 16, marginBottom: 14 },
   referralTitle: { ...TYPE.CARD_TITLE, fontSize: 13.5 },
   referralCodes: { flexDirection: 'row', marginTop: 10, gap: 8 },

@@ -137,3 +137,27 @@ GroupBuy              공동구매 1건
 3. **정책값 확정** — 성과 기준 수치, 인센티브 요율(3%/5% 제안), 이용허락 기간(12개월 제안), 공동구매 최소 수량·기간·국가.
 
 위 값들은 문서의 제안값으로 먼저 구현하고, 확정되면 설정으로 바꾼다.
+
+
+---
+
+## 진행 상태 (2026-09-16 저녁 갱신) — "결제 다음 단계부터"
+
+**P2·P3를 앱 서버 없이 갈 수 있는 데까지 구현했다.** 판매 귀속 한 조각(주문에 추적 코드 저장 + 결제 완료 시 ops 통보)만 앱 서버 패치로 남겼다.
+
+| 조각 | 위치 | 상태 |
+|---|---|---|
+| 데이터 모델 | ops `RepurposedAsset`·`AppOrderEvent`·`IncentiveGrant`·`GroupBuy` + enum 4종 | 로컬 커밋, 배포 보류 |
+| 가공물 등록·추적 코드 발급 | 브랜드 대시보드 "2차 가공" 섹션 → `registerRepurposedAsset` (`ra-xxxx`) | 로컬 커밋 |
+| 공동구매 개설 | 같은 섹션, 혜택이 공동구매인 동의 건만 → `openGroupBuy` (`gb-xxxx`, 국가·가격·최소수량·기간) | 로컬 커밋 |
+| 판매 귀속 수신 | `POST /api/webhooks/app-order` (x-greyd-app-key, orderId 멱등) → 소재 집계 + 인센티브 PENDING / 공동구매 수량 + REACHED | 로컬 커밋 |
+| 정산 | 콘솔 `/incentives` — 승인(포인트 원장 적립)·무효·지급 완료, 공동구매 미달/배송/완료(완료 시 인센티브 생성) | 로컬 커밋 |
+| 앱 현황 화면 | `Components/SecondaryUseStatusScreen.js` + `api/incentives.js`, 활동 탭 카드 진입, 테스트 4개 | 푸시됨 |
+| 앱 주문 추적 코드 | 주문서가 `route.params.trackingCode`를 주문 본문에 실음 | 푸시됨 |
+| **앱 서버** | `docs/server-patches/order-attribution-2026-09-16.patch` — `Order.trackingCode` + `payOrderNew` 뒤 ops 통보(`OPS_BASE_URL`, `GREYD_APP_MOBILE_KEY`) | **적용 대기(저장소 권한)** |
+
+**아직 없는 것**
+- 추적 코드가 앱에 들어오는 입구: 딥링크 `?tc=`를 읽어 상품 화면 → 주문서로 넘기는 배선. 링크 화이트리스트(`Components/utils/linking.js`)에 `tc` 쿼리 허용이 필요.
+- 소재 클릭 수(clicks) 집계 — 앱 서버 이벤트 없음.
+- 공동구매 참여(결제)는 Stripe 적용 후. 지금은 진행률 표시까지.
+- 요율 설정 UI: `appConfig.salesIncentiveBps`(기본 300)·`GroupBuy.incentiveBps`(기본 500)는 값만 있고 콘솔 입력은 없다.

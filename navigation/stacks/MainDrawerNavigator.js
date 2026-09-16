@@ -7,6 +7,7 @@ import headerBackButton from '../../Components/CustomComponents/headerBackButton
 import { horizontalAnimation } from '../../Components/CustomComponents/horizontalAnimation';
 import CheckoutScreen from '../../Components/CheckoutScreen';
 import SecondaryUseConsentScreen from '../../Components/SecondaryUseConsentScreen';
+import SecondaryUseStatusScreen from '../../Components/SecondaryUseStatusScreen';
 import IdentityVerifyScreen from '../../Components/IdentityVerifyScreen';
 import CartScreen from '../../Components/CartScreen';
 import OrderListScreen from '../../Components/OrderListScreen';
@@ -474,6 +475,13 @@ function MainDrawerNavigator({ route, navigation }) {
           headerShown: false,
           tabBarVisible: false,
         }}
+      />
+      {/* 내 2차 활용 현황 (2026-09-16 P2·P3) — 가공물 성과·인센티브·공동구매 */}
+      <Stack.Screen
+        name="SecondaryUseStatus"
+        component={SecondaryUseStatusScreen}
+        initialParams={initialParams}
+        options={{ title: null, ...headerBackButton, tabBarVisible: false }}
       />
       {/* 본인확인 (2026-09-16, §5.4) — 이메일 코드 */}
       <Stack.Screen
