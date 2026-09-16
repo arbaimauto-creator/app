@@ -1031,6 +1031,15 @@ export default class APIprovider {
     });
   };
 
+  // 장바구니 조회·삭제 (2026-09-16) — 장바구니 화면용. 서버는 requesterId 기준으로 본인 것만 돌려준다.
+  static getCartList = () => {
+    return this.request(API_ROOT_URL + '/cart', 'GET', { buyerId: this.requesterId });
+  };
+
+  static deleteCartItem = (cartItemId) => {
+    return this.request(API_ROOT_URL + '/cart/' + cartItemId, 'DELETE', {});
+  };
+
   // 장바구니 항목 생성 (2026-09-16). 호출부는 있었는데 정의가 없어 구매 흐름이 첫 단계에서 끊겨 있었다.
   // cartOrBuy=BUY면 장바구니에 쌓지 않고 바로 주문서로 가는 단건이다.
   static newCartItem = (productId, number, options, reviewerVideoId, cartOrBuy) => {

@@ -1,6 +1,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 import {
   Alert,
+  Linking,
   FlatList,
   PermissionsAndroid,
   Platform,
@@ -24,6 +25,7 @@ import { seedingStatusLabel, ONGOING_STATUSES, gProgressRatio } from '../../api/
 import { logEvent } from '../../api/common/analytics';
 import { getCreatorProfile, refreshServerStats, saveCreatorProfile } from '../../api/creators';
 import { getMyConsents, pendingConsents } from '../../api/consents';
+import { opsFgiCheckIn } from '../../api/opsBridge';
 import { referralCodesFor } from '../../api/referral';
 import {
   personalizedPoints,
@@ -510,6 +512,71 @@ export default function ActivityScreen({ navigation, route }) {
           <Text style={styles.subInfo}>{Strings.ADDRESS_SAVED}</Text>
         ) : null}
 
+        {/* FGI 일정·선정·출석 (2026-09-16, 기획서 §5.3 P3) — 세션이 설정된 캠페인만 */}
+        {campaign.fgiSession && seeding.status !== SEEDING_STATUS.CANCELLED ? (
+          <View style={styles.fgiBox}>
+            <Text style={styles.fgiTitle}>
+              {Strings.FGI_SESSION_TITLE} ·{' '}
+              {campaign.fgiSession.mode === 'OFFLINE' ? Strings.FGI_OFFLINE : Strings.FGI_ONLINE}
+            </Text>
+            {campaign.fgiSession.at ? (
+              <Text style={styles.subInfo}>
+                {new Date(campaign.fgiSession.at).toLocaleString()}
+              </Text>
+            ) : null}
+            {campaign.fgiSession.place ? (
+              <Text style={styles.subInfo}>{campaign.fgiSession.place}</Text>
+            ) : null}
+            <Text
+              style={[styles.subInfo, seeding.fgiSelection === 'SELECTED' && styles.fgiSelected]}
+            >
+              {seeding.fgiSelection === 'SELECTED'
+                ? Strings.FGI_SELECTED
+                : seeding.fgiSelection === 'WAITLIST'
+                  ? Strings.FGI_WAITLIST
+                  : seeding.fgiSelection === 'REJECTED'
+                    ? Strings.FGI_REJECTED
+                    : Strings.FGI_SELECTION_PENDING}
+            </Text>
+            {seeding.fgiSelection === 'SELECTED' ? (
+              <View style={styles.fgiActions}>
+                {campaign.fgiSession.link ? (
+                  <Btn
+                    variant="ghost"
+                    small
+                    title={Strings.FGI_JOIN_LINK}
+                    onPress={() => Linking.openURL(campaign.fgiSession.link).catch(() => {})}
+                  />
+                ) : null}
+                {seeding.fgiAttendedAt ? (
+                  <Badge tone="open" text={Strings.FGI_CHECKED_IN} />
+                ) : (
+                  <Btn
+                    small
+                    title={Strings.FGI_CHECK_IN}
+                    onPress={async () => {
+                      try {
+                        const res = await opsFgiCheckIn(seeding.campaignId);
+                        await upsertSeeding(seeding.campaignId, { fgiAttendedAt: res?.attendedAt });
+                        reload();
+                      } catch (e) {
+                        const code = e?.body?.error || e?.message;
+                        Alert.alert(
+                          code === 'too_early'
+                            ? Strings.FGI_CHECKIN_WINDOW
+                            : Strings.FGI_CHECKIN_FAILED,
+                          '',
+                          [{ text: Strings.OK }],
+                        );
+                      }
+                    }}
+                  />
+                )}
+              </View>
+            ) : null}
+          </View>
+        ) : null}
+
         {/* 시안 23: 발송 전에는 무페널티 취소 가능 */}
         {seeding.status === SEEDING_STATUS.APPLIED || seeding.status === SEEDING_STATUS.APPROVED ? (
           <Btn
@@ -820,6 +887,22 @@ const styles = StyleSheet.create({
   emptyTitle: { fontFamily: FONT.Bold, fontSize: 14.5, color: COLORS.INK },
 
   // 추천 코드 카드
+  fgiBox: {
+    marginTop: 10,
+    padding: 10,
+    borderRadius: RADIUS.FIELD,
+    backgroundColor: COLORS.AMBER_FAINT,
+    gap: 3,
+  },
+  fgiTitle: { fontFamily: FONT.Bold, fontSize: 12, color: COLORS.AMBER_DEEP },
+  fgiSelected: { color: COLORS.GREEN, fontFamily: FONT.Bold },
+  fgiActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 6,
+    flexWrap: 'wrap',
+  },
   consentCard: { marginHorizontal: 16, marginBottom: 14 },
   consentTitle: { ...TYPE.CARD_TITLE, fontSize: 13.5 },
   consentDesc: { ...TYPE.BODY, marginTop: 6, color: COLORS.GREY },

@@ -70,6 +70,8 @@ export async function getCreatorProfile() {
     strikes: server.strikes,
     completedCount: server.completedCount,
     rewardPoints: server.points,
+    // 본인확인(2026-09-16) — 서버가 정본. 로컬 낙관치는 서버 값이 오면 덮인다.
+    identityVerifiedAt: server.identityVerifiedAt ?? local?.identityVerifiedAt ?? null,
   };
 }
 

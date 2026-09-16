@@ -189,15 +189,30 @@ export default function MyScreen({ navigation }) {
             [Strings.MY_TRUST_STRIKES, String(trust.strikes)],
             [Strings.MY_TRUST_GRACE, String(trust.graceUsed)],
             [Strings.MY_TRUST_SURVEYS, String(trust.surveys)],
-            [
-              Strings.MY_TRUST_IDENTITY,
-              trust.identityVerified ? Strings.MY_TRUST_VERIFIED : Strings.MY_TRUST_IDENTITY_SOON,
-            ],
           ].map(([label, value]) => (
             <View key={label} style={[styles.row, styles.mt8]}>
               <Text style={styles.body}>{label}</Text>
               <Text style={styles.bodyStrong}>{value}</Text>
             </View>
+          ))}
+          {/* 본인확인 (2026-09-16, §5.4) — 미완료면 여기서 바로 시작한다 */}
+          {[0].map(() => (
+            <TouchableOpacity
+              key="identity"
+              style={[styles.row, styles.mt8]}
+              disabled={trust.identityVerified}
+              onPress={() => navigation.navigate('IdentityVerify', { onDone: reload })}
+              accessibilityRole="button"
+            >
+              <Text style={styles.body}>{Strings.MY_TRUST_IDENTITY}</Text>
+              <Text
+                style={[styles.bodyStrong, !trust.identityVerified && { color: COLORS.AMBER_DEEP }]}
+              >
+                {trust.identityVerified
+                  ? Strings.MY_TRUST_VERIFIED
+                  : `${Strings.MY_TRUST_VERIFY_CTA} ›`}
+              </Text>
+            </TouchableOpacity>
           ))}
           <TouchableOpacity
             onPress={openAppeal}
@@ -321,6 +336,28 @@ export default function MyScreen({ navigation }) {
               <Text style={[styles.xs, styles.mt4]}>{Strings.REF_MY_REFERENCES_DESC}</Text>
             </Card>
           </TouchableOpacity>
+        ) : null}
+
+        {/* 장바구니·주문 내역 (2026-09-16) — COMMERCE 플래그가 켜져야 노출 */}
+        {FEATURES.COMMERCE ? (
+          <>
+            <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('Cart')}>
+              <Card>
+                <View style={styles.row}>
+                  <Text style={styles.rowTitle}>{Strings.MY_CART_ROW}</Text>
+                  <Text style={styles.chev}>›</Text>
+                </View>
+              </Card>
+            </TouchableOpacity>
+            <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('OrderList')}>
+              <Card>
+                <View style={styles.row}>
+                  <Text style={styles.rowTitle}>{Strings.MY_ORDERS_ROW}</Text>
+                  <Text style={styles.chev}>›</Text>
+                </View>
+              </Card>
+            </TouchableOpacity>
+          </>
         ) : null}
 
         {/* 행 카드 3개 */}

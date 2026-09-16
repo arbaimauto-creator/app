@@ -90,14 +90,18 @@ export async function opsGetSeedings() {
 
 // 수령 확인 → ops Shipment DELIVERED (수동 브리지 ② 일부 대체)
 export async function opsReceived(campaignId) {
-  if (!FEATURES.LIVE_OPS_API) return;
+  if (!FEATURES.LIVE_OPS_API) {
+    return;
+  }
   const greydAppId = await getGreydAppId();
   await sendOrQueue('received', campaignId, '/received', { campaignId, greydAppId });
 }
 
 // 리뷰 링크 제출 → ops Content + POSTED (수동 브리지 ③ 대체)
 export async function opsUpload(campaignId, postUrl, format) {
-  if (!FEATURES.LIVE_OPS_API) return;
+  if (!FEATURES.LIVE_OPS_API) {
+    return;
+  }
   const greydAppId = await getGreydAppId();
   await sendOrQueue('upload', campaignId, '/upload', {
     campaignId,
@@ -108,7 +112,9 @@ export async function opsUpload(campaignId, postUrl, format) {
 }
 
 export async function opsCancel(campaignId) {
-  if (!FEATURES.LIVE_OPS_API) return;
+  if (!FEATURES.LIVE_OPS_API) {
+    return;
+  }
   const greydAppId = await getGreydAppId();
   await sendOrQueue('cancel', campaignId, '/cancel', { campaignId, greydAppId });
 }
@@ -131,8 +137,23 @@ export async function opsAddress(campaignId, address) {
   });
 }
 
+// FGI 출석 확인 (2026-09-16, 기획서 §5.3 P3) — 선정된 사람이 세션 시작 30분 전부터 누른다.
+// 실패하면 예외를 그대로 올린다(화면이 실패 안내를 띄워야 한다 — 출석은 조용히 삼키면 안 된다).
+export async function opsFgiCheckIn(campaignId) {
+  if (!FEATURES.LIVE_OPS_API) {
+    return { ok: true, attendedAt: new Date().toISOString(), engine: 'mock' };
+  }
+  const greydAppId = await getGreydAppId();
+  return opsPost('/fgi-attend', {
+    greydAppId,
+    campaignId: String(campaignId).replace(/^cmp-/, ''),
+  });
+}
+
 export async function opsFgi(campaignId, survey, firstImpression) {
-  if (!FEATURES.LIVE_OPS_API) return;
+  if (!FEATURES.LIVE_OPS_API) {
+    return;
+  }
   const greydAppId = await getGreydAppId();
   await sendOrQueue('fgi', campaignId, '/fgi', {
     campaignId,
