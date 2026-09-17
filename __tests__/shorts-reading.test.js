@@ -53,6 +53,21 @@ test('review stays available after legacy visibility updates and opens only on r
   act(() => {
     tree.update(<VideoOverlay context={context} />);
   });
+  // 2026-09-17: 기본은 리뷰 요약 숨김 — "리뷰 보기" 핸들만 보이고, 눌러야 본문이 뜬다
+  expect(JSON.stringify(tree.toJSON())).not.toContain('A review to read.');
+  const reveal = tree.root.findAll(
+    (node) =>
+      typeof node.props.onPress === 'function' &&
+      JSON.stringify(node.children.map((c) => String(c))).includes(Strings.SHORTS_SHOW_REVIEW) ===
+        false &&
+      node.props.accessibilityRole === 'button',
+  )[0];
+  act(() => {
+    reveal.props.onPress();
+  });
+  act(() => {
+    tree.update(<VideoOverlay context={context} />);
+  });
   expect(JSON.stringify(tree.toJSON())).toContain('A review to read.');
   expect(context.openDetails).not.toHaveBeenCalled();
   const button = tree.root.findAll(
