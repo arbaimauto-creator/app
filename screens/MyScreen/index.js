@@ -1,6 +1,7 @@
 // 마이 탭 (시안 화면 18) — 프로필·G-스코어·포인트·추천 코드·설정 진입점.
 import React, { useCallback, useState } from 'react';
 import {
+  Alert,
   Image,
   Platform,
   SafeAreaView,
@@ -27,6 +28,7 @@ import { Badge, Btn } from '../../Components/UI';
 import { selectCampaigns } from '../../slices/campaign';
 import { getSeedings } from '../../api/seedings';
 import { profileCompleteness, trustComponents } from '../../api/trust';
+import { prefSetSafe } from '../../api/prefSafe';
 import { buildRewardLedger, ledgerTotals } from '../../api/rewards';
 import {
   gProgressRatio,
@@ -51,7 +53,15 @@ export default function MyScreen({ navigation }) {
   const [bonusPoints, setBonusPoints] = useState(0);
   const [seedings, setSeedings] = useState({});
   const [notiReadAt, setNotiReadAt] = useState(null);
+  // 판매자 모드 전환 (2026-09-17) — 판매자 승인된 계정(userIsSeller)에만 노출
+  const [isSeller, setIsSeller] = useState(false);
   const campaigns = useSelector(selectCampaigns);
+
+  const switchToSellerMode = () => {
+    prefSetSafe('inviteRole', 'brand')
+      .then(() => Alert.alert(Strings.SELLER_MODE_SWITCH, Strings.SELLER_MODE_RESTART))
+      .catch(() => {});
+  };
 
   const reload = useCallback(() => {
     getCreatorProfile()
@@ -66,6 +76,9 @@ export default function MyScreen({ navigation }) {
     // 온보딩 완료 보상 +50P (v2 §3-③) — mock: 로컬 합산
     Preference.get('onboardingBonusGranted')
       .then((v) => setBonusPoints(v === 'true' ? 50 : 0))
+      .catch(() => {});
+    Preference.get('userIsSeller')
+      .then((v) => setIsSeller(v === 'true' || v === '1' || v === 'approved'))
       .catch(() => {});
   }, []);
 
@@ -368,6 +381,19 @@ export default function MyScreen({ navigation }) {
               </Card>
             </TouchableOpacity>
           </>
+        ) : null}
+
+        {/* 판매자 모드 전환 (2026-09-17) — 판매자 계정만. 셸은 부팅 시 역할을 읽으므로 재시작 안내 */}
+        {FEATURES.BRAND_APP && isSeller ? (
+          <TouchableOpacity activeOpacity={0.7} onPress={switchToSellerMode}>
+            <Card>
+              <View style={styles.row}>
+                <Text style={styles.rowTitle}>{Strings.SELLER_MODE_SWITCH}</Text>
+                <Text style={styles.chev}>›</Text>
+              </View>
+              <Text style={[styles.xs, styles.mt4]}>{Strings.SELLER_MODE_SWITCH_DESC}</Text>
+            </Card>
+          </TouchableOpacity>
         ) : null}
 
         {/* 행 카드 3개 */}

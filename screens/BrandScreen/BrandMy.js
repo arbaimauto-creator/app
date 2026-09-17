@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import {
+  Alert,
   Linking,
   SafeAreaView,
   ScrollView,
@@ -17,6 +18,8 @@ import Strings from '../../Components/Strings';
 import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
 import { fetchCampaignReviews } from '../../api/reviews';
 import { getEvaluations } from '../../api/evaluations';
+import { prefSetSafe } from '../../api/prefSafe';
+import APIprovider from '../../Components/APIprovider';
 
 const { COLORS, FONT } = T;
 
@@ -98,6 +101,43 @@ export default function BrandMy({ navigation }) {
           </View>
           <Text style={[styles.xs, { marginTop: 4 }]}>{Strings.BRAND_MY_REPORT_NOTE}</Text>
         </Card>
+
+        {/* 스토어 관리 (2026-09-17) — 앱에서도 상품 등록·관리. 웹(ops 판매자 포털)과 같은 API */}
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() =>
+            navigation.navigate('ProductList', {
+              sellerId: APIprovider.requesterId,
+              sellerName: brandName,
+            })
+          }
+        >
+          <Card style={[styles.rowCard, styles.rowInline]}>
+            <Text style={styles.rowTitle}>{Strings.STORE_MANAGE_MY_PRODUCTS}</Text>
+            <Text style={styles.xs}>›</Text>
+          </Card>
+        </TouchableOpacity>
+        <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('AddingNewProduct')}>
+          <Card style={[styles.rowCard, styles.rowInline]}>
+            <Text style={styles.rowTitle}>{Strings.STORE_ADD_PRODUCT}</Text>
+            <Text style={styles.xs}>+ ›</Text>
+          </Card>
+        </TouchableOpacity>
+
+        {/* 인플루언서 모드 복귀 (2026-09-17) — 셸은 부팅 시 역할을 읽으므로 재시작 안내 */}
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() =>
+            prefSetSafe('inviteRole', 'influencer')
+              .then(() => Alert.alert(Strings.INFLUENCER_MODE_SWITCH, Strings.INFLUENCER_MODE_RESTART))
+              .catch(() => {})
+          }
+        >
+          <Card style={[styles.rowCard, styles.rowInline]}>
+            <Text style={styles.rowTitle}>{Strings.INFLUENCER_MODE_SWITCH}</Text>
+            <Text style={styles.xs}>›</Text>
+          </Card>
+        </TouchableOpacity>
 
         {/* 담당 애널리스트 문의 */}
         <TouchableOpacity
