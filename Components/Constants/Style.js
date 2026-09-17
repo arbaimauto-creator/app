@@ -13,7 +13,8 @@ const COLOR_GREY = '#48453D';
 const COLOR_RED = '#FF3700';
 // const COLOR_BACKGROUND_DARK = '#0E0E0E';
 // const COLOR_BACKGROUND_DARK = '#3A3A3A';
-const COLOR_BACKGROUND_DARK = '#F4F4F4';
+// 2026-09-17 글래스 컨셉: 레거시 화면 배경도 웜 크림으로 정렬 (DesignTokens.COLORS.BG와 동일)
+const COLOR_BACKGROUND_DARK = '#F3EDE2';
 const COLOR_USER_CLASS_1 = '#FF6174';
 const COLOR_USER_CLASS_2 = '#FF6174';
 const COLOR_USER_CLASS_3 = '#FF6174';
