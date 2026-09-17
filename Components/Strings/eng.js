@@ -1983,6 +1983,16 @@ export default {
   REGULAR_PROMPT_HELPFUL_YES: 'It helped',
   REGULAR_PROMPT_LATER: 'Not sure yet',
   REGULAR_PROMPT_PURCHASE_TITLE: 'Was the review right?',
+  // Brand store (2026-09-17)
+  STORE_VISIT_ALL: 'See all products',
+  STORE_MANAGE_MY_PRODUCTS: 'Manage my products',
+  STORE_ADD_PRODUCT: 'Add product',
+  SELLER_MODE_SWITCH: 'Switch to seller mode',
+  SELLER_MODE_SWITCH_DESC: 'Store management and review evaluation for sellers',
+  SELLER_MODE_RESTART: 'Switched. Fully close and reopen the app to start in seller mode.',
+  INFLUENCER_MODE_SWITCH: 'Back to influencer mode',
+  INFLUENCER_MODE_RESTART:
+    'Switched. Fully close and reopen the app to start in influencer mode.',
   SET_TERMS_PRIVACY: 'Terms · Privacy Policy',
   SET_LOGOUT: 'Log out',
   SET_DELETE_ACCOUNT: 'Delete account',

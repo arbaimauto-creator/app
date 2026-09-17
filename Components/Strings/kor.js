@@ -1905,6 +1905,16 @@ export default {
   REGULAR_PROMPT_HELPFUL_YES: '도움됐어요',
   REGULAR_PROMPT_LATER: '아직 몰라요',
   REGULAR_PROMPT_PURCHASE_TITLE: '리뷰대로였나요?',
+  // 브랜드 스토어 (2026-09-17)
+  STORE_VISIT_ALL: '모든 상품 보러가기',
+  STORE_MANAGE_MY_PRODUCTS: '내 상품 관리',
+  STORE_ADD_PRODUCT: '상품 등록',
+  SELLER_MODE_SWITCH: '판매자 모드로 전환',
+  SELLER_MODE_SWITCH_DESC: '스토어 관리·리뷰 평가용 판매자 화면으로 전환합니다',
+  SELLER_MODE_RESTART: '전환되었어요. 앱을 완전히 종료했다가 다시 열면 판매자 화면으로 시작합니다.',
+  INFLUENCER_MODE_SWITCH: '인플루언서 모드로 돌아가기',
+  INFLUENCER_MODE_RESTART:
+    '전환되었어요. 앱을 완전히 종료했다가 다시 열면 인플루언서 화면으로 시작합니다.',
   SET_TERMS_PRIVACY: '이용약관 · 개인정보 처리방침',
   SET_LOGOUT: '로그아웃',
   SET_DELETE_ACCOUNT: '계정 삭제',

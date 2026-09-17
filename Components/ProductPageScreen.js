@@ -49,6 +49,8 @@ import ModalMenuButton from './ModalMenuButton';
 import ProductListItemView from './ProductListItemView';
 import ReportModal from './ReportModal';
 import Strings from './Strings';
+import T from './Constants/DesignTokens';
+import { openExternalStore } from '../api/outbound';
 import VideoListItemView from './VideoListItemView';
 import { CheckBox, ImageModal } from './Views';
 import { PricePrivate } from './Views/ProductItemVerticalView';
@@ -341,6 +343,32 @@ function Seller({ context }) {
         <Text style={styles.sellerName}>{product.seller.name}</Text>
       </View>
     </TouchableNativeFeedback>
+  );
+}
+
+// 외부몰 이동 (2026-09-17): 자사몰이 있는 판매자면 그레이드 귀속 파라미터를 붙여 내보낸다
+function ExternalStoreButton({ context }) {
+  const { product } = context.state;
+  const url = product.externalProductPageUrl || product.lowestPriceLink;
+  if (!url) {
+    return null;
+  }
+  return (
+    <TouchableOpacity
+      style={styles.externalStoreButton}
+      activeOpacity={0.8}
+      accessibilityRole="link"
+      onPress={() =>
+        openExternalStore({
+          sellerId: product.seller?.userId,
+          productId: product.productId,
+          url,
+          uid: APIprovider.requesterId,
+        }).catch(() => {})
+      }
+    >
+      <Text style={styles.externalStoreButtonText}>{Strings.STORE_VISIT_ALL} ↗</Text>
+    </TouchableOpacity>
   );
 }
 
@@ -2282,6 +2310,7 @@ export default class ProductPageScreen extends React.Component {
 
             <View style={styles.descriptionContainer}>
               <Seller context={this} />
+              <ExternalStoreButton context={this} />
               <DescriptionImages context={this} />
               <Description context={this} />
             </View>
@@ -2465,6 +2494,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Constants.TIER_COLORS.ARTISAN,
     fontFamily: Constants.CUSTOM_FONTS.SUIT.SEMIBOLD,
+  },
+  externalStoreButton: {
+    marginTop: 10,
+    marginBottom: 4,
+    paddingVertical: 11,
+    borderRadius: 9,
+    borderWidth: 1.5,
+    borderColor: T.COLORS.AMBER,
+    backgroundColor: T.COLORS.AMBER_FAINT,
+    alignItems: 'center',
+  },
+  externalStoreButtonText: {
+    fontFamily: T.FONT.Bold,
+    fontSize: 13,
+    color: T.COLORS.AMBER_DEEP,
   },
   description: {
     fontSize: 16,

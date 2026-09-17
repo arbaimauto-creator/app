@@ -23,6 +23,26 @@ import SortingKeywordSelector, {
   PRODUCT_SORTING_KEYWORD_LIST,
 } from './Views/SortingKeywordSelector';
 import { moderateScale } from './utils/scailing';
+import { openExternalStore } from '../api/outbound';
+
+// 외부몰 버튼 — 그리드 위 고정, 디자인 토큰 색만 사용
+const externalStyles = StyleSheet.create({
+  button: {
+    marginHorizontal: 12,
+    marginTop: 10,
+    paddingVertical: 11,
+    borderRadius: 9,
+    borderWidth: 1.5,
+    borderColor: T.COLORS.AMBER,
+    backgroundColor: T.COLORS.AMBER_FAINT,
+    alignItems: 'center',
+  },
+  text: {
+    fontFamily: T.FONT.Bold,
+    fontSize: 13,
+    color: T.COLORS.AMBER_DEEP,
+  },
+});
 
 
 const { UIManager } = NativeModules;
@@ -357,10 +377,37 @@ export default class ProductListScreen extends React.Component {
     }
   };
 
+  // 외부몰 이동 (2026-09-17): 판매자 상품 중 자사몰 링크가 있으면 스토어 상단에 버튼
+  renderExternalStoreButton() {
+    const list = this.state.productList || [];
+    const withUrl = list.find((p) => p.externalProductPageUrl || p.lowestPriceLink);
+    if (!withUrl || !this.state.sellerId) {
+      return null;
+    }
+    const url = withUrl.externalProductPageUrl || withUrl.lowestPriceLink;
+    return (
+      <TouchableOpacity
+        style={externalStyles.button}
+        activeOpacity={0.8}
+        accessibilityRole="link"
+        onPress={() =>
+          openExternalStore({
+            sellerId: this.state.sellerId,
+            url,
+            uid: APIprovider.requesterId,
+          }).catch(() => {})
+        }
+      >
+        <Text style={externalStyles.text}>{Strings.STORE_VISIT_ALL} ↗</Text>
+      </TouchableOpacity>
+    );
+  }
+
   render() {
     return (
       <SafeAreaView style={styles.safeAreaContainer}>
         <View style={styles.container}>
+          {this.renderExternalStoreButton()}
           <SectionGrid
             ref={this.productListSectionGridRef}
             showsVerticalScrollIndicator={false}
