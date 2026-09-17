@@ -334,6 +334,16 @@ export default function CuratedHome({ navigation }) {
     navigation.navigate('VideoPage', { videoList: playablePosts, videoId: item._id });
   };
 
+  // 구매 직행 (2026-09-17): 연결 상품이 있으면 상품 페이지로, 없으면 리뷰를 열어 구매 CTA로
+  const openBuy = (item) => {
+    const productId = item?.linkedProduct?.productId || item?.linkedProduct?._id;
+    if (productId) {
+      navigation.navigate('ProductPage', { productId });
+      return;
+    }
+    openPost(item);
+  };
+
   const openAuthor = (item) => {
     const userId = authorId(item);
     if (!userId) {
@@ -545,7 +555,7 @@ export default function CuratedHome({ navigation }) {
                 onShare={() =>
                   Share.share({ message: item.titleByCountry || item.title || caption(item) })
                 }
-                onCreate={() => navigation.navigate('Camera')}
+                onBuy={() => openBuy(item)}
               />
             ))}
           </View>
@@ -580,7 +590,7 @@ function RoundIcon({ name, dot, onPress }) {
   );
 }
 
-function PostCard({ item, following, saved, onOpen, onAuthor, onFollow, onSave, onShare, onCreate }) {
+function PostCard({ item, following, saved, onOpen, onAuthor, onFollow, onSave, onShare, onBuy }) {
   const name = authorName(item);
   const value = reviewScore(item);
   return (
@@ -671,8 +681,9 @@ function PostCard({ item, following, saved, onOpen, onAuthor, onFollow, onSave, 
             onPress={onSave}
           />
           <Action icon="share-variant-outline" label={Strings.SHARE} onPress={onShare} />
-          <TouchableOpacity style={styles.makeAction} onPress={onCreate}>
-            <Text style={styles.makeActionText}>{Strings.REF_MAKE_LIKE_THIS}</Text>
+          {/* "참고해서 올리기"는 저장(책갈피) → 리뷰 상세의 히든 동선으로 — 홈 카드는 구매 직행 (2026-09-17) */}
+          <TouchableOpacity style={styles.makeAction} onPress={onBuy}>
+            <Text style={styles.makeActionText}>{Strings.HOME_GO_BUY}</Text>
           </TouchableOpacity>
         </View>
       </View>

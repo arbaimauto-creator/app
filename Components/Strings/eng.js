@@ -2069,6 +2069,7 @@ export default {
   HOME_METRIC_EVIDENCE: 'Evidence',
   HOME_METRIC_MADE: 'Made',
   HOME_METRIC_COMMENTS: 'Comments',
+  HOME_GO_BUY: 'Go buy',
   // Review auto-translation (2026-09-17)
   TRANSLATE_SHOW_ORIGINAL: 'Show original',
   TRANSLATE_SHOW_TRANSLATION: 'Show translation',

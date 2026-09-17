@@ -1991,6 +1991,7 @@ export default {
   HOME_METRIC_EVIDENCE: '근거',
   HOME_METRIC_MADE: '제작',
   HOME_METRIC_COMMENTS: '댓글',
+  HOME_GO_BUY: '구매하러 가기',
   // 리뷰 자동 번역 (2026-09-17)
   TRANSLATE_SHOW_ORIGINAL: '원문 보기',
   TRANSLATE_SHOW_TRANSLATION: '번역 보기',
