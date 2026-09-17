@@ -305,17 +305,20 @@ export default function CuratedHome({ navigation }) {
 
   const creators = useMemo(() => {
     const seen = new Set();
-    return posts
-      .filter((item) => {
-        const name = authorName(item);
-        if (seen.has(name)) {
-          return false;
-        }
-        seen.add(name);
-        return true;
-      })
+    const unique = posts.filter((item) => {
+      const name = authorName(item);
+      if (seen.has(name)) {
+        return false;
+      }
+      seen.add(name);
+      return true;
+    });
+    // 단골 리뷰어 우선 노출 (2026-09-17, 설계 §4-3) — 안정 정렬이라 나머지 순서는 유지
+    const isRegularAuthor = (item) => Boolean(regularState[authorId(item)]?.regular);
+    return unique
+      .sort((a, b) => Number(isRegularAuthor(b)) - Number(isRegularAuthor(a)))
       .slice(0, 8);
-  }, [posts]);
+  }, [posts, regularState]);
 
   const playablePosts = useMemo(() => posts.filter((post) => !post.isMock), [posts]);
 
