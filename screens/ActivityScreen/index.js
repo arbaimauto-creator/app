@@ -17,7 +17,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import Preference from 'react-native-default-preference';
 import T from '../../Components/Constants/DesignTokens';
-import { Card, GlowCard, Btn, Badge, StatusPill, ProgressBar, NoteBox } from '../../Components/UI';
+import { Badge, Btn, Card, GlassOrbs, GlowCard, NoteBox, ProgressBar, StatusPill } from '../../Components/UI';
 import Strings from '../../Components/Strings';
 import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
 import { getSeedings, setSeedingStatus, upsertSeeding, SEEDING_STATUS } from '../../api/seedings';
@@ -685,6 +685,7 @@ export default function ActivityScreen({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <GlassOrbs />
       <View style={styles.headerRow}>
         <Text style={styles.header}>{Strings.ACTIVITY_TAB}</Text>
         <Badge tone="amber" text={`${points}P`} />

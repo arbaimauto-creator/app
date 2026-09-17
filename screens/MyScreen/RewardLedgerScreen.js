@@ -19,7 +19,7 @@ import Preference from 'react-native-default-preference';
 import T from '../../Components/Constants/DesignTokens';
 import FEATURES from '../../Components/Constants/Features';
 import Strings from '../../Components/Strings';
-import { Badge, Card, Chips } from '../../Components/UI';
+import { Badge, Card, Chips, GlassOrbs } from '../../Components/UI';
 import { selectCampaigns } from '../../slices/campaign';
 import { getSeedings } from '../../api/seedings';
 import { getCreatorProfile } from '../../api/creators';
@@ -89,6 +89,7 @@ export default function RewardLedgerScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <GlassOrbs />
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}

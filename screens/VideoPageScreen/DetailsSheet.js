@@ -17,6 +17,7 @@ import {
   View,
 } from 'react-native';
 import IconMaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { BlurView } from '@react-native-community/blur';
 import T from '../../Components/Constants/DesignTokens';
 import Strings from '../../Components/Strings';
 import { ReviewGradeBadgeView } from '../../Components/Views';
@@ -105,6 +106,16 @@ export default function DetailsSheet({
           <View style={styles.spacer} />
         </TouchableWithoutFeedback>
         <Animated.View style={[styles.sheet, { transform: [{ translateY }] }]}>
+          {/* 글래스 시트 (2026-09-17) — 뒤의 영상이 흐려져 비친다 */}
+          <BlurView
+            style={StyleSheet.absoluteFill}
+            pointerEvents="none"
+            blurType="light"
+            blurAmount={22}
+            overlayColor="transparent"
+            reducedTransparencyFallbackColor="#FFFFFF"
+          />
+          <View style={styles.sheetTint} pointerEvents="none" />
           <View {...headerPan.panHandlers}>
             <View style={styles.grabBar} />
             <View style={styles.header}>
@@ -187,12 +198,13 @@ const styles = StyleSheet.create({
   spacer: { flex: 1 },
   sheet: {
     height: SHEET_H,
-    backgroundColor: COLORS.SURFACE,
+    backgroundColor: 'transparent',
     borderTopLeftRadius: RADIUS.SHEET,
     borderTopRightRadius: RADIUS.SHEET,
     overflow: 'hidden',
     paddingBottom: Platform.OS === 'ios' ? 20 : 0,
   },
+  sheetTint: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(255,255,255,0.55)' },
   grabBar: {
     alignSelf: 'center',
     width: 36,
@@ -210,7 +222,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.LINE,
-    backgroundColor: COLORS.SURFACE,
+    backgroundColor: 'transparent',
   },
   roundBtn: {
     width: 44,
@@ -251,7 +263,7 @@ const styles = StyleSheet.create({
     paddingBottom: Platform.OS === 'android' ? 34 : 10,
     borderTopWidth: 1,
     borderTopColor: COLORS.LINE,
-    backgroundColor: COLORS.SURFACE,
+    backgroundColor: 'transparent',
   },
   hintText: { flex: 1, fontFamily: FONT.Regular, fontSize: 11, lineHeight: 15, color: COLORS.GREY },
   hintBtn: {

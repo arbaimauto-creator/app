@@ -14,7 +14,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import FastImage from 'react-native-fast-image';
 import T from '../../Components/Constants/DesignTokens';
-import { Card, Btn, ProgressBar } from '../../Components/UI';
+import { Btn, Card, GlassOrbs, ProgressBar } from '../../Components/UI';
 import Strings from '../../Components/Strings';
 import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
 import { fetchCampaignReviews } from '../../api/reviews';
@@ -290,6 +290,7 @@ export default function BrandReview({ navigation }) {
     const doneCount = sessionTotal > 0 ? sessionTotal : evaluatedCount;
     return (
       <SafeAreaView style={styles.container}>
+      <GlassOrbs />
         <ScrollView contentContainerStyle={styles.summaryWrap}>
           <Text style={styles.summaryEmoji}>✅</Text>
           <Text style={styles.summaryTitle}>{Strings.BRAND_SESSION_DONE(doneCount)}</Text>

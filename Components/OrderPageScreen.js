@@ -13,7 +13,7 @@ import {
 import FastImage from 'react-native-fast-image';
 import APIprovider from './APIprovider';
 import T from './Constants/DesignTokens';
-import { Badge, Card } from './UI';
+import { Badge, Card, GlassOrbs } from './UI';
 import Strings from './Strings';
 
 const { COLORS, FONT, TYPE } = T;
@@ -88,6 +88,7 @@ export default class OrderPageScreen extends React.Component {
     }
     return (
       <SafeAreaView style={styles.safe}>
+      <GlassOrbs />
         <ScrollView contentContainerStyle={styles.scroll}>
           <View style={styles.headerRow}>
             <TouchableOpacity

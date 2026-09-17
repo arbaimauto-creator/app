@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
+import { BlurView } from '@react-native-community/blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { isIPhone12, isIPhone12Max } from 'react-native-status-bar-height';
 import T from '../../Components/Constants/DesignTokens';
@@ -32,6 +33,16 @@ function CommentModal({ context }) {
       <View style={[styles.addCommentModalContainer(insets), { bottom }]}>
         <TouchableWithoutFeedback>
           <View style={styles.sheet}>
+            {/* 글래스 입력 시트 (2026-09-17) */}
+            <BlurView
+              style={StyleSheet.absoluteFill}
+              pointerEvents="none"
+              blurType="light"
+              blurAmount={22}
+              overlayColor="transparent"
+              reducedTransparencyFallbackColor="#FFFFFF"
+            />
+            <View style={styles.sheetTint} pointerEvents="none" />
             <View style={styles.grabBar} />
             <View style={styles.secretCommentContainer}>
               <Text style={styles.secretCommentLabel}>{Strings.SECRET_COMMENT}</Text>
@@ -132,12 +143,14 @@ const styles = StyleSheet.create({
   }),
   sheet: {
     width: '100%',
-    backgroundColor: COLORS.SURFACE,
+    backgroundColor: 'transparent',
     borderTopLeftRadius: RADIUS.SHEET,
     borderTopRightRadius: RADIUS.SHEET,
     paddingTop: 8,
+    overflow: 'hidden',
     ...T.SHADOW_SHEET,
   },
+  sheetTint: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(255,255,255,0.6)' },
   grabBar: {
     alignSelf: 'center',
     width: 36,

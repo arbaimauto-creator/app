@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import T from '../../Components/Constants/DesignTokens';
-import { Card, NoteBox } from '../../Components/UI';
+import { Card, GlassOrbs, NoteBox } from '../../Components/UI';
 import Strings from '../../Components/Strings';
 import { getSeedings, SEEDING_STATUS } from '../../api/seedings';
 import { isFgiEnabled } from '../../api/campaignMeta';
@@ -69,6 +69,7 @@ export default function MissionStatusScreen({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <GlassOrbs />
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.headerRow}>
           <TouchableOpacity

@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import FastImage from 'react-native-fast-image';
 import Strings from '../../Components/Strings';
 import T from '../../Components/Constants/DesignTokens';
-import { Card, Badge, Btn, NoteBox } from '../../Components/UI';
+import { Badge, Btn, Card, GlassOrbs, NoteBox } from '../../Components/UI';
 import { fetchCampaigns, selectCampaigns, selectMyApplications } from '../../slices/campaign';
 import { getCreatorProfile } from '../../api/creators';
 import { getOffers, respondToOffer } from '../../api/offers';
@@ -297,6 +297,7 @@ export default function TryScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <GlassOrbs />
       <View style={styles.headerRow}>
         <Text style={styles.header}>{Strings.TRY_TAB}</Text>
         <Badge tone="amber" text={`G${gScore}`} />

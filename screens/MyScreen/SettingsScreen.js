@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native';
 import T from '../../Components/Constants/DesignTokens';
-import { Card } from '../../Components/UI';
+import { Card, GlassOrbs } from '../../Components/UI';
 import Strings, { getLanguage, setLanguage } from '../../Components/Strings';
 import { pushNotifications } from '../../Components/services';
 import { menuLogout } from '../../Components/utils';
@@ -74,6 +74,7 @@ export default function SettingsScreen({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <GlassOrbs />
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}

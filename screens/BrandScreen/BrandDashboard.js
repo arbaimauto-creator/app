@@ -13,7 +13,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import FastImage from 'react-native-fast-image';
 import Preference from 'react-native-default-preference';
 import T from '../../Components/Constants/DesignTokens';
-import { Card, Btn, StatusPill, NoteBox } from '../../Components/UI';
+import { Btn, Card, GlassOrbs, NoteBox, StatusPill } from '../../Components/UI';
 import Strings from '../../Components/Strings';
 import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
 import {
@@ -89,6 +89,7 @@ export default function BrandDashboard() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <GlassOrbs />
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
         <Text style={styles.header}>
           {currentCampaign?.title || Strings.BRAND_DASH_TITLE}

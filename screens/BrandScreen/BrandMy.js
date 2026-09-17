@@ -13,7 +13,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import Preference from 'react-native-default-preference';
 import T from '../../Components/Constants/DesignTokens';
-import { Card, Badge, NoteBox } from '../../Components/UI';
+import { Badge, Card, GlassOrbs, NoteBox } from '../../Components/UI';
 import Strings from '../../Components/Strings';
 import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
 import { fetchCampaignReviews } from '../../api/reviews';
@@ -62,6 +62,7 @@ export default function BrandMy({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <GlassOrbs />
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
         <Text style={T.TYPE.H_TITLE}>{Strings.MY_TITLE}</Text>
 

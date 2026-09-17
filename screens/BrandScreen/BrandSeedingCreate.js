@@ -13,7 +13,7 @@ import {
   View,
 } from 'react-native';
 import T from '../../Components/Constants/DesignTokens';
-import { Badge, Card } from '../../Components/UI';
+import { Badge, Card, GlassOrbs } from '../../Components/UI';
 import Strings from '../../Components/Strings';
 import { createSeedingRequest, listSeedingRequests } from '../../api/brandSeedings';
 
@@ -63,6 +63,7 @@ export default function BrandSeedingCreate({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <GlassOrbs />
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.headerRow}>
           <TouchableOpacity
