@@ -1613,7 +1613,8 @@ export default {
   PROFILE_CHANNELS_HINT:
     '운영 중인 채널을 모두 알려주면 더 많은 캠페인에 매칭돼요. 주소를 붙여넣어도 돼요.',
   PROFILE_HANDLE_PH: '@handle 또는 프로필 주소',
-  PROFILE_CH_PRIMARY: '주력 · 필수',
+  PROFILE_CH_PRIMARY: '주력 · 선택',
+  ONB_COUNTRY_SEARCH: '다른 국가 검색',
   PROFILE_CH_OPTIONAL: '선택',
   PROFILE_AGE: '연령대',
   PROFILE_GENDER: '성별',

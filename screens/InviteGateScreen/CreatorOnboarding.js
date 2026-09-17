@@ -7,8 +7,10 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from 'react-native';
+import CountryPicker from 'react-native-country-picker-modal';
 import { CommonActions } from '@react-navigation/native';
 import Preference from 'react-native-default-preference';
 import T from '../../Components/Constants/DesignTokens';
@@ -72,6 +74,7 @@ export default function CreatorOnboarding({ navigation }) {
   // null = 아직 로드 전, '' = 저장된 값 없음(선택 UI 노출)
   const [storedCountry, setStoredCountry] = useState(null);
   const [country, setCountry] = useState(null);
+  const [countryPickerOpen, setCountryPickerOpen] = useState(false);
 
   // 기획서 §5.4 "프로필 완성하기" 재진입: 저장된 프로필이 있으면 채워서 시작 (빈 폼부터 다시 쓰게 하지 않는다)
   useEffect(() => {
@@ -124,13 +127,8 @@ export default function CreatorOnboarding({ navigation }) {
     setChannels((prev) => ({ ...prev, [key]: { ...prev[key], ...patch } }));
 
   const primary = channels[platform];
-  const canFinish =
-    normalizeHandle(primary.handle).length > 1 &&
-    primary.followerBand &&
-    ageBand &&
-    gender &&
-    storedCountry !== null &&
-    (!needsCountry || country);
+  // 2026-09-17: SNS 핸들·팔로워 밴드는 선택 입력으로 완화 — 인구통계·국가만 필수
+  const canFinish = ageBand && gender && storedCountry !== null && (!needsCountry || country);
 
   const goTo = (idx) => {
     setPage(idx);
@@ -218,6 +216,34 @@ export default function CreatorOnboarding({ navigation }) {
               <>
                 <Text style={styles.label}>{Strings.INVITE_COUNTRY_LABEL}</Text>
                 <Chips items={COUNTRY_ITEMS} selected={country} onSelect={setCountry} />
+                {/* 전세계 국가 검색 (2026-09-17) — 자주 쓰는 8개 밖은 검색 모달로 */}
+                <TouchableOpacity
+                  style={styles.countrySearch}
+                  onPress={() => setCountryPickerOpen(true)}
+                  accessibilityRole="button"
+                >
+                  <Text style={styles.countrySearchText}>
+                    {country && !COUNTRIES.includes(country)
+                      ? `${Strings.ONB_COUNTRY_SEARCH} · ${country} ✓`
+                      : `${Strings.ONB_COUNTRY_SEARCH} ›`}
+                  </Text>
+                </TouchableOpacity>
+                {countryPickerOpen ? (
+                  <CountryPicker
+                    visible
+                    withFilter
+                    withFlag
+                    withEmoji
+                    withCountryNameButton={false}
+                    countryCode={country || 'KR'}
+                    onSelect={(c) => {
+                      setCountry(c.cca2);
+                      setCountryPickerOpen(false);
+                    }}
+                    onClose={() => setCountryPickerOpen(false)}
+                    renderFlagButton={() => null}
+                  />
+                ) : null}
               </>
             ) : null}
 
@@ -348,6 +374,8 @@ const styles = StyleSheet.create({
   },
   formSub: { ...T.TYPE.SUB, marginTop: 6 },
   label: { ...T.TYPE.LABEL, marginTop: 18, marginBottom: 8 },
+  countrySearch: { marginTop: 8, minHeight: 36, justifyContent: 'center' },
+  countrySearchText: { fontFamily: FONT.Bold, fontSize: 12, color: COLORS.AMBER_DEEP },
   channelsHint: { ...T.TYPE.XS, marginTop: 16, lineHeight: 16 },
   channelBlock: { marginTop: 12 },
   channelHead: { flexDirection: 'row', alignItems: 'center', marginBottom: 7 },

@@ -5,14 +5,25 @@ import React from 'react';
 import { ActivityIndicator, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
+import { BlurView } from '@react-native-community/blur';
 import T from '../Constants/DesignTokens';
 
 const { COLORS, RADIUS, TYPE, GRADIENT } = T;
 
-// 흰 카드 (radius 18 + 넓고 옅은 그림자). 살짝 떠 있는 느낌은 그림자 반경으로 낸다.
+// 유리 카드 (2026-09-17 글래스 컨셉 v2) — 진짜 배경 블러. 뒤의 오브·배경이 흐려져 비친다.
+// overflow hidden이 블러를 모서리에 맞춰 자른다. 흰 틴트는 얇게 — 두꺼우면 유리가 아니라 반투명 판이 된다.
 export function Card({ style, children, ...rest }) {
   return (
     <View style={[styles.card, style]} {...rest}>
+      <BlurView
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
+        blurType="light"
+        blurAmount={16}
+        overlayColor="transparent"
+        reducedTransparencyFallbackColor="#FFFFFF"
+      />
+      <View style={styles.cardTint} pointerEvents="none" />
       {children}
     </View>
   );
@@ -24,6 +35,15 @@ export function Card({ style, children, ...rest }) {
 export function GlowCard({ style, contentStyle, children, glow = 0.9, ...rest }) {
   return (
     <View style={[styles.card, styles.glowCard, style]} {...rest}>
+      <BlurView
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
+        blurType="light"
+        blurAmount={16}
+        overlayColor="transparent"
+        reducedTransparencyFallbackColor="#FFFFFF"
+      />
+      <View style={styles.cardTint} pointerEvents="none" />
       <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
         <Defs>
           <RadialGradient id="greydGlow" cx="50%" cy="115%" rx="70%" ry="95%">
@@ -236,14 +256,20 @@ export function NoteBox({ text, tone = 'amber', style, children }) {
 
 const styles = StyleSheet.create({
   card: {
-    // 2026-09-17 글래스 컨셉: 반투명 유리판 — 웜 크림 배경·오브가 은은히 비친다
-    backgroundColor: COLORS.GLASS,
+    // 글래스 v2: 진짜 블러 위에 얇은 흰 틴트 — backgroundColor는 블러가 대신한다
+    backgroundColor: 'transparent',
     borderRadius: RADIUS.CARD,
     paddingVertical: 14,
     paddingHorizontal: 15,
     borderWidth: 1,
     borderColor: COLORS.GLASS_BORDER,
-    ...T.SHADOW_SOFT,
+    overflow: 'hidden',
+    elevation: 3,
+  },
+  cardTint: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255,255,255,0.28)',
+    borderRadius: RADIUS.CARD,
   },
   glowCard: { overflow: 'hidden' },
   glowInner: { position: 'relative', alignSelf: 'stretch' },

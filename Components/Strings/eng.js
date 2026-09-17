@@ -1679,7 +1679,8 @@ export default {
   PROFILE_CHANNELS_HINT:
     'Tell us every channel you run — more channels, more campaigns you match. Pasting a profile link works too.',
   PROFILE_HANDLE_PH: '@handle or profile link',
-  PROFILE_CH_PRIMARY: 'Main · required',
+  PROFILE_CH_PRIMARY: 'Main · optional',
+  ONB_COUNTRY_SEARCH: 'Search all countries',
   PROFILE_CH_OPTIONAL: 'Optional',
   PROFILE_AGE: 'Age range',
   PROFILE_GENDER: 'Gender',
