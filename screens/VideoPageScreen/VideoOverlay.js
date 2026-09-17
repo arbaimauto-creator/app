@@ -281,9 +281,29 @@ function VideoOverlay({ context }) {
     [context],
   );
   const [captionTruncated, setCaptionTruncated] = useState(false);
+  // 기본은 리뷰 요약을 숨긴다 (2026-09-17 피드백: 영상 절반이 가려짐) — "리뷰 보기"를 눌러야 뜬다
+  const [infoVisible, setInfoVisible] = useState(false);
   const canToggleCaption = captionExpanded || captionTruncated || hashTags.length > 0;
   const openHashTag = (tag) =>
     context.props.navigation.push('Search', { hashTag: tag, isHashtagSearch: true });
+  if (!infoVisible) {
+    return (
+      <View style={styles.overlayContainer} pointerEvents="box-none">
+        <ActionRail context={context} />
+        <View style={styles.bottomContainer} pointerEvents="box-none">
+          <TouchableOpacity
+            style={styles.revealBtn}
+            onPress={() => setInfoVisible(true)}
+            accessibilityRole="button"
+          >
+            <Text style={styles.revealText}>
+              @{review.author?.name || 'greyd'} · {Strings.SHORTS_SHOW_REVIEW} ›
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
   return (
     <View style={styles.overlayContainer} pointerEvents="box-none">
       <ActionRail context={context} />
@@ -294,7 +314,16 @@ function VideoOverlay({ context }) {
         <GestureDetector gesture={expandedSwipe.enabled(captionExpanded)}>
           <View style={styles.reviewSummary}>
             <View style={styles.summaryHeader}>
-              <Text style={styles.reviewEyebrow}>{Strings.SHORTS_REVIEW_LABEL}</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setCaptionExpanded(false);
+                  setInfoVisible(false);
+                }}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                accessibilityRole="button"
+              >
+                <Text style={styles.reviewEyebrow}>{Strings.SHORTS_REVIEW_LABEL} ✕</Text>
+              </TouchableOpacity>
               {review.g6RatingCount > 0 ? (
                 <ReviewGradeBadgeView
                   g6RatingCount={review.g6RatingCount}
@@ -487,6 +516,17 @@ const styles = StyleSheet.create({
     // 캡션·상세 핸들이 탭바에 가리지 않도록
     bottom: 18 + TAB_BAR_INSET,
   },
+  // 기본 상태 핸들 — 작게, 영상을 가리지 않는다 (2026-09-17)
+  revealBtn: {
+    alignSelf: 'flex-start',
+    paddingVertical: 9,
+    paddingHorizontal: 13,
+    borderRadius: 999,
+    backgroundColor: 'rgba(23,23,23,0.45)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.35)',
+  },
+  revealText: { fontFamily: T.FONT.Bold, fontSize: 12, color: '#FFFFFF' },
   authorRow: {
     flexDirection: 'row',
     alignItems: 'center',
