@@ -201,10 +201,13 @@ export default function FgiSurvey({ route, navigation }) {
         extra_count: extraQuestions.length,
         usage_days: usageDays ?? -1,
       });
+      // "나중에" 선택지 (2026-09-17): replace 단일 버튼이라 설문 후 활동 탭으로
+      // 돌아갈 길이 없었다 — 업로드는 활동 탭 카드에서 언제든 다시 진입 가능
       Alert.alert(
         Strings.FGI_DONE_TITLE,
         Strings.FGI_DONE_BODY,
         [
+          { text: Strings.REGULAR_PROMPT_LATER, style: 'cancel', onPress: () => navigation.goBack() },
           {
             text: Strings.UPLOAD_REVIEW_CTA,
             onPress: () => navigation.replace('ReviewLinkSubmit', { campaignId: campaign.id }),

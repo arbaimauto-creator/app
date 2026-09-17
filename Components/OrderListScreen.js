@@ -7,6 +7,7 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import APIprovider from './APIprovider';
@@ -98,6 +99,18 @@ export default class OrderListScreen extends React.Component {
               <Text style={styles.emptyIcon}>📦</Text>
               <Text style={styles.emptyTitle}>{Strings.ORDERS_EMPTY}</Text>
               <Text style={styles.emptyDesc}>{Strings.ORDERS_EMPTY_DESC}</Text>
+              {/* 예시 주문 (2026-09-17) — 실제 주문 전에도 상세까지의 흐름을 보여준다 */}
+              <TouchableOpacity
+                style={styles.mockCard}
+                activeOpacity={0.8}
+                onPress={() => this.props.navigation.push('OrderPage', { mock: true })}
+              >
+                <View style={styles.mockRow}>
+                  <Text style={styles.mockTitle}>수분 앰플 30ml 외 1건</Text>
+                  <Text style={styles.mockBadge}>{Strings.MOCK_EXAMPLE_BADGE}</Text>
+                </View>
+                <Text style={styles.emptyDesc}>{Strings.MOCK_ORDER_NOTE}</Text>
+              </TouchableOpacity>
             </View>
           }
         />
@@ -117,6 +130,20 @@ const styles = StyleSheet.create({
   list: { padding: 16, paddingBottom: 32 },
   item: { marginBottom: 10 },
   empty: { alignItems: 'center', gap: 6, padding: 24 },
+  mockCard: {
+    alignSelf: 'stretch',
+    marginTop: 14,
+    padding: 12,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: COLORS.LINE,
+    borderStyle: 'dashed',
+    backgroundColor: COLORS.SURFACE,
+    gap: 4,
+  },
+  mockRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  mockTitle: { fontFamily: FONT.Bold, fontSize: 12.5, color: COLORS.INK },
+  mockBadge: { fontFamily: FONT.Bold, fontSize: 10.5, color: COLORS.AMBER_DEEP },
   emptyIcon: { fontSize: 36 },
   emptyTitle: { fontFamily: FONT.Bold, fontSize: 15, color: COLORS.INK },
   emptyDesc: { fontFamily: FONT.Regular, fontSize: 12.5, color: COLORS.GREY, textAlign: 'center' },

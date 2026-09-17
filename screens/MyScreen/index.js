@@ -383,6 +383,19 @@ export default function MyScreen({ navigation }) {
           </>
         ) : null}
 
+        {/* 내 2차 활용 현황 (2026-09-17) — 활동 탭에만 있던 진입로를 마이 탭에도 */}
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => navigation.navigate('SecondaryUseStatus')}
+        >
+          <Card>
+            <View style={styles.row}>
+              <Text style={styles.rowTitle}>{Strings.INC_TITLE}</Text>
+              <Text style={styles.chev}>›</Text>
+            </View>
+          </Card>
+        </TouchableOpacity>
+
         {/* 판매자 모드 전환 (2026-09-17) — 판매자 계정만. 셸은 부팅 시 역할을 읽으므로 재시작 안내 */}
         {FEATURES.BRAND_APP && isSeller ? (
           <TouchableOpacity activeOpacity={0.7} onPress={switchToSellerMode}>

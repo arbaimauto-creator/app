@@ -67,6 +67,7 @@ import CampaignDetail from '../../screens/TryScreen/CampaignDetail';
 import ReviewLinkSubmit from '../../screens/TryScreen/ReviewLinkSubmit';
 import BrandWelcome from '../../screens/InviteGateScreen/BrandWelcome';
 import BrandSeedingCreate from '../../screens/BrandScreen/BrandSeedingCreate';
+import OrderPageScreen from '../../Components/OrderPageScreen';
 import AddressBook from '../../screens/MyScreen/AddressBook';
 import RewardLedgerScreen from '../../screens/MyScreen/RewardLedgerScreen';
 import AboutScreen from '../../screens/MyScreen/AboutScreen';
@@ -566,6 +567,13 @@ function MainDrawerNavigator({ route, navigation }) {
       <Stack.Screen
         name="BrandSeedingCreate"
         component={BrandSeedingCreate}
+        initialParams={initialParams}
+        options={{ headerShown: false }}
+      />
+      {/* 주문 상세 (2026-09-17) — 주문/수익 내역이 push하던 미등록 라우트 수리 */}
+      <Stack.Screen
+        name="OrderPage"
+        component={OrderPageScreen}
         initialParams={initialParams}
         options={{ headerShown: false }}
       />

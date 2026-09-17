@@ -42,6 +42,23 @@ const externalStyles = StyleSheet.create({
     fontSize: 13,
     color: T.COLORS.AMBER_DEEP,
   },
+  mockWrap: { paddingHorizontal: 12, paddingTop: 10, gap: 8 },
+  mockNote: { fontFamily: T.FONT.Regular, fontSize: 11, color: T.COLORS.GREY },
+  mockCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: T.COLORS.LINE,
+    borderStyle: 'dashed',
+    backgroundColor: T.COLORS.SURFACE,
+  },
+  mockThumb: { width: 42, height: 42, borderRadius: 8, backgroundColor: T.COLORS.TRACK },
+  mockTitle: { fontFamily: T.FONT.Bold, fontSize: 12.5, color: T.COLORS.INK },
+  mockPrice: { fontFamily: T.FONT.Regular, fontSize: 11.5, color: T.COLORS.GREY, marginTop: 2 },
+  mockBadge: { fontFamily: T.FONT.Bold, fontSize: 10.5, color: T.COLORS.AMBER_DEEP },
 });
 
 
@@ -403,11 +420,46 @@ export default class ProductListScreen extends React.Component {
     );
   }
 
+  // 예시 상품 (2026-09-17) — 스토어가 비어 있어도 마켓 흐름이 보이게 한다
+  renderMockProducts() {
+    if (!Array.isArray(this.state.productList) || this.state.productList.length > 0) {
+      return null;
+    }
+    const MOCKS = [
+      { id: 'mp1', title: '수분 앰플 30ml', price: '32,000' },
+      { id: 'mp2', title: '진정 크림 50ml', price: '24,000' },
+      { id: 'mp3', title: '저자극 클렌저 150ml', price: '18,000' },
+    ];
+    return (
+      <View style={externalStyles.mockWrap}>
+        <Text style={externalStyles.mockNote}>{Strings.MOCK_STORE_NOTE}</Text>
+        {MOCKS.map((m) => (
+          <TouchableOpacity
+            key={m.id}
+            style={externalStyles.mockCard}
+            activeOpacity={0.8}
+            onPress={() => Alert.alert(Strings.MOCK_EXAMPLE_BADGE, Strings.MOCK_PRODUCT_TAP)}
+          >
+            <View style={externalStyles.mockThumb} />
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text style={externalStyles.mockTitle} numberOfLines={1}>
+                {m.title}
+              </Text>
+              <Text style={externalStyles.mockPrice}>{m.price}</Text>
+            </View>
+            <Text style={externalStyles.mockBadge}>{Strings.MOCK_EXAMPLE_BADGE}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    );
+  }
+
   render() {
     return (
       <SafeAreaView style={styles.safeAreaContainer}>
         <View style={styles.container}>
           {this.renderExternalStoreButton()}
+          {this.renderMockProducts()}
           <SectionGrid
             ref={this.productListSectionGridRef}
             showsVerticalScrollIndicator={false}
