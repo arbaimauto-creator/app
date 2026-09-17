@@ -17,7 +17,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import Preference from 'react-native-default-preference';
 import T from '../../Components/Constants/DesignTokens';
 import FEATURES from '../../Components/Constants/Features';
-import { Card, GlowCard, ProgressBar } from '../../Components/UI';
+import { Card, GlassOrbs, GlowCard, ProgressBar } from '../../Components/UI';
 import Strings from '../../Components/Strings';
 import { getCreatorProfile } from '../../api/creators';
 import { referralCodesFor } from '../../api/referral';
@@ -120,6 +120,7 @@ export default function MyScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <GlassOrbs />
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* 헤더 행 */}
         <View style={styles.headerRow}>

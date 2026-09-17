@@ -14,12 +14,14 @@ const COLORS = {
   AMBER_FAINT: '#FFF9EC', // 앰버 입력 포커스 배경
   ON_AMBER: '#231B05', // 앰버 버튼 위 텍스트
 
-  // 앱 그라운드
-  BG: '#F4F4F4',
+  // 앱 그라운드 — 2026-09-17 글래스 컨셉: 차가운 회색 대신 웜 크림, 카드는 반투명 유리
+  BG: '#F3EDE2',
   SURFACE: '#FFFFFF',
+  GLASS: 'rgba(255,255,255,0.66)', // 유리 카드 면
+  GLASS_BORDER: 'rgba(255,255,255,0.85)', // 유리 카드 테두리(빛 받는 모서리)
   INK: '#171717',
   GREY: '#8A857B',
-  LINE: '#EAE7E1',
+  LINE: '#E9E1D2',
   DARK: '#3A3A3A',
 
   // 시맨틱
@@ -47,17 +49,17 @@ const COLORS = {
   ST_CANCELLED_FG: '#6E675C',
 
   // 진행바 트랙
-  TRACK: '#E8E5DF',
+  TRACK: '#E7DFCE',
 };
 
 const RADIUS = {
-  CARD: 18, // 2026-09-16 컨셉: 더 둥글게(14→18)
-  BTN: 14,
-  BTN_SM: 8,
-  FIELD: 10,
-  BADGE: 5,
+  CARD: 22, // 2026-09-17 글래스 컨셉: 유리판처럼 더 둥글게(18→22)
+  BTN: 26, // 필(알약) 버튼 — 시안 2
+  BTN_SM: 14,
+  FIELD: 14,
+  BADGE: 6,
   PILL: 999,
-  SHEET: 18,
+  SHEET: 24,
 };
 
 // Pretendard 패밀리명을 직접 정의한다 — Style.js를 import하면 Constants 순환 참조에
@@ -157,6 +159,10 @@ const GRADIENT = {
   AMBER_GLOW: ['rgba(255,183,49,0)', 'rgba(255,183,49,0.55)', 'rgba(255,150,20,0.85)'],
   GLOSS: ['rgba(255,255,255,0.55)', 'rgba(255,255,255,0.0)'],
   INK: ['#3A3A3A', '#171717'],
+  // 2026-09-17 글래스 컨셉 — 화면 배경(크림→살짝 골드)과 떠 있는 골드 오브(구체)
+  SCREEN: ['#F7F1E6', '#F1E7D4'],
+  ORB: ['#FFDE9E', '#F4B84A'],
+  ORB_SOFT: ['rgba(255,222,158,0.85)', 'rgba(244,184,74,0.35)'],
 };
 
 export default {

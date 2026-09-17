@@ -104,7 +104,7 @@ function BottomTabNavigator({ route, navigation }) {
         })}
         shifting={false}
         labeled={false}
-        barStyle={{ backgroundColor: '#F4F4F4', elevation: 20 }}
+        barStyle={{ backgroundColor: 'rgba(252,248,240,0.97)', elevation: 20 }}
         onIndexChange={(index) => {}}
       >
         <Tab.Screen
@@ -127,7 +127,7 @@ function BottomTabNavigator({ route, navigation }) {
       shifting={false}
       labeled={false}
       barStyle={{
-        backgroundColor: '#F4F4F4',
+        backgroundColor: 'rgba(252,248,240,0.97)',
 
         shadowColor: 'white',
         shadowOffset: {

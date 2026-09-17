@@ -107,6 +107,33 @@ export function Btn({
   );
 }
 
+// 글래스 배경 오브 (2026-09-17 컨셉) — 화면 뒤에 떠 있는 골드 구체 2~3개.
+// 화면 루트(SafeAreaView 바로 아래)에 한 번 깔면 유리 카드가 이 빛을 비춰 보인다.
+export function GlassOrbs({ style }) {
+  return (
+    <View pointerEvents="none" style={[StyleSheet.absoluteFill, style]}>
+      <LinearGradient
+        colors={GRADIENT.ORB_SOFT}
+        start={{ x: 0.2, y: 0.1 }}
+        end={{ x: 0.9, y: 1 }}
+        style={[styles.orb, { width: 230, height: 230, top: -60, right: -70 }]}
+      />
+      <LinearGradient
+        colors={GRADIENT.ORB_SOFT}
+        start={{ x: 0.8, y: 0 }}
+        end={{ x: 0.1, y: 1 }}
+        style={[styles.orb, { width: 150, height: 150, top: 260, left: -60, opacity: 0.75 }]}
+      />
+      <LinearGradient
+        colors={GRADIENT.ORB_SOFT}
+        start={{ x: 0.3, y: 0 }}
+        end={{ x: 0.7, y: 1 }}
+        style={[styles.orb, { width: 300, height: 300, bottom: -110, right: -90, opacity: 0.6 }]}
+      />
+    </View>
+  );
+}
+
 // 브랜드 워드마크 — "greyd" + 앰버 점. 로고 텍스트는 반드시 이 컴포넌트로 (점 누락 방지).
 export function Wordmark({ size = 30, style, center }) {
   return (
@@ -209,13 +236,13 @@ export function NoteBox({ text, tone = 'amber', style, children }) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: COLORS.SURFACE,
+    // 2026-09-17 글래스 컨셉: 반투명 유리판 — 웜 크림 배경·오브가 은은히 비친다
+    backgroundColor: COLORS.GLASS,
     borderRadius: RADIUS.CARD,
-    paddingVertical: 13,
-    paddingHorizontal: 14,
-    // 뉴모피즘(시안 3): 옅고 넓은 그림자 + 흰 테두리 한 줄로 면이 들려 보이게
+    paddingVertical: 14,
+    paddingHorizontal: 15,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.9)',
+    borderColor: COLORS.GLASS_BORDER,
     ...T.SHADOW_SOFT,
   },
   glowCard: { overflow: 'hidden' },
@@ -292,7 +319,8 @@ const styles = StyleSheet.create({
   prog: { backgroundColor: COLORS.TRACK, overflow: 'hidden' },
   progFill: { height: '100%', backgroundColor: COLORS.AMBER },
   note: { borderRadius: RADIUS.FIELD, paddingVertical: 9, paddingHorizontal: 12 },
+  orb: { position: 'absolute', borderRadius: 999 },
   noteText: { fontFamily: T.FONT.Regular, fontSize: 11, lineHeight: 16.5 },
 });
 
-export default { Card, GlowCard, Btn, Badge, StatusPill, Chips, ProgressBar, NoteBox };
+export default { Card, GlowCard, Btn, Badge, StatusPill, Chips, ProgressBar, NoteBox, GlassOrbs };

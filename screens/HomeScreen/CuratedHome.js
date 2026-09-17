@@ -19,7 +19,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import APIprovider from '../../Components/APIprovider';
 import T from '../../Components/Constants/DesignTokens';
 import Strings from '../../Components/Strings';
-import { Badge, Btn, NoteBox, Wordmark } from '../../Components/UI';
+import { Badge, Btn, GlassOrbs, NoteBox, Wordmark } from '../../Components/UI';
 import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
 import { getCreatorProfile } from '../../api/creators';
 import { getSeedings, SEEDING_STATUS } from '../../api/seedings';
@@ -350,6 +350,8 @@ export default function CuratedHome({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* 글래스 컨셉 (2026-09-17): 유리 카드 뒤에 떠 있는 골드 오브 */}
+      <GlassOrbs />
       <View style={styles.header}>
         <Wordmark size={20} />
         <View style={styles.gScore}>
