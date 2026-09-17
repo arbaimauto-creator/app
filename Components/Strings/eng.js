@@ -1174,6 +1174,9 @@ export default {
   USER_INSTAGRAM_ID: 'Instagram Username',
   INSTAGRAM_ID_GUIDELINES: 'Please enter your Instagram username.',
   CONDITION_USER_INSTAGRAM_ID: 'Enter Instagram username',
+  INSTAGRAM_ID_INVALID: 'Check your Instagram username',
+  INSTAGRAM_ID_INVALID_GUIDE:
+    'Only letters, numbers, underscores and periods are allowed (1–30 chars, cannot start or end with a period)',
 
   INSTAGRAM_ACCOUNT_CHANGE: 'Change instagram account',
   INSTAGRAM_ACCOUNT_CONNECT: 'Link Instagram account',
@@ -1965,7 +1968,7 @@ export default {
   SET_REMINDER_NOTE: 'Deadline alerts only — never marketing',
   SET_LANGUAGE: 'Language',
   SET_LANG_KO: '한국어',
-  SET_LANGUAGE_NOTE: 'English by default · auto-detected from your device',
+  SET_LANGUAGE_NOTE: 'Switches instantly in the app · reopen screens to apply everywhere',
   SET_TERMS_PRIVACY: 'Terms · Privacy Policy',
   SET_LOGOUT: 'Log out',
   SET_DELETE_ACCOUNT: 'Delete account',

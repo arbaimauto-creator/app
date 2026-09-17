@@ -25,6 +25,32 @@ import * as Sentry from '@sentry/react-native';
 
 let notificationHandler;
 
+// 인앱 알림 스위치(2026-09-17) — OS 권한과 별개로, 꺼져 있으면 앱이 만드는 로컬
+// 알림 표시를 건너뛴다. 백그라운드 핸들러는 헤드리스로 새로 뜰 수 있어 매번 저장값을 읽는다.
+let pushEnabled = true;
+Preference.get('pushEnabled')
+  .then((value) => {
+    pushEnabled = value !== 'false';
+  })
+  .catch(() => {});
+
+const isPushEnabled = () => pushEnabled;
+
+const setPushEnabled = (enabled) => {
+  pushEnabled = enabled;
+  return Preference.set('pushEnabled', enabled ? 'true' : 'false').catch(() => {});
+};
+
+const readPushEnabled = async () => {
+  try {
+    const value = await Preference.get('pushEnabled');
+    pushEnabled = value !== 'false';
+  } catch (e) {
+    // 못 읽으면 마지막 값 유지 (기본 켜짐)
+  }
+  return pushEnabled;
+};
+
 // 캠페인 활동 알림 6xx(P2, 2026-09-14) — 서버 푸시 {messageCode: 601~608, parameters: {campaignTitle, brand, points,
 // dayLeft, thumbnailUrl}}를 NotificationProvider와 같은 {title, body, image} 형태로. 알림함(api/activityNotifications)과 문구 공유.
 const campaignPushContents = (msgCode) => {
@@ -163,6 +189,9 @@ const configure = async (onNotification) => {
 
   messaging().setBackgroundMessageHandler(async (remoteMessage) => {
     console.log('Message handled in the background! setBackgroundMessageHandler', remoteMessage);
+    if (!(await readPushEnabled())) {
+      return;
+    }
     //  remoteMessage.data로 메세지에 접근가능
     //  remoteMessage.from 으로 topic name 또는 message identifier
     //  remoteMessage.messageId 는 메시지 고유값 id
@@ -243,6 +272,9 @@ const configure = async (onNotification) => {
 
   messaging().onMessage((remoteMessage) => {
     console.log('Message handled in the foreground! onMessage', remoteMessage);
+    if (!pushEnabled) {
+      return;
+    }
     //  remoteMessage.data로 메세지에 접근가능
     //  remoteMessage.from 으로 topic name 또는 message identifier
     //  remoteMessage.messageId 는 메시지 고유값 id
@@ -352,4 +384,11 @@ const configure = async (onNotification) => {
   });
 };
 
-export { configure, getDeviceToken, setNotificationHandler, clearNotificationHandler };
+export {
+  configure,
+  getDeviceToken,
+  setNotificationHandler,
+  clearNotificationHandler,
+  isPushEnabled,
+  setPushEnabled,
+};

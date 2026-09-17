@@ -79,6 +79,8 @@ let App = null;
 try {
   App = require('./App.tsx').default;
   require('./Components/services').pushNotifications.configure();
+  // 설정에서 고른 언어를 기기 언어보다 우선 적용 (비동기 — 첫 렌더 이후 화면부터 반영)
+  require('./Components/Strings').initLanguage();
 } catch (e) {
   reportStartupError(e, 'import');
 }

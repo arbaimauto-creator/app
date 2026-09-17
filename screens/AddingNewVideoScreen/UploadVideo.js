@@ -228,7 +228,7 @@ export default function UploadVideo({ context }) {
       ) : (
         <TouchableNativeFeedback
           onPress={() => {
-            Utils.checkPermissionToAccessGallery()
+            Utils.checkPermissionToAccessGallery('video')
               .then(() => openPicker(context))
               .catch((err) => Alert.alert(err.message));
           }}

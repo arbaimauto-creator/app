@@ -36,6 +36,7 @@ export default function DetailsSheet({
   onPressAuthor,
   onOpenSaved,
   children,
+  overlay,
 }) {
   const translateY = useRef(new Animated.Value(SHEET_H)).current;
 
@@ -174,6 +175,8 @@ export default function DetailsSheet({
             ) : null}
           </View>
         </Animated.View>
+        {/* 댓글 입력처럼 시트 위에 떠야 하는 오버레이 — Modal 밖에 두면 별도 창에 떠서 따로 논다 */}
+        {overlay}
       </View>
     </Modal>
   );

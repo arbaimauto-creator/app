@@ -72,6 +72,19 @@ export default class SignUpScreen extends React.Component {
   componentDidMount() {}
 
   async onPressSubmitButton() {
+    // 인스타 아이디 형식 검증 (2026-09-17 피드백) — 실계정 검증(OAuth)은 정책 결정 대기, 형식만 거른다.
+    // 규칙: 영문·숫자·밑줄·마침표 1~30자, 마침표로 시작/끝 불가
+    const instagramRaw = (this.state.instagramId || '').trim().replace(/^@/, '');
+    if (!/^[a-zA-Z0-9_](?:[a-zA-Z0-9._]{0,28}[a-zA-Z0-9_])?$/.test(instagramRaw)) {
+      Alert.alert(
+        Strings.INSTAGRAM_ID_INVALID,
+        Strings.INSTAGRAM_ID_INVALID_GUIDE,
+        [{ text: Strings.OK }],
+        { cancelable: true },
+      );
+      return;
+    }
+
     const result = await APIprovider.checkDuplicateId(this.state.name);
     if (this.props.route.params.name !== this.state.name) {
       if (result && !result.success) {
@@ -117,7 +130,7 @@ export default class SignUpScreen extends React.Component {
       profilePicUri: profilePicUri,
       profilePicType: profilePicType,
       countryCode: countryCode,
-      instagramId: instagramId,
+      instagramId: instagramRaw || instagramId,
     };
 
     APIprovider.signUp(profile)

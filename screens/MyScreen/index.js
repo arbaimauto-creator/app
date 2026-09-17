@@ -283,6 +283,18 @@ export default function MyScreen({ navigation }) {
           </Card>
         </TouchableOpacity>
 
+        {/* 팔로워/팔로잉 — 새 마이 탭 개편에서 진입 경로가 유실됐던 것 복구 (2026-09-17 피드백) */}
+        <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('FollowList')}>
+          <Card>
+            <View style={styles.row}>
+              <Text style={styles.rowTitle}>
+                {Strings.FOLLOWERS} · {Strings.FOLLOWING}
+              </Text>
+              <Text style={styles.chev}>›</Text>
+            </View>
+          </Card>
+        </TouchableOpacity>
+
         {/* 추천 코드 카드 — D6: 첫 루프 완주 시 3장 발급 (완주 전엔 잠금 힌트) */}
         {FEATURES.REFERRAL ? (
           <Card>

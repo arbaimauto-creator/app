@@ -1700,10 +1700,13 @@ class VideoPageScreen extends React.PureComponent {
               onToggleBookmark={this.toggleBookmarkFromSheet}
               onPressAuthor={this.openAuthorFromSheet}
               onOpenSaved={this.openSavedList}
+              overlay={<CommentModal context={this} />}
             >
               <ReviewComments context={this} />
             </DetailsSheet>
-            <CommentModal context={this} />
+            {/* 시트가 닫혀 있을 때(오버레이 댓글 버튼)만 화면 레이어에 직접 띄운다 —
+              시트가 열려 있으면 위의 overlay로 같은 창 안에 렌더링된다 */}
+            {!this.state.isDetailsOpen ? <CommentModal context={this} /> : null}
             <ReportModal
               visible={this.state.isInvalidContents}
               onCancel={() => {

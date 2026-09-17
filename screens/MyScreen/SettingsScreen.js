@@ -6,13 +6,15 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 import T from '../../Components/Constants/DesignTokens';
-import { Card, Badge } from '../../Components/UI';
-import Strings, { getLanguage } from '../../Components/Strings';
+import { Card } from '../../Components/UI';
+import Strings, { getLanguage, setLanguage } from '../../Components/Strings';
+import { pushNotifications } from '../../Components/services';
 import { menuLogout } from '../../Components/utils';
 import { getSeedings } from '../../api/seedings';
 import { getBuildNumber, getVersion } from 'react-native-device-info';
@@ -22,9 +24,24 @@ const { COLORS, FONT, TYPE } = T;
 const ACTIVE_STATUSES = ['applied', 'approved', 'shipped', 'received', 'reviewing'];
 
 export default function SettingsScreen({ navigation, route }) {
-  const isKorean = getLanguage() === 'ko';
+  // 언어·알림은 앱 안에서 바로 바뀐다 (2026-09-17 피드백 — 시스템 설정으로만 보내던 것 수정)
+  const [language, setLanguageState] = React.useState(getLanguage());
+  const [pushOn, setPushOn] = React.useState(pushNotifications.isPushEnabled());
+  const isKorean = language === 'ko';
   const openAppSettings = () =>
     Linking.openSettings().catch(() => Alert.alert(Strings.RETRY_GUIDELINES));
+
+  const onSelectLanguage = (lang) => {
+    if (lang === language) {
+      return;
+    }
+    setLanguage(lang).finally(() => setLanguageState(lang));
+  };
+
+  const onTogglePush = (enabled) => {
+    setPushOn(enabled);
+    pushNotifications.setPushEnabled(enabled);
+  };
   const openPrivacyPolicy = () =>
     Linking.openURL(Strings.TERMS_URL.PRIVACY_POLICY).catch(() =>
       Alert.alert(Strings.FAILED_TO_LOAD_TERMS),
@@ -67,34 +84,47 @@ export default function SettingsScreen({ navigation, route }) {
         <Text style={styles.headerTitle}>{Strings.SET_TITLE}</Text>
       </View>
       <ScrollView contentContainerStyle={styles.scroll}>
-        <TouchableOpacity activeOpacity={0.7} onPress={openAppSettings}>
-          <Card>
-            <View style={styles.row}>
-              <Text style={styles.rowTitle}>{Strings.SET_REMINDER_TITLE}</Text>
-              <Badge tone="open" text={Strings.SET_OPEN_SETTINGS} />
-            </View>
-            <Text style={[styles.xs, styles.mt4]}>{Strings.SET_REMINDER_NOTE}</Text>
-          </Card>
-        </TouchableOpacity>
+        <Card>
+          <View style={styles.row}>
+            <Text style={styles.rowTitle}>{Strings.SET_REMINDER_TITLE}</Text>
+            <Switch
+              trackColor={{ false: COLORS.TRACK, true: COLORS.AMBER }}
+              thumbColor={COLORS.SURFACE}
+              ios_backgroundColor={COLORS.TRACK}
+              onValueChange={onTogglePush}
+              value={pushOn}
+            />
+          </View>
+          <Text style={[styles.xs, styles.mt4]}>{Strings.SET_REMINDER_NOTE}</Text>
+          <TouchableOpacity onPress={openAppSettings} accessibilityRole="link">
+            <Text style={[styles.link, styles.mt4]}>{Strings.SET_OPEN_SETTINGS} ›</Text>
+          </TouchableOpacity>
+        </Card>
 
-        <TouchableOpacity activeOpacity={0.7} onPress={openAppSettings}>
-          <Card>
-            <View style={styles.row}>
-              <Text style={styles.rowTitle}>{Strings.SET_LANGUAGE}</Text>
-              <View style={styles.seg}>
-                <View style={[styles.segItem, !isKorean && styles.segItemOn]}>
-                  <Text style={[styles.segText, !isKorean && styles.segTextOn]}>EN</Text>
-                </View>
-                <View style={[styles.segItem, isKorean && styles.segItemOn]}>
-                  <Text style={[styles.segText, isKorean && styles.segTextOn]}>
-                    {Strings.SET_LANG_KO}
-                  </Text>
-                </View>
-              </View>
+        <Card>
+          <View style={styles.row}>
+            <Text style={styles.rowTitle}>{Strings.SET_LANGUAGE}</Text>
+            <View style={styles.seg}>
+              <TouchableOpacity
+                style={[styles.segItem, !isKorean && styles.segItemOn]}
+                onPress={() => onSelectLanguage('en')}
+                accessibilityRole="button"
+              >
+                <Text style={[styles.segText, !isKorean && styles.segTextOn]}>EN</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.segItem, isKorean && styles.segItemOn]}
+                onPress={() => onSelectLanguage('ko')}
+                accessibilityRole="button"
+              >
+                <Text style={[styles.segText, isKorean && styles.segTextOn]}>
+                  {Strings.SET_LANG_KO}
+                </Text>
+              </TouchableOpacity>
             </View>
-            <Text style={[styles.xs, styles.mt4]}>{Strings.SET_LANGUAGE_NOTE}</Text>
-          </Card>
-        </TouchableOpacity>
+          </View>
+          <Text style={[styles.xs, styles.mt4]}>{Strings.SET_LANGUAGE_NOTE}</Text>
+        </Card>
 
         <TouchableOpacity activeOpacity={0.7} onPress={openPrivacyPolicy}>
           <Card>
@@ -146,6 +176,7 @@ const styles = StyleSheet.create({
   xs: { ...TYPE.XS },
   mt4: { marginTop: 4 },
   chev: { fontFamily: FONT.Bold, fontSize: 16, color: COLORS.GREY },
+  link: { fontFamily: FONT.Bold, fontSize: 12, color: COLORS.AMBER_DEEP },
   seg: {
     flexDirection: 'row',
     width: 130,

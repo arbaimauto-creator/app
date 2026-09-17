@@ -1148,6 +1148,9 @@ export default {
   USER_INSTAGRAM_ID: '인스타그램 아이디',
   INSTAGRAM_ID_GUIDELINES: '본인의 인스타그램 아이디를 입력해주세요.',
   CONDITION_USER_INSTAGRAM_ID: '인스타그램 아이디 입력',
+  INSTAGRAM_ID_INVALID: '인스타그램 아이디를 확인해 주세요',
+  INSTAGRAM_ID_INVALID_GUIDE:
+    '영문·숫자·밑줄(_)·마침표(.)만 사용할 수 있어요 (1~30자, 마침표로 시작·끝 불가)',
 
   INSTAGRAM_ACCOUNT_CHANGE: '인스타그램 계정 변경하기',
   INSTAGRAM_ACCOUNT_CONNECT: '인스타그램 계정 연결하기',
@@ -1887,7 +1890,7 @@ export default {
   SET_REMINDER_NOTE: '마감 관련 알림만 — 마케팅 알림 없음',
   SET_LANGUAGE: '언어',
   SET_LANG_KO: '한국어',
-  SET_LANGUAGE_NOTE: '글로벌 기본 English · 기기 언어 자동 감지',
+  SET_LANGUAGE_NOTE: '앱에서 바로 전환됩니다 · 열려 있던 화면은 다시 열면 적용돼요',
   SET_TERMS_PRIVACY: '이용약관 · 개인정보 처리방침',
   SET_LOGOUT: '로그아웃',
   SET_DELETE_ACCOUNT: '계정 삭제',

@@ -127,6 +127,7 @@ function buildTodos(seedings, campaigns) {
 const thumb = (item) => item.thumbnailUrl || item?.relayedVideo?.thumbnailUrl || null;
 const authorName = (item) =>
   item?.author?.name || item?.user?.name || item?.userName || 'greyd.creator';
+const authorId = (item) => item?.author?.userId || item?.user?.userId || item?.userId || null;
 const authorImage = (item) =>
   item?.author?.profilePicUrl || item?.user?.profilePicUrl || thumb(item);
 const postCategory = (item) =>
@@ -255,13 +256,26 @@ export default function CuratedHome({ navigation }) {
       .slice(0, 8);
   }, [posts]);
 
+  const playablePosts = useMemo(() => posts.filter((post) => !post.isMock), [posts]);
+
   const openPost = (item) => {
-    const playable = posts.filter((post) => !post.isMock);
-    if (item.isMock || playable.length === 0) {
-      navigation.navigate('HomeFeed');
+    // 구버전 홈(HomeFeed)으로 보내지 않는다 — 새 버전과 호환되지 않는 옛 리워드 동선이 노출된다.
+    if (item.isMock || playablePosts.length === 0) {
       return;
     }
-    navigation.navigate('VideoPage', { videoList: playable, videoId: item._id });
+    navigation.navigate('VideoPage', { videoList: playablePosts, videoId: item._id });
+  };
+
+  const openAuthor = (item) => {
+    const userId = authorId(item);
+    if (!userId) {
+      return;
+    }
+    navigation.navigate('UserPage', {
+      pageOwnerUserId: userId,
+      pageOwnerUserName: authorName(item),
+      pageOwnerUserProfilePicUrl: item?.author?.profilePicUrl || item?.user?.profilePicUrl || null,
+    });
   };
 
   const cycleSort = () => setSort((current) => SORTS[(SORTS.indexOf(current) + 1) % SORTS.length]);
@@ -424,15 +438,17 @@ export default function CuratedHome({ navigation }) {
             {visiblePosts.length} REVIEWS · {filter.toUpperCase()}
           </Text>
           <View style={styles.feedActions}>
-            <TouchableOpacity
-              style={[styles.sortButton, styles.swipeFeedButton]}
-              onPress={() => navigation.navigate('HomeFeed')}
-              accessibilityRole="button"
-              accessibilityLabel="Open vertical swipe feed"
-            >
-              <MaterialCommunityIcons name="gesture-swipe-vertical" size={15} color="#FFFFFF" />
-              <Text style={styles.swipeFeedText}>{Strings.HOME_GO_FEED}</Text>
-            </TouchableOpacity>
+            {playablePosts.length > 0 ? (
+              <TouchableOpacity
+                style={[styles.sortButton, styles.swipeFeedButton]}
+                onPress={() => openPost(playablePosts[0])}
+                accessibilityRole="button"
+                accessibilityLabel="Open vertical swipe feed"
+              >
+                <MaterialCommunityIcons name="gesture-swipe-vertical" size={15} color="#FFFFFF" />
+                <Text style={styles.swipeFeedText}>{Strings.HOME_GO_FEED}</Text>
+              </TouchableOpacity>
+            ) : null}
             <TouchableOpacity style={styles.sortButton} onPress={cycleSort}>
               <Text style={styles.sortText}>{sort}</Text>
               <MaterialCommunityIcons name="swap-vertical" size={15} color={COLORS.INK} />
@@ -451,6 +467,7 @@ export default function CuratedHome({ navigation }) {
                 following={Boolean(following[authorName(item)])}
                 saved={Boolean(saved[item._id])}
                 onOpen={() => openPost(item)}
+                onAuthor={() => openAuthor(item)}
                 onFollow={() =>
                   setFollowing((current) => ({
                     ...current,
@@ -500,26 +517,34 @@ function RoundIcon({ name, dot, onPress }) {
   );
 }
 
-function PostCard({ item, following, saved, onOpen, onFollow, onSave, onShare, onCreate }) {
+function PostCard({ item, following, saved, onOpen, onAuthor, onFollow, onSave, onShare, onCreate }) {
   const name = authorName(item);
   const value = reviewScore(item);
   return (
     <View style={styles.postCard}>
       <View style={styles.postHeader}>
-        <FastImage source={{ uri: authorImage(item) }} style={styles.postAvatar} />
-        <View style={styles.identity}>
-          <View style={styles.nameRow}>
-            <Text style={styles.postName} numberOfLines={1}>
-              @{name.replace(/^@/, '')}
-            </Text>
-            <View style={styles.authorScore}>
-              <Text style={styles.authorScoreText}>G {Math.round(Number(value || 8) * 10)}</Text>
+        <TouchableOpacity
+          style={styles.authorTap}
+          activeOpacity={0.8}
+          onPress={onAuthor}
+          accessibilityRole="button"
+          accessibilityLabel={`Open @${name.replace(/^@/, '')} profile`}
+        >
+          <FastImage source={{ uri: authorImage(item) }} style={styles.postAvatar} />
+          <View style={styles.identity}>
+            <View style={styles.nameRow}>
+              <Text style={styles.postName} numberOfLines={1}>
+                @{name.replace(/^@/, '')}
+              </Text>
+              <View style={styles.authorScore}>
+                <Text style={styles.authorScoreText}>G {Math.round(Number(value || 8) * 10)}</Text>
+              </View>
             </View>
+            <Text style={styles.postMeta} numberOfLines={1}>
+              {postCategory(item)} · {item.isSponsored ? 'Sponsored' : 'Community review'}
+            </Text>
           </View>
-          <Text style={styles.postMeta} numberOfLines={1}>
-            {postCategory(item)} · {item.isSponsored ? 'Sponsored' : 'Community review'}
-          </Text>
-        </View>
+        </TouchableOpacity>
         <TouchableOpacity
           style={[styles.followButton, following && styles.followingButton]}
           onPress={onFollow}
@@ -816,6 +841,7 @@ const styles = StyleSheet.create({
     ...T.SHADOW_CARD,
   },
   postHeader: { flexDirection: 'row', alignItems: 'center', gap: 9, padding: 12 },
+  authorTap: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 9 },
   postAvatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: COLORS.TRACK },
   identity: { flex: 1, minWidth: 0 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },

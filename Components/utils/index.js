@@ -572,15 +572,19 @@ async function getMediaStreams(videoUri) {
   }
 }
 
-function checkPermissionToAccessGallery() {
+// Android 13+는 이미지/영상 권한이 분리돼 있다 — 영상 선택인데 READ_MEDIA_IMAGES만
+// 요청하면 갤러리에 영상이 뜨지 않는다 (2026-09-17 피드백: 리뷰 영상 첨부 불가)
+function checkPermissionToAccessGallery(mediaType = 'photo') {
   console.log('Platform', Platform);
+  const androidPermission =
+    Platform.Version >= 33
+      ? mediaType === 'video'
+        ? PERMISSIONS.ANDROID.READ_MEDIA_VIDEO
+        : PERMISSIONS.ANDROID.READ_MEDIA_IMAGES
+      : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE;
   return new Promise(async function (resolve, reject) {
     const permissionRes = await checkPermission(
-      Platform.OS === 'ios'
-        ? PERMISSIONS.IOS.PHOTO_LIBRARY
-        : Platform.OS === 'android' && Platform.Version >= 33
-          ? PERMISSIONS.ANDROID.READ_MEDIA_IMAGES
-          : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE,
+      Platform.OS === 'ios' ? PERMISSIONS.IOS.PHOTO_LIBRARY : androidPermission,
     );
 
     if (permissionRes === RESULTS.BLOCKED) {
@@ -592,7 +596,7 @@ function checkPermissionToAccessGallery() {
           text: Strings.OK,
           onPress: async () => {
             if (Platform.OS === 'android' && Platform.Version >= 33) {
-              const requested2 = await request(PERMISSIONS.ANDROID.READ_MEDIA_IMAGES);
+              const requested2 = await request(androidPermission);
               console.log('requested2', requested2);
             }
 
