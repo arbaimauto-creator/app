@@ -1918,6 +1918,11 @@ function PurchasePopup({ context }) {
       quantity: context.state.buyNumber,
       options: product.options,
       reviewerVideoId: context.state.video?._id,
+      // 단골 적중 (2026-09-17): 리뷰 출발 구매 — 결제 성공 시 "리뷰대로였나요?" 프롬프트 근거
+      hitContext: {
+        reviewerId: context.state.video?.author?.userId,
+        videoId: context.state.video?.videoId,
+      },
     });
   };
 

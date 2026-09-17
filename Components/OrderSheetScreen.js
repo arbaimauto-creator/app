@@ -140,6 +140,8 @@ export default class OrderSheetScreen extends React.Component {
     this.props.navigation.navigate('Checkout', {
       checkoutUrl: session.url,
       orderId,
+      // 단골 적중 (2026-09-17): 리뷰 출발 구매면 결제 성공 후 프롬프트에 쓴다
+      hitContext: this.props.route.params?.hitContext,
       // 서버가 만든 복귀 주소. 이 주소로 돌아오면 결제 결과로 인정한다.
       returnBase: session.returnBase || 'https://api.greyd.app/orders/checkout',
       onPaid: (paidOrderId) => {

@@ -9,6 +9,7 @@ import T from './Constants/DesignTokens';
 import Strings from './Strings';
 import HeaderLeftBackButton from './CustomComponents/headerBackButton/headerLeftBackButton';
 import { CHECKOUT_RESULT, classifyCheckoutUrl } from './utils/checkout';
+import { markPromptShown, recordHit, wasPromptShown } from '../api/regulars';
 
 const { COLORS } = T;
 
@@ -51,7 +52,29 @@ export default class CheckoutScreen extends React.Component {
             onPaid(orderId);
           }
           this.props.navigation.goBack();
+          this.maybePromptPurchaseHit();
         },
+      },
+    ]);
+  };
+
+  // 단골 적중 (2026-09-17): 리뷰 출발 구매(hitContext)면 결제 성공 후 리뷰당 한 번만
+  // "리뷰대로였나요?"를 묻고 응답을 적중 원장에 기록한다.
+  maybePromptPurchaseHit = async () => {
+    const hitContext = this.props.route.params?.hitContext;
+    if (!hitContext?.reviewerId || !hitContext?.videoId) {
+      return;
+    }
+    if (await wasPromptShown(hitContext.videoId)) {
+      return;
+    }
+    await markPromptShown(hitContext.videoId);
+    Alert.alert(Strings.REGULAR_PROMPT_PURCHASE_TITLE, '', [
+      { text: Strings.REGULAR_PROMPT_LATER, style: 'cancel' },
+      {
+        text: Strings.REGULAR_PROMPT_HELPFUL_YES,
+        onPress: () =>
+          recordHit(hitContext.reviewerId, hitContext.videoId, 'purchase').catch(() => {}),
       },
     ]);
   };
