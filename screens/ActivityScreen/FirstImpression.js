@@ -62,7 +62,14 @@ export default function FirstImpression({ route, navigation }) {
         },
       });
       logEvent('fi_submit', { campaign_id: campaign.id, has_note: note.trim().length > 0 });
-      navigation.goBack();
+      // 업로드로 바로 이어주기 (2026-09-17) — 이전엔 goBack만 해서 활동 탭에서 다시 찾아야 했다
+      Alert.alert(Strings.FI_DONE_TITLE, Strings.FI_DONE_BODY, [
+        { text: Strings.REGULAR_PROMPT_LATER, style: 'cancel', onPress: () => navigation.goBack() },
+        {
+          text: Strings.UPLOAD_REVIEW_CTA,
+          onPress: () => navigation.replace('ReviewLinkSubmit', { campaignId: campaign.id }),
+        },
+      ]);
     } catch (e) {
       submitLockRef.current = false;
       setIsSubmitting(false);

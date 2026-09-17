@@ -68,6 +68,7 @@ import ReviewLinkSubmit from '../../screens/TryScreen/ReviewLinkSubmit';
 import BrandWelcome from '../../screens/InviteGateScreen/BrandWelcome';
 import BrandSeedingCreate from '../../screens/BrandScreen/BrandSeedingCreate';
 import OrderPageScreen from '../../Components/OrderPageScreen';
+import MissionStatusScreen from '../../screens/ActivityScreen/MissionStatusScreen';
 import AddressBook from '../../screens/MyScreen/AddressBook';
 import RewardLedgerScreen from '../../screens/MyScreen/RewardLedgerScreen';
 import AboutScreen from '../../screens/MyScreen/AboutScreen';
@@ -567,6 +568,13 @@ function MainDrawerNavigator({ route, navigation }) {
       <Stack.Screen
         name="BrandSeedingCreate"
         component={BrandSeedingCreate}
+        initialParams={initialParams}
+        options={{ headerShown: false }}
+      />
+      {/* 미션 진행 상황 (2026-09-17) — 검수 중·FGI 제출 상태 타임라인 */}
+      <Stack.Screen
+        name="MissionStatus"
+        component={MissionStatusScreen}
         initialParams={initialParams}
         options={{ headerShown: false }}
       />

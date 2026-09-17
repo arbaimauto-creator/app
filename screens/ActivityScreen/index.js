@@ -643,6 +643,17 @@ export default function ActivityScreen({ navigation, route }) {
           </>
         ) : null}
 
+        {/* 검수 중 — 배지로 끝나지 않게 진행 상황 타임라인으로 안내 (2026-09-17) */}
+        {seeding.status === SEEDING_STATUS.REVIEWING ? (
+          <Btn
+            variant="ghost"
+            small
+            title={Strings.MS_VIEW_STATUS}
+            onPress={() => navigation.navigate('MissionStatus', { campaignId: seeding.campaignId })}
+            style={styles.actionGap}
+          />
+        ) : null}
+
         {seeding.status === SEEDING_STATUS.DONE ? (
           <View style={styles.feedbackCard}>
             {/* 브랜드 평가 데이터는 아직 앱에 내려오지 않는다 — 가짜 별점 대신 확인 상태(원장 pointsGranted)만 정직하게 */}

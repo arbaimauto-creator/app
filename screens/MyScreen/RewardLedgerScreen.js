@@ -3,6 +3,7 @@
 // 레거시 리뷰 리워드(R, 통화 단위) 화면(RewardList)은 삭제하지 않고 하단 행으로 연결한다(기능 보존 원칙).
 import React, { useCallback, useState } from 'react';
 import {
+  Alert,
   Platform,
   SafeAreaView,
   ScrollView,
@@ -22,7 +23,7 @@ import { Badge, Card, Chips } from '../../Components/UI';
 import { selectCampaigns } from '../../slices/campaign';
 import { getSeedings } from '../../api/seedings';
 import { getCreatorProfile } from '../../api/creators';
-import { buildRewardLedger, ledgerTotals } from '../../api/rewards';
+import { buildRewardLedger, ledgerTotals, REWARD_STATE } from '../../api/rewards';
 import {
   REWARD_STATE_ORDER,
   rewardPointsText,
@@ -122,11 +123,30 @@ export default function RewardLedgerScreen({ navigation }) {
         ) : (
           shown.map((e) => {
             const tappable = !!byId[e.campaignId];
+            // 지급 완료 상세 (2026-09-17) — 배지로 끝나지 않게 금액·적립처를 보여준다
+            const onRowPress = () => {
+              if (e.state === REWARD_STATE.PAID) {
+                Alert.alert(
+                  rewardStateLabel(e.state),
+                  Strings.REWARD_PAID_DETAIL(Number(e.points || 0).toLocaleString()),
+                  tappable
+                    ? [
+                        { text: Strings.OK, style: 'cancel' },
+                        { text: Strings.ACT_FEEDBACK_VIEW_ALL, onPress: () => openCampaign(e) },
+                      ]
+                    : [{ text: Strings.OK }],
+                );
+                return;
+              }
+              if (tappable) {
+                openCampaign(e);
+              }
+            };
             return (
               <TouchableOpacity
                 key={`${e.campaignId}:${e.state}:${e.at || ''}`}
-                activeOpacity={tappable ? 0.7 : 1}
-                onPress={() => tappable && openCampaign(e)}
+                activeOpacity={tappable || e.state === REWARD_STATE.PAID ? 0.7 : 1}
+                onPress={onRowPress}
                 accessibilityRole={tappable ? 'button' : 'text'}
                 accessibilityLabel={`${e.title || Strings.REWARD_REASON_onboarding} ${rewardStateLabel(e.state)} ${rewardPointsText(e)}`}
               >

@@ -9,7 +9,7 @@ import T from '../../Components/Constants/DesignTokens';
 import Strings from '../../Components/Strings';
 import { Badge, GlowCard, StatusPill } from '../../Components/UI';
 import { getCreatorProfile } from '../../api/creators';
-import { getSeedings } from '../../api/seedings';
+import { getSeedings, SEEDING_STATUS } from '../../api/seedings';
 import { seedingStatusLabel } from '../../api/statusModel';
 import { getHiddenCampaigns, hideCampaign } from '../../api/hiddenCampaigns';
 import { rankCampaigns, buildTodoItems, REASON } from '../../api/recommend';
@@ -101,6 +101,21 @@ export default function HomeHero({ navigation, campaigns }) {
     logEvent('home_swipe_open', {});
     navigation.navigate('CampaignSwipe', { initialIndex: index });
   };
+  // TODO 카드 직행 (2026-09-17) — 전부 활동 탭으로만 보내던 것을 단계 화면으로 바로
+  const openTodo = (item) => {
+    if (item.status === SEEDING_STATUS.RECEIVED) {
+      logEvent('home_todo_direct', { action: 'upload', campaign_id: item.campaignId });
+      navigation.navigate('ReviewLinkSubmit', { campaignId: item.campaignId });
+      return;
+    }
+    if (item.status === SEEDING_STATUS.REVIEWING) {
+      logEvent('home_todo_direct', { action: 'status', campaign_id: item.campaignId });
+      navigation.navigate('MissionStatus', { campaignId: item.campaignId });
+      return;
+    }
+    openActivity();
+  };
+
   const onHide = (campaign) => {
     setHidden((h) => [...h, campaign.id]);
     hideCampaign(campaign.id).catch(() => {});
@@ -132,7 +147,7 @@ export default function HomeHero({ navigation, campaigns }) {
               <TouchableOpacity
                 key={item.campaignId}
                 style={[styles.todoCard, item.order <= 2 && styles.todoCardUrgent]}
-                onPress={openActivity}
+                onPress={() => openTodo(item)}
                 activeOpacity={0.85}
                 accessibilityRole="button"
                 accessibilityLabel={`${item.title}, ${todoLine(item)}`}
