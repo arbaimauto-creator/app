@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   SafeAreaView,
   RefreshControl,
   ScrollView,
@@ -10,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Preference from 'react-native-default-preference';
 import { useFocusEffect, useScrollToTop } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import FastImage from 'react-native-fast-image';
@@ -28,6 +30,15 @@ import {
   getActivityNotiReadAt,
 } from '../../api/activityNotifications';
 import HomeHero from './HomeHero';
+import {
+  REGULAR_UNLOCK_HITS,
+  addRegular,
+  getRegulars,
+  hitCount,
+  isUnlocked,
+  removeRegular,
+  seedRegularsFromFollowing,
+} from '../../api/regulars';
 
 const { COLORS, TYPE } = T;
 const FILTERS = ['For you', 'Following', 'Skincare', 'Makeup', 'Food'];
@@ -168,8 +179,58 @@ export default function CuratedHome({ navigation }) {
   useScrollToTop(scrollRef);
   const [filter, setFilter] = useState('For you');
   const [sort, setSort] = useState('Latest');
-  const [following, setFollowing] = useState({});
+  // 단골 (2026-09-17): { [authorId]: { regular: bool, hits: number } } — 팔로우 대체
+  const [regularState, setRegularState] = useState({});
   const [saved, setSaved] = useState({});
+
+  const loadRegulars = useCallback(async () => {
+    const ids = await getRegulars();
+    const next = {};
+    ids.forEach((id) => {
+      next[id] = { regular: true, hits: REGULAR_UNLOCK_HITS };
+    });
+    setRegularState(next);
+  }, []);
+
+  useEffect(() => {
+    // 기존 팔로우 승계 — 서버 목록을 한 번 읽어 단골 캐시에 병합 (실패해도 무시)
+    Preference.get('userId')
+      .then((uid) => (uid ? APIprovider.getFollowingList(uid) : null))
+      .then((res) => {
+        const ids = (res?.userList ?? res?.list ?? [])
+          .map((u) => u.userId || u._id)
+          .filter(Boolean);
+        return ids.length ? seedRegularsFromFollowing(ids) : null;
+      })
+      .catch(() => {})
+      .finally(loadRegulars);
+  }, [loadRegulars]);
+
+  const onToggleRegular = async (item) => {
+    const id = authorId(item);
+    if (!id) {
+      return;
+    }
+    const current = regularState[id];
+    if (current?.regular) {
+      setRegularState((s) => ({ ...s, [id]: { ...current, regular: false } }));
+      removeRegular(id);
+      APIprovider.followUser(id, false).catch(() => {});
+      return;
+    }
+    if (await isUnlocked(id)) {
+      setRegularState((s) => ({ ...s, [id]: { regular: true, hits: REGULAR_UNLOCK_HITS } }));
+      addRegular(id);
+      APIprovider.followUser(id, true).catch(() => {});
+      return;
+    }
+    const hits = await hitCount(id);
+    setRegularState((s) => ({ ...s, [id]: { regular: false, hits } }));
+    Alert.alert(
+      Strings.REGULAR_LOCKED_TITLE,
+      `${Strings.REGULAR_LOCKED(hits, REGULAR_UNLOCK_HITS)}\n${Strings.REGULAR_LOCKED_GUIDE}`,
+    );
+  };
 
   useEffect(() => {
     dispatch(fetchCampaigns());
@@ -229,7 +290,7 @@ export default function CuratedHome({ navigation }) {
         return true;
       }
       if (filter === 'Following') {
-        return Boolean(following[authorName(item)]);
+        return Boolean(regularState[authorId(item)]?.regular);
       }
       return String(postCategory(item)).toLowerCase().includes(filter.toLowerCase());
     });
@@ -240,7 +301,7 @@ export default function CuratedHome({ navigation }) {
       result.sort((a, b) => Number(reviewScore(b) || 0) - Number(reviewScore(a) || 0));
     }
     return result;
-  }, [filter, following, posts, sort]);
+  }, [filter, regularState, posts, sort]);
 
   const creators = useMemo(() => {
     const seen = new Set();
@@ -464,16 +525,11 @@ export default function CuratedHome({ navigation }) {
               <PostCard
                 key={item._id}
                 item={item}
-                following={Boolean(following[authorName(item)])}
+                following={Boolean(regularState[authorId(item)]?.regular)}
                 saved={Boolean(saved[item._id])}
                 onOpen={() => openPost(item)}
                 onAuthor={() => openAuthor(item)}
-                onFollow={() =>
-                  setFollowing((current) => ({
-                    ...current,
-                    [authorName(item)]: !current[authorName(item)],
-                  }))
-                }
+                onFollow={() => onToggleRegular(item)}
                 onSave={() =>
                   setSaved((current) => ({ ...current, [item._id]: !current[item._id] }))
                 }
@@ -550,7 +606,7 @@ function PostCard({ item, following, saved, onOpen, onAuthor, onFollow, onSave, 
           onPress={onFollow}
         >
           <Text style={[styles.followText, following && styles.followingText]}>
-            {following ? 'Following' : 'Follow'}
+            {following ? Strings.REGULAR_DONE : Strings.REGULAR_CTA}
           </Text>
         </TouchableOpacity>
       </View>
