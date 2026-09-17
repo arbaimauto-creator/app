@@ -30,6 +30,7 @@ import {
   getActivityNotiReadAt,
 } from '../../api/activityNotifications';
 import HomeHero from './HomeHero';
+import AutoTranslateText from '../../Components/AutoTranslateText';
 import {
   REGULAR_UNLOCK_HITS,
   addRegular,
@@ -139,6 +140,9 @@ const thumb = (item) => item.thumbnailUrl || item?.relayedVideo?.thumbnailUrl ||
 const authorName = (item) =>
   item?.author?.name || item?.user?.name || item?.userName || 'greyd.creator';
 const authorId = (item) => item?.author?.userId || item?.user?.userId || item?.userId || null;
+// 필터/정렬 값은 로직 키로 유지하고 표시만 번역한다 (2026-09-17)
+const filterLabel = (value) => Strings.HOME_FILTER_LABEL?.[value] || value;
+const sortLabel = (value) => Strings.HOME_SORT_LABEL?.[value] || value;
 const authorImage = (item) =>
   item?.author?.profilePicUrl || item?.user?.profilePicUrl || thumb(item);
 const postCategory = (item) =>
@@ -453,7 +457,7 @@ export default function CuratedHome({ navigation }) {
               onPress={() => setFilter(item)}
             >
               <Text style={[styles.filterText, filter === item && styles.filterTextSelected]}>
-                {item}
+                {filterLabel(item)}
               </Text>
             </TouchableOpacity>
           ))}
@@ -461,8 +465,8 @@ export default function CuratedHome({ navigation }) {
 
         <View style={styles.curationHeader}>
           <View>
-            <Text style={styles.curationEyebrow}>CURATED BY GREYD</Text>
-            <Text style={styles.curationHeading}>Worth your attention</Text>
+            <Text style={styles.curationEyebrow}>{Strings.HOME_CURATED_EYEBROW}</Text>
+            <Text style={styles.curationHeading}>{Strings.HOME_CURATED_HEADING}</Text>
           </View>
           <TouchableOpacity onPress={() => setFilter('For you')}>
             <Text style={styles.curationSeeAll}>See all</Text>
@@ -499,7 +503,7 @@ export default function CuratedHome({ navigation }) {
 
         <View style={styles.feedMeta}>
           <Text style={styles.feedCount}>
-            {visiblePosts.length} REVIEWS · {filter.toUpperCase()}
+            {Strings.HOME_REVIEWS_COUNT(visiblePosts.length, filterLabel(filter))}
           </Text>
           <View style={styles.feedActions}>
             {playablePosts.length > 0 ? (
@@ -514,7 +518,7 @@ export default function CuratedHome({ navigation }) {
               </TouchableOpacity>
             ) : null}
             <TouchableOpacity style={styles.sortButton} onPress={cycleSort}>
-              <Text style={styles.sortText}>{sort}</Text>
+              <Text style={styles.sortText}>{sortLabel(sort)}</Text>
               <MaterialCommunityIcons name="swap-vertical" size={15} color={COLORS.INK} />
             </TouchableOpacity>
           </View>
@@ -546,20 +550,18 @@ export default function CuratedHome({ navigation }) {
         ) : (
           <View style={styles.empty}>
             <MaterialCommunityIcons name="account-search-outline" size={30} color={COLORS.GREY} />
-            <Text style={styles.emptyTitle}>Nothing here in {filter}</Text>
-            <Text style={styles.emptyBody}>Follow more testers or switch back to For you.</Text>
+            <Text style={styles.emptyTitle}>{Strings.HOME_EMPTY_TITLE(filterLabel(filter))}</Text>
+            <Text style={styles.emptyBody}>{Strings.HOME_EMPTY_BODY}</Text>
             <TouchableOpacity style={styles.emptyButton} onPress={() => setFilter('For you')}>
-              <Text style={styles.emptyButtonText}>Back to For you</Text>
+              <Text style={styles.emptyButtonText}>{Strings.HOME_EMPTY_BACK}</Text>
             </TouchableOpacity>
           </View>
         )}
 
         {!loading && visiblePosts.length > 0 ? (
           <View style={styles.caughtUp}>
-            <Text style={styles.caughtUpTitle}>You are caught up</Text>
-            <Text style={styles.caughtUpBody}>
-              Fresh reviews will appear here as creators post.
-            </Text>
+            <Text style={styles.caughtUpTitle}>{Strings.HOME_CAUGHT_UP}</Text>
+            <Text style={styles.caughtUpBody}>{Strings.HOME_CAUGHT_UP_BODY}</Text>
           </View>
         ) : null}
       </ScrollView>
@@ -633,9 +635,8 @@ function PostCard({ item, following, saved, onOpen, onAuthor, onFollow, onSave, 
           <Metric label="Made" value={madeCount(item)} />
           <Metric label="Comments" value={commentCount(item)} />
         </View>
-        <Text style={styles.caption} numberOfLines={4}>
-          {caption(item)}
-        </Text>
+        {/* 리뷰 본문 자동 번역 (2026-09-17) — 앱 언어와 다르면 번역, "원문 보기" 가능 */}
+        <AutoTranslateText text={caption(item)} style={styles.caption} numberOfLines={4} />
         <Text style={styles.tags}>
           #honestreview #greyd #{String(postCategory(item)).toLowerCase()}
         </Text>
@@ -646,26 +647,29 @@ function PostCard({ item, following, saved, onOpen, onAuthor, onFollow, onSave, 
             ))}
           </View>
           <Text style={styles.madeText}>
-            <Text style={styles.madeStrong}>{madeCount(item)}</Text> made a review from this
+            <Text style={styles.madeStrong}>{madeCount(item)}</Text>
+            {Strings.HOME_MADE_FROM_SUFFIX}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.commentPreview} onPress={onOpen}>
           <Text style={styles.commentText}>
             <Text style={styles.commentAuthor}>greyd.community </Text>
-            What detail convinced you most?
+            {Strings.HOME_PROMPT_QUESTION}
           </Text>
-          <Text style={styles.commentCount}>View all {commentCount(item)} comments</Text>
+          <Text style={styles.commentCount}>
+            {Strings.HOME_VIEW_ALL_COMMENTS(commentCount(item))}
+          </Text>
         </TouchableOpacity>
         <View style={styles.actions}>
           <Action
             icon={saved ? 'bookmark' : 'bookmark-outline'}
-            label={saved ? 'Saved' : 'Save'}
+            label={saved ? Strings.REF_SAVED : Strings.REF_SAVE}
             active={saved}
             onPress={onSave}
           />
-          <Action icon="share-variant-outline" label="Share" onPress={onShare} />
+          <Action icon="share-variant-outline" label={Strings.SHARE} onPress={onShare} />
           <TouchableOpacity style={styles.makeAction} onPress={onCreate}>
-            <Text style={styles.makeActionText}>Make one like this</Text>
+            <Text style={styles.makeActionText}>{Strings.REF_MAKE_LIKE_THIS}</Text>
           </TouchableOpacity>
         </View>
       </View>

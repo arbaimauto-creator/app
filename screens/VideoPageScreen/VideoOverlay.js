@@ -1,5 +1,5 @@
 import T from '../../Components/Constants/DesignTokens';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   StyleSheet,
@@ -15,7 +15,8 @@ import APIprovider from '../../Components/APIprovider';
 import Constants from '../../Components/Constants';
 import FEATURES from '../../Components/Constants/Features';
 import VideoLikeButton from '../../Components/CustomComponents/VideoLikeButton';
-import Strings from '../../Components/Strings';
+import Strings, { getLanguage } from '../../Components/Strings';
+import { needsTranslation, translate } from '../../api/translate';
 import utils, { isGuestUser, LogoutAlert } from '../../Components/utils';
 import {
   PRODUCT_CTA,
@@ -235,6 +236,26 @@ function VideoOverlay({ context }) {
   const caption = [title, body].filter(Boolean).join('\n');
   const hashTags = Array.isArray(review.hashTags) ? [...new Set(review.hashTags)] : [];
   const [captionExpanded, setCaptionExpanded] = useState(false);
+
+  // 리뷰 본문 자동 번역 (2026-09-17) — 앱 언어와 다르면 번역, 실패 시 원문 유지
+  const [captionTranslated, setCaptionTranslated] = useState(null);
+  const [showOriginalCaption, setShowOriginalCaption] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    setCaptionTranslated(null);
+    setShowOriginalCaption(false);
+    if (needsTranslation(caption, getLanguage())) {
+      translate(caption, getLanguage()).then((result) => {
+        if (alive && result) {
+          setCaptionTranslated(result);
+        }
+      });
+    }
+    return () => {
+      alive = false;
+    };
+  }, [caption]);
+  const displayCaption = captionTranslated && !showOriginalCaption ? captionTranslated : caption;
   // 펼친 카드 위 세로 스와이프 → 코드로 다음/이전 쇼츠. 펼친 카드 영역에선 네이티브 페이저가
   // 제스처를 못 받는다(2026-09-15 에뮬 재현: 카드를 터치 통과로 바꿔도 동일). RNGH Pan은 활성화되면
   // 네이티브 터치를 가져가므로 확실히 동작한다. 탭(해시태그·접기)은 Pan이 활성화되지 않아 그대로 눌린다.
@@ -303,8 +324,21 @@ function VideoOverlay({ context }) {
             {captionExpanded ? (
               <View>
                 <Text style={styles.caption} numberOfLines={CAPTION_LINES_EXPANDED}>
-                  {caption}
+                  {displayCaption}
                 </Text>
+                {captionTranslated ? (
+                  <TouchableOpacity
+                    onPress={() => setShowOriginalCaption((v) => !v)}
+                    style={styles.captionToggleHit}
+                    accessibilityRole="button"
+                  >
+                    <Text style={styles.captionToggle}>
+                      {showOriginalCaption
+                        ? Strings.TRANSLATE_SHOW_TRANSLATION
+                        : `${Strings.TRANSLATED_BY} · ${Strings.TRANSLATE_SHOW_ORIGINAL}`}
+                    </Text>
+                  </TouchableOpacity>
+                ) : null}
                 {hashTags.length > 0 ? (
                   <View style={styles.hashTagRow}>
                     {hashTags.map((tag) => (
@@ -340,7 +374,7 @@ function VideoOverlay({ context }) {
                       setCaptionTruncated(e.nativeEvent.lines.length > CAPTION_LINES_COLLAPSED)
                     }
                   >
-                    {caption}
+                    {displayCaption}
                   </Text>
                   {canToggleCaption ? (
                     <Text style={styles.captionToggle}>{Strings.CAPTION_MORE}</Text>
