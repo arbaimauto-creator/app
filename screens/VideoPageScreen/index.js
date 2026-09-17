@@ -42,6 +42,7 @@ import { Context } from '../../Contexts';
 import { changeReward, setTotalRevenue, setTotalReward } from '../../slices/user';
 import CommentModal from './CommentModal';
 import DetailsSheet from './DetailsSheet';
+import { markPromptShown, recordHit, wasPromptShown } from '../../api/regulars';
 import { setStatusColor } from './Header';
 import LinkedProduct from './LinkedProduct';
 import RenderVideoPlayer from './RenderVideoPlayer';
@@ -680,6 +681,7 @@ class VideoPageScreen extends React.PureComponent {
           relayedVideoCount: data.relayedVideoCount,
           isSponsored: data.isSponsored,
           statusCode: data.statusCode,
+          isBookmarked: data.isBookmarked ?? this.state.video.isBookmarked,
           titleByCountry: this.props.route.params.video?.titleByCountry || data.titleByCountry,
           descriptionByCountry:
             this.props.route.params.video?.descriptionByCountry || data.descriptionByCountry,
@@ -730,6 +732,9 @@ class VideoPageScreen extends React.PureComponent {
         Preference.set('isGradeBubbleGuided', 'true');
         Preference.set('isGradedAlready', 'true');
       }
+
+      // 단골 적중 (2026-09-17): 저장해 둔 리뷰를 다시 열었을 때 한 번만 묻는다
+      this.maybePromptHelpfulHit();
 
       if (this.props.route.params.isFocused && useIsFocused) {
         videoWatchedFBPixel(data);
@@ -1580,6 +1585,28 @@ class VideoPageScreen extends React.PureComponent {
         this.setState((prev) => ({ video: { ...prev.video, isBookmarked: !next } }));
       }
     });
+  };
+
+  // 단골 적중 (2026-09-17): 저장(북마크)해 둔 리뷰를 다시 열었을 때, 리뷰당 한 번만
+  // "도움됐나요?"를 묻고 응답을 적중 원장에 기록한다.
+  maybePromptHelpfulHit = async () => {
+    const video = this.state.video;
+    const reviewerId = video?.author?.userId;
+    const videoId = video?.videoId;
+    if (!reviewerId || !videoId || !video?.isBookmarked) {
+      return;
+    }
+    if (await wasPromptShown(videoId)) {
+      return;
+    }
+    await markPromptShown(videoId);
+    Alert.alert(Strings.REGULAR_PROMPT_HELPFUL_TITLE, '', [
+      { text: Strings.REGULAR_PROMPT_LATER, style: 'cancel' },
+      {
+        text: Strings.REGULAR_PROMPT_HELPFUL_YES,
+        onPress: () => recordHit(reviewerId, videoId, 'helpful').catch(() => {}),
+      },
+    ]);
   };
 
   openAuthorFromSheet = () => {
