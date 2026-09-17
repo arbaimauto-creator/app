@@ -102,6 +102,17 @@ export default function BrandMy({ navigation }) {
           <Text style={[styles.xs, { marginTop: 4 }]}>{Strings.BRAND_MY_REPORT_NOTE}</Text>
         </Card>
 
+        {/* 제품 뿌리기 (2026-09-17) — FGI/리뷰 캠페인 배포 요청 */}
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => navigation.navigate('BrandSeedingCreate')}
+        >
+          <Card style={[styles.rowCard, styles.rowInline]}>
+            <Text style={styles.rowTitle}>{Strings.BRAND_SEED_TITLE}</Text>
+            <Text style={styles.xs}>›</Text>
+          </Card>
+        </TouchableOpacity>
+
         {/* 스토어 관리 (2026-09-17) — 앱에서도 상품 등록·관리. 웹(ops 판매자 포털)과 같은 API */}
         <TouchableOpacity
           activeOpacity={0.7}

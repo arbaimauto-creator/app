@@ -66,6 +66,7 @@ import CampaignSwipeFeed from '../../screens/HomeScreen/CampaignSwipeFeed';
 import CampaignDetail from '../../screens/TryScreen/CampaignDetail';
 import ReviewLinkSubmit from '../../screens/TryScreen/ReviewLinkSubmit';
 import BrandWelcome from '../../screens/InviteGateScreen/BrandWelcome';
+import BrandSeedingCreate from '../../screens/BrandScreen/BrandSeedingCreate';
 import AddressBook from '../../screens/MyScreen/AddressBook';
 import RewardLedgerScreen from '../../screens/MyScreen/RewardLedgerScreen';
 import AboutScreen from '../../screens/MyScreen/AboutScreen';
@@ -560,6 +561,13 @@ function MainDrawerNavigator({ route, navigation }) {
         options={{
           ...headerBackButton,
         }}
+      />
+      {/* 판매자 제품 뿌리기 (2026-09-17) — FGI/리뷰 캠페인 배포 요청 */}
+      <Stack.Screen
+        name="BrandSeedingCreate"
+        component={BrandSeedingCreate}
+        initialParams={initialParams}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="UserPage"
