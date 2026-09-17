@@ -287,9 +287,7 @@ export default function MyScreen({ navigation }) {
         <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('FollowList')}>
           <Card>
             <View style={styles.row}>
-              <Text style={styles.rowTitle}>
-                {Strings.FOLLOWERS} · {Strings.FOLLOWING}
-              </Text>
+              <Text style={styles.rowTitle}>{Strings.REGULAR_MY_LIST}</Text>
               <Text style={styles.chev}>›</Text>
             </View>
           </Card>

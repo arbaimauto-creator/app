@@ -40,8 +40,8 @@ export default function FollowListTabView(props) {
   const { followerList, followingList } = props;
 
   let tabs = [];
-  tabs.push({ key: 'follower', title: Strings.FOLLOWERS });
-  tabs.push({ key: 'following', title: Strings.FOLLOWING });
+  tabs.push({ key: 'follower', title: Strings.REGULAR_TAB_FANS });
+  tabs.push({ key: 'following', title: Strings.REGULAR_MY_LIST });
   const [routes] = React.useState(tabs);
   const renderScene = ({ route, jumpTo }) => {
     switch (route.key) {
@@ -88,7 +88,7 @@ export default function FollowListTabView(props) {
                 return (
                   <View style={styles.tabBarLabelContainer(focused)}>
                     <Text style={focused ? styles.tabBarLabelFocused : styles.tabBarLabel}>
-                      {Strings.FOLLOWERS}
+                      {Strings.REGULAR_TAB_FANS}
                     </Text>
                   </View>
                 );
@@ -96,7 +96,7 @@ export default function FollowListTabView(props) {
                 return (
                   <View style={styles.tabBarLabelContainer(focused)}>
                     <Text style={focused ? styles.tabBarLabelFocused : styles.tabBarLabel}>
-                      {Strings.FOLLOWING}
+                      {Strings.REGULAR_MY_LIST}
                     </Text>
                   </View>
                 );
