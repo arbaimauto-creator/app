@@ -1985,6 +1985,11 @@ export default {
     Food: '푸드',
   },
   HOME_SORT_LABEL: { Latest: '최신순', 'Made count': '제작순', Score: '점수순' },
+  HOME_POST_SPONSORED: '협찬',
+  HOME_POST_COMMUNITY: '커뮤니티 리뷰',
+  HOME_METRIC_EVIDENCE: '근거',
+  HOME_METRIC_MADE: '제작',
+  HOME_METRIC_COMMENTS: '댓글',
   // 리뷰 자동 번역 (2026-09-17)
   TRANSLATE_SHOW_ORIGINAL: '원문 보기',
   TRANSLATE_SHOW_TRANSLATION: '번역 보기',

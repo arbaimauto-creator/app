@@ -2063,6 +2063,11 @@ export default {
     Food: 'Food',
   },
   HOME_SORT_LABEL: { Latest: 'Latest', 'Made count': 'Made count', Score: 'Score' },
+  HOME_POST_SPONSORED: 'Sponsored',
+  HOME_POST_COMMUNITY: 'Community review',
+  HOME_METRIC_EVIDENCE: 'Evidence',
+  HOME_METRIC_MADE: 'Made',
+  HOME_METRIC_COMMENTS: 'Comments',
   // Review auto-translation (2026-09-17)
   TRANSLATE_SHOW_ORIGINAL: 'Show original',
   TRANSLATE_SHOW_TRANSLATION: 'Show translation',

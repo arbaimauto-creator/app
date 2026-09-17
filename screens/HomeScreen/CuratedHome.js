@@ -602,7 +602,8 @@ function PostCard({ item, following, saved, onOpen, onAuthor, onFollow, onSave, 
               </View>
             </View>
             <Text style={styles.postMeta} numberOfLines={1}>
-              {postCategory(item)} · {item.isSponsored ? 'Sponsored' : 'Community review'}
+              {postCategory(item)} ·{' '}
+              {item.isSponsored ? Strings.HOME_POST_SPONSORED : Strings.HOME_POST_COMMUNITY}
             </Text>
           </View>
         </TouchableOpacity>
@@ -631,9 +632,9 @@ function PostCard({ item, following, saved, onOpen, onAuthor, onFollow, onSave, 
 
       <View style={styles.postBody}>
         <View style={styles.marks}>
-          <Metric label="Evidence" value={value || '—'} />
-          <Metric label="Made" value={madeCount(item)} />
-          <Metric label="Comments" value={commentCount(item)} />
+          <Metric label={Strings.HOME_METRIC_EVIDENCE} value={value || '—'} />
+          <Metric label={Strings.HOME_METRIC_MADE} value={madeCount(item)} />
+          <Metric label={Strings.HOME_METRIC_COMMENTS} value={commentCount(item)} />
         </View>
         {/* 리뷰 본문 자동 번역 (2026-09-17) — 앱 언어와 다르면 번역, "원문 보기" 가능 */}
         <AutoTranslateText text={caption(item)} style={styles.caption} numberOfLines={4} />
