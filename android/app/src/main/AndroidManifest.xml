@@ -120,6 +120,15 @@
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="https" android:host="greyd.page.link"/>
       </intent-filter>
+      <!-- 공동구매 공유 링크 https://greyd.app/groupbuy/gb-xxxx (2026-09-30).
+           autoVerify는 greyd.app에 /.well-known/assetlinks.json이 배포된 뒤에 켠다 —
+           먼저 켜면 Android 11 이하에서 검증 실패가 위 greyd.page.link 자동 열기까지 막을 수 있다. -->
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:scheme="https" android:host="greyd.app" android:pathPrefix="/groupbuy/"/>
+      </intent-filter>
     </activity>
 
     <!-- ✅ DevSettingsActivity에 android:exported 추가 -->
