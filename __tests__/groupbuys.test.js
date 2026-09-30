@@ -94,7 +94,8 @@ describe('정규화', () => {
     expect(gb.options).toEqual(['50ml', '80ml']);
     expect(gb.myOrders[0].state).toBe('RESERVED');
     expect(api.normalizeGroupBuy(rawGb({ country: 'JP' })).currency).toBe('JPY');
-    expect(api.normalizeGroupBuy(rawGb({ state: 'WEIRD' })).state).toBe('OPEN');
+    // 모르는 상태는 참여 불가로
+    expect(api.normalizeGroupBuy(rawGb({ state: 'WEIRD' })).state).toBe('CLOSED');
   });
 
   test('주문은 모르는 상태를 카드 등록 전으로, 송장이 없으면 shipment null', () => {
@@ -276,6 +277,69 @@ describe('브랜드 개설 검증', () => {
     expect(api.parseDateTimeInput('2026-10-05 25:00')).toBeNull();
     expect(api.parseDateTimeInput('어제')).toBeNull();
     expect(api.formatDateTimeInput(new Date(2026, 0, 2, 3, 4))).toBe('2026-01-02 03:04');
+  });
+});
+
+describe('검토에서 나온 경계 조건 (2026-09-30)', () => {
+  const base = {
+    title: 't',
+    productId: 'p',
+    hostHandle: 'h',
+    country: 'JP',
+    price: '2000',
+    minQuantity: '0',
+    maxQuantity: '0',
+    perUserMax: '3',
+    startsAt: new Date(NOW).toISOString(),
+    endsAt: new Date(NOW + 2 * 24 * H).toISOString(),
+  };
+  test('상품 통화와 판매 국가 통화가 다르면 막는다', () => {
+    expect(api.validateGroupBuyDraft({ ...base, productCurrency: 'KRW' }, NOW)).toBe('currency');
+    expect(api.validateGroupBuyDraft({ ...base, productCurrency: 'JPY' }, NOW)).toBeNull();
+  });
+  test('배송비·발송 예정일·분 범위', () => {
+    expect(api.validateGroupBuyDraft({ ...base, shippingFee: '-1' }, NOW)).toBe('shippingFee');
+    expect(api.validateGroupBuyDraft({ ...base, shippingFee: 'abc' }, NOW)).toBe('shippingFee');
+    expect(api.validateGroupBuyDraft({ ...base, shipBy: 'invalid' }, NOW)).toBe('shipBy');
+    expect(api.validateGroupBuyDraft({ ...base, shipBy: null }, NOW)).toBeNull();
+    expect(api.parseDateTimeInput('2026-10-05 10:75')).toBeNull();
+  });
+  test('깨진 %인코딩 복귀 주소도 예외 없이 처리', () => {
+    expect(() =>
+      api.billingResultFromUrl(
+        'https://ops.test/portal/groupbuy-billing/done?result=success&orderId=%E0%A4%A',
+      ),
+    ).not.toThrow();
+  });
+  test('카드 등록을 중단하고 다시 주문해도 1인 한도에 막히지 않는다', async () => {
+    mockFeatures.GROUP_BUY_MOCK = true;
+    await mockServer.reset(mockServer.seed(Date.now()));
+    // 5개 주문서 제출 후 카드 등록 없이 이탈
+    await api.createGroupBuyOrder('gb-a1b2c3d4', goodOrder({ quantity: 5 }), 'abandon-1');
+    let gb = await api.getGroupBuy('gb-a1b2c3d4');
+    expect(api.myActiveQuantity(gb)).toBe(0);
+    // 새로 다시 5개 — 이전 미완료 주문은 대체된다
+    const { order } = await api.createGroupBuyOrder(
+      'gb-a1b2c3d4',
+      goodOrder({ quantity: 5 }),
+      'retry-2',
+    );
+    await api.completeMockBilling(order.id);
+    gb = await api.getGroupBuy('gb-a1b2c3d4');
+    expect(gb.myOrders.filter((o) => o.state === 'BILLING_PENDING')).toHaveLength(0);
+    expect(api.myActiveQuantity(gb)).toBe(5);
+    mockFeatures.GROUP_BUY_MOCK = false;
+  });
+  test('오래된 시연 데이터는 새로 깐다', async () => {
+    mockFeatures.GROUP_BUY_MOCK = true;
+    const old = mockServer.seed(Date.now() - mockServer.RESEED_AFTER_MS - 1000);
+    old.groupBuys[0].title = '오래된 데이터';
+    await mockServer.reset(old);
+    await mockServer.reset(null); // 메모리 비우고 저장소에서 다시 읽게
+    mockStore.groupBuyMockV3 = JSON.stringify(old);
+    const gb = await api.getGroupBuy('gb-a1b2c3d4');
+    expect(gb.title).not.toBe('오래된 데이터');
+    mockFeatures.GROUP_BUY_MOCK = false;
   });
 });
 

@@ -42,11 +42,18 @@ function ShipmentEditor({ order, country, onSaved }) {
   const [number, setNumber] = useState(order.shipment?.trackingNumber || '');
   const [busy, setBusy] = useState(false);
 
-  if (!open) {
+  // 저장 직후에는 목록을 다시 불러오는 중이라 order.shipment가 아직 비어 있다 — 방금 저장한 값을 보여준다
+  const shown =
+    order.shipment ||
+    (courier && normalizeTrackingNumber(number)
+      ? { courier, trackingNumber: normalizeTrackingNumber(number) }
+      : null);
+
+  if (!open && shown) {
     return (
       <View style={s.between}>
         <Text style={s.body}>
-          {c.trackNo(courierName(order.shipment.courier, lang()), order.shipment.trackingNumber)}
+          {c.trackNo(courierName(shown.courier, lang()), shown.trackingNumber)}
         </Text>
         <Text style={s.link} accessibilityRole="button" onPress={() => setOpen(true)}>
           {c.editShipment}

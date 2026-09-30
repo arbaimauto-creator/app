@@ -1,7 +1,8 @@
 // 내 공동구매 (2026-09-30) — 탭 두 개: 참여한 공동구매(주문·결제 상태·배송 조회) / 내가 여는 공동구매(호스트)
 import React, { useState } from 'react';
 import { Alert, Linking, Text, TouchableOpacity, View } from 'react-native';
-import { Badge, Card } from '../../Components/UI';
+import FEATURES from '../../Components/Constants/Features';
+import { Badge, Btn, Card } from '../../Components/UI';
 import { courierName, trackingUrl } from '../../Components/utils/couriers';
 import {
   GB_STATE,
@@ -9,6 +10,7 @@ import {
   cancelGroupBuyOrder,
   listHostedGroupBuys,
   listMyGroupBuyOrders,
+  resetMockData,
 } from '../../api/groupBuys';
 import {
   Failure,
@@ -177,6 +179,25 @@ export default function MyGroupBuysScreen({ navigation, route }) {
             {c.emptyHosting}
           </Text>
         )
+      ) : null}
+      {FEATURES.GROUP_BUY_MOCK ? (
+        <Btn
+          small
+          variant="ghost"
+          title={c.resetDemo}
+          onPress={() =>
+            Alert.alert(c.resetDemo, c.resetDemoConfirm, [
+              { text: c.no, style: 'cancel' },
+              {
+                text: c.yes,
+                onPress: async () => {
+                  await resetMockData().catch(() => {});
+                  reload();
+                },
+              },
+            ])
+          }
+        />
       ) : null}
     </Frame>
   );

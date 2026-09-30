@@ -135,6 +135,7 @@ export function BrandGroupBuyCreateScreen({ navigation }) {
       productId: form.productId,
       productName: product?.name,
       listPrice: product?.listPrice || 0,
+      productCurrency: product?.currency || null,
       hostHandle: form.hostHandle,
       country: form.country,
       price: form.price,
@@ -152,7 +153,8 @@ export function BrandGroupBuyCreateScreen({ navigation }) {
         .filter(Boolean),
       startsAt: parseDateTimeInput(form.startsAt),
       endsAt: parseDateTimeInput(form.endsAt),
-      shipBy: form.shipBy ? parseDateTimeInput(form.shipBy) : null,
+      // 입력했는데 형식이 틀리면 NaN으로 넘겨 검증에서 걸리게 한다(조용히 빠지지 않게)
+      shipBy: form.shipBy.trim() ? parseDateTimeInput(form.shipBy) || 'invalid' : null,
     };
     const invalid = validateGroupBuyDraft(draft);
     if (invalid) {

@@ -68,7 +68,8 @@ const extractDeepLinkPath = (url) => {
 // 딥링크 경로 화이트리스트 (보안 감사 M2) — config에 정의된 라우트 프리픽스만 수용.
 // 커스텀 스킴(greyd://)은 타 앱이 임의 발신 가능하므로 미등록 경로는 버린다.
 // 기능 다이어트: 커머스 경로(products/orders/myorders)는 COMMERCE 플래그 복원 시 함께 되살린다
-const ALLOWED_LINK_PREFIXES = ['videos/', 'users/', 'notifications', 'mypage/', 'qnas/', 'events', 'groupbuy/'];
+const ALLOWED_LINK_PREFIXES = ['videos/', 'users/', 'notifications', 'mypage/', 'qnas/', 'events'];
+// 공동구매 경로는 공동구매가 켜진 빌드에서만 (서버 배포 전 스토어 빌드에서 "찾을 수 없음" 화면으로 새지 않게)
 // 커머스 경로는 플래그가 켜진 빌드에서만 (products/:productId → 상품 상세)
 const COMMERCE_LINK_PREFIXES = ['products/'];
 const isAllowedLinkPath = (path) => {
@@ -76,10 +77,18 @@ const isAllowedLinkPath = (path) => {
     return false;
   }
   const bare = stripQuery(path);
-  if (bare === 'seller/connect' || bare === 'market' || bare === 'market-orders' || /^market\/\d+$/.test(bare)) {
+  if (
+    bare === 'seller/connect' ||
+    bare === 'market' ||
+    bare === 'market-orders' ||
+    /^market\/\d+$/.test(bare)
+  ) {
     return true;
   }
   if (ALLOWED_LINK_PREFIXES.some((prefix) => bare.startsWith(prefix))) {
+    return true;
+  }
+  if (FEATURES.GROUP_BUY && bare.startsWith('groupbuy/')) {
     return true;
   }
   return FEATURES.COMMERCE && COMMERCE_LINK_PREFIXES.some((prefix) => bare.startsWith(prefix));

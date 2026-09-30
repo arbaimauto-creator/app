@@ -6,7 +6,8 @@
 //   → 결제된 주문 명단(이름·연락처·주소·수량·옵션·금액)이 브랜드에 공개된다 → 브랜드가 택배사·송장번호 입력 → 구매자 추적.
 //
 // 서버 정본은 ops(/api/mobile/*). ops에 공동구매 API가 올라가기 전에는 FEATURES.GROUP_BUY_MOCK(개발 빌드)로
-// 기기 안의 모의 서버(api/groupBuysMock.js)를 쓴다. 릴리스 빌드는 모의 서버를 절대 쓰지 않는다.
+// 기기 안의 모의 서버(api/groupBuysMock.js)를 쓴다. 릴리스 빌드에서는 TestFlight 시연 프로필
+// (eas.json testflight-groupbuy, GREYD_GROUPBUY_PREVIEW=1)만 켤 수 있다 — scripts/verify-release.js가 강제.
 import FEATURES from '../Components/Constants/Features';
 import { opsGet, opsPost } from './opsClient';
 import { OPS_API_BASE } from './opsRuntimeConfig';
@@ -109,7 +110,8 @@ export function normalizeGroupBuy(raw) {
   return {
     code: gb.code,
     title: gb.title || product.name || '',
-    state: GB_STATE[gb.state] ? gb.state : GB_STATE.OPEN,
+    // 모르는 상태는 참여 불가(CLOSED)로 — 서버가 새 상태를 먼저 내보내도 결제 버튼이 열리지 않게
+    state: GB_STATE[gb.state] ? gb.state : GB_STATE.CLOSED,
     openedBy: gb.openedBy === 'ARBAIM' ? 'ARBAIM' : 'BRAND',
     brand: { id: gb.brand?.id || null, name: gb.brand?.name || '' },
     host: {
@@ -250,10 +252,11 @@ export function orderTotal(gb, quantity) {
   return gb.price * q + (q > 0 ? gb.shippingFee : 0);
 }
 
-// 이미 예약된 내 수량(취소·무효 제외) — 1인 최대 수량 검사에 쓴다
+// 이미 예약된 내 수량 — 1인 최대 수량 검사에 쓴다.
+// 카드 등록 전(BILLING_PENDING) 주문은 세지 않는다: 결제창을 닫고 다시 주문하면 서버가 이전 미완료 주문을 대체한다.
 export function myActiveQuantity(gb) {
   return (gb?.myOrders || [])
-    .filter((o) => [ORDER_STATE.BILLING_PENDING, ORDER_STATE.RESERVED].includes(o.state))
+    .filter((o) => o.state === ORDER_STATE.RESERVED)
     .reduce((sum, o) => sum + o.quantity, 0);
 }
 
@@ -327,8 +330,15 @@ export function validateGroupBuyDraft(d, now = Date.now()) {
   if (!(price > 0)) {
     return 'price';
   }
+  if (d.productCurrency && d.productCurrency !== COUNTRIES[d.country].currency) {
+    return 'currency';
+  }
   if (d.listPrice && price > Number(d.listPrice)) {
     return 'priceAboveList';
+  }
+  const fee = Number(d.shippingFee || 0);
+  if (!Number.isInteger(fee) || fee < 0) {
+    return 'shippingFee';
   }
   const min = Number(d.minQuantity || 0);
   const max = Number(d.maxQuantity || 0);
@@ -352,6 +362,9 @@ export function validateGroupBuyDraft(d, now = Date.now()) {
   }
   if (end - start > 30 * 86400000) {
     return 'periodTooLong';
+  }
+  if (d.shipBy !== undefined && d.shipBy !== null && !Number.isFinite(ms(d.shipBy))) {
+    return 'shipBy';
   }
   const images = arr(d.detailImages);
   if (images.some((u) => !/^https:\/\//.test(u))) {
@@ -431,7 +444,11 @@ export function billingResultFromUrl(url, origin = opsOrigin()) {
   for (const pair of query.split('#')[0].split('&')) {
     const [k, v = ''] = pair.split('=');
     if (k) {
-      params[decodeURIComponent(k)] = decodeURIComponent(v.replace(/\+/g, ' '));
+      try {
+        params[decodeURIComponent(k)] = decodeURIComponent(v.replace(/\+/g, ' '));
+      } catch (e) {
+        // 잘못된 %인코딩은 건너뛴다 — 웹뷰 콜백 안에서 예외가 나지 않게
+      }
     }
   }
   return {
@@ -608,6 +625,14 @@ export async function setShipment(orderId, courier, trackingNumber) {
     : opsPost(`/brand/groupbuy-orders/${enc(orderId)}/shipment`, body);
 }
 
+// 모의 서버 전용: 시연 데이터를 처음 상태로
+export async function resetMockData() {
+  if (!isMock()) {
+    throw new Error('mock only');
+  }
+  await mock.reset(mock.seed());
+}
+
 // 개발 모의 서버 전용: 마감 시각을 기다리지 않고 판정·결제를 돌린다
 export async function simulateClose(code) {
   if (!isMock()) {
@@ -627,7 +652,12 @@ export function parseDateTimeInput(text) {
   const [, y, mo, d, h = '0', mi = '0'] = m;
   const date = new Date(Number(y), Number(mo) - 1, Number(d), Number(h), Number(mi));
   // 2026-02-31 같은 넘침 날짜는 거른다
-  if (date.getMonth() !== Number(mo) - 1 || date.getDate() !== Number(d) || Number(h) > 23) {
+  if (
+    date.getMonth() !== Number(mo) - 1 ||
+    date.getDate() !== Number(d) ||
+    Number(h) > 23 ||
+    Number(mi) > 59
+  ) {
     return null;
   }
   return date.toISOString();

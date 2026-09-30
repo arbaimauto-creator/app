@@ -208,5 +208,19 @@ test('브랜드 명단: 마감 전 잠김 → 마감 처리 → 명단·송장 �
   expect(t).toContain('이테스트1');
   expect(t).toContain('명단 내보내기 (CSV)');
   expect(t).toContain('CJ대한통운');
+
+  // 송장 저장 직후(목록 재조회 전)에도 화면이 깨지지 않고 방금 입력한 송장을 보여준다 (2026-09-30 회귀)
+  const firstChip = tree.root.findAll((n) => n.props.onPress && n.props.children?.props?.children === 'CJ대한통운')[0];
+  await act(async () => firstChip.props.onPress());
+  const input = tree.root.findAllByProps({ accessibilityLabel: '송장번호' }).find((n) => n.props.onChangeText);
+  await act(async () => input.props.onChangeText('1234-5678-9012'));
+  const save = tree.root.findAllByProps({ accessibilityLabel: '발송 처리' })[0];
+  await act(async () => save.props.onPress());
+  for (let i = 0; i < 5; i += 1) {
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+  }
+  expect(texts(tree)).toContain('123456789012');
   tree.unmount();
 });

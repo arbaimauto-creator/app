@@ -26,9 +26,15 @@ if (
 ) {
   failures.push('group-buy mock server must be off (or dev-only) in a production release');
 }
-// 공동구매 미리보기(테스트 데이터)는 TestFlight 시연 빌드 전용 — 스토어 배포(production) 프로필에서는 금지
-if (/GROUPBUY_PREVIEW = true/.test(runtime) && process.env.EAS_BUILD_PROFILE === 'production') {
-  failures.push('group-buy preview (mock data) must not be enabled in the production build profile');
+// 공동구매 미리보기(테스트 데이터)는 TestFlight 시연 빌드 전용 — testflight-groupbuy 프로필 밖에서는 전부 금지
+// (로컬 Xcode/Gradle 릴리스 빌드에 .env의 GREYD_GROUPBUY_PREVIEW=1이 남아 새는 것까지 막는다)
+if (
+  /GROUPBUY_PREVIEW = true/.test(runtime) &&
+  process.env.EAS_BUILD_PROFILE !== 'testflight-groupbuy'
+) {
+  failures.push(
+    'group-buy preview (mock data) is only allowed in the testflight-groupbuy EAS profile',
+  );
 }
 if (!/const DEFAULT_URL = null;/.test(linking) || linking.includes('mylinker://')) {
   failures.push('normal cold starts must return null, not a placeholder deep link');

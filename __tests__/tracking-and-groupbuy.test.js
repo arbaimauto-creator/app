@@ -104,10 +104,12 @@ describe('클릭 집계', () => {
 describe('딥링크 계약', () => {
   const read = (p) => fs.readFileSync(path.join(__dirname, '..', p), 'utf8');
 
-  test('공동구매 경로는 열려 있고 커머스 경로는 플래그 뒤에 있다', () => {
+  test('공동구매·커머스 경로는 각 플래그 뒤에 있다', () => {
     const linking = read('Components/utils/linking.js');
     const allowedList = linking.match(/const ALLOWED_LINK_PREFIXES = \[([^\]]+)\]/s)?.[1] || '';
-    expect(allowedList).toContain("'groupbuy/'");
+    // 2026-09-30: 공동구매 경로는 공동구매 플래그가 켜진 빌드에서만
+    expect(allowedList).not.toContain("'groupbuy/'");
+    expect(linking).toContain("FEATURES.GROUP_BUY && bare.startsWith('groupbuy/')");
     expect(linking).toContain("GroupBuy: 'groupbuy/:code'");
     expect(linking).toContain('FEATURES.COMMERCE && COMMERCE_LINK_PREFIXES');
     expect(linking).toContain('captureTrackingCode(url)');

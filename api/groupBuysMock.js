@@ -4,7 +4,9 @@
 // 실제 결제·개인정보는 없다. 시드 구매자 이름에는 전부 "테스트"가 들어간다.
 import { prefGetSafe, prefSetSafe } from './prefSafe';
 
-const KEY = 'groupBuyMockV2'; // 2026-09-30: 갤러리·최근 참여·안내 필드 추가로 시드 갱신
+const KEY = 'groupBuyMockV3'; // 2026-09-30: 시드 기간 연장·자동 재시드
+// 시드는 처음 실행 시각 기준이다. TestFlight 시연자가 며칠 뒤 열어도 흐름을 다시 해볼 수 있게 오래된 시드는 새로 깐다.
+export const RESEED_AFTER_MS = 4 * 86400000;
 const DAY = 86400000;
 
 let db = null;
@@ -104,8 +106,8 @@ export function seed(now = Date.now()) {
         },
       ],
       startsAt: new Date(now - 2 * DAY).toISOString(),
-      endsAt: new Date(now + 3 * DAY).toISOString(),
-      shipBy: new Date(now + 10 * DAY).toISOString(),
+      endsAt: new Date(now + 6 * DAY).toISOString(),
+      shipBy: new Date(now + 13 * DAY).toISOString(),
       myRole: 'BUYER',
     },
     {
@@ -138,8 +140,8 @@ export function seed(now = Date.now()) {
       detailImages: [],
       videos: [],
       startsAt: new Date(now + 1 * DAY).toISOString(),
-      endsAt: new Date(now + 6 * DAY).toISOString(),
-      shipBy: new Date(now + 14 * DAY).toISOString(),
+      endsAt: new Date(now + 9 * DAY).toISOString(),
+      shipBy: new Date(now + 16 * DAY).toISOString(),
       myRole: 'HOST',
     },
     {
@@ -172,8 +174,8 @@ export function seed(now = Date.now()) {
       detailImages: [],
       videos: [],
       startsAt: new Date(now - 4 * DAY).toISOString(),
-      endsAt: new Date(now + 1 * DAY).toISOString(),
-      shipBy: new Date(now + 8 * DAY).toISOString(),
+      endsAt: new Date(now + 5 * DAY).toISOString(),
+      shipBy: new Date(now + 12 * DAY).toISOString(),
       myRole: 'BRAND',
     },
   ];
@@ -181,7 +183,7 @@ export function seed(now = Date.now()) {
     ...seedOrders('gb-a1b2c3d4', 10, 19900, 3000, now),
     ...seedOrders('gb-1234abcd', 7, 16900, 0, now),
   ];
-  return { groupBuys, orders, seq: 1 };
+  return { groupBuys, orders, seq: 1, seededAt: now };
 }
 
 async function load() {
@@ -194,7 +196,11 @@ async function load() {
   } catch (e) {
     db = null;
   }
-  if (!db || !Array.isArray(db.groupBuys)) {
+  if (
+    !db ||
+    !Array.isArray(db.groupBuys) ||
+    !(Date.now() - Number(db.seededAt || 0) < RESEED_AFTER_MS)
+  ) {
     db = seed();
     await save();
   }
@@ -348,9 +354,15 @@ export async function createOrder(code, body) {
   if (existing) {
     return { order: orderView(existing), billingUrl: null, mock: true };
   }
+  // 같은 사람의 카드 등록 전 주문은 새 주문으로 대체한다(결제창을 닫고 다시 주문한 경우) — 서버 규칙과 같게
+  for (const o of ordersOf(code)) {
+    if (o.mine && o.state === 'BILLING_PENDING') {
+      o.state = 'CANCELLED';
+    }
+  }
   const v = view(gb);
   const mineActive = v.myOrders
-    .filter((o) => ['BILLING_PENDING', 'RESERVED'].includes(o.state))
+    .filter((o) => o.state === 'RESERVED')
     .reduce((s, o) => s + o.quantity, 0);
   if (!(body.quantity >= 1) || body.quantity + mineActive > gb.perUserMax) {
     throw fail(422, 'per_user_max');

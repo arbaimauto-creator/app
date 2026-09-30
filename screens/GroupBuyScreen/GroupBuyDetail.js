@@ -26,6 +26,7 @@ import {
   fillRatio,
   getGroupBuy,
   isGroupBuyCode,
+  myActiveQuantity,
   relativeMinutes,
   remainingQuantity,
   timeLeft,
@@ -241,6 +242,24 @@ export default function GroupBuyDetailScreen({ navigation, route }) {
     }
   }, [code, valid]);
 
+  // 시작·마감 시각이 지나면 버튼 상태가 바뀌도록 그 순간에 한 번 다시 그린다(24시간 안의 경계만)
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    if (!gb) {
+      return undefined;
+    }
+    const t = Date.now();
+    const next = [gb.startsAt, gb.endsAt]
+      .map((iso) => (iso ? new Date(iso).getTime() - t : NaN))
+      .filter((d) => d > 0 && d < 86400000)
+      .sort((a, b) => a - b)[0];
+    if (!next) {
+      return undefined;
+    }
+    const timer = setTimeout(() => setTick((x) => x + 1), next + 500);
+    return () => clearTimeout(timer);
+  }, [gb]);
+
   if (!gb) {
     return (
       <Frame navigation={navigation} title={c.eyebrow} onRefresh={reload} refreshing={loading}>
@@ -307,8 +326,11 @@ export default function GroupBuyDetailScreen({ navigation, route }) {
     }
   };
 
+  const limitReached = myActiveQuantity(gb) >= gb.perUserMax;
   let cta;
-  if (open) {
+  if (open && limitReached) {
+    cta = <Btn style={{ flex: 1 }} title={c.ctaLimit(gb.perUserMax)} disabled onPress={() => {}} />;
+  } else if (open) {
     cta = (
       <Btn
         style={{ flex: 1 }}

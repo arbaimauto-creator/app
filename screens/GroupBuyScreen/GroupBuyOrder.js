@@ -57,6 +57,17 @@ export default function GroupBuyOrderScreen({ navigation, route }) {
   const [busy, setBusy] = useState(false);
   const request = useRef(null);
 
+  // 다시 불러온 뒤 남은 수량·1인 한도가 줄었으면 선택 수량도 그 안으로 맞춘다
+  useEffect(() => {
+    if (gb) {
+      const cap = Math.max(
+        1,
+        Math.min(gb.perUserMax - myActiveQuantity(gb), remainingQuantity(gb)),
+      );
+      setQuantity((q) => Math.min(q, cap));
+    }
+  }, [gb]);
+
   useEffect(() => {
     if (gb?.options.length && !option) {
       setOption(gb.options[0]);
@@ -122,7 +133,7 @@ export default function GroupBuyOrderScreen({ navigation, route }) {
       if (!isBillingStartUrl(billingUrl)) {
         throw new Error('invalid billing url');
       }
-      request.current = null;
+      // 요청 번호는 지우지 않는다 — 카드 등록 창을 닫고 돌아와 다시 누르면 같은 주문·같은 결제창으로 이어진다
       navigation.navigate('GroupBuyBilling', {
         url: billingUrl,
         orderId: order.id,
