@@ -370,10 +370,7 @@ export default function CuratedHome({ navigation }) {
           <Text style={styles.gValue}>{gScore}</Text>
         </View>
         <View style={styles.headerActions}>
-          <RoundIcon
-            name="storefront-outline"
-            onPress={() => navigation.navigate('StoreCatalog')}
-          />
+          <RoundIcon name="storefront-outline" onPress={() => navigation.navigate('StoreCatalog')} />
           <RoundIcon name="magnify" onPress={() => navigation.navigate('Search')} />
           <RoundIcon
             name="bell-outline"
@@ -592,7 +589,7 @@ export default function CuratedHome({ navigation }) {
 function RoundIcon({ name, dot, onPress }) {
   return (
     <TouchableOpacity style={styles.iconButton} onPress={onPress}>
-      <MaterialCommunityIcons name={name} size={18} color={COLORS.INK} />
+      <MaterialCommunityIcons name={name} size={20} color={COLORS.INK} />
       {dot ? <View style={styles.notificationDot} /> : null}
     </TouchableOpacity>
   );
@@ -743,15 +740,15 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.AMBER_SOFT,
   },
   gLabel: { fontFamily: T.FONT.ExtraBold, fontSize: 10, color: COLORS.AMBER_DEEP },
-  gValue: { fontFamily: T.SERIF.Bold, fontSize: 15, color: COLORS.AMBER_DEEP, lineHeight: 17 },
+  gValue: { fontFamily: T.LATIN.ExtraBold, fontSize: 12, color: COLORS.AMBER_DEEP },
   headerActions: { marginLeft: 'auto', flexDirection: 'row', gap: 10 },
   iconButton: {
     width: 34,
     height: 34,
     borderRadius: 17,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(27,24,20,0.18)',
-    backgroundColor: 'rgba(255,255,255,0.55)',
+    borderWidth: 1,
+    borderColor: COLORS.LINE,
+    backgroundColor: COLORS.SURFACE,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -775,18 +772,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 11,
     borderWidth: 1,
-    borderColor: COLORS.GLASS_BORDER,
+    borderColor: COLORS.AMBER,
     borderRadius: T.RADIUS.CARD,
-    backgroundColor: COLORS.GLASS,
-    ...T.SHADOW_SOFT,
+    backgroundColor: COLORS.SURFACE,
+    ...T.SHADOW_CARD,
   },
   composerIcon: {
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: COLORS.IVORY,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: COLORS.CHAMPAGNE,
+    backgroundColor: COLORS.AMBER_SOFT,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -797,24 +792,19 @@ const styles = StyleSheet.create({
     height: 34,
     paddingHorizontal: 12,
     borderRadius: T.RADIUS.BTN_SM,
-    backgroundColor: COLORS.INK,
+    backgroundColor: COLORS.AMBER,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  primarySmallText: {
-    fontFamily: T.FONT.SemiBold,
-    fontSize: 12,
-    color: COLORS.ON_INK,
-    letterSpacing: 0.2,
-  },
+  primarySmallText: { fontFamily: T.FONT.ExtraBold, fontSize: 11, color: COLORS.ON_AMBER },
   rail: { gap: 13, paddingHorizontal: 16, paddingBottom: 14 },
   story: { width: 58, alignItems: 'center', gap: 6 },
   storyRing: {
     width: 58,
     height: 58,
-    padding: 1.5,
+    padding: 2,
     borderRadius: 29,
-    backgroundColor: COLORS.CHAMPAGNE,
+    backgroundColor: COLORS.AMBER,
   },
   storyImage: { width: 54, height: 54, borderRadius: 27, borderWidth: 2, borderColor: COLORS.BG },
   addStory: {

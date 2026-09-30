@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
   offerDeclineText: { ...TYPE.SUB, fontFamily: T.FONT.SemiBold },
   offerAccept: {
     flex: 2,
-    backgroundColor: COLORS.INK,
+    backgroundColor: COLORS.AMBER,
     borderRadius: T.RADIUS.BTN,
     paddingVertical: 11,
     alignItems: 'center',

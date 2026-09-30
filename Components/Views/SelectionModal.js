@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   selectModalText: {
-    color: '#7A5C2E',
+    color: 'rgba(255, 183, 49, 1)',
     textAlign: 'center',
     fontSize: 17,
     lineHeight: 22,

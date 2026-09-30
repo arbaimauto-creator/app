@@ -508,8 +508,8 @@ const styles = StyleSheet.create({
   handle: { fontFamily: FONT.Bold, fontSize: 14, color: COLORS.INK, marginBottom: 2 },
   xs: { ...TYPE.XS },
   gScore: {
-    fontFamily: T.SERIF.Bold,
-    fontSize: 34,
+    fontFamily: T.LATIN.ExtraBold,
+    fontSize: 30,
     color: COLORS.INK,
     marginTop: 10,
     marginBottom: 6,

@@ -75,7 +75,7 @@ export default function ProductGradeBadgeView({
 
 const styles = StyleSheet.create({
   refundCountContainer: ({ isSoldOut }) => ({
-    backgroundColor: isSoldOut ? 'rgba(255, 0, 0, .3)' : 'rgba(176, 141, 87, .12)',
+    backgroundColor: isSoldOut ? 'rgba(255, 0, 0, .3)' : 'rgba(255, 183, 49, .1)',
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',

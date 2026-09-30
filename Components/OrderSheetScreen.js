@@ -280,8 +280,8 @@ const styles = StyleSheet.create({
   totalCard: { padding: 14, gap: 6 },
   totalRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   totalLabel: { fontFamily: FONT.Medium, fontSize: 12.5, color: COLORS.GREY },
-  // 금액은 숫자뿐 — 세리프 라이닝 숫자 (2026-09-30)
-  totalValue: { fontFamily: T.SERIF.Bold, fontSize: 21, color: COLORS.INK },
+  // 금액은 숫자뿐 — Inter Tight (2026-09-16)
+  totalValue: { fontFamily: T.LATIN.ExtraBold, fontSize: 18, color: COLORS.INK },
   totalNote: { fontFamily: FONT.Regular, fontSize: 11, color: COLORS.GREY },
   footer: {
     padding: 16,

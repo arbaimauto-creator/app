@@ -1259,8 +1259,8 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   feedEmptyLogo: {
-    fontFamily: T.SERIF.SemiBold,
-    fontSize: 34,
+    fontFamily: T.FONT.Black,
+    fontSize: 28,
     color: T.COLORS.INK,
   },
   feedEmptyText: {

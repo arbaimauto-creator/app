@@ -2,7 +2,7 @@ import React from 'react';
 import { Linking, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { CommonActions } from '@react-navigation/native';
 import T from '../../Components/Constants/DesignTokens';
-import { Card, Btn, EmptyIcon } from '../../Components/UI';
+import { Card, Btn } from '../../Components/UI';
 import Strings from '../../Components/Strings';
 import FEATURES from '../../Components/Constants/Features';
 
@@ -16,7 +16,7 @@ export default function BrandWelcome({ navigation }) {
     <SafeAreaView style={styles.container}>
       <View style={styles.body}>
         <Card style={styles.heroCard}>
-          <EmptyIcon name="handshake-outline" size={30} />
+          <Text style={styles.emoji}>🤝</Text>
           <Text style={styles.title}>{Strings.BRAND_WELCOME_TITLE}</Text>
           <Text style={styles.sub}>
             {FEATURES.BRAND_APP ? Strings.BRAND_WELCOME_SUB : Strings.BRAND_WEB_SUB}

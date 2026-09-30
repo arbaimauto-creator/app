@@ -15,7 +15,6 @@ import Codes from './Constants/Codes';
 import T from './Constants/DesignTokens';
 import OrderListItemView from './OrderListItemView';
 import Strings from './Strings';
-import { EmptyIcon } from './UI';
 
 const { COLORS, FONT } = T;
 const PAGE = 18;
@@ -97,7 +96,7 @@ export default class OrderListScreen extends React.Component {
           }
           ListEmptyComponent={
             <View style={styles.empty}>
-              <EmptyIcon name="package-variant-closed" />
+              <Text style={styles.emptyIcon}>📦</Text>
               <Text style={styles.emptyTitle}>{Strings.ORDERS_EMPTY}</Text>
               <Text style={styles.emptyDesc}>{Strings.ORDERS_EMPTY_DESC}</Text>
               {/* 예시 주문 (2026-09-17) — 실제 주문 전에도 상세까지의 흐름을 보여준다 */}

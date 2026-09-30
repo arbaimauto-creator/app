@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   actionButtonIcon: {
     height: 30,
     borderRadius: RADIUS.BTN_SM,
-    backgroundColor: COLORS.INK,
+    backgroundColor: COLORS.AMBER,
     width: 70,
     flexDirection: 'row',
     alignItems: 'center',

@@ -21,8 +21,6 @@ import {
   Failure,
   Frame,
   OrderBadge,
-  Price,
-  ProductPlaceholder,
   StateBadge,
   dateLabel,
   money,
@@ -185,7 +183,9 @@ export default function GroupBuyDetailScreen({ navigation, route }) {
       {gb.product.imageUrl ? (
         <FastImage source={{ uri: gb.product.imageUrl }} style={s.hero} resizeMode="cover" />
       ) : (
-        <ProductPlaceholder style={s.hero} size={56} />
+        <View style={[s.hero, { alignItems: 'center', justifyContent: 'center' }]}>
+          <Text style={{ fontSize: 48 }}>🛍️</Text>
+        </View>
       )}
 
       <View style={{ gap: 6 }}>
@@ -205,7 +205,7 @@ export default function GroupBuyDetailScreen({ navigation, route }) {
         ) : null}
         <View style={s.row}>
           {off > 0 ? <Text style={s.off}>{c.off(off)}</Text> : null}
-          <Price style={s.price} amount={gb.price} currency={gb.currency} />
+          <Text style={s.price}>{money(gb.price, gb.currency)}</Text>
         </View>
         <Text style={s.sub}>
           {gb.shippingFee > 0

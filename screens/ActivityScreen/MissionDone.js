@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import T from '../../Components/Constants/DesignTokens';
-import { Card, Btn, Badge, ProgressBar, NoteBox, EmptyIcon } from '../../Components/UI';
+import { Card, Btn, Badge, ProgressBar, NoteBox } from '../../Components/UI';
 import Strings from '../../Components/Strings';
 import FEATURES from '../../Components/Constants/Features';
 import { referralCodesFor } from '../../api/referral';
@@ -53,7 +53,7 @@ export default function MissionDone({ navigation, route }) {
       </View>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.hero}>
-          <EmptyIcon name="party-popper" size={30} />
+          <Text style={styles.emoji}>🎉</Text>
           {pointsGranted != null ? (
             <>
               <Text style={styles.points}>+{pointsGranted}P</Text>

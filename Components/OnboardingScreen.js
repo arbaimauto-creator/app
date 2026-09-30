@@ -6,7 +6,7 @@ import SplashScreen from 'react-native-splash-screen';
 import { SafeAreaView } from 'react-native';
 import T from './Constants/DesignTokens';
 import { Card, Btn, Badge } from './UI';
-import Strings, { getLanguage } from './Strings';
+import Strings from './Strings';
 
 // 첫 실행 온보딩 — 시안 §7-1 확정 4장(자격 → 구조 → 검증 루프 → 첫 행동).
 // 각 장: 중앙 흰 카드(배지 + 헤드라인 + 구분선 + 영문 카피). 완료 처리(isOnboarded)는 기존과 동일.
@@ -96,8 +96,7 @@ export default function OnboardingScreen({ navigation }) {
                 </View>
               )}
               <View style={styles.divider} />
-              {/* 한국어 화면에서 부제는 영문 — 세리프 이탤릭으로 (영어 화면에선 부제가 한글이라 기본 서체) */}
-              <Text style={[styles.sub, getLanguage() === 'ko' && styles.subSerif]}>{p.sub}</Text>
+              <Text style={styles.sub}>{p.sub}</Text>
             </Card>
           </View>
         ))}
@@ -134,12 +133,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   logo: {
-    fontFamily: T.SERIF.SemiBold,
-    fontSize: 38,
+    fontFamily: FONT.ExtraBold,
+    fontSize: 26,
     color: COLORS.INK,
     textAlign: 'center',
     marginBottom: 22,
-    letterSpacing: -0.2,
+    letterSpacing: -0.5,
   },
   logoDot: { color: COLORS.AMBER },
   card: {
@@ -183,7 +182,6 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 14,
   },
-  subSerif: { fontFamily: T.SERIF.Italic, fontSize: 16, lineHeight: 21, letterSpacing: 0 },
   sub: {
     fontFamily: FONT.Regular,
     fontSize: 10.5,

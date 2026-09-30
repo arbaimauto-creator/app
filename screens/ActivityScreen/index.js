@@ -17,7 +17,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import Preference from 'react-native-default-preference';
 import T from '../../Components/Constants/DesignTokens';
-import { Badge, Btn, Card, GlassOrbs, GlowCard, NoteBox, ProgressBar, StatusPill, EmptyIcon } from '../../Components/UI';
+import { Badge, Btn, Card, GlassOrbs, GlowCard, NoteBox, ProgressBar, StatusPill } from '../../Components/UI';
 import Strings from '../../Components/Strings';
 import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
 import { getSeedings, setSeedingStatus, upsertSeeding, SEEDING_STATUS } from '../../api/seedings';
@@ -808,7 +808,7 @@ export default function ActivityScreen({ navigation, route }) {
             </View>
           ) : loadFailed || (campaignError && campaigns.length === 0) ? (
             <View style={styles.emptyWrap}>
-              <EmptyIcon name="alert-circle-outline" />
+              <Text style={styles.emptyEmoji}>⚠️</Text>
               <Text style={styles.emptyTitle}>{Strings.CAMPAIGNS_LOAD_ERROR}</Text>
               <Btn
                 variant="ghost"
@@ -822,7 +822,7 @@ export default function ActivityScreen({ navigation, route }) {
             </View>
           ) : (
             <View style={styles.emptyWrap}>
-              <EmptyIcon name="package-variant-closed" />
+              <Text style={styles.emptyEmoji}>📦</Text>
               <Text style={styles.emptyTitle}>{Strings.NO_CAMPAIGNS}</Text>
             </View>
           )
@@ -870,12 +870,12 @@ const styles = StyleSheet.create({
   topRow: { flexDirection: 'row', gap: 10, margin: 16 },
   topCard: { flex: 1 },
   topLabel: { fontFamily: FONT.Bold, fontSize: 11, color: COLORS.GREY },
-  gValue: { fontFamily: T.SERIF.Bold, fontSize: 34, color: COLORS.INK, letterSpacing: -0.6 },
+  gValue: { fontFamily: LATIN.ExtraBold, fontSize: 30, color: COLORS.INK, letterSpacing: -0.6 },
   gBar: { marginTop: 7 },
   topNote: { ...TYPE.XS, marginTop: 6 },
   pointValue: {
-    fontFamily: T.SERIF.Bold,
-    fontSize: 34,
+    fontFamily: LATIN.ExtraBold,
+    fontSize: 30,
     color: COLORS.AMBER_DEEP,
     letterSpacing: -0.6,
   },

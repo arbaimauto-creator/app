@@ -7,10 +7,10 @@ import T from '../../Components/Constants/DesignTokens';
 import FEATURES from '../../Components/Constants/Features';
 import { ProgressBar } from '../../Components/UI';
 import { GB_STATE, discountPercent, fillRatio, listGroupBuys, timeLeft } from '../../api/groupBuys';
-import { Price, ProductPlaceholder } from './common';
+import { money } from './common';
 import { gbCopy } from './strings';
 
-const { COLORS, FONT } = T;
+const { COLORS, FONT, LATIN } = T;
 
 export default function GroupBuyRail({ navigation }) {
   const [items, setItems] = useState([]);
@@ -63,7 +63,9 @@ export default function GroupBuyRail({ navigation }) {
               {gb.product.imageUrl ? (
                 <FastImage source={{ uri: gb.product.imageUrl }} style={styles.image} />
               ) : (
-                <ProductPlaceholder style={styles.image} size={30} label={null} />
+                <View style={[styles.image, styles.placeholder]}>
+                  <Text style={{ fontSize: 30 }}>🛍️</Text>
+                </View>
               )}
               <Text style={styles.host} numberOfLines={1}>
                 @{gb.host.handle}
@@ -73,7 +75,7 @@ export default function GroupBuyRail({ navigation }) {
               </Text>
               <View style={styles.priceRow}>
                 {off > 0 ? <Text style={styles.off}>{off}%</Text> : null}
-                <Price style={styles.price} amount={gb.price} currency={gb.currency} />
+                <Text style={styles.price}>{money(gb.price, gb.currency)}</Text>
               </View>
               {ratio != null ? <ProgressBar ratio={ratio} height={5} /> : null}
               {left ? (
@@ -112,7 +114,7 @@ const styles = StyleSheet.create({
   host: { fontFamily: FONT.Bold, fontSize: 11, color: COLORS.AMBER_DEEP },
   name: { fontFamily: FONT.Bold, fontSize: 12.5, lineHeight: 17, color: COLORS.INK },
   priceRow: { flexDirection: 'row', alignItems: 'baseline', gap: 4 },
-  off: { fontFamily: T.SERIF.Bold, fontSize: 17, color: COLORS.RED },
-  price: { fontFamily: T.SERIF.Bold, fontSize: 18, color: COLORS.INK },
+  off: { fontFamily: LATIN.ExtraBold, fontSize: 13, color: COLORS.RED },
+  price: { fontFamily: FONT.ExtraBold, fontSize: 13, color: COLORS.INK },
   left: { fontFamily: FONT.Regular, fontSize: 11, color: COLORS.GREY },
 });

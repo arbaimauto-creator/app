@@ -15,7 +15,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import Preference from 'react-native-default-preference';
 import T from './Constants/DesignTokens';
-import { Badge, EmptyIcon } from './UI';
+import { Badge } from './UI';
 import Strings from './Strings';
 import APIprovider from './APIprovider';
 
@@ -78,7 +78,7 @@ export default function ReferenceListScreen({ navigation, route }) {
         <ActivityIndicator color={COLORS.AMBER} style={styles.loading} />
       ) : items.length === 0 ? (
         <View style={styles.empty}>
-          <EmptyIcon name="bookmark-outline" />
+          <Text style={styles.emptyEmoji}>🔖</Text>
           <Text style={styles.emptyTitle}>
             {error ? Strings.FAILED_TO_LOAD_DATA : Strings.REF_EMPTY_TITLE}
           </Text>

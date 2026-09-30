@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.SURFACE,
   },
   inputMuted: { color: COLORS.GREY, backgroundColor: COLORS.BG },
-  codeInput: { fontFamily: T.SERIF.Bold, fontSize: 25, letterSpacing: 6, textAlign: 'center' },
+  codeInput: { fontFamily: T.LATIN.Bold, fontSize: 22, letterSpacing: 6, textAlign: 'center' },
   sent: { fontFamily: FONT.Regular, fontSize: 12, color: COLORS.AMBER_DEEP, marginTop: 2 },
   btn: { marginTop: 6 },
   btnSecondary: { marginTop: 2 },

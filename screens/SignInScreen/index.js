@@ -226,7 +226,7 @@ class SignInScreen extends React.Component {
             source={require('../../Resources/img/icGreydSplashSymbol126.png')}
             style={styles.symbol}
           />
-          <Wordmark size={44} center />
+          <Wordmark size={32} center />
           <Text style={styles.heroTitle}>{Strings.SIGNIN_TITLE}</Text>
           <Text style={styles.heroSub}>{Strings.SIGNIN_SUB}</Text>
           <View style={styles.flex4} />

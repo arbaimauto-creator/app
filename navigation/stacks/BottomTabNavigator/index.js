@@ -26,20 +26,6 @@ import BrandReview from '../../../screens/BrandScreen/BrandReview';
 import BrandMy from '../../../screens/BrandScreen/BrandMy';
 import MyScreen from '../../../screens/MyScreen';
 
-// 2026-09-30 Maison 고도화 — 평평한 아이보리 바 + 헤어라인 상단선, 머티리얼 활성 알약 배경은 끈다
-// (활성 상태는 아이콘·라벨의 에스프레소 색과 작은 골드 마커로만 표시 — renderTabBar.js)
-const TAB_BAR_STYLE = {
-  backgroundColor: 'rgba(251,249,245,0.98)',
-  borderTopWidth: StyleSheet.hairlineWidth,
-  borderTopColor: 'rgba(27,24,20,0.10)',
-  shadowColor: '#2A2016',
-  shadowOffset: { width: 0, height: -4 },
-  shadowOpacity: 0.04,
-  shadowRadius: 12,
-  elevation: 0,
-};
-const TAB_INDICATOR_STYLE = { backgroundColor: 'transparent' };
-
 const Stack = createStackNavigator();
 const Tab = createNavigatorFactory(MyMaterialBottomTabNavigator)();
 
@@ -118,8 +104,7 @@ function BottomTabNavigator({ route, navigation }) {
         })}
         shifting={false}
         labeled={false}
-        barStyle={TAB_BAR_STYLE}
-        activeIndicatorStyle={TAB_INDICATOR_STYLE}
+        barStyle={{ backgroundColor: 'rgba(252,248,240,0.97)', elevation: 20 }}
         onIndexChange={(index) => {}}
       >
         <Tab.Screen
@@ -141,8 +126,21 @@ function BottomTabNavigator({ route, navigation }) {
       })}
       shifting={false}
       labeled={false}
-      barStyle={TAB_BAR_STYLE}
-      activeIndicatorStyle={TAB_INDICATOR_STYLE}
+      barStyle={{
+        backgroundColor: 'rgba(252,248,240,0.97)',
+
+        shadowColor: 'white',
+        shadowOffset: {
+          width: 0,
+          height: 0,
+        },
+        shadowOpacity: 0.28,
+        shadowRadius: 16.0,
+        elevation: 20,
+
+        // paddingBottom:
+        //   isIPhone12() || isIPhone12Max() || isIPhoneWithDynamicIsland() ? insets.bottom : 0,
+      }}
       onIndexChange={(index) => {}}
     >
       <Tab.Screen

@@ -415,8 +415,8 @@ const styles = StyleSheet.create({
   rewardDivider: { width: 1, height: 40, backgroundColor: COLORS.LINE, marginHorizontal: 12 },
   rewardLabel: { ...TYPE.LABEL, color: COLORS.GREY },
   rewardValue: {
-    fontFamily: T.SERIF.Bold,
-    fontSize: 28,
+    fontFamily: T.LATIN.ExtraBold,
+    fontSize: 24,
     color: COLORS.INK,
     marginTop: 2,
     letterSpacing: -0.4,

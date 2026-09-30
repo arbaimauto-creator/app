@@ -15,7 +15,7 @@ import FastImage from 'react-native-fast-image';
 import APIprovider from './APIprovider';
 import T from './Constants/DesignTokens';
 import Strings from './Strings';
-import { Btn, Card, EmptyIcon } from './UI';
+import { Btn, Card } from './UI';
 import utils from './utils';
 
 const { COLORS, FONT, RADIUS } = T;
@@ -149,7 +149,7 @@ export default class CartScreen extends React.Component {
           }
           ListEmptyComponent={
             <View style={styles.empty}>
-              <EmptyIcon name="cart-outline" />
+              <Text style={styles.emptyIcon}>🛒</Text>
               <Text style={styles.emptyTitle}>{Strings.CART_EMPTY}</Text>
               <Text style={styles.emptyDesc}>{Strings.CART_EMPTY_DESC}</Text>
             </View>

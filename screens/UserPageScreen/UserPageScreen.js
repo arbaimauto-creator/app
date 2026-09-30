@@ -31,7 +31,7 @@ import { VictoryArea, VictoryChart, VictoryGroup, VictoryPolarAxis } from 'victo
 import APIprovider from '../../Components/APIprovider';
 import Constants from '../../Components/Constants';
 import T from '../../Components/Constants/DesignTokens';
-import { Badge, Btn, Card, EmptyIcon } from '../../Components/UI';
+import { Badge, Btn, Card } from '../../Components/UI';
 import FEATURES from '../../Components/Constants/Features';
 import Codes from '../../Components/Constants/Codes';
 import QNAList from '../../Components/CustomComponents/QNA/QNAList';
@@ -804,7 +804,7 @@ function ReviewGridItem({ item, index, videoList, navigation }) {
 function EmptyReviewMessage({ title, description }) {
   return (
     <View style={styles.emptyMessageContainer}>
-      <EmptyIcon name="inbox-outline" />
+      <Text style={styles.emptyEmoji}>{'📭'}</Text>
       <Text style={styles.emptyMessage}>{title}</Text>
       <Text style={styles.emptyDescription}>{description}</Text>
     </View>
@@ -2591,7 +2591,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: T.RADIUS.BTN,
-    backgroundColor: COLORS.INK,
+    backgroundColor: COLORS.AMBER,
     paddingVertical: 12,
     marginHorizontal: 16,
     marginVertical: 10,

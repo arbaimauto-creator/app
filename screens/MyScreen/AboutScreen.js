@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   headerTitle: { fontFamily: FONT.ExtraBold, fontSize: 18, color: COLORS.INK },
   scroll: { padding: 16, paddingTop: 4, paddingBottom: 32, gap: 9 },
   logoCard: { alignItems: 'center', paddingVertical: 22, gap: 5 },
-  logo: { fontFamily: T.SERIF.SemiBold, fontSize: 30, color: COLORS.INK },
+  logo: { fontFamily: FONT.Black, fontSize: 22, color: COLORS.INK },
   xs: { ...TYPE.XS },
   label: { fontFamily: FONT.Bold, fontSize: 10.5, color: COLORS.GREY, marginBottom: 6 },
   bizText: { fontFamily: FONT.Regular, fontSize: 13, color: COLORS.INK, lineHeight: 13 * 1.7 },

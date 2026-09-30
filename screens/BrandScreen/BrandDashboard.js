@@ -13,7 +13,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import FastImage from 'react-native-fast-image';
 import Preference from 'react-native-default-preference';
 import T from '../../Components/Constants/DesignTokens';
-import { Btn, Card, GlassOrbs, NoteBox, StatusPill, EmptyIcon } from '../../Components/UI';
+import { Btn, Card, GlassOrbs, NoteBox, StatusPill } from '../../Components/UI';
 import Strings from '../../Components/Strings';
 import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
 import {
@@ -117,7 +117,7 @@ export default function BrandDashboard() {
         {isEmpty ? (
           /* 빈 상태 — 배송·제작 기간 (시안: 대시보드 빈 상태) */
           <View style={styles.emptyWrap}>
-            <EmptyIcon name="truck-outline" />
+            <Text style={styles.emptyEmoji}>🚚</Text>
             <Text style={styles.emptyTitle}>{Strings.BRAND_EMPTY_TITLE}</Text>
             <Text style={styles.emptyBody}>{Strings.BRAND_EMPTY_BODY}</Text>
             <View style={styles.emptyPillRow}>
