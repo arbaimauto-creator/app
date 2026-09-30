@@ -17,6 +17,7 @@ import {
   markActivityNotiRead,
   toNotiListItem,
 } from '../api/activityNotifications';
+import { EmptyIcon } from './UI';
 
 const { COLORS, FONT, TYPE } = T;
 
@@ -144,7 +145,7 @@ function NotificationListScreen(props) {
         />
       ) : (
         <View style={styles.emptyMessageContainer}>
-          <Text style={styles.emptyEmoji}>🔔</Text>
+          <EmptyIcon name="bell-outline" />
           <Text style={styles.emptyTitle}>{Strings.EMPTY_NOTIFICATION_MESSAGE}</Text>
           <Text style={styles.emptyDesc}>{Strings.NOTI_EMPTY_DESC}</Text>
         </View>

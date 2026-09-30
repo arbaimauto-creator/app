@@ -1,11 +1,12 @@
-// greyd 시안 공용 컴포넌트 — DesignTokens 기반. 화면 리스타일 시 이 컴포넌트를 우선 사용한다.
-// 2026-09-16 컨셉 반영: 카드는 넓고 옅은 그림자로 살짝 떠 있고, 기본 버튼은 광택이 있는 앰버 그라데이션,
-// 강조 카드(GlowCard)는 아래쪽에서 앰버 빛이 번진다. 세 시안(따뜻한 글로우·글라스·뉴모피즘)의 공통 어휘.
+// greyd 공용 컴포넌트 — DesignTokens 기반. 화면 리스타일 시 이 컴포넌트를 우선 사용한다.
+// 2026-09-30 "Maison" 고도화: 카드는 프로스티드 포슬린(블러 + 두꺼운 흰 틴트 + 헤어라인),
+// 주 버튼은 에스프레소 무광 알약, 금색은 선·점·작은 강조에만. 강조 카드는 아래에서 샴페인 빛이 아주 옅게 번진다.
 import React from 'react';
 import { ActivityIndicator, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { BlurView } from '@react-native-community/blur';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import T from '../Constants/DesignTokens';
 
 const { COLORS, RADIUS, TYPE, GRADIENT } = T;
@@ -47,8 +48,8 @@ export function GlowCard({ style, contentStyle, children, glow = 0.9, ...rest })
       <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
         <Defs>
           <RadialGradient id="greydGlow" cx="50%" cy="115%" rx="70%" ry="95%">
-            <Stop offset="0" stopColor={COLORS.AMBER} stopOpacity={glow} />
-            <Stop offset="0.55" stopColor={COLORS.AMBER} stopOpacity={glow * 0.28} />
+            <Stop offset="0" stopColor={COLORS.CHAMPAGNE} stopOpacity={glow * 0.55} />
+            <Stop offset="0.55" stopColor={COLORS.CHAMPAGNE} stopOpacity={glow * 0.16} />
             <Stop offset="1" stopColor={COLORS.AMBER} stopOpacity={0} />
           </RadialGradient>
         </Defs>
@@ -59,7 +60,7 @@ export function GlowCard({ style, contentStyle, children, glow = 0.9, ...rest })
   );
 }
 
-// CTA 버튼 — variant: 'primary'(광택 앰버) | 'ghost'(테두리) | 'dark'
+// CTA 버튼 — variant: 'primary'(에스프레소) | 'gold'(샴페인 골드) | 'ghost'(헤어라인 테두리) | 'dark'
 export function Btn({
   title,
   onPress,
@@ -72,12 +73,14 @@ export function Btn({
   accessibilityLabel,
   ...rest
 }) {
-  const glossy = variant === 'primary' || variant === 'dark';
+  const glossy = variant === 'primary' || variant === 'dark' || variant === 'gold';
+  const gold = variant === 'gold';
   const base = [
     styles.btn,
     variant === 'ghost' && styles.btnGhost,
     variant === 'dark' && styles.btnDark,
-    glossy && !disabled && (variant === 'dark' ? styles.btnDarkShadow : styles.btnPrimaryShadow),
+    variant === 'primary' && styles.btnPrimaryEdge,
+    glossy && !disabled && (variant === 'primary' ? styles.btnPrimaryShadow : styles.btnDarkShadow),
     small && styles.btnSm,
     disabled && { opacity: 0.45 },
     style,
@@ -85,7 +88,7 @@ export function Btn({
   const text = [
     styles.btnText,
     variant === 'ghost' && styles.btnTextGhost,
-    variant === 'dark' && { color: '#FFFFFF' },
+    gold && { color: COLORS.ON_AMBER },
     small && { fontSize: 13 },
     textStyle,
   ];
@@ -104,12 +107,12 @@ export function Btn({
         <>
           <LinearGradient
             pointerEvents="none"
-            colors={variant === 'dark' ? GRADIENT.INK : GRADIENT.AMBER}
+            colors={gold ? GRADIENT.AMBER : GRADIENT.INK}
             start={{ x: 0.5, y: 0 }}
             end={{ x: 0.5, y: 1 }}
             style={[StyleSheet.absoluteFill, styles.btnFill, small && styles.btnFillSm]}
           />
-          {/* 위쪽 광택 띠 — 유리·젤 질감(시안 2) */}
+          {/* 위쪽 광택 띠 — 아주 얇게(무광에 가까운 새틴 질감) */}
           <LinearGradient
             pointerEvents="none"
             colors={GRADIENT.GLOSS}
@@ -120,7 +123,7 @@ export function Btn({
         </>
       ) : null}
       {loading && (
-        <ActivityIndicator size="small" color={variant === 'dark' ? '#FFFFFF' : COLORS.INK} />
+        <ActivityIndicator size="small" color={glossy && !gold ? COLORS.ON_INK : COLORS.INK} />
       )}
       <Text style={text}>{title}</Text>
     </TouchableOpacity>
@@ -136,25 +139,25 @@ export function GlassOrbs({ style }) {
         colors={GRADIENT.ORB_SOFT}
         start={{ x: 0.2, y: 0.1 }}
         end={{ x: 0.9, y: 1 }}
-        style={[styles.orb, { width: 230, height: 230, top: -60, right: -70 }]}
+        style={[styles.orb, { width: 260, height: 260, top: -90, right: -90, opacity: 0.9 }]}
       />
       <LinearGradient
         colors={GRADIENT.ORB_SOFT}
         start={{ x: 0.8, y: 0 }}
         end={{ x: 0.1, y: 1 }}
-        style={[styles.orb, { width: 150, height: 150, top: 260, left: -60, opacity: 0.75 }]}
+        style={[styles.orb, { width: 170, height: 170, top: 280, left: -90, opacity: 0.45 }]}
       />
       <LinearGradient
         colors={GRADIENT.ORB_SOFT}
         start={{ x: 0.3, y: 0 }}
         end={{ x: 0.7, y: 1 }}
-        style={[styles.orb, { width: 300, height: 300, bottom: -110, right: -90, opacity: 0.6 }]}
+        style={[styles.orb, { width: 320, height: 320, bottom: -140, right: -110, opacity: 0.4 }]}
       />
     </View>
   );
 }
 
-// 브랜드 워드마크 — "greyd" + 앰버 점. 로고 텍스트는 반드시 이 컴포넌트로 (점 누락 방지).
+// 브랜드 워드마크 — 세리프 "greyd" + 골드 점. 로고 텍스트는 반드시 이 컴포넌트로 (점 누락 방지).
 export function Wordmark({ size = 30, style, center }) {
   return (
     <Text style={[styles.wordmark, { fontSize: size }, center && { textAlign: 'center' }, style]}>
@@ -225,7 +228,7 @@ export function Chips({ items, selected, onSelect, style }) {
 }
 
 // 앰버 진행바 — ratio 0~1
-export function ProgressBar({ ratio, height = 7, style }) {
+export function ProgressBar({ ratio, height = 4, style }) {
   const w = Math.max(0, Math.min(1, ratio || 0)) * 100;
   return (
     <View
@@ -243,7 +246,12 @@ export function NoteBox({ text, tone = 'amber', style, children }) {
   const amber = tone === 'amber';
   return (
     <View
-      style={[styles.note, { backgroundColor: amber ? COLORS.AMBER_SOFT : COLORS.RED_SOFT }, style]}
+      style={[
+        styles.note,
+        amber ? null : { borderColor: 'rgba(178,69,47,0.25)' },
+        { backgroundColor: amber ? COLORS.AMBER_SOFT : COLORS.RED_SOFT },
+        style,
+      ]}
     >
       {children || (
         <Text style={[styles.noteText, { color: amber ? COLORS.AMBER_DEEP : COLORS.RED }]}>
@@ -254,13 +262,71 @@ export function NoteBox({ text, tone = 'amber', style, children }) {
   );
 }
 
+// 빈 상태·완료 아이콘 (2026-09-30) — 이모지 대신 샴페인 헤어라인 원 + 라인 아이콘
+export function EmptyIcon({ name, size = 26, style }) {
+  return (
+    <View style={[styles.emptyIcon, style]}>
+      <MaterialCommunityIcons name={name} size={size} color={COLORS.AMBER_DEEP} />
+    </View>
+  );
+}
+
+// 아이브로(섹션 위 작은 대문자 라벨) — 영문 전용. 예: "EDITOR'S PICK"
+export function Eyebrow({ text, style }) {
+  return <Text style={[styles.eyebrow, style]}>{String(text || '').toUpperCase()}</Text>;
+}
+
+// 헤어라인 구분선 — inset: 좌우 여백
+export function Hairline({ inset = 0, style }) {
+  return <View style={[styles.hairline, { marginHorizontal: inset }, style]} />;
+}
+
+// 섹션 머리 — 제목(한글 가능) + 오른쪽 작은 링크. eyebrow는 영문 라벨(선택).
+export function SectionHeader({ title, eyebrow, action, onAction, style }) {
+  return (
+    <View style={[styles.sectionHead, style]}>
+      <View style={{ flex: 1 }}>
+        {eyebrow ? <Eyebrow text={eyebrow} style={{ marginBottom: 4 }} /> : null}
+        <Text style={styles.sectionTitle}>{title}</Text>
+      </View>
+      {action ? (
+        <Text style={styles.sectionAction} onPress={onAction} accessibilityRole="button">
+          {action}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  eyebrow: { ...TYPE.EYEBROW },
+  emptyIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.IVORY,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: COLORS.CHAMPAGNE,
+    marginBottom: 6,
+  },
+  hairline: { height: StyleSheet.hairlineWidth, backgroundColor: COLORS.LINE },
+  sectionHead: { flexDirection: 'row', alignItems: 'flex-end', gap: 12 },
+  sectionTitle: { ...TYPE.H_TITLE, fontSize: 18 },
+  sectionAction: {
+    fontFamily: T.FONT.Medium,
+    fontSize: 12,
+    color: COLORS.AMBER_DEEP,
+    letterSpacing: 0.2,
+  },
   card: {
     // 글래스 v2: 진짜 블러 위에 얇은 흰 틴트 — backgroundColor는 블러가 대신한다
     backgroundColor: 'transparent',
     borderRadius: RADIUS.CARD,
-    paddingVertical: 14,
-    paddingHorizontal: 15,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
     borderWidth: 1,
     borderColor: COLORS.GLASS_BORDER,
     overflow: 'hidden',
@@ -268,19 +334,19 @@ const styles = StyleSheet.create({
   },
   cardTint: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255,255,255,0.28)',
+    backgroundColor: 'rgba(255,255,255,0.52)',
     borderRadius: RADIUS.CARD,
   },
   glowCard: { overflow: 'hidden' },
   glowInner: { position: 'relative', alignSelf: 'stretch' },
   btn: {
-    minHeight: 48,
+    minHeight: 50,
     flexDirection: 'row',
     gap: 8,
-    backgroundColor: COLORS.AMBER,
+    backgroundColor: COLORS.INK,
     borderRadius: RADIUS.BTN,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
+    paddingVertical: 13,
+    paddingHorizontal: 18,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -299,54 +365,76 @@ const styles = StyleSheet.create({
   btnGlossSm: { borderTopLeftRadius: RADIUS.BTN_SM, borderTopRightRadius: RADIUS.BTN_SM },
   btnPrimaryShadow: { ...T.SHADOW_GLOW },
   btnDarkShadow: { ...T.SHADOW_SOFT },
+  // 에스프레소 버튼 안쪽의 샴페인 헤어라인 — 가까이서 보면 금박 테두리처럼 읽힌다
+  btnPrimaryEdge: { borderWidth: StyleSheet.hairlineWidth, borderColor: 'rgba(217,198,165,0.55)' },
   btnGhost: {
-    backgroundColor: COLORS.SURFACE,
-    borderWidth: 1.5,
-    borderColor: COLORS.LINE,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: 'rgba(27,24,20,0.22)',
   },
   btnDark: { backgroundColor: COLORS.INK },
-  btnSm: { paddingVertical: 7, paddingHorizontal: 12, borderRadius: RADIUS.BTN_SM },
+  btnSm: { minHeight: 38, paddingVertical: 8, paddingHorizontal: 14, borderRadius: RADIUS.BTN_SM },
   btnText: { ...TYPE.BTN, textAlign: 'center' },
-  btnTextGhost: { color: COLORS.INK, fontFamily: T.FONT.Bold },
+  btnTextGhost: { color: COLORS.INK, fontFamily: T.FONT.SemiBold },
   wordmark: {
-    fontFamily: T.FONT.Black,
+    fontFamily: T.SERIF.SemiBold,
     color: COLORS.INK,
-    letterSpacing: -0.5,
+    letterSpacing: -0.2,
   },
-  wordmarkDot: { color: COLORS.AMBER, fontFamily: T.FONT.Black },
+  wordmarkDot: { color: COLORS.AMBER, fontFamily: T.SERIF.SemiBold },
   badge: {
     borderRadius: RADIUS.BADGE,
-    paddingVertical: 2,
-    paddingHorizontal: 7,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
     alignSelf: 'flex-start',
   },
-  badgeText: { ...TYPE.BADGE, letterSpacing: 0.2 },
+  badgeText: { ...TYPE.BADGE },
   pill: {
     borderRadius: 4,
     paddingVertical: 2,
     paddingHorizontal: 6,
     alignSelf: 'flex-start',
   },
-  pillText: { fontFamily: T.FONT.ExtraBold, fontSize: 9.5 },
+  pillText: { fontFamily: T.FONT.SemiBold, fontSize: 10, letterSpacing: 0.3 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   chip: {
-    minHeight: 44,
+    minHeight: 40,
     justifyContent: 'center',
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: COLORS.LINE,
-    backgroundColor: COLORS.SURFACE,
+    backgroundColor: 'rgba(255,255,255,0.6)',
     borderRadius: RADIUS.PILL,
     paddingVertical: 4,
-    paddingHorizontal: 10,
+    paddingHorizontal: 14,
   },
-  chipOn: { backgroundColor: COLORS.AMBER_SOFT, borderColor: COLORS.AMBER },
-  chipText: { fontFamily: T.FONT.SemiBold, fontSize: 11, color: COLORS.GREY },
-  chipTextOn: { color: COLORS.AMBER_DEEP },
+  chipOn: { backgroundColor: COLORS.INK, borderColor: COLORS.INK },
+  chipText: { fontFamily: T.FONT.Medium, fontSize: 12, color: COLORS.DARK, letterSpacing: 0.1 },
+  chipTextOn: { color: COLORS.ON_INK },
   prog: { backgroundColor: COLORS.TRACK, overflow: 'hidden' },
   progFill: { height: '100%', backgroundColor: COLORS.AMBER },
-  note: { borderRadius: RADIUS.FIELD, paddingVertical: 9, paddingHorizontal: 12 },
+  note: {
+    borderRadius: RADIUS.FIELD,
+    paddingVertical: 11,
+    paddingHorizontal: 14,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(176,141,87,0.35)',
+  },
   orb: { position: 'absolute', borderRadius: 999 },
-  noteText: { fontFamily: T.FONT.Regular, fontSize: 11, lineHeight: 16.5 },
+  noteText: { fontFamily: T.FONT.Regular, fontSize: 12, lineHeight: 18 },
 });
 
-export default { Card, GlowCard, Btn, Badge, StatusPill, Chips, ProgressBar, NoteBox, GlassOrbs };
+export default {
+  Card,
+  GlowCard,
+  Btn,
+  Badge,
+  StatusPill,
+  Chips,
+  ProgressBar,
+  NoteBox,
+  GlassOrbs,
+  Eyebrow,
+  Hairline,
+  SectionHeader,
+  EmptyIcon,
+};

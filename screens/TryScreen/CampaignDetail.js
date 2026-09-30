@@ -490,12 +490,13 @@ const styles = StyleSheet.create({
   ctaDisabled: { opacity: 0.45 },
   footer: { padding: 16, backgroundColor: COLORS.BG },
   cta: {
-    backgroundColor: COLORS.AMBER,
+    backgroundColor: COLORS.INK,
     borderRadius: RADIUS.BTN,
     paddingVertical: 14,
     alignItems: 'center',
   },
-  ctaSecondary: { backgroundColor: COLORS.INK },
+  // 2026-09-30: 주 CTA가 에스프레소가 되면서 보조 CTA는 테두리형으로
+  ctaSecondary: { backgroundColor: 'transparent', borderWidth: 1, borderColor: COLORS.INK },
   ctaText: { ...TYPE.BTN, fontSize: 14.5 },
-  ctaTextSecondary: { color: '#FFFFFF' },
+  ctaTextSecondary: { color: COLORS.INK },
 });

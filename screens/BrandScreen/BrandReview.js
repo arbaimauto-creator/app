@@ -14,7 +14,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import FastImage from 'react-native-fast-image';
 import T from '../../Components/Constants/DesignTokens';
-import { Btn, Card, GlassOrbs, ProgressBar } from '../../Components/UI';
+import { Btn, Card, GlassOrbs, ProgressBar, EmptyIcon } from '../../Components/UI';
 import Strings from '../../Components/Strings';
 import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
 import { fetchCampaignReviews } from '../../api/reviews';
@@ -292,7 +292,7 @@ export default function BrandReview({ navigation }) {
       <SafeAreaView style={styles.container}>
       <GlassOrbs />
         <ScrollView contentContainerStyle={styles.summaryWrap}>
-          <Text style={styles.summaryEmoji}>✅</Text>
+          <EmptyIcon name="check-circle-outline" />
           <Text style={styles.summaryTitle}>{Strings.BRAND_SESSION_DONE(doneCount)}</Text>
           <Text style={styles.summaryCounts}>
             {Strings.BRAND_SESSION_COUNTS(session.pick, session.ok, session.skip)}

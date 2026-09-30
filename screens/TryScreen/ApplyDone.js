@@ -3,7 +3,7 @@ import React from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { prefSetSafe } from '../../api/prefSafe';
 import T from '../../Components/Constants/DesignTokens';
-import { Card, Btn, NoteBox } from '../../Components/UI';
+import { Card, Btn, NoteBox, EmptyIcon } from '../../Components/UI';
 import Strings from '../../Components/Strings';
 
 const { COLORS, FONT, TYPE } = T;
@@ -39,7 +39,7 @@ export default function ApplyDone({ navigation, route }) {
       </View>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.hero}>
-          <Text style={styles.emoji}>🙌</Text>
+          <EmptyIcon name="check-decagram-outline" size={30} />
           <Text style={styles.title}>
             {autoConfirmed ? Strings.APPLYDONE_HERO_CONFIRMED : Strings.APPLYDONE_HERO}
           </Text>

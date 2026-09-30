@@ -19,7 +19,7 @@ import {
 } from '../api/incentives';
 import T from './Constants/DesignTokens';
 import Strings from './Strings';
-import { Badge, Card, GlowCard, ProgressBar } from './UI';
+import { Badge, Card, GlowCard, ProgressBar, EmptyIcon } from './UI';
 
 const { COLORS, FONT, RADIUS } = T;
 
@@ -105,7 +105,7 @@ export default class SecondaryUseStatusScreen extends React.Component {
 
         {empty ? (
           <View style={styles.empty}>
-            <Text style={styles.emptyIcon}>🎬</Text>
+            <EmptyIcon name="movie-open-outline" />
             <Text style={styles.emptyTitle}>{Strings.INC_EMPTY}</Text>
             <Text style={styles.emptyDesc}>{Strings.INC_EMPTY_DESC}</Text>
           </View>

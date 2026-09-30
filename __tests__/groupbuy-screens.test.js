@@ -123,7 +123,8 @@ test('상세: 가격·호스트·참여 버튼', async () => {
   expect(t).toContain('민지의 수분 크림 공동구매');
   expect(t).toContain('@');
   expect(t).toContain('minji.skin');
-  expect(t).toContain('19,900원');
+  // 가격은 세리프 숫자 + 한글 단위로 나뉘어 그려진다 — 접근성 라벨은 한 덩어리
+  expect(tree.root.findAllByProps({ accessibilityLabel: '19,900원' }).length).toBeGreaterThan(0);
   expect(t).toContain('29% 할인');
   const join = tree.root.findByProps({ accessibilityLabel: '공동구매 참여하기' });
   await act(async () => join.props.onPress());
@@ -141,7 +142,8 @@ test('주문서: 동의 전에는 제출 버튼이 막혀 있다', async () => {
   const tree = await render(GroupBuyOrderScreen, { code: 'gb-a1b2c3d4' });
   const t = texts(tree);
   expect(t).toContain('결제 예정 금액');
-  expect(t).toContain('22,900원'); // 19,900 + 배송비 3,000
+  // 19,900 + 배송비 3,000
+  expect(tree.root.findAllByProps({ accessibilityLabel: '22,900원' }).length).toBeGreaterThan(0);
   const submit = tree.root.findByProps({
     accessibilityLabel: '(테스트) 카드 등록 건너뛰고 참여하기',
   });

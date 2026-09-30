@@ -103,7 +103,7 @@ const TAB_ICONS = {
 
 export const tabBarIcon = ({ focused, color, route }) => {
   const icon = TAB_ICONS[route.name];
-  const tint = focused ? T.COLORS.AMBER_DEEP : T.COLORS.GREY;
+  const tint = focused ? T.COLORS.INK : T.COLORS.GREY;
   if (!icon) {
     return (
       <View>
@@ -113,7 +113,9 @@ export const tabBarIcon = ({ focused, color, route }) => {
   }
   return (
     <View style={{ width: 100, alignItems: 'center' }}>
-      <IconMCI name={focused ? icon.on : icon.off} size={24} color={tint} />
+      {/* 활성 탭 위의 작은 골드 마커 (2026-09-30) */}
+      <View style={[styles.marker, focused && styles.markerOn]} />
+      <IconMCI name={focused ? icon.on : icon.off} size={22} color={tint} />
       <Text style={[styles.iconName, focused && styles.iconNameOn]}>{icon.label()}</Text>
     </View>
   );
@@ -173,8 +175,18 @@ const styles = StyleSheet.create({
     marginTop: moderateScale(3),
   },
   iconNameOn: {
-    color: T.COLORS.AMBER_DEEP,
-    fontFamily: T.FONT.Bold,
+    color: T.COLORS.INK,
+    fontFamily: T.FONT.SemiBold,
   },
+  // 레이아웃 높이를 바꾸지 않도록 절대 위치(아이콘 위 6px)
+  marker: {
+    position: 'absolute',
+    top: -7,
+    width: 14,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: 'transparent',
+  },
+  markerOn: { backgroundColor: T.COLORS.AMBER },
 });
 export default renderTabBar;

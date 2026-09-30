@@ -19,6 +19,7 @@ import CommentListItemView from '../../Components/CommentListItemView';
 import T from '../../Components/Constants/DesignTokens';
 import Strings from '../../Components/Strings';
 import { LogoutAlert, isGuestUser } from '../../Components/utils';
+import { EmptyIcon } from '../../Components/UI';
 
 const { COLORS, RADIUS, FONT } = T;
 
@@ -474,7 +475,7 @@ function ReviewComments({ context }) {
             keyExtractor={(item) => item._id}
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
-                <Text style={styles.emptyEmoji}>💬</Text>
+                <EmptyIcon name="comment-outline" />
                 <Text style={styles.emptyTitle}>{Strings.FEED_NO_COMMENTS_TITLE}</Text>
                 <Text style={styles.emptyDesc}>{Strings.FEED_NO_COMMENTS_DESC}</Text>
               </View>

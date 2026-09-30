@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import T from '../../Components/Constants/DesignTokens';
 import FEATURES from '../../Components/Constants/Features';
 import { Badge, Btn, GlassOrbs, NoteBox } from '../../Components/UI';
@@ -25,6 +26,19 @@ export function money(amount, currency) {
     return lang() === 'ko' ? `${n.toLocaleString()}엔` : `¥${n.toLocaleString()}`;
   }
   return lang() === 'ko' ? `${n.toLocaleString()}원` : `₩${n.toLocaleString()}`;
+}
+
+// 가격 — 숫자는 세리프(라이닝 숫자), 한글 단위(원·엔)는 Pretendard로 분리해 섞이지 않게
+export function Price({ amount, currency, style, unitStyle }) {
+  const n = Number(amount || 0).toLocaleString();
+  const ko = lang() === 'ko';
+  const unit = currency === 'JPY' ? (ko ? '엔' : '¥') : ko ? '원' : '₩';
+  return (
+    <Text style={style} accessibilityLabel={money(amount, currency)}>
+      {ko ? n : `${unit}${n}`}
+      {ko ? <Text style={[s.priceUnit, unitStyle]}>{unit}</Text> : null}
+    </Text>
+  );
 }
 
 const pad = (n) => String(n).padStart(2, '0');
@@ -118,6 +132,16 @@ export function Frame({ navigation, title, children, onRefresh, refreshing, foot
       </ScrollView>
       {footer ? <View style={s.footer}>{footer}</View> : null}
     </SafeAreaView>
+  );
+}
+
+// 상품 이미지가 없을 때 — 이모지 대신 샴페인 헤어라인 아이콘 + 영문 라벨
+export function ProductPlaceholder({ style, size = 40, label = 'Group buy' }) {
+  return (
+    <View style={[style, s.placeholder]}>
+      <MaterialCommunityIcons name="shopping-outline" size={size} color={COLORS.CHAMPAGNE} />
+      {label ? <Text style={s.placeholderLabel}>{label.toUpperCase()}</Text> : null}
+    </View>
   );
 }
 
@@ -240,13 +264,23 @@ export const s = StyleSheet.create({
     gap: 6,
   },
   failure: { gap: 10, alignItems: 'center', paddingVertical: 24 },
-  eyebrow: { fontFamily: LATIN.Bold, fontSize: 10, letterSpacing: 1.4, color: COLORS.AMBER_DEEP },
+  eyebrow: { fontFamily: FONT.SemiBold, fontSize: 11, letterSpacing: 0.8, color: COLORS.AMBER_DEEP },
   h1: { fontFamily: FONT.ExtraBold, fontSize: 20, color: COLORS.INK, lineHeight: 27 },
   h2: { fontFamily: FONT.Bold, fontSize: 15, color: COLORS.INK },
   body: { fontFamily: FONT.Regular, fontSize: 13, lineHeight: 19, color: COLORS.INK },
   sub: { fontFamily: FONT.Regular, fontSize: 12, lineHeight: 17, color: COLORS.GREY },
   strong: { fontFamily: FONT.Bold, fontSize: 13, color: COLORS.INK },
-  price: { fontFamily: LATIN.ExtraBold, fontSize: 24, color: COLORS.INK, letterSpacing: -0.4 },
+  price: { fontFamily: T.SERIF.Bold, fontSize: 30, color: COLORS.INK, letterSpacing: -0.2 },
+  placeholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: COLORS.IVORY,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: COLORS.CHAMPAGNE,
+  },
+  placeholderLabel: { ...T.TYPE.EYEBROW, fontSize: 9, color: COLORS.GREY },
+  priceUnit: { fontFamily: FONT.Medium, fontSize: 15, color: COLORS.INK, letterSpacing: 0 },
   strike: {
     fontFamily: FONT.Regular,
     fontSize: 12,

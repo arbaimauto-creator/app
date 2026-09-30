@@ -431,7 +431,7 @@ const styles = StyleSheet.create({
   honesty: { ...T.TYPE.XS, marginTop: 16, lineHeight: 16 },
   submit: {
     marginTop: 14,
-    backgroundColor: T.COLORS.AMBER,
+    backgroundColor: T.COLORS.INK,
     borderRadius: T.RADIUS.BTN,
     paddingVertical: 14,
     alignItems: 'center',

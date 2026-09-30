@@ -21,6 +21,7 @@ import {
   Failure,
   Field,
   Frame,
+  Price,
   Stepper,
   dateLabel,
   money,
@@ -143,7 +144,7 @@ export default function GroupBuyOrderScreen({ navigation, route }) {
     <>
       <View style={s.between}>
         <Text style={s.strong}>{c.total}</Text>
-        <Text style={s.price}>{money(orderTotal(gb, quantity), gb.currency)}</Text>
+        <Price style={s.price} amount={orderTotal(gb, quantity)} currency={gb.currency} />
       </View>
       <Text style={s.sub}>{c.chargeAt(endLabel)}</Text>
       <Btn

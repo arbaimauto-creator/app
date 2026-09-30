@@ -207,6 +207,10 @@
 		<string>fonts/Onest-SemiBold.ttf</string>
 		<string>fonts/Onest-Bold.ttf</string>
 		<string>fonts/Onest-ExtraBold.ttf</string>
+		<string>fonts/CormorantGaramond-Medium.ttf</string>
+		<string>fonts/CormorantGaramond-SemiBold.ttf</string>
+		<string>fonts/CormorantGaramond-Bold.ttf</string>
+		<string>fonts/CormorantGaramond-MediumItalic.ttf</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>

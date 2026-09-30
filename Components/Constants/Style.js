@@ -4,17 +4,18 @@ import Strings from '../Strings';
 // index.js가 이 파일을 `...Style`로 펼쳐 쓰므로, 로드 순서에 따라 Constants가
 // 빈 객체가 되어 `Constants.TIER_COLORS.X` 접근이 릴리스에서 터진다.
 
-const COLOR_MAIN = '#FFB731';
+// 2026-09-30 Maison 고도화: DesignTokens.COLORS.AMBER(샴페인 브론즈)와 동일
+const COLOR_MAIN = '#B08D57';
 //const COLOR_MAIN_DARK = '#B07003'
-const COLOR_MAIN_DARK = 'rgb(174, 125, 35)';
-const COLOR_MAIN_LIGHT = '#FDD590';
-const COLOR_SUB = '#B07003';
+const COLOR_MAIN_DARK = '#7A5C2E';
+const COLOR_MAIN_LIGHT = '#E6D5B6';
+const COLOR_SUB = '#7A5C2E';
 const COLOR_GREY = '#48453D';
 const COLOR_RED = '#FF3700';
 // const COLOR_BACKGROUND_DARK = '#0E0E0E';
 // const COLOR_BACKGROUND_DARK = '#3A3A3A';
 // 2026-09-17 글래스 컨셉: 레거시 화면 배경도 웜 크림으로 정렬 (DesignTokens.COLORS.BG와 동일)
-const COLOR_BACKGROUND_DARK = '#F3EDE2';
+const COLOR_BACKGROUND_DARK = '#F6F3EE';
 const COLOR_USER_CLASS_1 = '#FF6174';
 const COLOR_USER_CLASS_2 = '#FF6174';
 const COLOR_USER_CLASS_3 = '#FF6174';
@@ -122,7 +123,7 @@ const SEARCH_BAR_COMMON_PROPS = {
 };
 
 const TIER_COLORS = {
-  GIVER: '#FFB731',
+  GIVER: '#B08D57',
   ARTISAN: '#3a3a3a',
   OPERATOR: '#6a6a6a',
   STRIVER: '#a0a0a0',
@@ -130,7 +131,7 @@ const TIER_COLORS = {
   PIONEER: 'white',
 };
 
-const COLOR_POINT_BLUE = '#FFB731'; //'#192BC2';
+const COLOR_POINT_BLUE = '#B08D57'; //'#192BC2';
 
 const CUSTOM_FONTS = {
   // SUIT: {

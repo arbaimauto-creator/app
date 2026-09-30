@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import Strings from '../../Components/Strings';
 import T from '../../Components/Constants/DesignTokens';
-import { Card, Btn } from '../../Components/UI';
+import { Card, Btn, EmptyIcon } from '../../Components/UI';
 import { upsertSeeding } from '../../api/seedings';
 import { logEvent } from '../../api/common/analytics';
 
@@ -88,7 +88,7 @@ export default function FirstImpression({ route, navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Text style={styles.emoji}>📦</Text>
+        <EmptyIcon name="package-variant-closed" size={30} />
         <Text style={styles.title}>{Strings.FI_TITLE}</Text>
         <Text style={styles.sub}>{Strings.FI_SUB(campaign.brand)}</Text>
 

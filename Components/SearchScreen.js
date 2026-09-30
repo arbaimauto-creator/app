@@ -18,6 +18,7 @@ import HeaderLeftBackButton from './CustomComponents/headerBackButton/headerLeft
 import SearchResultTabView from './SearchResultTabView';
 import Strings from './Strings';
 import T from './Constants/DesignTokens';
+import { EmptyIcon } from './UI';
 
 const { COLORS, RADIUS, FONT, TYPE } = T;
 
@@ -141,7 +142,7 @@ export class SearchScreen extends React.Component {
   renderSearchMain() {
     return (
       <View style={styles.emptyMessageContainer}>
-        <Text style={styles.emptyEmoji}>🔍</Text>
+        <EmptyIcon name="magnify" />
         <Text style={styles.emptyTitle}>{Strings.INPUT_SEARCH_KEYWORD}</Text>
         <Text style={styles.emptyDesc}>{Strings.SEARCH_EMPTY_DESC}</Text>
       </View>
