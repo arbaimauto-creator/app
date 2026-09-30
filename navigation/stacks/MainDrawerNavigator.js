@@ -8,7 +8,16 @@ import { horizontalAnimation } from '../../Components/CustomComponents/horizonta
 import CheckoutScreen from '../../Components/CheckoutScreen';
 import SecondaryUseConsentScreen from '../../Components/SecondaryUseConsentScreen';
 import SecondaryUseStatusScreen from '../../Components/SecondaryUseStatusScreen';
-import GroupBuyScreen from '../../Components/GroupBuyScreen';
+import {
+  BrandGroupBuyCreateScreen,
+  BrandGroupBuyOrdersScreen,
+  BrandGroupBuysScreen,
+  GroupBuyBillingScreen,
+  GroupBuyDetailScreen,
+  GroupBuyOrderScreen,
+  HostGroupBuyScreen,
+  MyGroupBuysScreen,
+} from '../../screens/GroupBuyScreen';
 import IdentityVerifyScreen from '../../Components/IdentityVerifyScreen';
 import CartScreen from '../../Components/CartScreen';
 import OrderListScreen from '../../Components/OrderListScreen';
@@ -530,12 +539,46 @@ function MainDrawerNavigator({ route, navigation }) {
           tabBarVisible: false,
         }}
       />
-      {/* 공동구매 참여 (2026-09-16 P3) — 딥링크 groupbuy/:code. 결제 전엔 참여 희망만 */}
+      {/* 공동구매 (2026-09-30) — 딥링크 groupbuy/:code. 화면이 자체 헤더를 그린다 */}
       <Stack.Screen
         name="GroupBuy"
-        component={GroupBuyScreen}
-        initialParams={initialParams}
-        options={{ title: null, ...headerBackButton, tabBarVisible: false }}
+        component={GroupBuyDetailScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="GroupBuyOrder"
+        component={GroupBuyOrderScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="GroupBuyBilling"
+        component={GroupBuyBillingScreen}
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="MyGroupBuys"
+        component={MyGroupBuysScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="HostGroupBuy"
+        component={HostGroupBuyScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="BrandGroupBuys"
+        component={BrandGroupBuysScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="BrandGroupBuyCreate"
+        component={BrandGroupBuyCreateScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="BrandGroupBuyOrders"
+        component={BrandGroupBuyOrdersScreen}
+        options={{ headerShown: false }}
       />
       {/* 앱 내 결제 (2026-09-16) — 서버가 만든 Stripe Checkout URL을 웹뷰로 연다 */}
       <Stack.Screen

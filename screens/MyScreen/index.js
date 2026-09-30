@@ -16,6 +16,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import Preference from 'react-native-default-preference';
 import T from '../../Components/Constants/DesignTokens';
+import { gbCopy } from '../GroupBuyScreen/strings';
 import FEATURES from '../../Components/Constants/Features';
 import { storeCopy } from '../StoreScreen/strings';
 import { Card, GlassOrbs, GlowCard, ProgressBar } from '../../Components/UI';
@@ -396,6 +397,18 @@ export default function MyScreen({ navigation }) {
           </>
         ) : null}
 
+        {/* 내 공동구매 (2026-09-30) — 참여한 공동구매 / 내가 여는 공동구매(호스트) */}
+        {FEATURES.GROUP_BUY ? (
+          <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('MyGroupBuys')}>
+            <Card>
+              <View style={styles.row}>
+                <Text style={styles.rowTitle}>{gbCopy().myTitle}</Text>
+                <Text style={styles.chev}>›</Text>
+              </View>
+            </Card>
+          </TouchableOpacity>
+        ) : null}
+
         {/* 내 2차 활용 현황 (2026-09-17) — 활동 탭에만 있던 진입로를 마이 탭에도 */}
         <TouchableOpacity
           activeOpacity={0.7}
@@ -411,7 +424,7 @@ export default function MyScreen({ navigation }) {
 
         {/* 판매자 모드 전환 (2026-09-17) — 판매자 계정만. 셸은 부팅 시 역할을 읽으므로 재시작 안내 */}
         {FEATURES.BRAND_APP && isSeller ? (
-          <TouchableOpacity activeOpacity={0.7} onPress={switchToSellerMode}>
+          <TouchableOpacity activeOpacity={0.7} onPress={goSellerMode}>
             <Card>
               <View style={styles.row}>
                 <Text style={styles.rowTitle}>{Strings.SELLER_MODE_SWITCH}</Text>

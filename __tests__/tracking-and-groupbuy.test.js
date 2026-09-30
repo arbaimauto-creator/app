@@ -1,10 +1,9 @@
-// 추적 코드 입구 · 클릭 집계 · 공동구매 참여 (2026-09-16 P2·P3)
+// 추적 코드 입구 · 클릭 집계 (2026-09-16 P2) — 공동구매는 __tests__/groupbuys.test.js
 jest.mock('../Components/Constants/Features', () => ({ LIVE_OPS_API: true, COMMERCE: false }));
 
-const mockOpsGet = jest.fn();
 const mockOpsPost = jest.fn();
 jest.mock('../api/opsClient', () => ({
-  opsGet: (...args) => mockOpsGet(...args),
+  opsGet: jest.fn(),
   opsPost: (...args) => mockOpsPost(...args),
   getGreydAppId: async () => 'app-test-device',
 }));
@@ -32,17 +31,9 @@ import {
   trackingCodeFromUrl,
   trackingKind,
 } from '../Components/utils/tracking';
-import {
-  absoluteOpsUrl,
-  canJoinGroupBuy,
-  getGroupBuy,
-  joinGroupBuy,
-  normalizeGroupBuy,
-  reportTrackingClick,
-} from '../api/tracking';
+import { reportTrackingClick } from '../api/tracking';
 
 beforeEach(() => {
-  mockOpsGet.mockReset();
   mockOpsPost.mockReset();
   for (const k of Object.keys(mockStore)) {
     delete mockStore[k];
@@ -107,49 +98,6 @@ describe('클릭 집계', () => {
     mockOpsPost.mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce({ ok: true });
     expect(await reportTrackingClick('gb-deadbeef')).toBe(false);
     expect(await reportTrackingClick('gb-deadbeef')).toBe(true);
-  });
-});
-
-describe('공동구매', () => {
-  test('응답을 정규화하고 참여 가능 여부를 판정한다', async () => {
-    mockOpsGet.mockResolvedValue({
-      groupBuy: {
-        id: 7,
-        title: '세럼 공동구매',
-        countries: ['KR', 'JP'],
-        price: 29000,
-        minQuantity: 30,
-        joinedQuantity: 4,
-        intentQuantity: 9,
-        endsAt: '2026-09-30T00:00:00Z',
-        state: 'OPEN',
-        incentivePercent: 5,
-        myJoin: { quantity: 2, state: 'INTENT' },
-      },
-    });
-    const gb = await getGroupBuy('gb-deadbeef');
-    expect(mockOpsGet).toHaveBeenCalledWith('/groupbuys/gb-deadbeef');
-    expect(gb.intentQuantity).toBe(9);
-    expect(gb.myJoin.quantity).toBe(2);
-    expect(canJoinGroupBuy(gb, new Date('2026-09-20').getTime())).toBe(true);
-    expect(canJoinGroupBuy(gb, new Date('2026-10-01').getTime())).toBe(false);
-    expect(canJoinGroupBuy({ ...gb, state: 'FAILED' }, 0)).toBe(false);
-    expect(normalizeGroupBuy(null)).toBeNull();
-    expect(await getGroupBuy('nonsense')).toBeNull();
-  });
-
-  test('ops 상대경로 이미지는 절대 URL로 만든다', () => {
-    expect(absoluteOpsUrl('/api/files/abc', 'https://ops.greyd.app/api/mobile')).toBe('https://ops.greyd.app/api/files/abc');
-    expect(absoluteOpsUrl('https://cdn.x/y.png', 'https://ops.greyd.app')).toBe('https://cdn.x/y.png');
-    expect(absoluteOpsUrl(null)).toBeNull();
-  });
-
-  test('참여 수량은 1~99로 자른다', async () => {
-    mockOpsPost.mockResolvedValue({ ok: true });
-    await joinGroupBuy('gb-deadbeef', 500, 'KR');
-    expect(mockOpsPost).toHaveBeenCalledWith('/groupbuys/gb-deadbeef/join', { quantity: 99, country: 'KR' });
-    await joinGroupBuy('gb-deadbeef', 0);
-    expect(mockOpsPost).toHaveBeenLastCalledWith('/groupbuys/gb-deadbeef/join', { quantity: 1, country: null });
   });
 });
 

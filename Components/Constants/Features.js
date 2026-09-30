@@ -34,6 +34,13 @@ const FEATURES = {
   // ⚠️ 스토어 정식 배포 전에는 반드시 false (클로즈드 앱 원칙)
   TEST_GUEST_ENTRY: false,
 
+  // 공동구매 (2026-09-30, docs/groupbuy-dev-spec-2026-09-30.md) — 홈 레일·마이 탭·브랜드 셸 진입점.
+  // ops 공동구매 API 배포 전이라 개발 빌드에서만 켠다. 서버가 올라가면 true로.
+  GROUP_BUY: typeof __DEV__ !== 'undefined' && __DEV__,
+
+  // 공동구매 모의 서버(api/groupBuysMock.js) — 개발 빌드 전용. 릴리스에서는 항상 false여야 한다.
+  GROUP_BUY_MOCK: typeof __DEV__ !== 'undefined' && __DEV__,
+
   // ops 실연동 (Phase 1.5 롤아웃 1단계 — 캠페인 읽기). OFF면 전면 mock (현행 동일)
   LIVE_OPS_API: true,
 };

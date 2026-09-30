@@ -29,6 +29,7 @@ import {
   countUnread,
   getActivityNotiReadAt,
 } from '../../api/activityNotifications';
+import GroupBuyRail from '../GroupBuyScreen/GroupBuyRail';
 import HomeHero from './HomeHero';
 import AutoTranslateText from '../../Components/AutoTranslateText';
 import {
@@ -408,6 +409,9 @@ export default function CuratedHome({ navigation }) {
         )}
         {/* 기획서 §5.1 첫 화면: 할 일 → 신청 가능 캠페인 → 보상 현황이 리뷰 피드보다 먼저 */}
         <HomeHero navigation={navigation} campaigns={campaigns} />
+
+        {/* 공동구매 (2026-09-30) — 모집 중·오픈 예정. 없으면 렌더하지 않는다 */}
+        <GroupBuyRail navigation={navigation} />
 
         <TouchableOpacity
           style={styles.composer}

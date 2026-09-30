@@ -2625,25 +2625,6 @@ export default {
     'Production, distribution, shipping and payouts are handled by the brand and greyd. Numbers reflect completed payments.',
   CHECKOUT_PREPARING: 'Opening the payment page',
   CHECKOUT_FAILED_TO_START: 'Could not open the payment page. Please try again in a moment.',
-  // Group buy screen (2026-09-16 P3)
-  GB_EYEBROW: 'Group buy',
-  GB_PROGRESS: (n, min) => `${n} / ${min} joined`,
-  GB_HOW_IT_WORKS: (min) =>
-    `It goes ahead once ${min} are in. If it falls short, every payment is fully refunded. Ships only to the listed countries.`,
-  GB_QUANTITY: 'Quantity',
-  GB_BUY: 'Join and pay',
-  GB_INTENT: 'Save my spot',
-  GB_INTENT_HINT: 'Payment is not open yet. Leave the quantity you want and we will tell you first when it opens.',
-  GB_INTENT_LEFT: (n) => `Spot saved for ${n}`,
-  GB_INTENT_CANCEL: 'Cancel',
-  GB_INTENT_DONE_TITLE: 'Spot saved',
-  GB_INTENT_DONE_BODY: 'We will notify you when payment opens.',
-  GB_CANCEL_TITLE: 'Cancel your saved spot?',
-  GB_JOIN_FAILED: 'Could not save that. Please try again in a moment.',
-  GB_CLOSED: 'This group buy is closed.',
-  GB_FAILED_NOTE: 'It did not reach the minimum and was cancelled. Payments are fully refunded.',
-  GB_NOT_FOUND: 'Group buy not found. The link may have expired.',
-  GB_LOAD_FAILED: 'Could not load. Check your connection.',
   // FGI no-show (2026-09-16 P3 automation)
   FGI_NO_SHOW: 'Marked no-show · 1 strike',
   // Server push 6xx additions (2026-09-16) — same numbers as ops lib/push/codes.ts

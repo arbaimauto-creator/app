@@ -2530,25 +2530,6 @@ export default {
   INC_NOTE: '제작·유통·배송·정산은 브랜드와 greyd가 처리해요. 숫자는 결제 완료 기준으로 반영돼요.',
   CHECKOUT_PREPARING: '결제창을 여는 중이에요',
   CHECKOUT_FAILED_TO_START: '결제창을 열지 못했어요. 잠시 후 다시 시도해 주세요.',
-  // 공동구매 참여 화면 (2026-09-16 P3)
-  GB_EYEBROW: '공동구매',
-  GB_PROGRESS: (n, min) => `${n} / ${min}개 모임`,
-  GB_HOW_IT_WORKS: (min) =>
-    `${min}개가 모이면 성사돼요. 미달이면 결제된 금액은 전액 환불돼요. 배송은 대상 국가로만 가능해요.`,
-  GB_QUANTITY: '수량',
-  GB_BUY: '공동구매 참여 · 결제',
-  GB_INTENT: '참여 희망 남기기',
-  GB_INTENT_HINT: '결제는 아직 열리지 않았어요. 희망 수량을 남겨두면 결제가 열릴 때 먼저 알려드려요.',
-  GB_INTENT_LEFT: (n) => `참여 희망 ${n}개 남김`,
-  GB_INTENT_CANCEL: '희망 취소',
-  GB_INTENT_DONE_TITLE: '참여 희망을 남겼어요',
-  GB_INTENT_DONE_BODY: '결제가 열리면 알림으로 알려드릴게요.',
-  GB_CANCEL_TITLE: '참여 희망을 취소할까요?',
-  GB_JOIN_FAILED: '참여를 기록하지 못했어요. 잠시 후 다시 시도해 주세요.',
-  GB_CLOSED: '모집이 끝난 공동구매예요.',
-  GB_FAILED_NOTE: '최소 수량에 못 미쳐 취소됐어요. 결제된 금액은 전액 환불돼요.',
-  GB_NOT_FOUND: '공동구매를 찾을 수 없어요. 링크가 만료됐을 수 있어요.',
-  GB_LOAD_FAILED: '불러오지 못했어요. 연결을 확인해 주세요.',
   // FGI 노쇼 (2026-09-16 P3 자동화)
   FGI_NO_SHOW: '노쇼 처리됨 · Strike 1',
   // 서버 푸시 6xx 추가분 (2026-09-16) — ops lib/push/codes.ts 와 같은 번호

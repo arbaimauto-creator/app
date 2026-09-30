@@ -19,6 +19,9 @@ if (!/TEST_GUEST_ENTRY:\s*false/.test(features)) {
 if (!/COMMERCE:\s*false/.test(features)) {
   failures.push('legacy commerce must remain disabled until its routes are restored');
 }
+if (!/GROUP_BUY_MOCK:\s*(false|typeof __DEV__ !== 'undefined' && __DEV__),/.test(features)) {
+  failures.push('group-buy mock server must be off (or dev-only) in a production release');
+}
 if (!/const DEFAULT_URL = null;/.test(linking) || linking.includes('mylinker://')) {
   failures.push('normal cold starts must return null, not a placeholder deep link');
 }

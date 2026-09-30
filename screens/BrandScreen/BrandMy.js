@@ -19,6 +19,8 @@ import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
 import { fetchCampaignReviews } from '../../api/reviews';
 import { getEvaluations } from '../../api/evaluations';
 import { prefSetSafe } from '../../api/prefSafe';
+import FEATURES from '../../Components/Constants/Features';
+import { gbCopy } from '../GroupBuyScreen/strings';
 
 const { COLORS, FONT } = T;
 
@@ -112,6 +114,19 @@ export default function BrandMy({ navigation }) {
             <Text style={styles.xs}>›</Text>
           </Card>
         </TouchableOpacity>
+
+        {/* 공동구매 관리 (2026-09-30) — 호스트 지정 개설 · 주문 명단 · 송장 입력 */}
+        {FEATURES.GROUP_BUY ? (
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('BrandGroupBuys')}
+          >
+            <Card style={[styles.rowCard, styles.rowInline]}>
+              <Text style={styles.rowTitle}>{gbCopy().brandTitle}</Text>
+              <Text style={styles.xs}>›</Text>
+            </Card>
+          </TouchableOpacity>
+        ) : null}
 
         {/* 웹과 같은 ops 상품 저장소를 사용하는 판매자 관리 */}
         <TouchableOpacity
