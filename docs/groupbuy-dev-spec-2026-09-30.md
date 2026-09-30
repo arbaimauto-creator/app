@@ -33,7 +33,8 @@
 | 역할 | 화면 (라우트) | 파일 |
 |---|---|---|
 | 구매자 | 홈 공동구매 레일 | `screens/GroupBuyScreen/GroupBuyRail.js` → `CuratedHome` |
-| 구매자 | 상세 = 쇼핑몰형 페이지 (`GroupBuy`, 딥링크 `groupbuy/:code`) | `GroupBuyDetail.js` |
+| 구매자 | 상세 = 쇼핑몰형 페이지 (`GroupBuy`, 딥링크 `groupbuy/:code`) — 이미지 갤러리, 초 단위 마감 시계, 목표까지 남은 수량, 참여자 수·최근 참여, 고정 탭(상세정보·호스트·구매 안내), 상세 이미지 접기/펼치기, 구매 4단계·배송·교환/반품·판매자·FAQ, 하단 가격 바, 오픈 알림 받기, 공유 | `GroupBuyDetail.js` |
+| 구매자 | 옵션 선택 시트(옵션·수량·남은 수량·합계) → 주문서로 선택값 전달 | `OptionSheet.js` |
 | 구매자 | 주문서 (`GroupBuyOrder`) | `GroupBuyOrder.js` |
 | 구매자 | 토스 카드 등록 웹뷰 (`GroupBuyBilling`) | `GroupBuyBilling.js`, `Components/utils/paymentSchemes.js` |
 | 구매자·호스트 | 내 공동구매 — 참여 / 내가 여는 (`MyGroupBuys`) | `MyGroupBuys.js` → 마이 탭 진입 |
@@ -100,7 +101,8 @@
   "openedBy": "BRAND" | "ARBAIM",
   "brand": { "id": "...", "name": "..." },
   "host": { "id": "...", "handle": "minji.skin", "name": "...", "avatarUrl": "...", "note": "호스트 한마디" },
-  "product": { "id": "<SellerProduct id>", "name": "...", "imageUrl": "/api/files/..", "description": "...", "listPrice": 28000 },
+  "product": { "id": "<SellerProduct id>", "name": "...", "imageUrl": "/api/files/..", "images": ["/api/files/..", "..."],  // 갤러리(없으면 imageUrl 한 장)
+               "description": "...", "listPrice": 28000 },
   "country": "KR" | "JP", "currency": "KRW" | "JPY",
   "price": 19900, "shippingFee": 3000,
   "minQuantity": 30,                   // 0 = 최소 없음
@@ -113,6 +115,9 @@
   "reservedQuantity": 21,              // RESERVED(+PAID/SHIPPED) 수량 합
   "orderCount": 10,
   "myRole": "BUYER" | "HOST" | "BRAND",
+  "recentBuyers": [{ "name": "김**", "quantity": 2, "at": "ISO" }],   // 최근 참여 최대 5건, 이름은 서버가 가린다(첫 글자 + **)
+  "watching": false,                   // 요청자가 오픈 알림을 신청했는지
+  "notices": { "shipping": "브랜드 배송 안내", "returns": "교환·반품·환불 안내" },  // 브랜드 입력, 비면 앱 기본 문구
   "myOrders": [ /* 요청자 본인의 GroupBuyOrder */ ]
 }
 
@@ -136,6 +141,7 @@
 | GET | `/groupbuys?scope=live` | → `{ groupBuys: GroupBuy[] }` | `SCHEDULED`·`OPEN`만. 요청자 국가 우선 정렬 권장 |
 | GET | `/groupbuys/:code` | → `{ groupBuy }` | `PENDING_HOST`는 호스트·브랜드 외 404 |
 | POST | `/groupbuys/:code/orders` | `{ requestId, quantity, option, recipient, agreeCharge, agreeThirdParty }` → `{ order, billingUrl }` | 아래 검증. **`requestId` 멱등**(같은 값이면 같은 주문·같은 URL) |
+| POST | `/groupbuys/:code/watch` | `{ on: bool }` → `{ watching }` | 오픈 예정(`SCHEDULED`) 알림 신청/해제. 시작 시각에 신청자에게 푸시 |
 | POST | `/groupbuy-orders/:id/cancel` | → `{ order }` | 본인·`OPEN`·`BILLING_PENDING|RESERVED`만. 빌링키 폐기 |
 | GET | `/me/groupbuy-orders` | → `{ orders }` | 최신순 |
 

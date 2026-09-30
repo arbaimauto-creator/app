@@ -109,6 +109,57 @@ describe('정규화', () => {
   });
 });
 
+describe('상세 v2 필드', () => {
+  test('갤러리는 images가 없으면 대표 이미지 한 장, 최근 참여는 5건까지', () => {
+    const one = api.normalizeGroupBuy(rawGb());
+    expect(one.product.images).toEqual(['https://ops.test/api/files/p.png']);
+    const many = api.normalizeGroupBuy(
+      rawGb({
+        product: { images: ['/a.png', 'https://cdn.x/b.png'], listPrice: 1 },
+        recentBuyers: Array.from({ length: 7 }, (_, i) => ({ name: `김**${i}`, quantity: 1 })),
+        watching: 1,
+        notices: { shipping: '배송 안내' },
+      }),
+    );
+    expect(many.product.images).toEqual(['https://ops.test/a.png', 'https://cdn.x/b.png']);
+    expect(many.recentBuyers).toHaveLength(5);
+    expect(many.watching).toBe(true);
+    expect(many.notices).toEqual({ shipping: '배송 안내', returns: '' });
+  });
+
+  test('목표까지 남은 수량·상대 시각·초 단위 남은 시간', () => {
+    const gb = api.normalizeGroupBuy(rawGb());
+    expect(api.toGoal(gb)).toBe(18);
+    expect(api.toGoal({ ...gb, reservedQuantity: 40 })).toBe(0);
+    expect(api.toGoal({ ...gb, minQuantity: 0 })).toBeNull();
+    expect(api.relativeMinutes(new Date(NOW - 5 * 60000).toISOString(), NOW)).toBe(5);
+    expect(api.relativeMinutes(new Date(NOW + 60000).toISOString(), NOW)).toBe(0);
+    expect(api.relativeMinutes(null, NOW)).toBeNull();
+    expect(api.timeLeft(new Date(NOW + 61500).toISOString(), NOW)).toMatchObject({
+      minutes: 1,
+      seconds: 1,
+    });
+  });
+
+  test('오픈 알림 받기 경로', async () => {
+    mockOpsPost.mockResolvedValue({ watching: true });
+    await api.watchGroupBuy('gb-a1b2c3d4', 1);
+    expect(mockOpsPost).toHaveBeenCalledWith('/groupbuys/gb-a1b2c3d4/watch', { on: true });
+  });
+
+  test('모의 서버: 이름 가리기와 알림 상태', async () => {
+    expect(mockServer.maskName('김테스트3')).toBe('김**');
+    expect(mockServer.maskName('')).toBe('익명');
+    mockFeatures.GROUP_BUY_MOCK = true;
+    await mockServer.reset(mockServer.seed(Date.now()));
+    await api.watchGroupBuy('gb-a1b2c3d4', true);
+    const gb = await api.getGroupBuy('gb-a1b2c3d4');
+    expect(gb.watching).toBe(true);
+    expect(gb.recentBuyers[0].name).toMatch(/^.\*\*$/);
+    expect(gb.product.images.length).toBe(4);
+  });
+});
+
 describe('판정·계산', () => {
   const gb = api.normalizeGroupBuy(rawGb());
 

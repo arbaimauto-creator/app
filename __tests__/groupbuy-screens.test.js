@@ -125,9 +125,36 @@ test('상세: 가격·호스트·참여 버튼', async () => {
   expect(t).toContain('minji.skin');
   expect(t).toContain('19,900원');
   expect(t).toContain('29% 할인');
+  // v2: 갤러리·실시간 마감·목표·참여자·고정 탭·구매 안내
+  expect(tree.root.findAllByProps({ accessibilityLabel: '1/4' }).length).toBeGreaterThan(0);
+  expect(t).toContain('마감까지');
+  expect(t).toContain('목표까지 11개 남았어요');
+  expect(t).toContain('10명 참여 중');
+  expect(t).toContain('구매 안내');
+  expect(t).toContain('자주 묻는 질문');
+  // 참여하기 → 옵션 시트 → 주문서(고른 옵션·수량을 넘긴다)
   const join = tree.root.findByProps({ accessibilityLabel: '공동구매 참여하기' });
   await act(async () => join.props.onPress());
-  expect(navigation.navigate).toHaveBeenCalledWith('GroupBuyOrder', { code: 'gb-a1b2c3d4' });
+  expect(navigation.navigate).not.toHaveBeenCalled();
+  expect(texts(tree)).toContain('옵션 선택');
+  const toOrder = tree.root.findByProps({ accessibilityLabel: '주문서 작성' });
+  await act(async () => toOrder.props.onPress());
+  expect(navigation.navigate).toHaveBeenCalledWith('GroupBuyOrder', {
+    code: 'gb-a1b2c3d4',
+    option: '50ml',
+    quantity: 1,
+  });
+  tree.unmount();
+});
+
+test('주문서: 옵션 시트에서 고른 옵션·수량으로 시작한다', async () => {
+  const tree = await render(GroupBuyOrderScreen, {
+    code: 'gb-a1b2c3d4',
+    option: '80ml',
+    quantity: 2,
+  });
+  // 19,900 × 2 + 배송비 3,000
+  expect(texts(tree)).toContain('42,800원');
   tree.unmount();
 });
 
@@ -178,7 +205,7 @@ test('브랜드 명단: 마감 전 잠김 → 마감 처리 → 명단·송장 �
     });
   }
   const t = texts(tree);
-  expect(t).toContain('테스트 구매자 1');
+  expect(t).toContain('이테스트1');
   expect(t).toContain('명단 내보내기 (CSV)');
   expect(t).toContain('CJ대한통운');
   tree.unmount();

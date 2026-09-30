@@ -123,6 +123,10 @@ export function normalizeGroupBuy(raw) {
       id: product.id || null,
       name: product.name || '',
       imageUrl: absoluteOpsUrl(product.imageUrl),
+      // 갤러리 — images가 없으면 대표 이미지 한 장
+      images: (arr(product.images).length ? arr(product.images) : [product.imageUrl])
+        .map((u) => absoluteOpsUrl(u))
+        .filter(Boolean),
       description: product.description || '',
       listPrice: num(product.listPrice),
     },
@@ -153,7 +157,34 @@ export function normalizeGroupBuy(raw) {
     orderCount: num(gb.orderCount),
     myRole: ['HOST', 'BRAND'].includes(gb.myRole) ? gb.myRole : 'BUYER',
     myOrders: arr(gb.myOrders).map(normalizeOrder).filter(Boolean),
+    // 최근 참여(이름은 서버가 가려서 준다: "김**") — 사회적 증거용, 최대 5건
+    recentBuyers: arr(gb.recentBuyers)
+      .filter((b) => b && b.name)
+      .slice(0, 5)
+      .map((b) => ({ name: String(b.name), quantity: num(b.quantity, 1), at: b.at || null })),
+    watching: !!gb.watching,
+    notices: {
+      shipping: gb.notices?.shipping || '',
+      returns: gb.notices?.returns || '',
+    },
   };
+}
+
+// "5분 전" 같은 상대 시각 — 분 단위, 음수·미래는 방금
+export function relativeMinutes(iso, now = Date.now()) {
+  const t = ms(iso);
+  if (!Number.isFinite(t)) {
+    return null;
+  }
+  return Math.max(0, Math.floor((now - t) / 60000));
+}
+
+// 목표까지 남은 수량(최소 수량 없으면 null)
+export function toGoal(gb) {
+  if (!gb || !gb.minQuantity) {
+    return null;
+  }
+  return Math.max(0, gb.minQuantity - gb.reservedQuantity);
 }
 
 // ── 계산 ────────────────────────────────────────────────────────────
@@ -210,6 +241,7 @@ export function timeLeft(iso, now = Date.now()) {
     days: Math.floor(diff / 86400000),
     hours: Math.floor((diff % 86400000) / 3600000),
     minutes: Math.floor((diff % 3600000) / 60000),
+    seconds: Math.floor((diff % 60000) / 1000),
   };
 }
 
@@ -462,6 +494,11 @@ export async function cancelGroupBuyOrder(orderId) {
   return isMock()
     ? mock.cancelOrder(orderId)
     : opsPost(`/groupbuy-orders/${enc(orderId)}/cancel`, {});
+}
+
+// 오픈 예정 공동구매 알림 받기/끄기
+export async function watchGroupBuy(code, on) {
+  return isMock() ? mock.watch(code, !!on) : opsPost(`/groupbuys/${enc(code)}/watch`, { on: !!on });
 }
 
 export async function listMyGroupBuyOrders() {

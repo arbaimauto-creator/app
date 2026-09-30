@@ -1,10 +1,10 @@
 // 공동구매 모의 서버 (2026-09-30) — 개발 빌드 전용(FEATURES.GROUP_BUY_MOCK).
 // ops 공동구매 API(docs/groupbuy-dev-spec-2026-09-30.md §4)와 같은 응답 모양을 기기 안에서 흉내 낸다.
 // 목적: 서버가 올라가기 전에 구매자·호스트·브랜드 화면 전 과정을 한 기기에서 눌러 볼 수 있게.
-// 실제 결제·개인정보는 없다. 시드 구매자 이름은 전부 "테스트"로 시작한다.
+// 실제 결제·개인정보는 없다. 시드 구매자 이름에는 전부 "테스트"가 들어간다.
 import { prefGetSafe, prefSetSafe } from './prefSafe';
 
-const KEY = 'groupBuyMockV1';
+const KEY = 'groupBuyMockV2'; // 2026-09-30: 갤러리·최근 참여·안내 필드 추가로 시드 갱신
 const DAY = 86400000;
 
 let db = null;
@@ -15,6 +15,8 @@ function fail(status, error) {
   err.body = { error };
   return err;
 }
+
+const SURNAMES = ['김', '이', '박', '최', '정', '강', '조', '윤', '장', '임'];
 
 function seedOrders(code, count, unit, fee, now, startIndex = 1) {
   const orders = [];
@@ -32,7 +34,8 @@ function seedOrders(code, count, unit, fee, now, startIndex = 1) {
       shippingFee: fee,
       total: unit * q + fee,
       recipient: {
-        name: `테스트 구매자 ${n}`,
+        // 성씨를 돌려 쓰고 '테스트'를 붙여 시험 데이터임을 드러낸다 (최근 참여에는 '김**'처럼 가려짐)
+        name: `${SURNAMES[n % SURNAMES.length]}테스트${n}`,
         phone: `010-0000-${String(1000 + n).slice(-4)}`,
         postalCode: '06236',
         address1: '서울특별시 강남구 테헤란로 000',
@@ -65,7 +68,13 @@ export function seed(now = Date.now()) {
       product: {
         id: 'sp-1001',
         name: '자작나무 수분 크림 80ml',
-        imageUrl: null,
+        imageUrl: 'https://picsum.photos/seed/greyd-gb-cream-1/900/900',
+        images: [
+          'https://picsum.photos/seed/greyd-gb-cream-1/900/900',
+          'https://picsum.photos/seed/greyd-gb-cream-2/900/900',
+          'https://picsum.photos/seed/greyd-gb-cream-3/900/900',
+          'https://picsum.photos/seed/greyd-gb-cream-4/900/900',
+        ],
         description: '가볍게 스며드는 수분 크림. 민감 피부 테스트 완료.',
         listPrice: 28000,
       },
@@ -77,10 +86,22 @@ export function seed(now = Date.now()) {
       maxQuantity: 300,
       perUserMax: 5,
       options: ['50ml', '80ml'],
-      detailImages: [],
+      detailImages: [
+        'https://picsum.photos/seed/greyd-gb-detail-1/900/1300',
+        'https://picsum.photos/seed/greyd-gb-detail-2/900/1100',
+        'https://picsum.photos/seed/greyd-gb-detail-3/900/1200',
+      ],
       videos: [
-        { videoId: 'mock-video-1', thumbnailUrl: null, caption: '2주 사용 후기' },
-        { videoId: 'mock-video-2', thumbnailUrl: null, caption: '바르는 법' },
+        {
+          videoId: 'mock-video-1',
+          thumbnailUrl: 'https://picsum.photos/seed/greyd-gb-v1/300/450',
+          caption: '2주 사용 후기',
+        },
+        {
+          videoId: 'mock-video-2',
+          thumbnailUrl: 'https://picsum.photos/seed/greyd-gb-v2/300/450',
+          caption: '바르는 법',
+        },
       ],
       startsAt: new Date(now - 2 * DAY).toISOString(),
       endsAt: new Date(now + 3 * DAY).toISOString(),
@@ -97,7 +118,12 @@ export function seed(now = Date.now()) {
       product: {
         id: 'sp-2001',
         name: '톤업 선크림 SPF50+',
-        imageUrl: null,
+        imageUrl: 'https://picsum.photos/seed/greyd-gb-sun-1/900/900',
+        images: [
+          'https://picsum.photos/seed/greyd-gb-sun-1/900/900',
+          'https://picsum.photos/seed/greyd-gb-sun-2/900/900',
+          'https://picsum.photos/seed/greyd-gb-sun-3/900/900',
+        ],
         description: '백탁 없는 톤업 선크림.',
         listPrice: 3200,
       },
@@ -126,7 +152,12 @@ export function seed(now = Date.now()) {
       product: {
         id: 'sp-3001',
         name: '약산성 클렌징 오일 200ml',
-        imageUrl: null,
+        imageUrl: 'https://picsum.photos/seed/greyd-gb-oil-1/900/900',
+        images: [
+          'https://picsum.photos/seed/greyd-gb-oil-1/900/900',
+          'https://picsum.photos/seed/greyd-gb-oil-2/900/900',
+          'https://picsum.photos/seed/greyd-gb-oil-3/900/900',
+        ],
         description: '',
         listPrice: 24000,
       },
@@ -195,7 +226,31 @@ function view(gb) {
     reservedQuantity: counted.reduce((s, o) => s + o.quantity, 0),
     orderCount: counted.length,
     myOrders: orders.filter((o) => o.mine).map(orderView),
+    // 최근 참여 5건 — 이름은 첫 글자만 남기고 가린다(서버 규칙과 같게)
+    recentBuyers: counted
+      .slice()
+      .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))
+      .slice(0, 5)
+      .map((o) => ({ name: maskName(o.recipient.name), quantity: o.quantity, at: o.createdAt })),
+    watching: !!(db.watches || {})[gb.code],
+    notices: gb.notices || DEFAULT_NOTICES,
   };
+}
+
+const DEFAULT_NOTICES = {
+  shipping:
+    '마감 후 결제가 끝나면 브랜드가 직접 발송해요. 발송 예정일 안에 송장번호가 앱에 등록돼요.',
+  returns:
+    '수령 후 7일 이내 교환·반품을 신청할 수 있어요. 단순 변심 반품의 왕복 배송비는 구매자 부담이에요. 사용한 제품은 반품이 어려워요.',
+};
+
+export function maskName(name) {
+  const n = String(name || '').trim();
+  if (!n) {
+    return '익명';
+  }
+  // "테스트 구매자 3" 같은 시드 이름도 첫 글자만
+  return `${n.slice(0, 1)}**`;
 }
 
 function orderView(o) {
@@ -353,6 +408,14 @@ export async function cancelOrder(orderId) {
   o.state = 'CANCELLED';
   await save();
   return { order: orderView(o) };
+}
+
+export async function watch(code, on) {
+  await ready();
+  find(code);
+  db.watches = { ...(db.watches || {}), [code]: !!on };
+  await save();
+  return { watching: !!on };
 }
 
 export async function myOrders() {

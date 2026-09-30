@@ -210,6 +210,57 @@ const ko = {
   shipped: '발송 처리했어요.',
   simulateClose: '(테스트) 지금 마감 처리',
   pickCourier: '택배사 선택',
+  // 상세 v2 (2026-09-30)
+  tabs: { detail: '상세정보', host: '호스트', guide: '구매 안내' },
+  groupPrice: '공동구매가',
+  save: (amount) => `정가보다 ${amount} 저렴해요`,
+  goalLeft: (n) => `목표까지 ${n}개 남았어요`,
+  goalReached: '목표 달성! 마감 때 한 번에 결제돼요',
+  buyers: (n) => `${n}명 참여 중`,
+  recent: (name, q, min) =>
+    `${name}님이 ${q}개 참여 · ${min < 1 ? '방금' : min < 60 ? `${min}분 전` : `${Math.floor(min / 60)}시간 전`}`,
+  endsIn: '마감까지',
+  startsInLabel: '오픈까지',
+  clock: ({ days, hours, minutes, seconds }) =>
+    `${days > 0 ? `${days}일 ` : ''}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`,
+  moreDetail: '상세정보 더보기',
+  lessDetail: '상세정보 접기',
+  steps: [
+    ['카드 등록', '지금은 카드만 등록해요. 돈은 나가지 않아요.'],
+    ['마감 판정', '마감 시각에 모인 수량을 확인해요.'],
+    ['일괄 결제', '목표를 넘으면 등록한 카드로 한 번에 결제돼요. 미달이면 결제되지 않아요.'],
+    ['발송', '브랜드가 직접 보내고, 송장번호로 배송을 조회할 수 있어요.'],
+  ],
+  shippingTitle: '배송 안내',
+  returnsTitle: '교환·반품·환불',
+  sellerTitle: '판매자 정보',
+  faqTitle: '자주 묻는 질문',
+  faq: [
+    [
+      '언제 결제되나요?',
+      '마감 시각에 목표 수량을 넘으면 등록한 카드로 자동 결제돼요. 그 전에는 결제되지 않아요.',
+    ],
+    [
+      '참여를 취소할 수 있나요?',
+      '마감 전에는 내 공동구매에서 언제든 취소할 수 있어요. 카드 등록도 함께 해제돼요.',
+    ],
+    [
+      '목표를 못 채우면요?',
+      '공동구매가 취소되고 아무도 결제되지 않아요. 결과는 알림으로 알려드려요.',
+    ],
+    [
+      '결제가 실패하면요?',
+      '한도 초과 등으로 결제되지 않으면 그 주문만 취소되고 알림으로 안내해요.',
+    ],
+  ],
+  notify: '오픈 알림 받기',
+  notifyOn: '알림 신청됨 · 끄기',
+  notifyDone: '오픈하면 알려드릴게요.',
+  sheetTitle: '옵션 선택',
+  toOrder: '주문서 작성',
+  totalLabel: '합계',
+  shipIncluded: (fee) => `배송비 ${fee} 포함`,
+  soldLeft: (n) => `남은 수량 ${n}개`,
 };
 
 const en = {
@@ -409,6 +460,50 @@ const en = {
   shipped: 'Marked as shipped.',
   simulateClose: '(Test) Close now',
   pickCourier: 'Choose courier',
+  tabs: { detail: 'Details', host: 'Host', guide: 'How it works' },
+  groupPrice: 'Group price',
+  save: (amount) => `${amount} off the regular price`,
+  goalLeft: (n) => `${n} more to reach the goal`,
+  goalReached: 'Goal reached! Everyone is charged at close',
+  buyers: (n) => `${n} joined`,
+  recent: (name, q, min) =>
+    `${name} joined with ${q} · ${min < 1 ? 'just now' : min < 60 ? `${min}m ago` : `${Math.floor(min / 60)}h ago`}`,
+  endsIn: 'Ends in',
+  startsInLabel: 'Opens in',
+  clock: ({ days, hours, minutes, seconds }) =>
+    `${days > 0 ? `${days}d ` : ''}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`,
+  moreDetail: 'Show full details',
+  lessDetail: 'Show less',
+  steps: [
+    ['Register a card', 'Nothing is charged now.'],
+    ['Close', 'We check the total at the deadline.'],
+    ['Charge', 'If the goal is met, everyone is charged at once. Otherwise nobody is.'],
+    ['Ship', 'The brand ships directly. Track it with the tracking number.'],
+  ],
+  shippingTitle: 'Shipping',
+  returnsTitle: 'Returns & refunds',
+  sellerTitle: 'Seller',
+  faqTitle: 'FAQ',
+  faq: [
+    ['When am I charged?', 'Only at the deadline, and only if the goal is reached.'],
+    [
+      'Can I cancel?',
+      'Any time before it closes, from My group buys. Your card registration is released.',
+    ],
+    [
+      'What if the goal is not reached?',
+      'The group buy is cancelled and nobody is charged. We will notify you.',
+    ],
+    ['What if my payment fails?', 'Only that order is cancelled and we will let you know.'],
+  ],
+  notify: 'Notify me when it opens',
+  notifyOn: 'Notification on · Turn off',
+  notifyDone: 'We will let you know when it opens.',
+  sheetTitle: 'Choose options',
+  toOrder: 'Continue to order',
+  totalLabel: 'Total',
+  shipIncluded: (fee) => `incl. ${fee} shipping`,
+  soldLeft: (n) => `${n} left`,
 };
 
 export const gbCopy = () => (getLanguage() === 'ko' ? ko : en);

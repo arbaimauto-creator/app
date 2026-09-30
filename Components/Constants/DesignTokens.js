@@ -64,10 +64,12 @@ const RADIUS = {
 
 // Pretendard 패밀리명을 직접 정의한다 — Style.js를 import하면 Constants 순환 참조에
 // 새 진입점이 생겨 로드 순서에 따라 초기화 실패가 난다 (릴리스 흰 화면 원인이었음).
+// 2026-09-30: 굵기 한 단계 낮춤(대표 결정 — "글씨 얇게"). 화면 250여 곳이 제목에 ExtraBold/Black을 써서
+// 전체가 무거웠다. 이름은 "그 자리의 가장 강한 강조"라는 의미로 두고 실제 파일만 한 단계 가볍게 매핑한다.
 const FONT = {
-  Black: 'Pretendard-Black',
-  Bold: 'Pretendard-Bold',
-  ExtraBold: 'Pretendard-ExtraBold',
+  Black: 'Pretendard-ExtraBold',
+  Bold: 'Pretendard-SemiBold',
+  ExtraBold: 'Pretendard-Bold',
   ExtraLight: 'Pretendard-ExtraLight',
   Light: 'Pretendard-Light',
   Medium: 'Pretendard-Medium',
@@ -76,23 +78,25 @@ const FONT = {
   Thin: 'Pretendard-Thin',
 };
 
-// 라틴·숫자 전용 패밀리 (2026-09-16).
-// Onest는 제목·수치처럼 "읽는 것보다 보는 것"에 가까운 자리, Inter Tight는 라벨·버튼·표 같은 좁은 자리에 쓴다.
-// 둘 다 한글 글리프가 없다 — 한글이 섞이는 본문·버튼 문구는 반드시 Pretendard(FONT)를 유지한다.
+// 라틴·숫자 전용 패밀리 (2026-09-16 도입 → 2026-09-30 Pretendard로 통일).
+// 이름(DISPLAY·LATIN)은 기존 화면 호환을 위해 남기고 값만 Pretendard를 가리킨다.
+// Onest·Inter Tight 폰트 파일은 번들에 남아 있지만 토큰에서는 더 쓰지 않는다.
 const DISPLAY = {
-  Regular: 'Onest-Regular',
-  Medium: 'Onest-Medium',
-  SemiBold: 'Onest-SemiBold',
-  Bold: 'Onest-Bold',
-  ExtraBold: 'Onest-ExtraBold',
+  Regular: 'Pretendard-Regular',
+  Medium: 'Pretendard-Medium',
+  SemiBold: 'Pretendard-SemiBold',
+  Bold: 'Pretendard-SemiBold',
+  ExtraBold: 'Pretendard-Bold',
 };
 
+// 2026-09-30: 서체는 Pretendard 하나로 통일(대표 결정 — "Pretendard처럼 깔끔하게").
+// 숫자·라틴 자리도 Pretendard를 쓰고, 굵기는 FONT와 같이 한 단계 가볍게.
 const LATIN = {
-  Regular: 'InterTight-Regular',
-  Medium: 'InterTight-Medium',
-  SemiBold: 'InterTight-SemiBold',
-  Bold: 'InterTight-Bold',
-  ExtraBold: 'InterTight-ExtraBold',
+  Regular: 'Pretendard-Regular',
+  Medium: 'Pretendard-Medium',
+  SemiBold: 'Pretendard-SemiBold',
+  Bold: 'Pretendard-SemiBold',
+  ExtraBold: 'Pretendard-Bold',
 };
 
 const TYPE = {

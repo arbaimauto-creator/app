@@ -78,7 +78,20 @@ export function OrderBadge({ state, style }) {
 }
 
 // 화면 틀 — 글래스 배경 + 뒤로 + 제목 + 당겨서 새로고침
-export function Frame({ navigation, title, children, onRefresh, refreshing, footer, scrollRef }) {
+// right: 헤더 오른쪽 요소(예: 공유). stickyIndex: children 기준 고정할 요소 위치(첫 child = 0).
+// ScrollView는 Children.toArray로 null을 빼고 센다 — 고정 요소 앞에는 null이 오지 않게 쓸 것.
+export function Frame({
+  navigation,
+  title,
+  children,
+  onRefresh,
+  refreshing,
+  footer,
+  scrollRef,
+  right,
+  stickyIndex,
+  onScroll,
+}) {
   const c = gbCopy();
   return (
     <SafeAreaView style={s.page}>
@@ -96,10 +109,14 @@ export function Frame({ navigation, title, children, onRefresh, refreshing, foot
         <Text style={s.headerTitle} numberOfLines={1}>
           {title}
         </Text>
-        <View style={s.backBtn} />
+        {right || <View style={s.backBtn} />}
       </View>
       <ScrollView
         ref={scrollRef}
+        // 개발 안내 자리는 항상 child 하나를 차지한다 → 호출부 인덱스 + 1
+        stickyHeaderIndices={stickyIndex != null ? [stickyIndex + 1] : undefined}
+        onScroll={onScroll}
+        scrollEventThrottle={onScroll ? 32 : undefined}
         contentContainerStyle={s.content}
         keyboardShouldPersistTaps="handled"
         refreshControl={
@@ -113,7 +130,9 @@ export function Frame({ navigation, title, children, onRefresh, refreshing, foot
           ) : undefined
         }
       >
-        {FEATURES.GROUP_BUY_MOCK ? <NoteBox text={c.mockNotice} /> : null}
+        <View style={FEATURES.GROUP_BUY_MOCK ? null : s.emptySlot}>
+          {FEATURES.GROUP_BUY_MOCK ? <NoteBox text={c.mockNotice} /> : null}
+        </View>
         {children}
       </ScrollView>
       {footer ? <View style={s.footer}>{footer}</View> : null}
@@ -230,6 +249,7 @@ export const s = StyleSheet.create({
     color: COLORS.INK,
   },
   content: { padding: 16, paddingBottom: 48, gap: 12 },
+  emptySlot: { marginBottom: -12 }, // 빈 안내 자리가 gap만큼 벌어지지 않게
   footer: {
     paddingHorizontal: 16,
     paddingTop: 10,
@@ -240,7 +260,7 @@ export const s = StyleSheet.create({
     gap: 6,
   },
   failure: { gap: 10, alignItems: 'center', paddingVertical: 24 },
-  eyebrow: { fontFamily: LATIN.Bold, fontSize: 10, letterSpacing: 1.4, color: COLORS.AMBER_DEEP },
+  eyebrow: { fontFamily: FONT.Bold, fontSize: 11.5, letterSpacing: 0.2, color: COLORS.AMBER_DEEP },
   h1: { fontFamily: FONT.ExtraBold, fontSize: 20, color: COLORS.INK, lineHeight: 27 },
   h2: { fontFamily: FONT.Bold, fontSize: 15, color: COLORS.INK },
   body: { fontFamily: FONT.Regular, fontSize: 13, lineHeight: 19, color: COLORS.INK },

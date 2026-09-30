@@ -41,8 +41,9 @@ export default function GroupBuyOrderScreen({ navigation, route }) {
   const c = gbCopy();
   const code = route.params?.code;
   const { data: gb, loading, error, reload } = useFocusLoad(() => getGroupBuy(code), code);
-  const [quantity, setQuantity] = useState(1);
-  const [option, setOption] = useState(null);
+  // 상세 페이지 옵션 시트에서 고른 값으로 시작한다(없으면 1개·첫 옵션)
+  const [quantity, setQuantity] = useState(Math.max(1, Number(route.params?.quantity) || 1));
+  const [option, setOption] = useState(route.params?.option || null);
   const [recipient, setRecipient] = useState({
     name: '',
     phone: '',
