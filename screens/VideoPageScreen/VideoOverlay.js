@@ -286,9 +286,27 @@ function VideoOverlay({ context }) {
   const canToggleCaption = captionExpanded || captionTruncated || hashTags.length > 0;
   const openHashTag = (tag) =>
     context.props.navigation.push('Search', { hashTag: tag, isHashtagSearch: true });
+  // 상단 뒤로가기 (2026-09-17): 홈 카드에서 push된 쇼츠에 나갈 길이 없었다
+  const backButton = context.props.navigation?.canGoBack?.() ? (
+    <TouchableOpacity
+      style={styles.backBtn}
+      onPress={() => context.props.navigation.goBack()}
+      accessibilityRole="button"
+      accessibilityLabel={Strings.BACK}
+    >
+      <IconMaterialIcons name="arrow-back" size={22} color="#FFFFFF" />
+    </TouchableOpacity>
+  ) : null;
+
+  const hideInfo = () => {
+    setCaptionExpanded(false);
+    setInfoVisible(false);
+  };
+
   if (!infoVisible) {
     return (
       <View style={styles.overlayContainer} pointerEvents="box-none">
+        {backButton}
         <ActionRail context={context} />
         <View style={styles.bottomContainer} pointerEvents="box-none">
           <TouchableOpacity
@@ -306,24 +324,30 @@ function VideoOverlay({ context }) {
   }
   return (
     <View style={styles.overlayContainer} pointerEvents="box-none">
+      {/* 영상 아무 데나 탭하면 리뷰가 내려간다 (2026-09-17) */}
+      <TouchableWithoutFeedback onPress={hideInfo}>
+        <View style={StyleSheet.absoluteFill} />
+      </TouchableWithoutFeedback>
+      {backButton}
       <ActionRail context={context} />
+      {/* 리뷰 카드 우측 상단 큰 X (2026-09-17) — 헤더의 작은 ✕는 누르기 어려웠다 */}
       <View style={styles.bottomContainer} pointerEvents="box-none">
         {/* 캡션을 펼치면 카드가 화면 절반을 덮는다. 카드가 터치 대상이면 Android에서 바깥 세로 페이저가
             제스처를 못 받아(2026-09-15 에뮬 재현) 펼친 동안엔 배경·본문을 터치 통과로 두고,
             해시태그와 '접기'만 누를 수 있게 한다. 영상 위 스와이프는 항상 다음 쇼츠. */}
         <GestureDetector gesture={expandedSwipe.enabled(captionExpanded)}>
           <View style={styles.reviewSummary}>
+            <TouchableOpacity
+              style={styles.closeX}
+              onPress={hideInfo}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              accessibilityRole="button"
+              accessibilityLabel={Strings.VIDEO_DETAILS_CLOSE}
+            >
+              <IconMaterialIcons name="close" size={22} color="#FFFFFF" />
+            </TouchableOpacity>
             <View style={styles.summaryHeader}>
-              <TouchableOpacity
-                onPress={() => {
-                  setCaptionExpanded(false);
-                  setInfoVisible(false);
-                }}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                accessibilityRole="button"
-              >
-                <Text style={styles.reviewEyebrow}>{Strings.SHORTS_REVIEW_LABEL} ✕</Text>
-              </TouchableOpacity>
+              <Text style={styles.reviewEyebrow}>{Strings.SHORTS_REVIEW_LABEL}</Text>
               {review.g6RatingCount > 0 ? (
                 <ReviewGradeBadgeView
                   g6RatingCount={review.g6RatingCount}
@@ -527,6 +551,29 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.35)',
   },
   revealText: { fontFamily: T.FONT.Bold, fontSize: 12, color: '#FFFFFF' },
+  backBtn: {
+    position: 'absolute',
+    top: T.TOP_INSET + 6,
+    left: 14,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(23,23,23,0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeX: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    zIndex: 2,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(23,23,23,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   authorRow: {
     flexDirection: 'row',
     alignItems: 'center',

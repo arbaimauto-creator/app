@@ -19,7 +19,6 @@ import { fetchCampaigns, selectCampaigns } from '../../slices/campaign';
 import { fetchCampaignReviews } from '../../api/reviews';
 import { getEvaluations } from '../../api/evaluations';
 import { prefSetSafe } from '../../api/prefSafe';
-import APIprovider from '../../Components/APIprovider';
 
 const { COLORS, FONT } = T;
 
@@ -114,22 +113,17 @@ export default function BrandMy({ navigation }) {
           </Card>
         </TouchableOpacity>
 
-        {/* 스토어 관리 (2026-09-17) — 앱에서도 상품 등록·관리. 웹(ops 판매자 포털)과 같은 API */}
+        {/* 웹과 같은 ops 상품 저장소를 사용하는 판매자 관리 */}
         <TouchableOpacity
           activeOpacity={0.7}
-          onPress={() =>
-            navigation.navigate('ProductList', {
-              sellerId: APIprovider.requesterId,
-              sellerName: brandName,
-            })
-          }
+          onPress={() => navigation.navigate('SellerStore')}
         >
           <Card style={[styles.rowCard, styles.rowInline]}>
             <Text style={styles.rowTitle}>{Strings.STORE_MANAGE_MY_PRODUCTS}</Text>
             <Text style={styles.xs}>›</Text>
           </Card>
         </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('AddingNewProduct')}>
+        <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('SellerStore')}>
           <Card style={[styles.rowCard, styles.rowInline]}>
             <Text style={styles.rowTitle}>{Strings.STORE_ADD_PRODUCT}</Text>
             <Text style={styles.xs}>+ ›</Text>

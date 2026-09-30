@@ -369,6 +369,7 @@ export default function CuratedHome({ navigation }) {
           <Text style={styles.gValue}>{gScore}</Text>
         </View>
         <View style={styles.headerActions}>
+          <RoundIcon name="storefront-outline" onPress={() => navigation.navigate('StoreCatalog')} />
           <RoundIcon name="magnify" onPress={() => navigation.navigate('Search')} />
           <RoundIcon
             name="bell-outline"

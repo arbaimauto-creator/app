@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --amber:#FFB731; --amber-deep:#8A5D00; --amber-soft:#FFF3D9; --amber-faint:#FFF9EC; --on-amber:#231B05;
+  --bg:#F4F4F4; --card:#FFFFFF; --ink:#171717; --line:#EAE7E1; --muted:#8A857B;
+  --green:#1F8A4C; --green-bg:#E4F3E9; --red:#E53400; --red-bg:#FCE9E2; --track:#E8E5DF;
+  --r-card:14px; --r-btn:11px; --r-sm:8px; --r-input:10px; --r-badge:5px; --r-sheet:18px; --r-pill:999px;
+  --sh:0 1px 2px rgba(20,15,5,0.05);
+}
+body{margin:0;background:#E9E7E3;font-family:Pretendard,Inter,system-ui,sans-serif;color:var(--ink)}
+a{color:var(--amber-deep);text-decoration:none}
+a:hover{color:var(--ink)}
+*{box-sizing:border-box}
+.sc::-webkit-scrollbar{width:0}
+@keyframes pop{from{transform:scale(.94);opacity:0}to{transform:scale(1);opacity:1}}
+</style>
+</helmet>
+
+<div style="display:flex;gap:34px;align-items:flex-start;padding:36px 40px;min-height:100vh">
+
+<div style="width:196px;flex:none;position:sticky;top:36px">
+  <div style="font-size:20px;font-weight:800;letter-spacing:-.4px">greyd.</div>
+  <div style="font-size:11.5px;color:var(--muted);margin:4px 0 16px">Design spec · 390×844 · 18 screens</div>
+  <sc-for list="{{ index }}" as="s" hint-placeholder-count="14">
+    <div onClick="{{ s.go }}" style="display:flex;gap:8px;align-items:baseline;padding:6px 8px;border-radius:var(--r-sm);cursor:pointer;background:{{ s.bg }}" style-hover="background:rgba(0,0,0,.05)">
+      <span style="font:400 10.5px ui-monospace,Menlo,monospace;color:var(--muted);width:16px">{{ s.n }}</span>
+      <span style="font-size:12px;font-weight:{{ s.w }}">{{ s.label }}</span>
+    </div>
+  </sc-for>
+</div>
+
+<div style="width:390px;height:844px;flex:none;position:relative;border-radius:38px;background:#fff;box-shadow:0 1px 2px rgba(20,15,5,.05),0 18px 50px rgba(20,15,5,.10);overflow:hidden;border:1px solid var(--line)">
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg);overflow:hidden">
+
+  <div style="height:46px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 22px 4px;font-size:11.5px;font-weight:700;color:var(--ink)">
+    <span>9:41</span>
+    <span style="display:flex;gap:5px;align-items:center">
+      <span style="width:16px;height:9px;border:1.4px solid var(--ink);border-radius:2px;display:inline-block"></span>
+      <span style="width:22px;height:9px;border:1.4px solid var(--ink);border-radius:3px;display:inline-block;position:relative"><span style="position:absolute;inset:1.5px;right:6px;background:var(--ink);border-radius:1px"></span></span>
+    </span>
+  </div>
+
+  <div style="flex:1;position:relative;overflow:hidden">
+
+  <!-- 1 GATE -->
+  <sc-if value="{{ isGate }}" hint-placeholder-val="{{ true }}">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;padding:0 24px 28px;background:var(--card)">
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:26px">
+        <div>
+          <div style="font-size:34px;font-weight:800;letter-spacing:-1px">greyd.</div>
+          <div style="font-size:13px;line-height:1.5;color:var(--muted);margin-top:8px">Invite only. Enter the 6-digit code from your invitation.</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <sc-for list="{{ codeCells }}" as="c" hint-placeholder-count="6">
+            <div style="flex:1;height:56px;border:1px solid {{ c.border }};background:{{ c.bg }};border-radius:var(--r-input);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800">{{ c.ch }}</div>
+          </sc-for>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;margin-bottom:8px">Region</div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px">
+            <sc-for list="{{ countries }}" as="c" hint-placeholder-count="6">
+              <div onClick="{{ c.pick }}" style="padding:8px 14px;border-radius:var(--r-pill);font-size:11px;font-weight:700;cursor:pointer;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.color }}">{{ c.code }}</div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      <div onClick="{{ goLogin }}" style="height:52px;border-radius:var(--r-btn);background:var(--amber);color:var(--on-amber);display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:800;cursor:pointer">Enter greyd</div>
+      <div style="text-align:center;font-size:10.5px;color:var(--muted);margin-top:12px">No code? Ask the creator who referred you.</div>
+    </div>
+  </sc-if>
+
+  <!-- 2 LOGIN -->
+  <sc-if value="{{ isLogin }}">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;padding:0 24px 28px;background:var(--card)">
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:14px">
+        <div style="margin-bottom:10px">
+          <div style="font-size:20px;font-weight:800;letter-spacing:-.2px">Sign in</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:6px">Code accepted · Region KR</div>
+        </div>
+        <sc-for list="{{ providers }}" as="p" hint-placeholder-count="3">
+          <div onClick="{{ goOnboard }}" style="height:54px;border:1px solid var(--line);border-radius:var(--r-btn);background:var(--card);box-shadow:var(--sh);display:flex;align-items:center;gap:12px;padding:0 16px;cursor:pointer" style-hover="border-color:var(--amber)">
+            <span style="width:22px;height:22px;border-radius:50%;background:{{ p.color }};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:{{ p.fg }}">{{ p.mark }}</span>
+            <span style="font-size:13.5px;font-weight:800">Continue with {{ p.name }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="font-size:10.5px;line-height:1.5;color:var(--muted);text-align:center">By continuing you agree to the Creator Terms and Review Policy.</div>
+    </div>
+  </sc-if>
+
+  <!-- 3 ONBOARDING -->
+  <sc-if value="{{ isOnboard }}">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg)">
+      <div style="padding:12px 16px 10px;display:flex;align-items:center;gap:10px">
+        <div onClick="{{ back }}" style="width:32px;height:32px;border-radius:var(--r-pill);border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px">←</div>
+        <div style="flex:1;display:flex;gap:4px">
+          <sc-for list="{{ steps }}" as="st" hint-placeholder-count="4">
+            <div style="flex:1;height:4px;border-radius:var(--r-pill);background:{{ st.bg }}"></div>
+          </sc-for>
+        </div>
+        <div style="font:400 11.5px ui-monospace,Menlo,monospace;color:var(--muted)">{{ stepLabel }}</div>
+      </div>
+      <div class="sc" style="flex:1;overflow-y:auto;padding:6px 16px 16px">
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);padding:20px">
+          <div style="font-size:20px;font-weight:800;letter-spacing:-.2px">{{ ob.title }}</div>
+          <div style="font-size:13px;line-height:1.55;color:var(--muted);margin-top:8px">{{ ob.body }}</div>
+
+          <sc-if value="{{ ob.isLast }}">
+            <div style="margin-top:20px;display:flex;flex-direction:column;gap:18px">
+              <div>
+                <div style="font-size:11px;font-weight:700;margin-bottom:7px">Main channel</div>
+                <div style="display:flex;align-items:center;height:44px;border:1px solid var(--amber);background:var(--amber-faint);border-radius:var(--r-input);padding:0 12px;gap:6px">
+                  <span style="font-size:13px;color:var(--muted)">@</span>
+                  <span style="font-size:13px">yuna.reviews</span>
+                  <span style="margin-left:auto;font-size:10px;font-weight:800;background:var(--amber-soft);color:var(--amber-deep);padding:3px 7px;border-radius:var(--r-badge)">INSTAGRAM</span>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:11px;font-weight:700;margin-bottom:7px">Followers</div>
+                <div style="display:flex;gap:6px">
+                  <sc-for list="{{ followerBands }}" as="b" hint-placeholder-count="4">
+                    <div onClick="{{ b.pick }}" style="flex:1;height:38px;border-radius:var(--r-sm);border:1px solid {{ b.border }};background:{{ b.bg }};color:{{ b.color }};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer">{{ b.label }}</div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="display:flex;gap:12px">
+                <div style="flex:1">
+                  <div style="font-size:11px;font-weight:700;margin-bottom:7px">Age</div>
+                  <div style="height:44px;border:1px solid var(--line);border-radius:var(--r-input);display:flex;align-items:center;padding:0 12px;font-size:13px;background:var(--card)">26 <span style="margin-left:auto;color:var(--muted);font-size:11px">▾</span></div>
+                </div>
+                <div style="flex:1">
+                  <div style="font-size:11px;font-weight:700;margin-bottom:7px">Gender</div>
+                  <div style="display:flex;height:44px;border:1px solid var(--line);border-radius:var(--r-input);overflow:hidden;background:var(--card)">
+                    <sc-for list="{{ genders }}" as="g" hint-placeholder-count="3">
+                      <div onClick="{{ g.pick }}" style="flex:1;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer;background:{{ g.bg }};color:{{ g.color }}">{{ g.label }}</div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:11px;font-weight:700;margin-bottom:7px">Categories · pick up to 3</div>
+                <div style="display:flex;flex-wrap:wrap;gap:7px">
+                  <sc-for list="{{ cats }}" as="c" hint-placeholder-count="8">
+                    <div onClick="{{ c.toggle }}" style="padding:9px 13px;border-radius:var(--r-pill);font-size:11.5px;cursor:pointer;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.color }};font-weight:{{ c.weight }}">{{ c.label }}</div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ ob.isIntro }}">
+            <div style="margin-top:18px;height:170px;border-radius:var(--r-input);background:repeating-linear-gradient(135deg,#EFEDE8 0 8px,#F7F5F1 8px 16px);display:flex;align-items:center;justify-content:center;font:400 10.5px ui-monospace,Menlo,monospace;color:var(--muted)">{{ ob.art }}</div>
+            <div style="margin-top:16px;background:var(--amber-soft);border-radius:var(--r-input);padding:12px 14px;font-size:11.5px;line-height:1.5;color:var(--amber-deep)">{{ ob.note }}</div>
+          </sc-if>
+        </div>
+      </div>
+      <div style="padding:0 16px 22px;display:flex;gap:10px">
+        <sc-if value="{{ ob.canPrev }}">
+          <div onClick="{{ prevStep }}" style="width:52px;height:52px;border-radius:var(--r-btn);border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px">←</div>
+        </sc-if>
+        <div onClick="{{ nextStep }}" style="flex:1;height:52px;border-radius:var(--r-btn);background:var(--amber);color:var(--on-amber);display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:800;cursor:pointer">{{ ob.cta }}</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- 4 HOME -->
+  <sc-if value="{{ isHome }}">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg)">
+      <div style="flex:none;display:flex;align-items:center;padding:8px 16px 10px;gap:12px;background:var(--bg);border-bottom:1px solid {{ homeHairline }}">
+        <div style="font-size:20px;font-weight:800;letter-spacing:-.6px">greyd.</div>
+        <div onClick="{{ goGscore }}" style="display:flex;align-items:center;gap:5px;background:var(--amber-soft);color:var(--amber-deep);padding:5px 9px;border-radius:var(--r-pill);cursor:pointer">
+          <span style="font-size:10px;font-weight:800">G</span><span style="font-size:12px;font-weight:800">50</span>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:10px">
+          <div onClick="{{ goDiscover }}" style="width:34px;height:34px;border-radius:var(--r-pill);border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer">
+            <span style="width:11px;height:11px;border:1.6px solid var(--ink);border-radius:50%;display:inline-block;position:relative"><span style="position:absolute;width:6px;height:1.6px;background:var(--ink);transform:rotate(45deg);left:8px;top:9px"></span></span>
+          </div>
+          <div onClick="{{ goNotif }}" style="width:34px;height:34px;border-radius:var(--r-pill);border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative">
+            <span style="width:12px;height:12px;border:1.6px solid var(--ink);border-radius:4px 4px 2px 2px;display:inline-block"></span>
+            <span style="position:absolute;top:7px;right:8px;width:7px;height:7px;border-radius:50%;background:var(--amber);border:1.5px solid var(--card)"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sc" style="flex:1;overflow-y:auto;padding:12px 0 20px">
+
+        <div onClick="{{ goComposer }}" style="margin:0 16px 14px;background:var(--card);border:1px solid var(--amber);border-radius:var(--r-card);box-shadow:var(--sh);padding:13px 14px;cursor:pointer">
+          <div style="display:flex;align-items:center;gap:11px">
+            <div style="flex:none;width:42px;height:42px;border-radius:var(--r-pill);background:var(--amber-soft);display:flex;flex-direction:column;align-items:center;justify-content:center">
+              <span style="font-size:12.5px;font-weight:800;line-height:1;color:var(--amber-deep)">D-9</span>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:11px;font-weight:700;color:var(--amber-deep)">DRAFT IN PROGRESS</div>
+              <div style="font-size:13px;font-weight:700;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Barrier Repair Cream review</div>
+            </div>
+            <span style="flex:none;font-size:11px;font-weight:800;background:var(--amber);color:var(--on-amber);padding:8px 12px;border-radius:var(--r-sm)">Continue</span>
+          </div>
+          <div style="display:flex;gap:5px;margin-top:12px">
+            <sc-for list="{{ draftSteps }}" as="d" hint-placeholder-count="4">
+              <div style="flex:1">
+                <div style="height:4px;border-radius:var(--r-pill);background:{{ d.bg }}"></div>
+                <div style="font-size:9.5px;color:{{ d.color }};margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ d.label }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div class="sc" style="display:flex;gap:13px;overflow-x:auto;padding:0 16px 14px">
+          <div onClick="{{ goComposer }}" style="width:58px;flex:none;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer">
+            <div style="width:56px;height:56px;border-radius:var(--r-pill);border:1.5px dashed var(--muted);background:var(--card);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--muted)">+</div>
+            <span style="font-size:10.5px;color:var(--muted)">Post</span>
+          </div>
+          <sc-for list="{{ rail }}" as="p" hint-placeholder-count="5">
+            <div onClick="{{ p.open }}" style="width:58px;flex:none;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer">
+              <div style="width:56px;height:56px;border-radius:var(--r-pill);padding:2.5px;background:{{ p.ring }};position:relative">
+                <div style="width:100%;height:100%;border-radius:var(--r-pill);background:repeating-linear-gradient(135deg,#EFEDE8 0 6px,#F7F5F1 6px 12px);border:2px solid var(--bg)"></div>
+                <span style="position:absolute;bottom:-1px;right:-1px;min-width:19px;height:19px;padding:0 4px;border-radius:var(--r-pill);background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:800;color:{{ p.gColor }}">{{ p.g }}</span>
+              </div>
+              <span style="font-size:10.5px;color:{{ p.color }};max-width:58px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.who }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div class="sc" style="display:flex;gap:7px;overflow-x:auto;padding:0 16px 6px">
+          <sc-for list="{{ homeFilters }}" as="c" hint-placeholder-count="5">
+            <div onClick="{{ c.pick }}" style="flex:none;padding:8px 13px;border-radius:var(--r-pill);font-size:11.5px;cursor:pointer;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.color }};font-weight:{{ c.weight }}">{{ c.label }}</div>
+          </sc-for>
+        </div>
+        <div style="display:flex;align-items:center;padding:12px 16px 10px">
+          <div style="font-size:11px;font-weight:700;color:var(--muted)">{{ feedCountLabel }}</div>
+          <div onClick="{{ cycleFeedSort }}" style="margin-left:auto;font-size:11px;font-weight:700;border:1px solid var(--line);background:var(--card);border-radius:var(--r-sm);padding:6px 10px;cursor:pointer">{{ feedSortLabel }} ↕</div>
+        </div>
+
+        <sc-if value="{{ feedHasPosts }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:12px;padding:0 16px">
+          <sc-for list="{{ posts }}" as="p" hint-placeholder-count="3">
+            <div style="background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);overflow:hidden">
+              <div style="display:flex;align-items:center;gap:9px;padding:12px 13px 11px">
+                <div onClick="{{ p.profile }}" style="width:34px;height:34px;flex:none;border-radius:var(--r-pill);background:repeating-linear-gradient(135deg,#EFEDE8 0 6px,#F7F5F1 6px 12px);cursor:pointer"></div>
+                <div style="flex:1;min-width:0">
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <span onClick="{{ p.profile }}" style="font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.who }}</span>
+                    <span style="flex:none;font-size:9.5px;font-weight:800;background:var(--amber-soft);color:var(--amber-deep);padding:3px 6px;border-radius:var(--r-badge)">G {{ p.g }}</span>
+                  </div>
+                  <div style="font-size:10.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.meta }}</div>
+                </div>
+                <div onClick="{{ p.follow }}" style="flex:none;height:30px;padding:0 12px;border-radius:var(--r-sm);border:1px solid {{ p.followBorder }};background:{{ p.followBg }};color:{{ p.followFg }};display:flex;align-items:center;font-size:11px;font-weight:800;cursor:pointer">{{ p.followLabel }}</div>
+              </div>
+
+              <div onClick="{{ p.next }}" style="height:{{ p.h }};background:repeating-linear-gradient(135deg,#EFEDE8 0 8px,#F7F5F1 8px 16px);position:relative;cursor:pointer">
+                <span style="position:absolute;top:10px;left:10px;font-size:10px;font-weight:800;background:var(--card);color:var(--ink);padding:4px 8px;border-radius:var(--r-badge)">✓ {{ p.score }}</span>
+                <span style="position:absolute;top:10px;right:10px;font-size:10px;font-weight:800;background:rgba(23,23,23,.72);color:#fff;padding:4px 8px;border-radius:var(--r-badge)">{{ p.slideLabel }}</span>
+                <span style="position:absolute;left:0;right:0;top:50%;text-align:center;font:400 10.5px ui-monospace,Menlo,monospace;color:var(--muted)">{{ p.frameLabel }}</span>
+                <sc-if value="{{ p.sponsored }}">
+                  <span style="position:absolute;bottom:34px;left:10px;font-size:10px;font-weight:800;background:var(--card);border:1px solid var(--line);color:var(--ink);padding:4px 8px;border-radius:var(--r-badge)">Sponsored · {{ p.brand }}</span>
+                </sc-if>
+                <span style="position:absolute;bottom:11px;left:0;right:0;display:flex;justify-content:center;gap:5px">
+                  <sc-for list="{{ p.dots }}" as="d" hint-placeholder-count="4">
+                    <span onClick="{{ d.set }}" style="width:{{ d.w }};height:5px;border-radius:var(--r-pill);background:{{ d.bg }};cursor:pointer"></span>
+                  </sc-for>
+                </span>
+              </div>
+
+              <div class="sc" style="display:flex;gap:6px;overflow-x:auto;padding:11px 13px 0">
+                <sc-for list="{{ p.marks }}" as="m" hint-placeholder-count="3">
+                  <div style="flex:none;display:flex;align-items:center;gap:5px;background:var(--bg);border-radius:var(--r-badge);padding:5px 8px">
+                    <span style="font-size:10px;color:var(--muted)">{{ m.k }}</span>
+                    <span style="font-size:10.5px;font-weight:800">{{ m.v }}</span>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="padding:10px 13px 13px">
+                <div style="font-size:13px;line-height:1.55">{{ p.caption }}</div>
+                <div style="font-size:11.5px;color:var(--amber-deep);margin-top:6px">{{ p.tags }}</div>
+
+                <div onClick="{{ p.open }}" style="display:flex;align-items:center;gap:8px;margin-top:12px;cursor:pointer">
+                  <div style="display:flex">
+                    <sc-for list="{{ p.avatars }}" as="a" hint-placeholder-count="3">
+                      <span style="width:20px;height:20px;border-radius:var(--r-pill);background:repeating-linear-gradient(135deg,#EFEDE8 0 5px,#F7F5F1 5px 10px);border:1.5px solid var(--card);margin-left:{{ a.ml }}"></span>
+                    </sc-for>
+                  </div>
+                  <span style="font-size:11.5px;color:var(--muted)"><span style="font-weight:800;color:var(--ink)">{{ p.made }}</span> made a review from this</span>
+                </div>
+
+                <div onClick="{{ p.open }}" style="margin-top:11px;background:var(--bg);border-radius:var(--r-input);padding:10px 11px;cursor:pointer">
+                  <div style="font-size:11.5px;line-height:1.45"><span style="font-weight:700">{{ p.topWho }}</span> {{ p.topComment }}</div>
+                  <div style="font-size:10.5px;color:var(--muted);margin-top:5px">View all {{ p.comments }} comments</div>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
+                  <div onClick="{{ p.save }}" style="flex:none;height:34px;padding:0 12px;border-radius:var(--r-sm);border:1px solid {{ p.saveBorder }};background:{{ p.saveBg }};color:{{ p.saveFg }};display:flex;align-items:center;gap:5px;font-size:11px;font-weight:800;cursor:pointer">{{ p.saveLabel }}</div>
+                  <div style="flex:none;height:34px;padding:0 12px;border-radius:var(--r-sm);border:1px solid var(--line);display:flex;align-items:center;font-size:11px;font-weight:800;color:var(--muted);cursor:pointer">Share</div>
+                  <div onClick="{{ p.make }}" style="flex:1;height:34px;border-radius:var(--r-sm);background:var(--amber);color:var(--on-amber);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;cursor:pointer">Make one like this</div>
+                </div>
+              </div>
+            </div>
+
+            <sc-if value="{{ p.showSuggest }}">
+              <div style="background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);padding:14px 0 15px">
+                <div style="display:flex;align-items:baseline;padding:0 13px 12px">
+                  <div style="font-size:13px;font-weight:700">Creators who test like you</div>
+                  <div onClick="{{ goDiscover }}" style="margin-left:auto;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer">See all</div>
+                </div>
+                <div class="sc" style="display:flex;gap:10px;overflow-x:auto;padding:0 13px">
+                  <sc-for list="{{ suggestions }}" as="g" hint-placeholder-count="3">
+                    <div onClick="{{ g.open }}" style="width:128px;flex:none;border:1px solid var(--line);border-radius:var(--r-input);padding:13px 12px;text-align:center;cursor:pointer">
+                      <div style="width:44px;height:44px;border-radius:var(--r-pill);background:repeating-linear-gradient(135deg,#EFEDE8 0 6px,#F7F5F1 6px 12px);margin:0 auto"></div>
+                      <div style="font-size:11.5px;font-weight:700;margin-top:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ g.who }}</div>
+                      <div style="font-size:10.5px;color:var(--muted);margin-top:3px">{{ g.meta }}</div>
+                      <div onClick="{{ g.follow }}" style="margin-top:10px;height:32px;border-radius:var(--r-sm);background:{{ g.bg }};border:1px solid {{ g.border }};color:{{ g.fg }};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">{{ g.label }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+          </sc-for>
+        </div>
+        </sc-if>
+
+        <sc-if value="{{ feedEmpty }}">
+          <div style="margin:44px 16px 0;text-align:center;padding:0 20px">
+            <div style="width:52px;height:52px;border-radius:var(--r-card);background:var(--card);border:1px solid var(--line);margin:0 auto"></div>
+            <div style="font-size:14px;font-weight:700;margin-top:16px">Nothing here in {{ homeFilter }}</div>
+            <div style="font-size:13px;line-height:1.55;color:var(--muted);margin-top:6px">Follow more testers, or switch back to For you.</div>
+            <div onClick="{{ resetFeed }}" style="display:inline-flex;margin-top:16px;height:44px;align-items:center;padding:0 18px;border-radius:var(--r-btn);background:var(--amber);color:var(--on-amber);font-size:13.5px;font-weight:800;cursor:pointer">Back to For you</div>
+          </div>
+        </sc-if>
+
+        <div style="margin:16px 16px 0;text-align:center;padding:18px 16px;border:1px dashed var(--line);border-radius:var(--r-card)">
+          <div style="font-size:12.5px;font-weight:700">You are caught up</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:4px">Checked 2 minutes ago · 18 new reviews yesterday</div>
+          <div onClick="{{ goDiscover }}" style="display:inline-flex;margin-top:12px;height:38px;align-items:center;padding:0 15px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--card);font-size:11.5px;font-weight:800;cursor:pointer">Search all reviews</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- 5 FEED -->
+  <sc-if value="{{ isFeed }}">
+    <div onClick="{{ toggleClean }}" style="position:absolute;inset:0;background:#141210;cursor:pointer">
+      <div style="position:absolute;inset:0;background:repeating-linear-gradient(135deg,#22201C 0 10px,#2A2723 10px 20px);display:flex;align-items:center;justify-content:center;font:400 10.5px ui-monospace,Menlo,monospace;color:#6E675C">vertical review video</div>
+      <sc-if value="{{ feedOverlay }}">
+        <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.35) 0,rgba(0,0,0,0) 22%,rgba(0,0,0,0) 55%,rgba(0,0,0,.62) 100%)">
+          <div style="position:absolute;right:12px;bottom:130px;display:flex;flex-direction:column;gap:20px;align-items:center">
+            <sc-for list="{{ feedRail }}" as="r" hint-placeholder-count="4">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:5px">
+                <div style="width:38px;height:38px;border-radius:{{ r.radius }};border:1.6px solid rgba(255,255,255,.9)"></div>
+                <span style="font-size:10.5px;color:#fff">{{ r.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="position:absolute;left:16px;right:78px;bottom:24px;color:#fff">
+            <span style="font-size:10px;font-weight:800;background:var(--amber);color:var(--on-amber);padding:4px 8px;border-radius:var(--r-badge)">✓ 92</span>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
+              <div style="width:26px;height:26px;border-radius:var(--r-pill);background:#3A3630"></div>
+              <span onClick="{{ goCreator }}" style="font-size:13px;font-weight:700;cursor:pointer">@yuna.reviews</span>
+              <span style="font-size:10.5px;color:rgba(255,255,255,.7)">128K views</span>
+              <span style="font-size:10px;font-weight:800;border:1px solid rgba(255,255,255,.5);padding:2px 6px;border-radius:var(--r-badge)">Sponsored</span>
+            </div>
+            <div style="font-size:13px;line-height:1.5;margin-top:9px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">Day 14 with the barrier cream — texture, sting test on damaged skin, and what happened to my redness. 2주 사용 후기.</div>
+            <div onClick="{{ goReview }}" style="margin-top:12px;display:inline-flex;align-items:center;gap:6px;background:#fff;color:var(--ink);border-radius:var(--r-sm);padding:9px 12px;font-size:11px;font-weight:800">Open full review</div>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ feedClean }}">
+        <div style="position:absolute;top:16px;left:0;right:0;text-align:center;font-size:10.5px;color:rgba(255,255,255,.45)">tap to show details</div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <!-- 6 REVIEW DETAIL -->
+  <sc-if value="{{ isReview }}">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg)">
+      <div style="padding:8px 16px 8px;display:flex;align-items:center;gap:10px">
+        <div onClick="{{ back }}" style="width:32px;height:32px;border-radius:var(--r-pill);border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px">←</div>
+        <div onClick="{{ goCreator }}" style="font-size:11.5px;color:var(--muted);cursor:pointer">Review · <span style="font-weight:700;color:var(--ink)">@yuna.reviews</span></div>
+        <div onClick="{{ goRefs }}" style="margin-left:auto;font-size:11px;font-weight:700;border:1px solid var(--line);background:var(--card);border-radius:var(--r-sm);padding:7px 10px;cursor:pointer">Save</div>
+      </div>
+      <div class="sc" style="flex:1;overflow-y:auto;padding:0 0 20px">
+        <div class="sc" style="display:flex;gap:8px;overflow-x:auto;padding:4px 16px 14px">
+          <sc-for list="{{ slides }}" as="s" hint-placeholder-count="4">
+            <div style="width:96px;height:130px;flex:none;border-radius:var(--r-input);background:repeating-linear-gradient(135deg,#EFEDE8 0 8px,#F7F5F1 8px 16px);border:1px solid {{ s.border }};display:flex;align-items:flex-end;padding:8px;font:400 10.5px ui-monospace,Menlo,monospace;color:var(--muted)">{{ s.label }}</div>
+          </sc-for>
+        </div>
+        <div style="padding:0 16px">
+          <div style="font-size:20px;font-weight:800;letter-spacing:-.2px;line-height:1.3">Two weeks on a damaged barrier: does it actually calm redness?</div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:10px">
+            <span style="font-size:10px;font-weight:800;background:var(--amber-soft);color:var(--amber-deep);padding:4px 8px;border-radius:var(--r-badge)">✓ 92 G-SCORE</span>
+            <span style="font-size:10.5px;color:var(--muted)">Aug 2 · 128K views</span>
+          </div>
+
+          <div style="background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);padding:16px;margin-top:16px">
+            <div style="font-size:14px;font-weight:700;margin-bottom:12px">Rated on 6 points</div>
+            <div style="display:flex;flex-direction:column;gap:11px">
+              <sc-for list="{{ criteria }}" as="c" hint-placeholder-count="6">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="font-size:11.5px;color:var(--muted);width:96px;flex:none">{{ c.label }}</div>
+                  <div style="flex:1;height:6px;border-radius:var(--r-pill);background:var(--track);overflow:hidden"><div style="height:100%;width:{{ c.pct }};background:var(--amber);border-radius:var(--r-pill)"></div></div>
+                  <div style="font-size:11px;font-weight:700;width:26px;text-align:right">{{ c.val }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="font-size:13px;line-height:1.65;margin-top:18px">I stopped all actives for 14 days and used this twice daily. Sting test on a fresh shave patch: none. The cream sinks in about 40 seconds and doesn't pill under sunscreen. Redness on my cheeks dropped visibly by day 9 — photos above are same light, same time of day.</div>
+          <div style="font-size:13px;line-height:1.65;margin-top:12px;color:var(--muted)">14일 동안 액티브 제품을 모두 멈추고 하루 두 번 사용했습니다. 자극은 없었고, 9일째부터 홍조가 눈에 띄게 줄었어요.</div>
+
+          <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:16px">
+            <sc-for list="{{ tags }}" as="t" hint-placeholder-count="5">
+              <div style="padding:7px 12px;border-radius:var(--r-pill);background:var(--card);border:1px solid var(--line);font-size:11.5px;color:var(--muted)">{{ t }}</div>
+            </sc-for>
+          </div>
+
+          <div style="font-size:14px;font-weight:700;margin:22px 0 10px">Comments · 12</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ comments }}" as="c" hint-placeholder-count="3">
+              <div style="display:flex;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);padding:12px">
+                <div style="width:28px;height:28px;flex:none;border-radius:var(--r-pill);background:#EFEDE8"></div>
+                <div>
+                  <div style="font-size:11px;font-weight:700">{{ c.who }} <span style="font-weight:400;color:var(--muted);margin-left:4px">{{ c.when }}</span></div>
+                  <div style="font-size:12.5px;line-height:1.5;margin-top:4px">{{ c.text }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      <div style="flex:none;padding:12px 16px 22px;background:var(--card);border-top:1px solid var(--line)">
+        <div onClick="{{ goCampaign }}" style="height:52px;border-radius:var(--r-btn);background:var(--amber);color:var(--on-amber);display:flex;align-items:center;justify-content:center;gap:8px;font-size:13.5px;font-weight:800;cursor:pointer">42 people made a review like this</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- 7 TRY -->
+  <sc-if value="{{ isTry }}">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg)">
+      <div style="flex:none;display:flex;align-items:center;gap:10px;padding:10px 16px 10px">
+        <div style="font-size:20px;font-weight:800;letter-spacing:-.2px">Try</div>
+        <div onClick="{{ goGscore }}" style="margin-left:auto;display:flex;align-items:center;gap:6px;background:var(--amber-soft);color:var(--amber-deep);padding:6px 10px;border-radius:var(--r-pill);cursor:pointer">
+          <span style="font-size:10px;font-weight:800">G-SCORE</span><span style="font-size:13px;font-weight:800">50</span>
+        </div>
+      </div>
+      <div class="sc" style="flex:1;overflow-y:auto;padding:0 16px 20px">
+        <div style="border:1.5px solid var(--amber);background:var(--card);border-radius:var(--r-card);box-shadow:var(--sh);padding:16px">
+          <div style="font-size:10px;font-weight:800;background:var(--amber-soft);color:var(--amber-deep);padding:4px 8px;border-radius:var(--r-badge);display:inline-block">DIRECT OFFER</div>
+          <div style="font-size:14px;font-weight:700;margin-top:10px">A brand picked you first</div>
+          <div style="font-size:13px;line-height:1.55;color:var(--muted);margin-top:6px">Aeru Labs wants your take on their unreleased scalp serum. Reply within 48 hours.</div>
+          <div style="display:flex;gap:8px;margin-top:14px">
+            <div onClick="{{ dismissOffer }}" style="flex:1;height:44px;border-radius:var(--r-btn);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:800;cursor:pointer">No thanks</div>
+            <div onClick="{{ goCampaign }}" style="flex:1.4;height:44px;border-radius:var(--r-btn);background:var(--amber);color:var(--on-amber);display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:800;cursor:pointer">Accept</div>
+          </div>
+        </div>
+
+        <div style="font-size:11px;font-weight:700;margin:22px 0 10px;color:var(--muted)">ALL CAMPAIGNS</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <sc-for list="{{ tryCampaigns }}" as="c" hint-placeholder-count="4">
+            <div onClick="{{ c.open }}" style="background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);padding:12px;display:flex;gap:12px;cursor:{{ c.cursor }};opacity:{{ c.opacity }}">
+              <div style="width:72px;height:72px;flex:none;border-radius:var(--r-input);background:repeating-linear-gradient(135deg,#EFEDE8 0 8px,#F7F5F1 8px 16px)"></div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:6px">
+                  <span style="font-size:10px;font-weight:800;padding:3px 7px;border-radius:var(--r-badge);background:{{ c.badgeBg }};color:{{ c.badgeFg }}">{{ c.badge }}</span>
+                  <span style="font-size:10.5px;color:var(--muted)">{{ c.meta }}</span>
+                </div>
+                <div style="font-size:14px;font-weight:700;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.title }}</div>
+                <div style="font-size:11.5px;color:var(--muted);margin-top:3px">{{ c.sub }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- 8 CAMPAIGN DETAIL -->
+  <sc-if value="{{ isCampaign }}">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg)">
+      <div class="sc" style="flex:1;overflow-y:auto">
+        <div style="height:230px;background:repeating-linear-gradient(135deg,#EFEDE8 0 8px,#F7F5F1 8px 16px);position:relative;display:flex;align-items:center;justify-content:center">
+          <span style="font:400 10.5px ui-monospace,Menlo,monospace;color:var(--muted)">campaign hero image</span>
+          <div onClick="{{ back }}" style="position:absolute;top:10px;left:16px;width:32px;height:32px;border-radius:var(--r-pill);background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px">←</div>
+        </div>
+        <div style="padding:16px 16px 20px">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:10px;font-weight:800;background:var(--amber);color:var(--on-amber);padding:4px 8px;border-radius:var(--r-badge)">OPEN</span>
+            <span style="font-size:10.5px;color:var(--muted)">closes in 3 days · 12 of 40 spots left</span>
+          </div>
+          <div style="font-size:20px;font-weight:800;letter-spacing:-.2px;margin-top:10px;line-height:1.3">Barrier Repair Cream 30ml</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:5px">Aeru Labs · ships to KR, VN, TH</div>
+
+          <div style="background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);padding:16px;margin-top:16px">
+            <div style="font-size:14px;font-weight:700;margin-bottom:12px">What you commit to</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+              <sc-for list="{{ terms }}" as="t" hint-placeholder-count="4">
+                <div>
+                  <div style="font-size:10.5px;color:var(--muted)">{{ t.k }}</div>
+                  <div style="font-size:19px;font-weight:800;margin-top:3px">{{ t.v }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="font-size:14px;font-weight:700;margin:20px 0 10px">Content guide</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ guides }}" as="g" hint-placeholder-count="4">
+              <div style="display:flex;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);padding:12px 14px">
+                <span style="width:18px;height:18px;flex:none;border-radius:var(--r-badge);background:var(--amber-soft);color:var(--amber-deep);font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center">{{ g.n }}</span>
+                <span style="font-size:13px;line-height:1.5">{{ g.text }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="font-size:14px;font-weight:700;margin:20px 0 8px">Why you? · one line</div>
+          <div style="border:1px solid var(--amber);background:var(--amber-faint);border-radius:var(--r-input);padding:12px 14px;font-size:13px;line-height:1.5;min-height:76px;color:var(--ink)">I test on a reactive barrier and shoot the same-light before/after every time.<span style="opacity:.35">|</span></div>
+          <div style="font-size:10.5px;color:var(--muted);margin-top:6px;text-align:right">62 / 120</div>
+
+          <div onClick="{{ togglePledge }}" style="display:flex;gap:11px;align-items:flex-start;margin-top:16px;background:var(--amber-soft);border-radius:var(--r-input);padding:14px;cursor:pointer">
+            <span style="width:20px;height:20px;flex:none;border-radius:var(--r-badge);border:1.6px solid {{ pledgeBorder }};background:{{ pledgeBg }};color:var(--on-amber);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">{{ pledgeMark }}</span>
+            <span style="font-size:11.5px;line-height:1.55;color:var(--amber-deep)">I will post an honest review within the deadline, and disclose it as sponsored. Missing the deadline counts as a strike.</span>
+          </div>
+        </div>
+      </div>
+      <div style="flex:none;padding:12px 16px 22px;background:var(--card);border-top:1px solid var(--line)">
+        <div onClick="{{ apply }}" style="height:52px;border-radius:var(--r-btn);background:{{ applyBg }};color:{{ applyFg }};display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:800;cursor:pointer">Apply to this campaign</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- 9 APPLIED -->
+  <sc-if value="{{ isApplied }}">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;background:var(--card);padding:0 24px 26px">
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+        <div style="width:64px;height:64px;border-radius:var(--r-pill);background:var(--green-bg);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;animation:pop .28s ease-out">✓</div>
+        <div style="font-size:20px;font-weight:800;letter-spacing:-.2px;margin-top:18px">Application sent</div>
+        <div style="font-size:13px;line-height:1.6;color:var(--muted);margin-top:8px;max-width:280px">Aeru Labs reviews applications within 3 days. We'll notify you either way. 3일 내에 알려드릴게요.</div>
+        <div style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-card);padding:16px;margin-top:24px;text-align:left">
+          <div style="display:flex;align-items:center"><span style="font-size:11px;font-weight:700">Progress</span><span style="margin-left:auto;font:400 11.5px ui-monospace,Menlo,monospace;color:var(--muted)">1 / 1</span></div>
+          <div style="height:6px;border-radius:var(--r-pill);background:var(--track);margin-top:10px;overflow:hidden"><div style="width:25%;height:100%;background:var(--amber);border-radius:var(--r-pill)"></div></div>
+          <div style="display:flex;flex-direction:column;gap:9px;margin-top:14px">
+            <sc-for list="{{ pipeline }}" as="p" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:9px">
+                <span style="width:16px;height:16px;border-radius:var(--r-pill);border:1.6px solid {{ p.color }};background:{{ p.fill }}"></span>
+                <span style="font-size:12.5px;color:{{ p.text }}">{{ p.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      <div onClick="{{ goActivity }}" style="height:52px;border-radius:var(--r-btn);background:var(--amber);color:var(--on-amber);display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:800;cursor:pointer">Track it in Activity</div>
+      <div onClick="{{ goTry }}" style="text-align:center;font-size:11.5px;color:var(--muted);margin-top:14px;cursor:pointer">Keep browsing campaigns</div>
+    </div>
+  </sc-if>
+
+  <!-- 10 ACTIVITY -->
+  <sc-if value="{{ isActivity }}">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg)">
+      <div style="flex:none;padding:10px 16px 12px">
+        <div style="font-size:20px;font-weight:800;letter-spacing:-.2px">Activity</div>
+        <div style="display:flex;background:var(--card);border:1px solid var(--line);border-radius:var(--r-pill);padding:3px;margin-top:12px">
+          <sc-for list="{{ segs }}" as="s" hint-placeholder-count="2">
+            <div onClick="{{ s.pick }}" style="flex:1;height:34px;border-radius:var(--r-pill);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer;background:{{ s.bg }};color:{{ s.color }}">{{ s.label }}</div>
+          </sc-for>
+        </div>
+      </div>
+      <div class="sc" style="flex:1;overflow-y:auto;padding:0 16px 20px">
+        <div onClick="{{ goGscore }}" style="background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);padding:16px;cursor:pointer">
+          <div style="display:flex;align-items:flex-end">
+            <div>
+              <div style="font-size:11px;font-weight:700;color:var(--muted)">G-SCORE</div>
+              <div style="font-size:19px;font-weight:800;margin-top:4px">50 <span style="font-size:11.5px;font-weight:400;color:var(--muted)">/ 100</span></div>
+            </div>
+            <div style="margin-left:auto;font-size:10px;font-weight:800;background:var(--green-bg);color:var(--green);padding:4px 8px;border-radius:var(--r-badge)">+4 THIS MONTH</div>
+          </div>
+          <div style="height:6px;border-radius:var(--r-pill);background:var(--track);margin-top:12px;overflow:hidden"><div style="width:50%;height:100%;background:var(--amber);border-radius:var(--r-pill)"></div></div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:9px">+10 to unlock Curated campaigns</div>
+        </div>
+
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);padding:16px;margin-top:10px;display:flex;align-items:center">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted)">POINTS</div>
+            <div style="font-size:19px;font-weight:800;margin-top:4px">1,240 P</div>
+          </div>
+          <div style="margin-left:auto;font-size:11px;font-weight:700;border:1px solid var(--line);border-radius:var(--r-sm);padding:8px 11px;cursor:pointer">History</div>
+        </div>
+
+        <sc-if value="{{ segOngoing }}" hint-placeholder-val="{{ true }}">
+          <div style="font-size:11px;font-weight:700;color:var(--muted);margin:22px 0 10px">IN PROGRESS · 3</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ missions }}" as="m" hint-placeholder-count="3">
+              <div onClick="{{ m.open }}" style="background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);padding:14px;cursor:pointer">
+                <div style="display:flex;align-items:center;gap:6px">
+                  <span style="font-size:10px;font-weight:800;padding:3px 7px;border-radius:var(--r-badge);background:{{ m.badgeBg }};color:{{ m.badgeFg }}">{{ m.badge }}</span>
+                  <span style="font-size:10.5px;color:var(--muted)">{{ m.due }}</span>
+                </div>
+                <div style="font-size:14px;font-weight:700;margin-top:8px">{{ m.title }}</div>
+                <div style="height:6px;border-radius:var(--r-pill);background:var(--track);margin-top:10px;overflow:hidden"><div style="width:{{ m.pct }};height:100%;background:var(--amber);border-radius:var(--r-pill)"></div></div>
+                <div style="font-size:10.5px;color:var(--muted);margin-top:7px">{{ m.step }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ segDone }}">
+          <div style="margin-top:40px;text-align:center;padding:0 20px">
+            <div style="width:52px;height:52px;border-radius:var(--r-card);background:var(--card);border:1px solid var(--line);margin:0 auto"></div>
+            <div style="font-size:14px;font-weight:700;margin-top:16px">No finished missions yet</div>
+            <div style="font-size:13px;line-height:1.55;color:var(--muted);margin-top:6px">Completed reviews land here with the score they earned.</div>
+            <div onClick="{{ goTry }}" style="display:inline-flex;margin-top:16px;height:44px;align-items:center;padding:0 18px;border-radius:var(--r-btn);background:var(--amber);color:var(--on-amber);font-size:13.5px;font-weight:800;cursor:pointer">Find a campaign</div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- 11 MY PAGE -->
+  <sc-if value="{{ isMy }}">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg)">
+      <div style="flex:none;display:flex;align-items:center;padding:10px 16px 12px">
+        <div style="font-size:20px;font-weight:800;letter-spacing:-.2px">My Page</div>
+        <div onClick="{{ goSettings }}" style="margin-left:auto;width:34px;height:34px;border-radius:var(--r-pill);border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer">
+          <span style="width:13px;height:13px;border:1.6px solid var(--ink);border-radius:50%;display:inline-block"></span>
+        </div>
+      </div>
+      <div class="sc" style="flex:1;overflow-y:auto;padding:0 16px 20px">
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);padding:16px">
+          <div style="display:flex;gap:14px;align-items:center">
+            <div style="width:56px;height:56px;flex:none;border-radius:var(--r-pill);background:repeating-linear-gradient(135deg,#EFEDE8 0 6px,#F7F5F1 6px 12px)"></div>
+            <div style="flex:1">
+              <div style="font-size:14px;font-weight:700">@yuna.reviews</div>
+              <div style="font-size:11.5px;color:var(--muted);margin-top:3px">Skincare · Seoul, KR</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px;background:var(--amber-soft);color:var(--amber-deep);padding:6px 10px;border-radius:var(--r-pill)">
+              <span style="font-size:10px;font-weight:800">G</span><span style="font-size:13px;font-weight:800">50</span>
+            </div>
+          </div>
+          <div style="height:6px;border-radius:var(--r-pill);background:var(--track);margin-top:14px;overflow:hidden"><div style="width:50%;height:100%;background:var(--amber);border-radius:var(--r-pill)"></div></div>
+          <div style="display:flex;gap:8px;margin-top:14px">
+            <sc-for list="{{ stats }}" as="s" hint-placeholder-count="3">
+              <div style="flex:1;background:var(--bg);border-radius:var(--r-input);padding:11px 12px">
+                <div style="font-size:10.5px;color:var(--muted)">{{ s.k }}</div>
+                <div style="font-size:19px;font-weight:800;margin-top:2px;color:{{ s.color }}">{{ s.v }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);padding:16px;margin-top:10px;display:flex;align-items:center">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted)">POINTS</div>
+            <div style="font-size:19px;font-weight:800;margin-top:4px">1,240 P</div>
+          </div>
+          <div style="margin-left:auto;font-size:11px;font-weight:700;background:var(--amber);color:var(--on-amber);border-radius:var(--r-sm);padding:9px 12px;cursor:pointer">Use</div>
+        </div>
+
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);padding:16px;margin-top:10px">
+          <div style="display:flex;align-items:center">
+            <div style="font-size:14px;font-weight:700">Invite code</div>
+            <span style="margin-left:auto;font-size:10px;font-weight:800;background:#EDEBE6;color:#6E675C;padding:4px 8px;border-radius:var(--r-badge)">🔒 LOCKED</span>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <sc-for list="{{ lockedCode }}" as="c" hint-placeholder-count="6">
+              <div style="flex:1;height:44px;border-radius:var(--r-sm);background:var(--bg);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:var(--muted)">{{ c }}</div>
+            </sc-for>
+          </div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:10px">Unlocks at G60. Each creator can invite 2 people.</div>
+        </div>
+
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);margin-top:10px;overflow:hidden">
+          <sc-for list="{{ myRows }}" as="r" hint-placeholder-count="5">
+            <div onClick="{{ r.go }}" style="display:flex;align-items:center;padding:15px 16px;border-bottom:1px solid {{ r.border }};cursor:pointer" style-hover="background:var(--bg)">
+              <span style="font-size:13px">{{ r.label }}</span>
+              <span style="margin-left:auto;font-size:11.5px;color:var(--muted)">{{ r.hint }}</span>
+              <span style="font-size:12px;color:var(--muted);margin-left:8px">›</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- 12 MY REFERENCES -->
+  <sc-if value="{{ isRefs }}">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg)">
+      <div style="flex:none;display:flex;align-items:center;gap:10px;padding:8px 16px 10px">
+        <div onClick="{{ back }}" style="width:32px;height:32px;border-radius:var(--r-pill);border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px">←</div>
+        <div style="font-size:20px;font-weight:800;letter-spacing:-.2px">My references</div>
+        <div onClick="{{ toggleRefsEmpty }}" style="margin-left:auto;font-size:10.5px;color:var(--muted);border:1px solid var(--line);border-radius:var(--r-sm);padding:6px 9px;cursor:pointer">{{ refsToggleLabel }}</div>
+      </div>
+      <div class="sc" style="flex:1;overflow-y:auto;padding:0 16px 20px">
+        <sc-if value="{{ refsHas }}" hint-placeholder-val="{{ true }}">
+          <div style="font-size:11.5px;color:var(--muted);margin-bottom:12px">Reviews you saved as a blueprint. 6 items.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <sc-for list="{{ refs }}" as="r" hint-placeholder-count="6">
+              <div style="background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);overflow:hidden">
+                <div onClick="{{ r.open }}" style="height:126px;background:repeating-linear-gradient(135deg,#EFEDE8 0 8px,#F7F5F1 8px 16px);position:relative;cursor:pointer">
+                  <span style="position:absolute;top:8px;left:8px;font-size:10px;font-weight:800;background:var(--card);border:1px solid var(--line);padding:3px 7px;border-radius:var(--r-badge)">✓ {{ r.score }}</span>
+                </div>
+                <div style="padding:10px">
+                  <div style="font-size:11.5px;line-height:1.35">{{ r.title }}</div>
+                  <div onClick="{{ r.make }}" style="margin-top:9px;height:34px;border-radius:var(--r-sm);background:var(--amber-soft);color:var(--amber-deep);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;cursor:pointer">Make one like this</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ refsEmpty }}">
+          <div style="margin-top:60px;text-align:center;padding:0 24px">
+            <div style="width:52px;height:52px;border-radius:var(--r-card);background:var(--card);border:1px solid var(--line);margin:0 auto"></div>
+            <div style="font-size:14px;font-weight:700;margin-top:16px">Nothing saved yet</div>
+            <div style="font-size:13px;line-height:1.55;color:var(--muted);margin-top:6px">Save a review from the feed and it becomes a reference you can copy the structure of.</div>
+            <div onClick="{{ goFeed }}" style="display:inline-flex;margin-top:16px;height:44px;align-items:center;padding:0 18px;border-radius:var(--r-btn);background:var(--amber);color:var(--on-amber);font-size:13.5px;font-weight:800;cursor:pointer">Browse the feed</div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- 13 NOTIFICATIONS -->
+  <sc-if value="{{ isNotif }}">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg)">
+      <div style="flex:none;display:flex;align-items:center;gap:10px;padding:8px 16px 10px">
+        <div onClick="{{ back }}" style="width:32px;height:32px;border-radius:var(--r-pill);border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px">←</div>
+        <div style="font-size:20px;font-weight:800;letter-spacing:-.2px">Notifications</div>
+        <div onClick="{{ readAll }}" style="margin-left:auto;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer">Mark all read</div>
+      </div>
+      <div class="sc" style="flex:1;overflow-y:auto;padding:0 16px 20px">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{ notifs }}" as="n" hint-placeholder-count="6">
+            <div onClick="{{ n.open }}" style="display:flex;gap:11px;padding:14px;border-radius:var(--r-card);border:1px solid {{ n.border }};background:{{ n.bg }};box-shadow:var(--sh);cursor:pointer">
+              <span style="width:8px;height:8px;flex:none;border-radius:50%;background:{{ n.dot }};margin-top:5px"></span>
+              <div style="flex:1">
+                <div style="font-size:13px;font-weight:{{ n.weight }};line-height:1.45">{{ n.title }}</div>
+                <div style="font-size:11.5px;color:var(--muted);margin-top:4px">{{ n.body }}</div>
+              </div>
+              <span style="font-size:10.5px;color:var(--muted);flex:none">{{ n.when }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- 14 SETTINGS -->
+  <sc-if value="{{ isSettings }}">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg)">
+      <div style="flex:none;display:flex;align-items:center;gap:10px;padding:8px 16px 10px">
+        <div onClick="{{ back }}" style="width:32px;height:32px;border-radius:var(--r-pill);border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px">←</div>
+        <div style="font-size:20px;font-weight:800;letter-spacing:-.2px">Settings</div>
+      </div>
+      <div class="sc" style="flex:1;overflow-y:auto;padding:0 16px 20px">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin:6px 0 8px">NOTIFICATIONS</div>
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);padding:15px 16px;display:flex;align-items:center;gap:14px">
+          <div style="flex:1">
+            <div style="font-size:13px">D-day reminders</div>
+            <div style="font-size:11.5px;color:var(--muted);margin-top:3px">Ping me 24h before a deadline</div>
+          </div>
+          <div onClick="{{ toggleDday }}" style="width:44px;height:26px;border-radius:var(--r-pill);background:{{ ddayBg }};padding:3px;cursor:pointer;display:flex;justify-content:{{ ddayJustify }};transition:background .18s">
+            <div style="width:20px;height:20px;border-radius:var(--r-pill);background:#fff;box-shadow:var(--sh)"></div>
+          </div>
+        </div>
+
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin:20px 0 8px">LANGUAGE</div>
+        <div style="display:flex;background:var(--card);border:1px solid var(--line);border-radius:var(--r-pill);padding:3px">
+          <sc-for list="{{ langs }}" as="l" hint-placeholder-count="2">
+            <div onClick="{{ l.pick }}" style="flex:1;height:36px;border-radius:var(--r-pill);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer;background:{{ l.bg }};color:{{ l.color }}">{{ l.label }}</div>
+          </sc-for>
+        </div>
+
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin:20px 0 8px">LEGAL</div>
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);overflow:hidden">
+          <sc-for list="{{ legal }}" as="r" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;padding:15px 16px;border-bottom:1px solid {{ r.border }};cursor:pointer" style-hover="background:var(--bg)">
+              <span style="font-size:13px">{{ r.label }}</span>
+              <span style="margin-left:auto;font-size:12px;color:var(--muted)">›</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div onClick="{{ goGate }}" style="margin-top:20px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);padding:15px 16px;font-size:13px;font-weight:700;text-align:center;cursor:pointer">Log out</div>
+
+        <div style="margin-top:10px;background:var(--red-bg);border-radius:var(--r-card);padding:16px">
+          <div style="font-size:13px;font-weight:700;color:var(--red)">Delete account</div>
+          <div style="font-size:11.5px;line-height:1.5;color:var(--red);opacity:.85;margin-top:5px">Your reviews, G-score and points are erased. Re-entry needs a new invite code.</div>
+          <div style="margin-top:12px;height:40px;border-radius:var(--r-sm);border:1px solid var(--red);color:var(--red);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;cursor:pointer">Delete permanently</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- 15 DISCOVER -->
+  <sc-if value="{{ isDiscover }}">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg)">
+      <div style="flex:none;padding:8px 16px 12px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div onClick="{{ back }}" style="width:32px;height:32px;flex:none;border-radius:var(--r-pill);border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px">←</div>
+          <div style="flex:1;height:40px;border:1px solid var(--amber);background:var(--amber-faint);border-radius:var(--r-input);display:flex;align-items:center;padding:0 12px;gap:8px">
+            <span style="width:11px;height:11px;border:1.6px solid var(--muted);border-radius:var(--r-pill);flex:none"></span>
+            <span style="font-size:13px">{{ query }}<span style="opacity:.35">|</span></span>
+            <span onClick="{{ clearQuery }}" style="margin-left:auto;font-size:11px;color:var(--muted);cursor:pointer">clear</span>
+          </div>
+          <div onClick="{{ openSheet }}" style="width:40px;height:40px;flex:none;border-radius:var(--r-input);border:1px solid var(--line);background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer">
+            <span style="width:14px;height:1.6px;background:var(--ink)"></span>
+            <span style="width:10px;height:1.6px;background:var(--ink)"></span>
+            <span style="width:6px;height:1.6px;background:var(--ink)"></span>
+          </div>
+        </div>
+        <div class="sc" style="display:flex;gap:7px;overflow-x:auto;margin-top:12px">
+          <sc-for list="{{ discoverCats }}" as="c" hint-placeholder-count="6">
+            <div onClick="{{ c.pick }}" style="flex:none;padding:8px 13px;border-radius:var(--r-pill);font-size:11.5px;cursor:pointer;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.color }};font-weight:{{ c.weight }}">{{ c.label }}</div>
+          </sc-for>
+        </div>
+      </div>
+      <div class="sc" style="flex:1;overflow-y:auto;padding:0 16px 20px">
+        <div style="display:flex;align-items:center;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:var(--muted)">{{ resultLabel }}</div>
+          <div onClick="{{ cycleSort }}" style="margin-left:auto;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--line);background:var(--card);border-radius:var(--r-sm);padding:7px 10px">{{ sortLabel }} ↕</div>
+        </div>
+        <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ results }}" as="r" hint-placeholder-count="5">
+              <div onClick="{{ r.open }}" style="display:flex;gap:12px;padding:11px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);cursor:pointer">
+                <div style="width:62px;height:78px;flex:none;border-radius:var(--r-sm);background:repeating-linear-gradient(135deg,#EFEDE8 0 8px,#F7F5F1 8px 16px)"></div>
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center">
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <span style="font-size:10px;font-weight:800;background:var(--amber-soft);color:var(--amber-deep);padding:3px 7px;border-radius:var(--r-badge)">✓ {{ r.score }}</span>
+                    <span style="font-size:10.5px;color:var(--muted)">{{ r.cat }}</span>
+                  </div>
+                  <div style="font-size:13px;font-weight:700;line-height:1.35;margin-top:6px">{{ r.title }}</div>
+                  <div style="font-size:10.5px;color:var(--muted);margin-top:5px">{{ r.who }} · {{ r.made }} made this</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ noResults }}">
+          <div style="margin-top:56px;text-align:center;padding:0 24px">
+            <div style="width:52px;height:52px;border-radius:var(--r-card);background:var(--card);border:1px solid var(--line);margin:0 auto"></div>
+            <div style="font-size:14px;font-weight:700;margin-top:16px">Nothing in this category yet</div>
+            <div style="font-size:13px;line-height:1.55;color:var(--muted);margin-top:6px">Try another category, or clear the filters to see everything.</div>
+            <div onClick="{{ resetFilters }}" style="display:inline-flex;margin-top:16px;height:44px;align-items:center;padding:0 18px;border-radius:var(--r-btn);background:var(--amber);color:var(--on-amber);font-size:13.5px;font-weight:800;cursor:pointer">Clear filters</div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- 16 REVIEW COMPOSER -->
+  <sc-if value="{{ isComposer }}">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg)">
+      <div style="flex:none;display:flex;align-items:center;gap:10px;padding:8px 16px 10px">
+        <div onClick="{{ back }}" style="width:32px;height:32px;border-radius:var(--r-pill);border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px">←</div>
+        <div style="font-size:20px;font-weight:800;letter-spacing:-.2px">Draft review</div>
+        <div style="margin-left:auto;font-size:11px;font-weight:700;color:var(--muted)">Saved 2m ago</div>
+      </div>
+      <div class="sc" style="flex:1;overflow-y:auto;padding:0 16px 20px">
+        <div style="background:var(--amber-soft);border-radius:var(--r-card);padding:13px 14px">
+          <div style="font-size:11px;font-weight:700;color:var(--amber-deep)">BLUEPRINT</div>
+          <div style="font-size:12.5px;line-height:1.5;color:var(--amber-deep);margin-top:5px">Following @yuna.reviews · 92 — same-light photos, 14-day window, one honest negative.</div>
+        </div>
+
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin:20px 0 9px">MEDIA · 3 of 4 slots</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+          <sc-for list="{{ mediaSlots }}" as="m" hint-placeholder-count="4">
+            <div style="height:112px;border-radius:var(--r-input);background:{{ m.bg }};border:1.4px {{ m.borderStyle }} {{ m.border }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer">
+              <span style="font-size:{{ m.markSize }};font-weight:800;color:{{ m.color }}">{{ m.mark }}</span>
+              <span style="font:400 10.5px ui-monospace,Menlo,monospace;color:{{ m.color }}">{{ m.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin:22px 0 9px">HEADLINE</div>
+        <div style="border:1px solid var(--amber);background:var(--amber-faint);border-radius:var(--r-input);padding:12px 14px;font-size:13px;line-height:1.5">Two weeks on a damaged barrier: does it actually calm redness?<span style="opacity:.35">|</span></div>
+
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin:22px 0 9px">SELF-RATING · tap to set</div>
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);padding:15px 16px;display:flex;flex-direction:column;gap:13px">
+          <sc-for list="{{ composerCriteria }}" as="c" hint-placeholder-count="6">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="font-size:11.5px;width:92px;flex:none">{{ c.label }}</div>
+              <div style="flex:1;display:flex;gap:4px">
+                <sc-for list="{{ c.dots }}" as="d" hint-placeholder-count="5">
+                  <div onClick="{{ d.set }}" style="flex:1;height:22px;border-radius:var(--r-badge);background:{{ d.bg }};cursor:pointer"></div>
+                </sc-for>
+              </div>
+              <div style="font-size:11px;font-weight:700;width:18px;text-align:right;color:{{ c.valColor }}">{{ c.val }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin:22px 0 9px">EVIDENCE CHECKLIST</div>
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);overflow:hidden">
+          <sc-for list="{{ checklist }}" as="k" hint-placeholder-count="4">
+            <div onClick="{{ k.toggle }}" style="display:flex;gap:11px;align-items:flex-start;padding:13px 15px;border-bottom:1px solid {{ k.border }};cursor:pointer">
+              <span style="width:19px;height:19px;flex:none;border-radius:var(--r-badge);border:1.6px solid {{ k.mBorder }};background:{{ k.mBg }};color:var(--on-amber);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">{{ k.mark }}</span>
+              <span style="font-size:12.5px;line-height:1.45">{{ k.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin:22px 0 9px">CAPTION · {{ captionCount }} / 300</div>
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);padding:14px;font-size:13px;line-height:1.6;min-height:96px">Day 14. Sting test on a fresh shave patch: none. Sinks in ~40s, no pilling under sunscreen. Redness down visibly from day 9 — same light, same hour.
+          <span style="color:var(--amber-deep)">{{ captionTags }}</span><span style="opacity:.35">|</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:10px">
+          <sc-for list="{{ tagSuggest }}" as="t" hint-placeholder-count="5">
+            <div onClick="{{ t.toggle }}" style="padding:8px 12px;border-radius:var(--r-pill);font-size:11.5px;cursor:pointer;border:1px solid {{ t.border }};background:{{ t.bg }};color:{{ t.color }};font-weight:{{ t.weight }}">{{ t.label }}</div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="flex:none;padding:11px 16px 22px;background:var(--card);border-top:1px solid var(--line);display:flex;align-items:center;gap:12px">
+        <div style="flex:none">
+          <div style="font-size:10.5px;color:var(--muted)">Projected</div>
+          <div style="font-size:19px;font-weight:800;line-height:1.1">✓ {{ projected }}</div>
+        </div>
+        <div onClick="{{ submitDraft }}" style="flex:1;height:52px;border-radius:var(--r-btn);background:var(--amber);color:var(--on-amber);display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:800;cursor:pointer">Submit for scoring</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- 17 G-SCORE -->
+  <sc-if value="{{ isGscore }}">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg)">
+      <div style="flex:none;display:flex;align-items:center;gap:10px;padding:8px 16px 10px">
+        <div onClick="{{ back }}" style="width:32px;height:32px;border-radius:var(--r-pill);border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px">←</div>
+        <div style="font-size:20px;font-weight:800;letter-spacing:-.2px">G-score</div>
+      </div>
+      <div class="sc" style="flex:1;overflow-y:auto;padding:0 16px 20px">
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);padding:18px">
+          <div style="display:flex;align-items:flex-end;gap:10px">
+            <div style="font-size:44px;font-weight:800;letter-spacing:-1.5px;line-height:.9">50</div>
+            <div style="font-size:11.5px;color:var(--muted);padding-bottom:5px">/ 100 · Tier Core</div>
+            <div style="margin-left:auto;font-size:10px;font-weight:800;background:var(--green-bg);color:var(--green);padding:4px 8px;border-radius:var(--r-badge)">+4 THIS MONTH</div>
+          </div>
+          <div class="sc" style="display:flex;align-items:flex-end;gap:7px;height:78px;margin-top:18px">
+            <sc-for list="{{ history }}" as="h" hint-placeholder-count="6">
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px">
+                <div style="width:100%;height:{{ h.h }};background:{{ h.bg }};border-radius:var(--r-badge) var(--r-badge) 2px 2px"></div>
+                <span style="font-size:10.5px;color:var(--muted)">{{ h.m }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin:22px 0 9px">TIERS</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{ tiers }}" as="t" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:12px;background:{{ t.bg }};border:1px solid {{ t.border }};border-radius:var(--r-card);box-shadow:var(--sh);padding:14px">
+              <div style="width:42px;height:42px;flex:none;border-radius:var(--r-pill);background:{{ t.chipBg }};color:{{ t.chipFg }};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800">{{ t.g }}</div>
+              <div style="flex:1">
+                <div style="font-size:13px;font-weight:700">{{ t.name }}</div>
+                <div style="font-size:11.5px;color:var(--muted);margin-top:3px">{{ t.perk }}</div>
+              </div>
+              <span style="font-size:10px;font-weight:800;padding:4px 8px;border-radius:var(--r-badge);background:{{ t.stBg }};color:{{ t.stFg }}">{{ t.status }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin:22px 0 9px">WHAT MOVED IT</div>
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);overflow:hidden">
+          <sc-for list="{{ ledger }}" as="l" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:10px;padding:14px 15px;border-bottom:1px solid {{ l.border }}">
+              <div style="flex:1">
+                <div style="font-size:12.5px">{{ l.label }}</div>
+                <div style="font-size:10.5px;color:var(--muted);margin-top:3px">{{ l.when }}</div>
+              </div>
+              <span style="font-size:13px;font-weight:800;color:{{ l.color }}">{{ l.delta }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background:var(--amber-soft);border-radius:var(--r-card);padding:14px;margin-top:10px;font-size:12.5px;line-height:1.55;color:var(--amber-deep)">Fastest way up: post before D-day and name one thing that did not work. Balanced reviews score highest.</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- 18 CREATOR PROFILE -->
+  <sc-if value="{{ isCreator }}">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg)">
+      <div style="flex:none;display:flex;align-items:center;gap:10px;padding:8px 16px 10px">
+        <div onClick="{{ back }}" style="width:32px;height:32px;border-radius:var(--r-pill);border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px">←</div>
+        <div style="font-size:11.5px;color:var(--muted)">Creator</div>
+      </div>
+      <div class="sc" style="flex:1;overflow-y:auto;padding:0 16px 20px">
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);padding:16px">
+          <div style="display:flex;gap:14px;align-items:center">
+            <div style="width:56px;height:56px;flex:none;border-radius:var(--r-pill);background:repeating-linear-gradient(135deg,#EFEDE8 0 6px,#F7F5F1 6px 12px)"></div>
+            <div style="flex:1">
+              <div style="font-size:14px;font-weight:700">@yuna.reviews</div>
+              <div style="font-size:11.5px;color:var(--muted);margin-top:3px">Skincare · Barrier & sensitivity</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px;background:var(--amber-soft);color:var(--amber-deep);padding:6px 10px;border-radius:var(--r-pill)">
+              <span style="font-size:10px;font-weight:800">G</span><span style="font-size:13px;font-weight:800">92</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:14px">
+            <sc-for list="{{ creatorStats }}" as="s" hint-placeholder-count="3">
+              <div style="flex:1;background:var(--bg);border-radius:var(--r-input);padding:11px 12px">
+                <div style="font-size:10.5px;color:var(--muted)">{{ s.k }}</div>
+                <div style="font-size:19px;font-weight:800;margin-top:2px">{{ s.v }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div onClick="{{ goRefs }}" style="margin-top:14px;height:44px;border-radius:var(--r-btn);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:800;cursor:pointer">Save as reference</div>
+        </div>
+
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin:22px 0 10px">11 REVIEWS</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <sc-for list="{{ creatorGrid }}" as="r" hint-placeholder-count="6">
+            <div onClick="{{ r.open }}" style="background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh);overflow:hidden;cursor:pointer">
+              <div style="height:{{ r.h }};background:repeating-linear-gradient(135deg,#EFEDE8 0 8px,#F7F5F1 8px 16px);position:relative">
+                <span style="position:absolute;top:8px;left:8px;font-size:10px;font-weight:800;background:var(--card);border:1px solid var(--line);padding:3px 7px;border-radius:var(--r-badge)">✓ {{ r.score }}</span>
+              </div>
+              <div style="padding:10px">
+                <div style="font-size:11.5px;line-height:1.35">{{ r.title }}</div>
+                <div style="font-size:10.5px;color:var(--muted);margin-top:5px">{{ r.made }} made this</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ sheetOpen }}">
+    <div onClick="{{ closeSheet }}" style="position:absolute;inset:0;background:rgba(20,15,5,.32);display:flex;flex-direction:column;justify-content:flex-end;z-index:5">
+      <div style="background:var(--card);border-radius:var(--r-sheet) var(--r-sheet) 0 0;padding:10px 16px 24px">
+        <div style="width:38px;height:4px;border-radius:var(--r-pill);background:var(--track);margin:0 auto 14px"></div>
+        <div style="font-size:20px;font-weight:800;letter-spacing:-.2px">Filters</div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin:18px 0 9px">MINIMUM SCORE</div>
+        <div style="display:flex;gap:7px">
+          <sc-for list="{{ minScores }}" as="m" hint-placeholder-count="4">
+            <div onClick="{{ m.pick }}" style="flex:1;height:40px;border-radius:var(--r-sm);border:1px solid {{ m.border }};background:{{ m.bg }};color:{{ m.color }};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer">{{ m.label }}</div>
+          </sc-for>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin:18px 0 9px">ONLY SHOW</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{ sheetFlags }}" as="f" hint-placeholder-count="2">
+            <div onClick="{{ f.toggle }}" style="display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:var(--r-input);padding:13px 14px;cursor:pointer">
+              <span style="font-size:12.5px;flex:1">{{ f.label }}</span>
+              <span style="width:44px;height:26px;border-radius:var(--r-pill);background:{{ f.bg }};padding:3px;display:flex;justify-content:{{ f.justify }}"><span style="width:20px;height:20px;border-radius:var(--r-pill);background:#fff;box-shadow:var(--sh)"></span></span>
+            </div>
+          </sc-for>
+        </div>
+        <div onClick="{{ closeSheet }}" style="margin-top:18px;height:52px;border-radius:var(--r-btn);background:var(--amber);color:var(--on-amber);display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:800;cursor:pointer">Show {{ resultCount }} reviews</div>
+      </div>
+    </div>
+  </sc-if>
+
+  </div>
+
+  <sc-if value="{{ showTabs }}">
+    <div style="flex:none;display:flex;background:var(--card);border-top:1px solid var(--line);padding:8px 6px 22px">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+        <div onClick="{{ t.go }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;padding:4px 0">
+          <div style="width:17px;height:17px;display:flex;align-items:center;justify-content:center">
+            <div style="width:15px;height:15px;border:1.7px solid {{ t.color }};border-radius:{{ t.radius }};transform:rotate({{ t.rotate }})"></div>
+          </div>
+          <span style="font-size:10.5px;font-weight:{{ t.weight }};color:{{ t.color }}">{{ t.label }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+</div>
+</div>
+
+<div style="width:250px;flex:none;position:sticky;top:36px;font-size:11.5px;line-height:1.6;color:#57534B">
+  <div style="font-size:11px;font-weight:700;color:var(--ink)">TOKENS</div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 14px">
+    <sc-for list="{{ swatches }}" as="s" hint-placeholder-count="8">
+      <div style="width:52px">
+        <div style="height:28px;border-radius:var(--r-badge);background:{{ s.hex }};border:1px solid var(--line)"></div>
+        <div style="font:400 9.5px ui-monospace,Menlo,monospace;color:var(--muted);margin-top:4px">{{ s.hex }}</div>
+      </div>
+    </sc-for>
+  </div>
+  <div>All colors, radii and the single card shadow live in one <span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px">:root</span> block — change a value there and every screen follows.</div>
+  <div style="margin-top:12px">Tabs stay visible on Home / Feed / Try / Activity / My Page. Stacked screens (review, campaign, references, notifications, settings) carry a top-left back button.</div>
+  <div style="margin-top:12px;color:var(--muted)">No prices, no cart, no likes — reach is expressed as “N made this”.</div>
+</div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FFB731&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#FFB731&quot;,&quot;#FF9F1C&quot;,&quot;#F2C744&quot;,&quot;#E0A32E&quot;],&quot;section&quot;:&quot;Tokens&quot;},&quot;initialScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;home&quot;,&quot;options&quot;:[&quot;gate&quot;,&quot;login&quot;,&quot;onboard&quot;,&quot;home&quot;,&quot;feed&quot;,&quot;review&quot;,&quot;try&quot;,&quot;campaign&quot;,&quot;applied&quot;,&quot;activity&quot;,&quot;my&quot;,&quot;refs&quot;,&quot;notif&quot;,&quot;settings&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;}}">
+const C = {
+  amber:'#FFB731', amberDeep:'#8A5D00', amberSoft:'#FFF3D9', amberFaint:'#FFF9EC', onAmber:'#231B05',
+  bg:'#F4F4F4', card:'#FFFFFF', ink:'#171717', line:'#EAE7E1', muted:'#8A857B',
+  green:'#1F8A4C', greenBg:'#E4F3E9', red:'#E53400', redBg:'#FCE9E2', track:'#E8E5DF'
+};
+const STATUS = {
+  Applied:['#EDEBE6','#6E675C'], Approved:['#D3EDF7','#2B5E8E'], Received:['#E4F3E9','#1F8A4C'],
+  Reviewing:['#F0E9F7','#6A4E8E'], Done:['#E4F3E9','#1F8A4C'], 'No-show':['#FCE9E2','#E53400'],
+  Cancelled:['#EDEBE6','#6E675C'], Closed:['#EDEBE6','#6E675C'], Open:['#FFB731','#231B05'],
+  Curated:['#EDEBE6','#6E675C']
+};
+const SCREENS = [
+  ['gate','Invite gate'],['login','Sign in'],['onboard','Onboarding'],['home','Home'],['discover','Discover'],
+  ['feed','Feed'],['review','Review detail'],['creator','Creator profile'],['composer','Review composer'],
+  ['try','Try'],['campaign','Campaign detail'],['applied','Applied'],['activity','Activity'],['gscore','G-score'],
+  ['my','My Page'],['refs','My references'],['notif','Notifications'],['settings','Settings']
+];
+const LIBRARY = [
+  {score:92, title:'Two weeks on a damaged barrier', who:'@yuna.reviews', made:42, cat:'Skincare'},
+  {score:88, title:'Sunscreen under makeup, 8 hours', who:'@dana.tests', made:31, cat:'Makeup'},
+  {score:84, title:'This cleanser stripped my skin', who:'@minji.beauty', made:19, cat:'Skincare'},
+  {score:79, title:'Scalp serum on thin hair', who:'@hoon', made:12, cat:'Haircare'},
+  {score:74, title:'Silk pillowcase: worth it?', who:'@rei.k', made:9, cat:'Body'},
+  {score:71, title:'Matte lip, 9 hours, no touch-up', who:'@dana.tests', made:8, cat:'Makeup'},
+  {score:66, title:'Cold brew vs. the corner-store can', who:'@hoon', made:5, cat:'Food'},
+  {score:61, title:'Hand balm trio in dry season', who:'@rei.k', made:3, cat:'Body'}
+];
+const TABS = [['home','Home','3px','0deg'],['feed','Feed','50%','0deg'],['try','Try','2px','45deg'],['activity','Activity','3px','0deg'],['my','My Page','50%','0deg']];
+
+const HOME_FILTERS = ['For you','Following','Skincare','Makeup','Food'];
+const POSTS = [
+  {who:'@yuna.reviews', cat:'Skincare', meta:'Skincare · Aeru Labs · 2h', g:92, score:92, age:2, media:'PHOTO', h:'300px',
+   made:42, comments:12, slides:4, sponsored:true, brand:'Aeru Labs',
+   frames:['day 0 · same light','day 7 · cheek close-up','day 14 · same light','texture on back of hand'],
+   marks:[{k:'Evidence',v:'9.4'},{k:'Window',v:'14d'},{k:'Balance',v:'9.6'}],
+   caption:'Day 14 with the barrier cream. Sting test on a fresh shave patch: none, and redness is visibly down from day 9 — same light, same hour. The pump is genuinely annoying.',
+   tags:'#barrierrepair #14daytest #sensitiveskin',
+   topWho:'@dana.tests', topComment:'The same-light comparison is what sold me.'},
+  {who:'@dana.tests', cat:'Makeup', meta:'Makeup · bought myself · 6h', g:88, score:88, age:6, media:'VIDEO', h:'340px',
+   made:31, comments:8, slides:3, sponsored:false, brand:'',
+   frames:['hour 0 · full face','hour 3 · pilling check','hour 8 · humidity fail'],
+   marks:[{k:'Evidence',v:'9.0'},{k:'Window',v:'8h'},{k:'Balance',v:'9.1'}],
+   caption:'8 hours of sunscreen under full coverage. Pilling test at hour 3 and hour 8, no filter. It failed the humidity test — showing you exactly where.',
+   tags:'#sunscreen #8hourtest #nofilter',
+   topWho:'@hoon', topComment:'Did it pill under a chemical SPF too, or only physical?'},
+  {who:'@minji.beauty', cat:'Skincare', meta:'Skincare · Somu · 1d', g:84, score:84, age:26, media:'PHOTO', h:'280px',
+   made:19, comments:24, slides:5, sponsored:true, brand:'Somu',
+   frames:['pH strip on camera','before · tightness','after 10 min','ingredient panel','my routine'],
+   marks:[{k:'Evidence',v:'8.8'},{k:'Window',v:'10d'},{k:'Balance',v:'9.4'}],
+   caption:'This cleanser stripped my skin and I am saying so, sponsored or not. pH strip on camera, before/after tightness at 10 minutes.',
+   tags:'#cleanser #honestreview #ph',
+   topWho:'@yuna.reviews', topComment:'Respect for posting this as a paid campaign.'},
+  {who:'@hoon', cat:'Food', meta:'Food · Nulli · 2d', g:79, score:66, age:50, media:'PHOTO', h:'260px',
+   made:5, comments:6, slides:3, sponsored:true, brand:'Nulli',
+   frames:['side by side pour','ice melt at 20 min','price per serving'],
+   marks:[{k:'Evidence',v:'7.8'},{k:'Window',v:'7d'},{k:'Balance',v:'8.2'}],
+   caption:'Cold brew concentrate vs. the corner-store can, blind tasted by four people. The concentrate wins on body and loses on price.',
+   tags:'#coldbrew #blindtest #pricepercup',
+   topWho:'@rei.k', topComment:'Finally someone did the cost math.'}
+];
+
+class Component extends DCLogic {
+  get A(){ return this.props.accent || '#FFB731'; }
+  state = {
+    route:'home', stack:[], country:'KR', step:1, feedClean:false, seg:'Ongoing',
+    refsEmpty:false, cats:['Skincare','Haircare'], band:'10–50K', gender:'F',
+    pledge:true, dday:true, lang:'EN', offer:true,
+    query:'barrier', dCat:'All', sort:'Made count', minScore:'Any', sheetOpen:false,
+    flags:{'Same-light photos':true,'Video reviews':false},
+    rate:{Evidence:4, 'Usage window':5, Specificity:4, Balance:5, Production:3, Disclosure:5},
+    checks:[true,true,false,true], tags:['#barrierrepair','#14daytest'],
+    homeFilter:'For you', feedSort:'Latest', slide:{}, saved:{}, follows:{'@dana.tests':true}
+  };
+
+  componentDidMount(){
+    const a = this.props.accent;
+    if (a) document.documentElement.style.setProperty('--amber', a);
+    const r = this.props.initialScreen;
+    if (r && SCREENS.some(s => s[0] === r)) this.setState({route:r, stack:[]});
+  }
+
+  go = r => this.setState(s => ({route:r, stack:[...s.stack, s.route], feedClean:false}));
+  jump = r => this.setState({route:r, stack:[]});
+  back = () => this.setState(s => s.stack.length ? {route:s.stack[s.stack.length-1], stack:s.stack.slice(0,-1)} : {route:'home'});
+
+  toggleCat = c => this.setState(s => ({cats: s.cats.includes(c) ? s.cats.filter(x=>x!==c) : (s.cats.length>=3 ? s.cats : [...s.cats,c])}));
+
+  pill(active){ return active
+    ? {bg:this.A, border:this.A, color:C.onAmber, weight:700}
+    : {bg:C.card, border:C.line, color:C.muted, weight:400}; }
+
+  seg(active){ return active ? {bg:C.ink, color:'#fff'} : {bg:'transparent', color:C.muted}; }
+
+  badge(kind){ if (kind === 'Open') return {badgeBg:this.A, badgeFg:'#231B05'};
+    const [bg,fg] = STATUS[kind] || STATUS.Applied; return {badgeBg:bg, badgeFg:fg}; }
+
+  ob(){
+    const steps = [
+      {title:'Invited, not signed up', body:'greyd is closed. You are here because another creator vouched for you — that is the whole membership model.', art:'illustration · invite chain', note:'Your invite came from @minji.beauty.', isIntro:true, cta:'Next'},
+      {title:'Brands send, you test', body:'Accept a campaign and the product ships free. No purchase, no fees, no reimbursement forms.', art:'illustration · parcel arriving', note:'Nothing on greyd is for sale.', isIntro:true, cta:'Next'},
+      {title:'Honest beats flattering', body:'Reviews are scored on evidence: same-light photos, usage window, specifics. A negative review can score higher than a glowing one.', art:'illustration · G-score dial', note:'G-score 0–100 decides which campaigns open for you.', isIntro:true, cta:'Next'},
+      {title:'Tell us where you post', body:'This sets which campaigns you are eligible for. You can change it later in My Page.', isLast:true, cta:'Finish setup'}
+    ];
+    const i = Math.min(this.state.step,4) - 1;
+    return Object.assign({canPrev: this.state.step>1}, steps[i]);
+  }
+
+  renderVals(){
+    const r = this.state.route, s = this.state;
+    const isTab = ['home','feed','try','activity','my'].includes(r);
+    const cell = i => {
+      const code = 'K7' + 'M2Q9';
+      const filled = i < 6;
+      return {ch: filled ? code[i] : '', bg: i===5 ? C.amberFaint : C.card, border: i===5 ? this.A : C.line};
+    };
+    const tri = (n) => Object.assign({}, this.badge(n), {badge: n === 'Curated' ? '🔒 CURATED' : n.toUpperCase()});
+    const min = {Any:0,'60+':60,'75+':75,'90+':90}[s.minScore] || 0;
+    const q = (s.query || '').trim().toLowerCase();
+    let filtered = LIBRARY.filter(x =>
+      (s.dCat === 'All' || x.cat === s.dCat) && x.score >= min &&
+      (!q || x.title.toLowerCase().includes(q) || x.who.toLowerCase().includes(q) || x.cat.toLowerCase().includes(q)));
+    filtered = filtered.slice().sort((a,b) => s.sort === 'Score' ? b.score - a.score : s.sort === 'Made count' ? b.made - a.made : 0);
+    const railData = [
+      {who:'@yuna.reviews', g:92, ring:this.A, color:C.ink, gColor:C.ink},
+      {who:'@dana.tests', g:88, ring:this.A, color:C.ink, gColor:C.ink},
+      {who:'@minji', g:84, ring:this.A, color:C.ink, gColor:C.ink},
+      {who:'@hoon', g:79, ring:C.line, color:C.muted, gColor:C.muted},
+      {who:'@rei.k', g:74, ring:C.line, color:C.muted, gColor:C.muted}
+    ];
+    let feedPosts = POSTS.filter(p =>
+      s.homeFilter === 'For you' ? true :
+      s.homeFilter === 'Following' ? !!s.follows[p.who] : p.cat === s.homeFilter);
+    feedPosts = feedPosts.slice().sort((a,b) =>
+      s.feedSort === 'Made count' ? b.made - a.made : s.feedSort === 'Score' ? b.score - a.score : a.age - b.age);
+    const rateSum = Object.keys(s.rate).reduce((t,k)=>t+s.rate[k],0);
+    const projected = Math.min(99, Math.round(40 + (rateSum/30)*45 + s.checks.filter(Boolean).length*3));
+
+    return {
+      // routing
+      isGate:r==='gate', isLogin:r==='login', isOnboard:r==='onboard', isHome:r==='home', isFeed:r==='feed',
+      isReview:r==='review', isTry:r==='try', isCampaign:r==='campaign', isApplied:r==='applied',
+      isActivity:r==='activity', isMy:r==='my', isRefs:r==='refs', isNotif:r==='notif', isSettings:r==='settings',
+      isDiscover:r==='discover', isComposer:r==='composer', isGscore:r==='gscore', isCreator:r==='creator',
+      goDiscover:()=>this.go('discover'), goComposer:()=>this.go('composer'),
+      goGscore:()=>this.go('gscore'), goCreator:()=>this.go('creator'),
+      showTabs:isTab && r!=='feed',
+      back:this.back,
+      goLogin:()=>this.go('login'), goOnboard:()=>this.jump('onboard'), goHome:()=>this.jump('home'),
+      goFeed:()=>this.jump('feed'), goTry:()=>this.jump('try'), goActivity:()=>this.jump('activity'),
+      goNotif:()=>this.go('notif'), goReview:()=>this.go('review'), goCampaign:()=>this.go('campaign'),
+      goRefs:()=>this.go('refs'), goSettings:()=>this.go('settings'), goGate:()=>this.jump('gate'),
+
+      index: SCREENS.map(([id,label],i)=>({
+        n:String(i+1).padStart(2,'0'), label, go:()=>this.jump(id),
+        bg: r===id ? C.amberSoft : 'transparent', w: r===id ? 700 : 400
+      })),
+      tabs: TABS.map(([id,label,radius,rotate])=>({
+        label, radius, rotate, go:()=>this.jump(id),
+        color: r===id ? C.ink : C.muted, weight: r===id ? 700 : 400
+      })),
+      swatches:[{hex:this.A},{hex:'#FFF3D9'},{hex:'#8A5D00'},{hex:'#171717'},{hex:'#F4F4F4'},{hex:'#EAE7E1'},{hex:'#1F8A4C'},{hex:'#E53400'}],
+
+      // gate
+      codeCells:[0,1,2,3,4,5].map(cell),
+      countries:['SG','IN','BR','VN','TH','KR'].map(c=>Object.assign({code:c, pick:()=>this.setState({country:c})}, this.pill(s.country===c))),
+
+      // login
+      providers:[
+        {name:'Google', mark:'G', color:'#EA4335', fg:'#fff'},
+        {name:'Facebook', mark:'f', color:'#1877F2', fg:'#fff'},
+        {name:'Kakao', mark:'K', color:'#FEE500', fg:'#3C1E1E'}
+      ],
+
+      // onboarding
+      steps:[1,2,3,4].map(n=>({bg: n<=s.step ? this.A : C.track})),
+      stepLabel:`${Math.min(s.step,4)} / 4`,
+      stepNum:s.step, ob:this.ob(),
+      nextStep:()=> s.step>=4 ? this.jump('home') : this.setState({step:s.step+1}),
+      prevStep:()=> this.setState({step:Math.max(1,s.step-1)}),
+      followerBands:['1–10K','10–50K','50–200K','200K+'].map(b=>Object.assign({label:b, pick:()=>this.setState({band:b})}, (a=>({bg:a?this.A:C.card, border:a?this.A:C.line, color:a?C.onAmber:C.muted}))(s.band===b))),
+      genders:[['F','Female'],['M','Male'],['X','Other']].map(([k,label])=>({label:k, pick:()=>this.setState({gender:k}), bg: s.gender===k ? C.ink : 'transparent', color: s.gender===k ? '#fff' : C.muted})),
+      cats:['Skincare','Makeup','Haircare','Fragrance','Body','Devices','Wellness','Food'].map(c=>Object.assign({label:c, toggle:()=>this.toggleCat(c)}, this.pill(s.cats.includes(c)))),
+
+      // home
+      homeHairline:C.line,
+      draftSteps:[['Photos 3/4',1],['Ratings',1],['Caption',1],['Submit',0]].map(([label,done])=>({
+        label, bg: done ? this.A : C.track, color: done ? C.ink : C.muted
+      })),
+      rail:railData.map(p=>Object.assign({}, p, {open:()=>this.go('creator')})),
+      homeFilters:HOME_FILTERS.map(l=>Object.assign({label:l, pick:()=>this.setState({homeFilter:l})}, this.pill(s.homeFilter===l))),
+      homeFilter:s.homeFilter,
+      feedSortLabel:s.feedSort,
+      cycleFeedSort:()=>{ const o=['Latest','Made count','Score']; this.setState({feedSort:o[(o.indexOf(s.feedSort)+1)%3]}); },
+      feedCountLabel:`${feedPosts.length} REVIEWS · ${s.homeFilter.toUpperCase()}`,
+      feedHasPosts:feedPosts.length>0, feedEmpty:feedPosts.length===0,
+      resetFeed:()=>this.setState({homeFilter:'For you'}),
+      posts:feedPosts.map((p,pi)=>{
+        const active = s.slide[p.who] || 0;
+        const followed = !!s.follows[p.who];
+        const saved = !!s.saved[p.who];
+        return Object.assign({}, p, {
+          slideLabel:`${p.media} ${active+1}/${p.slides}`,
+          frameLabel:p.frames[active],
+          dots:Array.from({length:p.slides},(_,i)=>({
+            w: i===active ? '14px' : '5px',
+            bg: i===active ? this.A : 'rgba(23,23,23,.22)',
+            set:()=>this.setState({slide:Object.assign({}, s.slide, {[p.who]:i})})
+          })),
+          next:()=>this.setState({slide:Object.assign({}, s.slide, {[p.who]:(active+1)%p.slides})}),
+          avatars:[0,1,2].map((_,i)=>({ml: i===0 ? '0' : '-7px'})),
+          follow:()=>this.setState({follows:Object.assign({}, s.follows, {[p.who]:!followed})}),
+          followLabel: followed ? 'Following' : 'Follow',
+          followBg: followed ? 'transparent' : this.A,
+          followBorder: followed ? C.line : this.A,
+          followFg: followed ? C.muted : C.onAmber,
+          save:()=>this.setState({saved:Object.assign({}, s.saved, {[p.who]:!saved})}),
+          saveLabel: saved ? '✓ Saved' : 'Save',
+          saveBg: saved ? C.amberSoft : 'transparent',
+          saveBorder: saved ? C.amberSoft : C.line,
+          saveFg: saved ? C.amberDeep : C.muted,
+          showSuggest: pi===1,
+          open:()=>this.go('review'), profile:()=>this.go('creator'), make:()=>this.go('composer')
+        });
+      }),
+      suggestions:[
+        {who:'@sohee.lab', meta:'Barrier · G81'},
+        {who:'@tae.tests', meta:'Haircare · G77'},
+        {who:'@rei.k', meta:'Body · G74'}
+      ].map(g=>Object.assign({}, g, {
+        open:()=>this.go('creator'),
+        follow:()=>this.setState({follows:Object.assign({}, s.follows, {[g.who]:!s.follows[g.who]})}),
+        label: s.follows[g.who] ? 'Following' : 'Follow',
+        bg: s.follows[g.who] ? 'transparent' : this.A,
+        border: s.follows[g.who] ? C.line : this.A,
+        fg: s.follows[g.who] ? C.muted : C.onAmber
+      })),
+      openCampaigns:[
+        Object.assign({title:'Cold-brew concentrate 6-pack', sub:'5 days left · 20 spots', meta:'Food', opacity:1, open:()=>this.go('campaign')}, tri('Open')),
+        Object.assign({title:'Hand balm trio, winter set', sub:'2 days left · 15 spots', meta:'Body', opacity:1, open:()=>this.go('campaign')}, tri('Open')),
+        Object.assign({title:'Scalp serum · pre-release', sub:'Unlocks at G60', meta:'Haircare', opacity:.6, open:()=>{}}, tri('Curated'))
+      ],
+      colA:[
+        {score:92, h:'214px', title:'Two weeks on a damaged barrier', who:'@yuna.reviews', made:42, open:()=>this.go('review')},
+        {score:71, h:'140px', title:'Matte lip, 9 hours, no touch-up', who:'@dana.tests', made:8, open:()=>this.go('review')}
+      ],
+      colB:[
+        {score:84, h:'146px', title:'This cleanser stripped my skin', who:'@minji.beauty', made:19, open:()=>this.go('review')},
+        {score:66, h:'206px', title:'Cold brew vs. the corner-store can', who:'@hoon', made:5, open:()=>this.go('review')}
+      ],
+
+      // feed
+      feedOverlay:!s.feedClean, feedClean:s.feedClean,
+      toggleClean:()=>this.setState({feedClean:!s.feedClean}),
+      feedRail:[{label:'12', radius:'10px'},{label:'Share', radius:'10px'},{label:'Save', radius:'6px'},{label:'···', radius:'50%'}],
+
+      // review
+      slides:[{label:'day 0', border:this.A},{label:'day 7', border:C.line},{label:'day 14', border:C.line},{label:'texture', border:C.line}],
+      criteria:[
+        {label:'Evidence', val:'9.4', pct:'94%'},{label:'Usage window', val:'9.0', pct:'90%'},
+        {label:'Specificity', val:'8.8', pct:'88%'},{label:'Balance', val:'9.6', pct:'96%'},
+        {label:'Production', val:'8.2', pct:'82%'},{label:'Disclosure', val:'10', pct:'100%'}
+      ],
+      tags:['#barrierrepair','#sensitiveskin','#14daytest','#beforeafter','#honestreview'],
+      comments:[
+        {who:'@dana.tests', when:'2d', text:'The same-light comparison is what sold me. Ordering the mini size.'},
+        {who:'@hoon', when:'3d', text:'Did it pill under a chemical sunscreen too, or only physical?'},
+        {who:'@minji.beauty', when:'5d', text:'Structure of this one is my template now.'}
+      ],
+
+      // try
+      dismissOffer:()=>this.setState({offer:false}),
+      tryCampaigns:[
+        Object.assign({title:'Barrier Repair Cream 30ml', sub:'12 of 40 spots left', meta:'closes in 3d', opacity:1, cursor:'pointer', open:()=>this.go('campaign')}, tri('Open')),
+        Object.assign({title:'Cold-brew concentrate 6-pack', sub:'You applied Aug 9', meta:'Food', opacity:1, cursor:'pointer', open:()=>this.go('activity')}, tri('Applied')),
+        Object.assign({title:'Silk pillowcase set', sub:'Filled on Aug 4', meta:'Home', opacity:.6, cursor:'default', open:()=>{}}, tri('Closed')),
+        Object.assign({title:'Scalp serum · pre-release', sub:'Unlocks at G60', meta:'Haircare', opacity:.6, cursor:'default', open:()=>{}}, tri('Curated'))
+      ],
+
+      // campaign detail
+      terms:[{k:'You receive',v:'Free · 30ml'},{k:'Post within',v:'14 days'},{k:'Platform',v:'IG or TikTok'},{k:'Ships to',v:'KR / VN / TH'}],
+      guides:[
+        {n:'1', text:'Same-light before and after, day 0 and day 14.'},
+        {n:'2', text:'Say the texture and absorption time out loud.'},
+        {n:'3', text:'Name one thing that did not work for you.'},
+        {n:'4', text:'Tag #ad or the local disclosure equivalent.'}
+      ],
+      togglePledge:()=>this.setState({pledge:!s.pledge}),
+      pledgeMark: s.pledge ? '✓' : '',
+      pledgeBg: s.pledge ? this.A : 'transparent',
+      pledgeBorder: s.pledge ? this.A : C.amberDeep,
+      applyBg: s.pledge ? this.A : C.track,
+      applyFg: s.pledge ? C.onAmber : C.muted,
+      apply:()=> s.pledge && this.go('applied'),
+
+      // applied
+      pipeline:[
+        {label:'Application sent', color:C.green, fill:C.green, text:C.ink},
+        {label:'Brand review · up to 3 days', color:this.A, fill:'transparent', text:C.ink},
+        {label:'Product ships', color:C.line, fill:'transparent', text:C.muted},
+        {label:'Post review by D+14', color:C.line, fill:'transparent', text:C.muted}
+      ],
+
+      // activity
+      segs:['Ongoing','Done'].map(l=>Object.assign({label:l, pick:()=>this.setState({seg:l})}, this.seg(s.seg===l))),
+      segOngoing:s.seg==='Ongoing', segDone:s.seg==='Done',
+      missions:[
+        Object.assign({title:'Barrier Repair Cream 30ml', due:'D-9', pct:'75%', step:'Received · draft your review', open:()=>this.go('composer')}, this.badge('Received')),
+        Object.assign({title:'Cold-brew concentrate', due:'waiting', pct:'25%', step:'Applied Aug 9 · brand reviewing', open:()=>this.go('campaign')}, this.badge('Applied')),
+        Object.assign({title:'Hand balm trio', due:'D-2', pct:'90%', step:'Posted · under scoring', open:()=>this.go('review')}, this.badge('Reviewing'))
+      ],
+
+      // my page
+      stats:[{k:'Completed',v:'11',color:C.ink},{k:'Strike',v:'1',color:C.red},{k:'Limit',v:'3',color:C.ink}],
+      lockedCode:['•','•','•','•','•','•'],
+      myRows:[
+        {label:'G-score & tiers', hint:'G50', border:C.line, go:()=>this.go('gscore')},
+        {label:'My references', hint:'6 saved', border:C.line, go:()=>this.go('refs')},
+        {label:'My reviews', hint:'11', border:C.line, go:()=>this.go('review')},
+        {label:'Shipping address', hint:'Seoul', border:C.line, go:()=>{}},
+        {label:'Notifications', hint:'2 new', border:C.line, go:()=>this.go('notif')},
+        {label:'Settings', hint:'EN', border:'transparent', go:()=>this.go('settings')}
+      ],
+
+      // references
+      refsHas:!s.refsEmpty, refsEmpty:s.refsEmpty,
+      refsToggleLabel: s.refsEmpty ? 'show saved' : 'show empty state',
+      toggleRefsEmpty:()=>this.setState({refsEmpty:!s.refsEmpty}),
+      refs:[
+        {score:92, title:'Two weeks on a damaged barrier'},{score:88, title:'Sunscreen under makeup, 8h'},
+        {score:84, title:'This cleanser stripped my skin'},{score:79, title:'Scalp serum, thin hair'},
+        {score:74, title:'Silk pillowcase: worth it?'},{score:71, title:'Matte lip, 9 hours'}
+      ].map(x=>Object.assign({}, x, {open:()=>this.go('review'), make:()=>this.go('composer')})),
+
+      // notifications
+      readAll:()=>this.forceUpdate(),
+      notifs:[
+        {unread:true, title:'Aeru Labs approved your application', body:'Barrier Repair Cream ships tomorrow', when:'1h'},
+        {unread:true, title:'A brand picked you first', body:'Scalp serum · reply within 48h', when:'5h'},
+        {unread:false, title:'Your review scored 92', body:'+4 G-score · two weeks on a damaged barrier', when:'2d'},
+        {unread:false, title:'D-2 reminder', body:'Hand balm trio review is due Friday', when:'3d'},
+        {unread:false, title:'42 creators made a review like yours', body:'Your barrier cream review is trending', when:'4d'},
+        {unread:false, title:'Strike removed', body:'Late post from June has expired off your record', when:'1w'}
+      ].map(n=>({
+        title:n.title, body:n.body, when:n.when, open:()=>this.go('review'),
+        bg: n.unread ? C.amberFaint : C.card, border: n.unread ? C.amberSoft : C.line,
+        dot: n.unread ? this.A : 'transparent', weight: n.unread ? 700 : 400
+      })),
+
+      // discover
+      query:s.query,
+      clearQuery:()=>this.setState({query:''}),
+      discoverCats:['All','Skincare','Makeup','Haircare','Body','Food'].map(c=>Object.assign({label:c, pick:()=>this.setState({dCat:c})}, this.pill(s.dCat===c))),
+      sortLabel:s.sort,
+      cycleSort:()=>{ const o=['Made count','Newest','Score']; this.setState({sort:o[(o.indexOf(s.sort)+1)%3]}); },
+      resultLabel:`${filtered.length} REVIEWS · ${s.dCat.toUpperCase()}`,
+      resultCount:filtered.length,
+      hasResults:filtered.length>0, noResults:filtered.length===0,
+      results:filtered.map(x=>Object.assign({}, x, {open:()=>this.go('review')})),
+      resetFilters:()=>this.setState({dCat:'All', query:'', minScore:'Any'}),
+      openSheet:()=>this.setState({sheetOpen:true}),
+      closeSheet:()=>this.setState({sheetOpen:false}),
+      sheetOpen:s.sheetOpen,
+      minScores:['Any','60+','75+','90+'].map(m=>Object.assign({label:m, pick:()=>this.setState({minScore:m})}, (a=>({bg:a?this.A:C.card, border:a?this.A:C.line, color:a?C.onAmber:C.muted}))(s.minScore===m))),
+      sheetFlags:Object.keys(s.flags).map(k=>({
+        label:k, toggle:()=>this.setState({flags:Object.assign({}, s.flags, {[k]:!s.flags[k]})}),
+        bg: s.flags[k] ? this.A : C.track, justify: s.flags[k] ? 'flex-end' : 'flex-start'
+      })),
+
+      // composer
+      mediaSlots:[
+        {label:'day 0', mark:'✓', markSize:'13px', bg:'repeating-linear-gradient(135deg,#EFEDE8 0 8px,#F7F5F1 8px 16px)', border:C.line, borderStyle:'solid', color:C.muted},
+        {label:'day 7', mark:'✓', markSize:'13px', bg:'repeating-linear-gradient(135deg,#EFEDE8 0 8px,#F7F5F1 8px 16px)', border:C.line, borderStyle:'solid', color:C.muted},
+        {label:'day 14', mark:'✓', markSize:'13px', bg:'repeating-linear-gradient(135deg,#EFEDE8 0 8px,#F7F5F1 8px 16px)', border:C.line, borderStyle:'solid', color:C.muted},
+        {label:'add texture shot', mark:'+', markSize:'20px', bg:C.amberFaint, border:this.A, borderStyle:'dashed', color:C.amberDeep}
+      ],
+      composerCriteria:Object.keys(s.rate).map(k=>({
+        label:k, val:s.rate[k], valColor: s.rate[k]>=4 ? C.ink : C.muted,
+        dots:[1,2,3,4,5].map(n=>({set:()=>this.setState({rate:Object.assign({}, s.rate, {[k]:n})}), bg: n<=s.rate[k] ? this.A : C.track}))
+      })),
+      checklist:['Same light and hour in every photo','Stated the full usage window','Named one thing that did not work','Sponsored disclosure in the first line'].map((l,i)=>({
+        label:l, toggle:()=>this.setState({checks:s.checks.map((c,j)=>j===i?!c:c)}),
+        mark: s.checks[i] ? '✓' : '', mBg: s.checks[i] ? this.A : 'transparent',
+        mBorder: s.checks[i] ? this.A : C.line, border: i===3 ? 'transparent' : C.line
+      })),
+      tagSuggest:['#barrierrepair','#14daytest','#sensitiveskin','#beforeafter','#ad'].map(t=>Object.assign({label:t, toggle:()=>this.setState({tags: s.tags.includes(t) ? s.tags.filter(x=>x!==t) : [...s.tags, t]})}, this.pill(s.tags.includes(t)))),
+      captionTags:' ' + s.tags.join(' '),
+      captionCount:168 + s.tags.join(' ').length,
+      projected:projected,
+      submitDraft:()=>this.go('applied'),
+
+      // g-score
+      history:[['Mar',34],['Apr',38],['May',41],['Jun',44],['Jul',46],['Aug',50]].map(([m,v],i)=>({
+        m, h:(v*1.35)+'px', bg: i===5 ? this.A : C.track
+      })),
+      tiers:[
+        {g:'G20', name:'Trial', perk:'Open campaigns only', status:'PASSED', bg:C.card, border:C.line, chipBg:C.greenBg, chipFg:C.green, stBg:C.greenBg, stFg:C.green},
+        {g:'G40', name:'Core', perk:'Multi-brand campaigns, 3 slots', status:'CURRENT', bg:C.amberFaint, border:this.A, chipBg:this.A, chipFg:C.onAmber, stBg:C.amberSoft, stFg:C.amberDeep},
+        {g:'G60', name:'Curated', perk:'Pre-release products, invite codes', status:'+10 TO GO', bg:C.card, border:C.line, chipBg:C.bg, chipFg:C.muted, stBg:'#EDEBE6', stFg:'#6E675C'},
+        {g:'G80', name:'Signature', perk:'Direct brand offers, paid add-ons', status:'LOCKED', bg:C.card, border:C.line, chipBg:C.bg, chipFg:C.muted, stBg:'#EDEBE6', stFg:'#6E675C'}
+      ],
+      ledger:[
+        {label:'Barrier cream review scored 92', when:'Aug 2', delta:'+4', color:C.green, border:C.line},
+        {label:'Posted 3 days before D-day', when:'Aug 2', delta:'+1', color:C.green, border:C.line},
+        {label:'Late post · hand balm trio', when:'Jun 18', delta:'−3', color:C.red, border:C.line},
+        {label:'Review scored 74', when:'Jun 2', delta:'+2', color:C.green, border:'transparent'}
+      ],
+
+      // creator profile
+      creatorStats:[{k:'Reviews',v:'11'},{k:'Made from', v:'128'},{k:'On time',v:'96%'}],
+      creatorGrid:LIBRARY.slice(0,6).map((x,i)=>Object.assign({}, x, {h: i%3===0 ? '150px' : '118px', open:()=>this.go('review')})),
+
+      // settings
+      toggleDday:()=>this.setState({dday:!s.dday}),
+      ddayBg: s.dday ? this.A : C.track,
+      ddayJustify: s.dday ? 'flex-end' : 'flex-start',
+      langs:['EN','한국어'].map(l=>Object.assign({label:l, pick:()=>this.setState({lang:l})}, this.seg(s.lang===l))),
+      legal:[{label:'Creator Terms', border:C.line},{label:'Review & Disclosure Policy', border:C.line},{label:'Privacy', border:'transparent'}]
+    };
+  }
+}
+
+</script>
+</body>
+</html>

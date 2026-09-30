@@ -43,6 +43,10 @@ const config = {
         NoticeList: 'events',
         // 공동구매 (2026-09-16 P3) — 소재·초대 링크 greyd://groupbuy/gb-xxxx 또는 https://greyd.app/groupbuy/gb-xxxx
         GroupBuy: 'groupbuy/:code',
+        SellerStore: 'seller/connect',
+        StoreCatalog: 'market',
+        StoreProduct: 'market/:productId',
+        StoreOrders: 'market-orders',
       },
     },
   },
@@ -72,6 +76,9 @@ const isAllowedLinkPath = (path) => {
     return false;
   }
   const bare = stripQuery(path);
+  if (bare === 'seller/connect' || bare === 'market' || bare === 'market-orders' || /^market\/\d+$/.test(bare)) {
+    return true;
+  }
   if (ALLOWED_LINK_PREFIXES.some((prefix) => bare.startsWith(prefix))) {
     return true;
   }

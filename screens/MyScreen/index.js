@@ -17,6 +17,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import Preference from 'react-native-default-preference';
 import T from '../../Components/Constants/DesignTokens';
 import FEATURES from '../../Components/Constants/Features';
+import { storeCopy } from '../StoreScreen/strings';
 import { Card, GlassOrbs, GlowCard, ProgressBar } from '../../Components/UI';
 import Strings from '../../Components/Strings';
 import { getCreatorProfile } from '../../api/creators';
@@ -57,10 +58,15 @@ export default function MyScreen({ navigation }) {
   const [isSeller, setIsSeller] = useState(false);
   const campaigns = useSelector(selectCampaigns);
 
-  const switchToSellerMode = () => {
-    prefSetSafe('inviteRole', 'brand')
-      .then(() => Alert.alert(Strings.SELLER_MODE_SWITCH, Strings.SELLER_MODE_RESTART))
-      .catch(() => {});
+  // 판매자 전환: 이미 승인된 판매자면 바로 전환, 아니면 브랜드 코드 입력 화면으로 (2026-09-23)
+  const goSellerMode = () => {
+    if (isSeller) {
+      prefSetSafe('inviteRole', 'brand')
+        .then(() => Alert.alert(Strings.SELLER_MODE_SWITCH, Strings.SELLER_MODE_RESTART))
+        .catch(() => {});
+    } else {
+      navigation.navigate('BrandCodeEntry');
+    }
   };
 
   const reload = useCallback(() => {
@@ -297,6 +303,12 @@ export default function MyScreen({ navigation }) {
           </Card>
         </TouchableOpacity>
 
+        <TouchableOpacity onPress={() => navigation.navigate('StoreOrders')}>
+          <Card><Text style={styles.rowTitle}>{storeCopy().orders} ›</Text></Card>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('SellerStore')}>
+          <Card><Text style={styles.rowTitle}>{storeCopy().connect} ›</Text></Card>
+        </TouchableOpacity>
         {/* 팔로워/팔로잉 — 새 마이 탭 개편에서 진입 경로가 유실됐던 것 복구 (2026-09-17 피드백) */}
         <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('FollowList')}>
           <Card>

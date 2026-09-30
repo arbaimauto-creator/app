@@ -67,6 +67,7 @@ import CampaignDetail from '../../screens/TryScreen/CampaignDetail';
 import ReviewLinkSubmit from '../../screens/TryScreen/ReviewLinkSubmit';
 import BrandWelcome from '../../screens/InviteGateScreen/BrandWelcome';
 import BrandSeedingCreate from '../../screens/BrandScreen/BrandSeedingCreate';
+import { SellerStoreScreen, StoreCatalogScreen, StoreProductScreen, StoreOrdersScreen, StoreWebScreen } from '../../screens/StoreScreen';
 import OrderPageScreen from '../../Components/OrderPageScreen';
 import MissionStatusScreen from '../../screens/ActivityScreen/MissionStatusScreen';
 import AddressBook from '../../screens/MyScreen/AddressBook';
@@ -564,6 +565,11 @@ function MainDrawerNavigator({ route, navigation }) {
           ...headerBackButton,
         }}
       />
+      <Stack.Screen name="SellerStore" component={SellerStoreScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="StoreCatalog" component={StoreCatalogScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="StoreProduct" component={StoreProductScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="StoreOrders" component={StoreOrdersScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="StoreWeb" component={StoreWebScreen} options={{ headerShown: false }} />
       {/* 판매자 제품 뿌리기 (2026-09-17) — FGI/리뷰 캠페인 배포 요청 */}
       <Stack.Screen
         name="BrandSeedingCreate"
