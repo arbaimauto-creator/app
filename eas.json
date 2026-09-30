@@ -29,10 +29,23 @@
         "buildType": "apk",
         "credentialsSource": "local"
       }
+    },
+    "testflight-groupbuy": {
+      "extends": "production",
+      "env": {
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true",
+        "RCT_NEW_ARCH_ENABLED": "0",
+        "GREYD_GROUPBUY_PREVIEW": "1"
+      }
     }
   },
   "submit": {
     "production": {
+      "ios": {
+        "ascAppId": "1526096078"
+      }
+    },
+    "testflight-groupbuy": {
       "ios": {
         "ascAppId": "1526096078"
       }

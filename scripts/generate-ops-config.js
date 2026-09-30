@@ -22,8 +22,13 @@ const apiBase = process.env.GREYD_OPS_API_BASE || fileEnv.GREYD_OPS_API_BASE ||
 
 if (!appKey) throw new Error('GREYD_APP_MOBILE_KEY is missing from the environment or .env');
 
+// 공동구매 미리보기 빌드(TestFlight 시연용) — 서버 없이 기기 안 테스트 데이터로 공동구매 화면을 연다.
+// eas.json의 testflight-groupbuy 프로필만 켠다. production 프로필에서는 verify-release가 막는다.
+const groupBuyPreview = (process.env.GREYD_GROUPBUY_PREVIEW || fileEnv.GREYD_GROUPBUY_PREVIEW) === '1';
+
 const source = `// Generated file. Do not commit.\n` +
   `export const OPS_API_BASE = ${JSON.stringify(apiBase)};\n` +
-  `export const OPS_APP_KEY = ${JSON.stringify(appKey)};\n`;
+  `export const OPS_APP_KEY = ${JSON.stringify(appKey)};\n` +
+  `export const GROUPBUY_PREVIEW = ${groupBuyPreview};\n`;
 fs.writeFileSync(outputPath, source, 'utf8');
 console.log('Generated ops runtime configuration.');

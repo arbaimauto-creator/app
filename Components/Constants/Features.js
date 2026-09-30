@@ -1,6 +1,16 @@
 // Greyd 1단계(클로즈드 FGI 앱) 기능 플래그 — 단일 출처.
 // 회의 결정(2026-08-10): 기능은 삭제하지 않고 플래그로 숨긴다. 복원 = 플래그 한 줄.
 // 스펙: docs/superpowers/specs/2026-08-10-greyd-phase1-v2-design.md
+// 공동구매 미리보기 빌드 스위치 — scripts/generate-ops-config.js가 GREYD_GROUPBUY_PREVIEW=1일 때 true로 생성.
+// 생성 파일이 없는 환경(테스트 등)에서는 꺼진다.
+const GROUPBUY_PREVIEW = (() => {
+  try {
+    return require('../../api/opsRuntimeConfig').GROUPBUY_PREVIEW === true;
+  } catch (e) {
+    return false;
+  }
+})();
+
 const FEATURES = {
   // 초대 코드 게이트 (로그인 후 1회). 켜지면 게스트 입장 버튼 숨김.
   INVITE_GATE: false,
@@ -36,10 +46,10 @@ const FEATURES = {
 
   // 공동구매 (2026-09-30, docs/groupbuy-dev-spec-2026-09-30.md) — 홈 레일·마이 탭·브랜드 셸 진입점.
   // ops 공동구매 API 배포 전이라 개발 빌드에서만 켠다. 서버가 올라가면 true로.
-  GROUP_BUY: typeof __DEV__ !== 'undefined' && __DEV__,
+  GROUP_BUY: (typeof __DEV__ !== 'undefined' && __DEV__) || GROUPBUY_PREVIEW,
 
   // 공동구매 모의 서버(api/groupBuysMock.js) — 개발 빌드 전용. 릴리스에서는 항상 false여야 한다.
-  GROUP_BUY_MOCK: typeof __DEV__ !== 'undefined' && __DEV__,
+  GROUP_BUY_MOCK: (typeof __DEV__ !== 'undefined' && __DEV__) || GROUPBUY_PREVIEW,
 
   // ops 실연동 (Phase 1.5 롤아웃 1단계 — 캠페인 읽기). OFF면 전면 mock (현행 동일)
   LIVE_OPS_API: true,

@@ -19,8 +19,16 @@ if (!/TEST_GUEST_ENTRY:\s*false/.test(features)) {
 if (!/COMMERCE:\s*false/.test(features)) {
   failures.push('legacy commerce must remain disabled until its routes are restored');
 }
-if (!/GROUP_BUY_MOCK:\s*(false|typeof __DEV__ !== 'undefined' && __DEV__),/.test(features)) {
+if (
+  !/GROUP_BUY_MOCK:\s*(false|\(?typeof __DEV__ !== 'undefined' && __DEV__\)?( \|\| GROUPBUY_PREVIEW)?),/.test(
+    features,
+  )
+) {
   failures.push('group-buy mock server must be off (or dev-only) in a production release');
+}
+// 공동구매 미리보기(테스트 데이터)는 TestFlight 시연 빌드 전용 — 스토어 배포(production) 프로필에서는 금지
+if (/GROUPBUY_PREVIEW = true/.test(runtime) && process.env.EAS_BUILD_PROFILE === 'production') {
+  failures.push('group-buy preview (mock data) must not be enabled in the production build profile');
 }
 if (!/const DEFAULT_URL = null;/.test(linking) || linking.includes('mylinker://')) {
   failures.push('normal cold starts must return null, not a placeholder deep link');
