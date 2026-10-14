@@ -7,20 +7,32 @@ set -uo pipefail
 WORK="$HOME/greyd-work"
 BASE="$WORK/ops-launch"
 FIX="$WORK/ops-preview-fix"
-BRANCH="claude/product-preview"
+BRANCH="${BRANCH:-}"   # 비우면 운영 릴리스가 들어 있는 브랜치를 자동으로 찾는다
+PREVIEW_SHA=5ea9982  # 링크 미리보기 API 커밋
 KEY="$HOME/.ssh/greyd-ops-sg.pem"
 HOST="ubuntu@13.215.149.118"
 FILE="lib/proposals/productPreview.ts"
 stop() { printf '\n\033[1;31m✖ %s\033[0m\n' "$1"; exit 1; }
 ok() { printf '\033[1;32m✔ %s\033[0m\n' "$1"; }
 
-echo "1/6 운영 서버에 떠 있는 릴리스가 $BRANCH 인지 확인"
+echo "1/6 운영 서버에 떠 있는 릴리스와 그 브랜치 찾기"
 LIVE=$(ssh -i "$KEY" -o ConnectTimeout=15 "$HOST" 'basename "$(readlink -f ~/ops-releases/current)"' 2>/dev/null) || stop "서버 접속 실패"
 LIVE_SHA="${LIVE##*-}"
 git -C "$BASE" fetch -q origin || stop "git fetch 실패"
-git -C "$BASE" merge-base --is-ancestor "$LIVE_SHA" "origin/$BRANCH" 2>/dev/null \
-  || stop "운영 릴리스($LIVE)가 $BRANCH 에 없음 — 다른 브랜치로 배포돼 있어 멈춤. 이 메시지를 Claude에 붙여주세요"
-ok "운영 $LIVE ⊂ $BRANCH"
+if [ -z "$BRANCH" ]; then
+  # 운영 커밋을 포함하고, 링크 미리보기 코드도 들어 있는 원격 브랜치 — 그중 운영 커밋이 맨 끝(HEAD)인 것을 우선
+  CANDS=$(git -C "$BASE" branch -r --contains "$LIVE_SHA" 2>/dev/null | sed 's#^ *origin/##' | grep -v HEAD | while read -r b; do
+    git -C "$BASE" merge-base --is-ancestor "$PREVIEW_SHA" "origin/$b" 2>/dev/null && echo "$b"; done)
+  EXACT=$(for b in $CANDS; do [ "$(git -C "$BASE" rev-parse --short=7 "origin/$b")" = "${LIVE_SHA:0:7}" ] && echo "$b"; done)
+  N=$(printf '%s\n' $EXACT | grep -c .)
+  if [ "$N" = 1 ]; then BRANCH="$EXACT"; else
+    echo "  운영 $LIVE 를 포함하는 브랜치: $(echo $CANDS)"; echo "  그중 끝이 운영 커밋인 브랜치: $(echo $EXACT)"
+    stop "배포 브랜치를 하나로 못 정함 — 위 두 줄을 Claude에 붙여주세요 (또는 BRANCH=브랜치명 bash <(curl …) 로 지정)"
+  fi
+fi
+git -C "$BASE" merge-base --is-ancestor "$LIVE_SHA" "origin/$BRANCH" 2>/dev/null || stop "운영 릴리스($LIVE)가 $BRANCH 에 없음"
+git -C "$BASE" merge-base --is-ancestor "$PREVIEW_SHA" "origin/$BRANCH" 2>/dev/null || stop "$BRANCH 에 링크 미리보기 코드가 없음"
+ok "운영 $LIVE ⇒ 배포 브랜치 $BRANCH"
 
 echo "2/6 작업 폴더 준비 ($FIX)"
 if [ -d "$FIX" ]; then git -C "$FIX" fetch -q origin && git -C "$FIX" checkout -q "$BRANCH" && git -C "$FIX" merge -q --ff-only "origin/$BRANCH" || stop "작업 폴더 갱신 실패"
