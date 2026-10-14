@@ -43,10 +43,16 @@ ops 코드: `rueseo92-create/greyd-ops` 브랜치 `claude/brand-dashboard-remain
 3. ~~**상품 진행 요청**~~ ✅ (2026-10-14) — `ProductProposal(brandId)` ↔ `GET/POST /brand/product-requests`.
 4. ~~**ops 브랜드 포털에 대시보드 넣기**~~ ✅ — ops 브랜드 웹(`greyd.app/brand/app`)에 같은 화면(공동구매·주문 배송·월 정산서·상품 진행 요청)이 서버 화면으로 들어가 있고,
    「전체 보기」 메뉴에서 캠페인 리포트(FGI)·월 정산서·상품 진행 요청까지 닿는다. 로그인은 브랜드 웹 세션이라 별도 토큰·CORS 불필요.
-5. **결정 필요** — 정산 기준(결제 완료 vs 발송 완료), 세금계산서 발행 흐름, 배송비 처리.
-   → 결정 전이라 ops 콘솔 「공동구매 운영 › 정산 기본 설정」에서 바꾸는 **설정값**으로 구현. 정하면 콘솔에서 값만 넣으면 된다(코드 수정 없음).
-   적용 순서: 공동구매별 조건 → 브랜드 설정(브랜드 계약) → 전체 기본 → 내장 값(결제 완료 · 익월 10일 · 세금계산서 미정 · 배송비 차감 없음).
-   끝까지 정하지 않은 항목은 브랜드 화면에 「미정」, API에 `undecided: ["basis"|"taxInvoice"|"shipping"]`.
+5. **정산 조건 결정** — ops 콘솔 「공동구매 운영 › 정산 기본 설정」의 **설정값**(코드 수정 없이 바꿈).
+   적용 순서: 공동구매별 조건 → 브랜드 설정(브랜드 계약) → 전체 기본 → 내장 값.
+
+   | 항목 | 상태 | 값 |
+   |---|---|---|
+   | 정산 기준 | ✅ 확정 (2026-10-14) | **결제 완료** — 내장 값. 예외 브랜드·공동구매만 발송 완료로 덮어쓸 수 있음 |
+   | 세금계산서 발행 방식 | ⬜ 미정 | 선택지: 매월 정산 확정 후 브랜드 역발행 · 아르바임이 수수료분 발행 · 브랜드가 지급액분 발행 · 둘 다 · 발행 없음 |
+   | 배송비 차감 | ⬜ 미정 | 선택지: 차감 없음(브랜드 직접 발송, 지금 계산값) · 주문당 정액 차감. 예외 공동구매는 콘솔 정산 조건 칸에 주문당 금액 |
+
+   미정 항목은 브랜드 화면에 「미정」, API에 `undecided: ["taxInvoice", "shipping"]`.
 6. **남은 것** — ops 배포(브랜치 머지 + `db push`), 앱·`web/` 대시보드의 상태 이름 매핑 확인(아래), 지급 원장(실제 지급 기록 → `state: "PAID"`), 일본 택배사(앱 서버 배송 조회 목록에 추가 후 허용).
 
 ## 4. 실행 (예시 데이터)
@@ -101,7 +107,7 @@ CSV 내보내기는 UTF-8 BOM + 수식 주입 방지(`= + - @` 앞 작은따옴�
        }] }   // 오래된 달 → 최근 달 순서, 진행 중인 달도 PLANNED로(periodEnd 미래 → "집계 중")
      ```
    - `GET /brand/groupbuys`의 각 공동구매에 `settlement` 조건을 같이 내려 준다(브랜드가 상세에서 조건 확인).
-   - **아직 정할 것**: 정산 기준(결제 완료 vs 발송 완료), 세금계산서 발행 흐름, 배송비 처리(브랜드 직접 발송이면 0).
+   - **정산 기준 = 결제 완료(2026-10-14 확정)**. **아직 정할 것**: 세금계산서 발행 흐름, 배송비 처리(브랜드 직접 발송이면 0).
      → ops에서 설정값(`SettlementPolicy`, 콘솔 「정산 기본 설정」)으로 열어 둠 — 남은 일 5번 참고.
    모의 서버 예시: 비타 C 앰플 = 인스타(인플 15% · 운영 5%), 히알루론 크림 = 창고형(공급가 9,500원), 마스크팩 = 창고형(5,200원).
 5. **상품 진행 요청 (제안)** — `GET /brand/product-requests` → `{ requests }`, `POST /brand/product-requests` `{ items: [{ name, spec, quantity, expiresOn, supplyPrice, goal: "CLEARANCE"|"TEST" }] }` → `{ requests }`.
@@ -115,7 +121,7 @@ CSV 내보내기는 UTF-8 BOM + 수식 주입 방지(`= + - @` 앞 작은따옴�
 - **명단**: 공개 전(`released: false`)엔 `orders: []`·`summary.reserved`만. 공개 후 명단은 앱 서버가 정본(ops가 읽어 전달), 조회는 감사 로그. 주문 `id`는 앱 서버 주문 id, `orderNo` 같이 내려 줌.
 - **송장**: `courier`는 앱 코드(`CJ HANJIN LOTTE EPOST LOGEN CU GS OTHER`) 또는 ops 이름. 일본 택배사(`YAMATO SAGAWA JAPANPOST`)는 아직 422 `unsupported_courier`.
 - **취소**: 브랜드 웹과 같은 규칙 — 검토 중이거나, 시작 전이고 주문 0건일 때만. 아니면 409 `not_cancelable`.
-- **정산** 응답: `contract = { payoutDay, basis, taxInvoice, shipping: { mode, perOrder }, note, undecided }`, 달마다 `state: "PLANNED" | "DUE"`(지급 예정일 지남 — 지급 원장이 없어 `PAID`는 아직 없음) + `open`(진행 중인 달), `undecided`, 줄마다 `shipping`·`orders`·`unshipped`·`payoutDate`.
+- **정산** 응답: `contract = { payoutDay, basis, taxInvoice(UNDECIDED|BRAND_REVERSE|ARBAIM_ISSUES|BRAND_ISSUES|BOTH|NONE), shipping: { mode, perOrder }, note, undecided }`, 달마다 `state: "PLANNED" | "DUE"`(지급 예정일 지남 — 지급 원장이 없어 `PAID`는 아직 없음) + `open`(진행 중인 달), `undecided`, 줄마다 `shipping`·`orders`·`unshipped`·`payoutDate`.
   창고형은 `amount`·`base`가 공급가 × 수량(판매 금액이 아님). 결제 확인 전 주문 수는 `pending`.
 - **상품 진행 요청**: 상태 `RECEIVED→REVIEW · REVIEWING→NEGOTIATING · ACCEPTED→APPROVED · DECLINED→REJECTED`(원래 값 `opsStatus`), 담당자 답 `note`. 검증 실패는 422 `{ error: "bad_items", message }`.
 
