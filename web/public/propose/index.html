@@ -256,7 +256,11 @@ async function importFrom(p) {
     if (!res.ok || !j.product) throw new Error(j.error || 'fail');
     const pr = j.product, set = (k, v) => { const el = $(`[data-k=${k}]`, p); if (v && !el.value.trim()) { el.value = v; el.closest('.f')?.classList.remove('bad'); } };
     set('name', pr.name);
-    set('retail', pr.retailPrice ? won(pr.retailPrice) : '');
+    // 원화 가격만 소비자가로 채운다 — 해외몰(USD 등)·통화 미상·말이 안 되는 금액(1,000원 미만)은 비워 두고 안내
+    const krw = String(pr.currency || '').toUpperCase() === 'KRW' || (!pr.currency && /\.(kr|co\.kr)$/i.test(u.hostname));
+    const price = Number(pr.retailPrice || pr.salePrice || 0);
+    const priceOk = krw && Number.isFinite(price) && price >= 1000 && price < 100000000;
+    if (priceOk) set('retail', won(Math.round(price)));
     set('url', pr.url || u.toString());
     if (pr.imageUrl && !$('[data-k=image]', p).files.length) {
       const box = $('.img', p); $('img', box)?.remove();
@@ -264,7 +268,10 @@ async function importFrom(p) {
       box.insertBefore(img, $('[data-k=image]', box)); p.dataset.imageUrl = pr.imageUrl;
     }
     rate(p);
-    say(`불러왔어요${pr.siteName ? ` · ${pr.siteName}` : ''}. 내용을 확인하고 공급가 · 재고 등 나머지를 채워주세요.`, 'ok');
+    const notes = [];
+    if (price && !priceOk) notes.push(krw ? '가격이 맞지 않아 소비자가는 비워 뒀어요' : `원화가 아닌 가격(${pr.currency || '통화 미상'})이라 소비자가는 원화로 직접 입력해주세요`);
+    if (!pr.imageUrl) notes.push('이미지는 찾지 못했어요 — 직접 올려주세요');
+    say(`불러왔어요${pr.siteName ? ` · ${pr.siteName}` : ''}. ${notes.length ? notes.join(' · ') + '. ' : ''}내용을 확인하고 공급가 · 재고 등 나머지를 채워주세요.`, notes.length ? '' : 'ok');
   } catch (e) {
     const why = { unsupported_site: '쿠팡 · 네이버 링크는 불러올 수 없어요.', not_a_product: '상품 정보를 찾지 못했어요.', https_only: 'https:// 주소만 불러올 수 있어요.' }[e.message];
     say(`${why || '지금은 불러올 수 없어요.'} 아래 칸에 직접 입력해주세요.`, 'no');

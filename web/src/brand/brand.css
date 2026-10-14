@@ -299,3 +299,9 @@
 @media (prefers-reduced-motion: reduce) {
   .bc * { transition: none !important; }
 }
+
+.bc .rc-line { padding: 6px 0; border-top: 1px dotted var(--line); }
+.bc .rc-line:first-of-type { border-top: 0; }
+.bc .rc-line .t { display: block; font-weight: 600; color: var(--fg); }
+.bc .rc-line .rc-row.small { align-items: start; }
+.bc .rc-sub { font-size: 11.5px; color: var(--fg3); margin-top: 2px; }

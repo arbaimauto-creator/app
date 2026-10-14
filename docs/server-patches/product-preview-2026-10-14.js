@@ -190,11 +190,24 @@ const abs = (u, base) => {
   }
 };
 
+// 통화: JSON-LD → 메타 → 가격 옆 기호 → 한국 도메인·lang=ko. 근거가 없으면 null.
+function detectCurrency(offer, meta, html, baseUrl) {
+  const c = offer.priceCurrency || meta['product:price:currency'] || meta['og:price:currency'] || meta['product:sale_price:currency'];
+  if (c && /^[A-Z]{3}$/i.test(c)) return c.toUpperCase();
+  if (/[₩]|원<\/|원\s*<|"KRW"/.test(html)) return 'KRW';
+  if (/\.(kr|co\.kr)$/i.test(new URL(baseUrl).hostname) || /<html[^>]+lang=["']ko/i.test(html)) return 'KRW';
+  if (/\$\s?\d/.test(html) && !/[₩]/.test(html)) return 'USD';
+  return null;
+}
+const httpsOnly = (u) => (u ? u.replace(/^http:\/\//i, 'https://') : null);
+
 export function parseProduct(html, baseUrl) {
   const meta = metaMap(html);
   const ld = jsonLdProducts(html)[0] || null;
   const offer = ld ? (Array.isArray(ld.offers) ? ld.offers[0] : ld.offers) || {} : {};
-  const ldImage = ld ? (Array.isArray(ld.image) ? ld.image[0] : ld.image?.url || ld.image) : null;
+  const pick = (v) => (Array.isArray(v) ? pick(v[0]) : v && typeof v === 'object' ? v.url || v.contentUrl || null : v || null);
+  const ldImage = ld ? pick(ld.image) : null;
+  const linkImage = /<link[^>]+rel=["']image_src["'][^>]*href=["']([^"']+)/i.exec(html)?.[1];
   const title = decode(/<title[^>]*>([\s\S]*?)<\/title>/i.exec(html)?.[1]);
 
   const name = decode(ld?.name) || meta['og:title'] || meta['twitter:title'] || title || '';
@@ -214,8 +227,8 @@ export function parseProduct(html, baseUrl) {
     name: cleanName,
     retailPrice: listPrice, // 소비자가(정가)
     salePrice: price, // 현재 판매가
-    currency: offer.priceCurrency || meta['product:price:currency'] || 'KRW',
-    imageUrl: abs(ldImage || meta['og:image'] || meta['twitter:image'], baseUrl),
+    currency: detectCurrency(offer, meta, html, baseUrl), // 모르면 null — 'KRW'로 넘겨짚지 않는다
+    imageUrl: httpsOnly(abs(ldImage || meta['og:image:secure_url'] || meta['og:image'] || meta['og:image:url'] || meta['twitter:image'] || meta['twitter:image:src'] || linkImage, baseUrl)),
     description: decode(ld?.description || meta['og:description'] || meta.description).slice(0, 300),
     brand: decode(typeof ld?.brand === 'string' ? ld.brand : ld?.brand?.name) || meta['product:brand'] || '',
     sku: decode(ld?.sku || ld?.mpn) || '',

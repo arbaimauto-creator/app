@@ -7,6 +7,7 @@
 // 정산·상품 등록 요청은 ops에 아직 계약이 없다 → docs/brand-partner-center-2026-10-14.md의 제안 경로를 쓰고,
 // 서버가 404를 주면 화면에 "준비 중"으로 보인다.
 import * as mock from './mockServer.js';
+import { normalizeTerms, DEFAULT_CONTRACT } from './settlement.js';
 
 const BASE = String(import.meta.env.VITE_OPS_API_BASE || '').replace(/\/+$/, '');
 export const IS_MOCK = !BASE || import.meta.env.VITE_BRAND_MOCK === '1';
@@ -215,6 +216,7 @@ export function normalizeGroupBuy(raw) {
     startsAt: gb.startsAt || null,
     endsAt: gb.endsAt || null,
     shipBy: gb.shipBy || null,
+    settlement: normalizeTerms(gb.settlement), // 정산 조건(케이스마다 운영이 세팅)
     reservedQuantity: num(gb.reservedQuantity),
     orderCount: num(gb.orderCount),
   };
@@ -270,14 +272,17 @@ async function proposed(method, path, body) {
   }
 }
 
-// 월 정산: { settlements: [{ id, periodStart, periodEnd, payoutDate, state: PLANNED|PAID,
-//   gross, refunds, hostIncentive, fees, shipping, payout, currency, lines:[{code,title,amount}] }] }
+// 월 정산: { contract: { payoutDay, basis }, settlements: [{ id, periodStart, periodEnd, payoutDate, state: PLANNED|PAID,
+//   gross, refunds, hostIncentive, fees, shipping, payout, unset, currency,
+//   lines:[{ code, title, terms, quantity, amount, returnedQuantity, refundAmount, base, refunds, hostFee, platformFee, payout, unset }] }] }
+// 계산 규칙은 settlement.js(서버가 정본)
 export async function listSettlements() {
   const res = IS_MOCK ? await mock.settlements() : await proposed('GET', '/brand/settlements');
   if (!res) {
     return null;
   }
-  return arr(res.settlements).map((s) => ({
+  const contract = { ...DEFAULT_CONTRACT, ...(res.contract || {}) };
+  const list = arr(res.settlements).map((s) => ({
     id: String(s.id),
     periodStart: s.periodStart,
     periodEnd: s.periodEnd,
@@ -290,8 +295,25 @@ export async function listSettlements() {
     shipping: num(s.shipping),
     payout: num(s.payout),
     currency: s.currency || 'KRW',
-    lines: arr(s.lines).map((l) => ({ title: l.title || '', code: l.code || '', amount: num(l.amount) })),
+    unset: !!s.unset,
+    lines: arr(s.lines).map((l) => ({
+      code: l.code || '',
+      title: l.title || '',
+      terms: normalizeTerms(l.terms),
+      quantity: num(l.quantity),
+      amount: num(l.amount),
+      returnedQuantity: num(l.returnedQuantity),
+      refundAmount: num(l.refundAmount),
+      base: num(l.base),
+      refunds: num(l.refunds),
+      hostFee: num(l.hostFee),
+      platformFee: num(l.platformFee),
+      payout: num(l.payout),
+      unset: !!l.unset,
+    })),
   }));
+  list.contract = contract;
+  return list;
 }
 
 // 상품 진행 요청: { requests: [{ id, name, spec, quantity, expiresOn, supplyPrice, goal, state, note, createdAt }] }

@@ -2,7 +2,9 @@
 // 응답 모양은 ops 계약(docs/groupbuy-dev-spec-2026-09-30.md §4-6)과 같게 맞춘다.
 // 데이터는 이 브라우저의 localStorage에만 있고, 이름·연락처·주소는 전부 지어낸 예시 값이다.
 
-const KEY = 'gd-brand-mock-v2'; // v2: 월 정산
+import { computeLine, summarize, payoutDateFor, DEFAULT_CONTRACT } from './settlement.js';
+
+const KEY = 'gd-brand-mock-v3'; // v3: 공동구매별 정산 조건
 const DAY = 86400000;
 const wait = (ms = 160) => new Promise((r) => setTimeout(r, ms));
 const clone = (v) => JSON.parse(JSON.stringify(v));
@@ -65,6 +67,7 @@ export function seed(now = Date.now()) {
   const groupBuys = [
     gb('gb-1a2b3c01', {
       title: '비타 C 브라이트 앰플 30ml 공동구매',
+      settlement: { type: 'COMMISSION', hostRateBps: 1500, platformRateBps: 500 },
       state: 'OPEN',
       host: { handle: 'minji.skin', name: '민지' },
       product: { name: '비타 C 브라이트 앰플 30ml', listPrice: 32000 },
@@ -80,6 +83,7 @@ export function seed(now = Date.now()) {
     }),
     gb('gb-1a2b3c02', {
       title: '히알루론 수분 크림 50ml 공동구매',
+      settlement: { type: 'SUPPLY', supplyPrice: 9500 },
       state: 'SHIPPING',
       host: { handle: 'daily.hana', name: '하나' },
       product: { name: '히알루론 수분 크림 50ml', listPrice: 28000 },
@@ -95,6 +99,7 @@ export function seed(now = Date.now()) {
     }),
     gb('gb-1a2b3c03', {
       title: '펩타이드 아이세럼 15ml 테스트 공동구매',
+      settlement: { type: 'COMMISSION', hostRateBps: 2000, platformRateBps: 500 },
       state: 'PENDING_HOST',
       openedBy: 'BRAND',
       host: { handle: 'jp.beauty.rin', name: 'Rin' },
@@ -114,6 +119,7 @@ export function seed(now = Date.now()) {
     }),
     gb('gb-1a2b3c04', {
       title: '시카 진정 마스크팩 10매 공동구매',
+      settlement: { type: 'SUPPLY', supplyPrice: 5200 },
       state: 'DONE',
       host: { handle: 'skin.log.yu', name: '유' },
       product: { name: '시카 진정 마스크팩 10매', listPrice: 15000 },
@@ -129,6 +135,7 @@ export function seed(now = Date.now()) {
     }),
     gb('gb-1a2b3c05', {
       title: '선 크림 SPF50 50ml 공동구매',
+      settlement: { type: 'SUPPLY', supplyPrice: 8000 },
       state: 'FAILED',
       host: { handle: 'sun.daily', name: '선데일리' },
       product: { name: '선 크림 SPF50 50ml', listPrice: 24000 },
@@ -156,20 +163,28 @@ export function seed(now = Date.now()) {
     }
   }
 
-  // 월 정산 — 한 달(1일~말일) 결제 완료분을 다음 달 10일에 지급(예시). 이번 달은 집계 중(지급 예정).
-  // 지급일·차감률은 계약 전 예시 값.
+  // 월 정산 — 1일~말일 결제 완료분을 계약 지급일(기본 익월 10일)에 지급. 공동구매마다 정산 조건(창고형 공급가 /
+  // 인스타 수수료율)이 다르고, 반품은 환불 후 정산에서 뺀다. 수량·금액은 예시 값.
+  const contract = { ...DEFAULT_CONTRACT };
   const cur = new Date(now);
-  const grossByMonth = [352800000, 368400000, 347400000, 397800000, 423000000, 376200000]; // 마지막 = 이번 달(진행 중)
-  const settlements = grossByMonth.map((gross, i) => {
-    const back = grossByMonth.length - 1 - i;
+  const byCode = Object.fromEntries(groupBuys.map((g) => [g.code, g]));
+  const monthly = [0.95, 1.0, 0.93, 1.08, 1.14, 0.62]; // 마지막 = 이번 달(진행 중)
+  const settlements = monthly.map((f, i) => {
+    const back = monthly.length - 1 - i;
     const start = new Date(cur.getFullYear(), cur.getMonth() - back, 1);
     const end = new Date(cur.getFullYear(), cur.getMonth() - back + 1, 0, 23, 59);
-    const payout = new Date(cur.getFullYear(), cur.getMonth() - back + 1, 10);
-    const refunds = Math.round((gross * (0.006 + (i % 3) * 0.003)) / 1000) * 1000;
-    const hostIncentive = Math.round(((gross - refunds) * 0.06) / 1000) * 1000;
-    const fees = Math.round(((gross - refunds) * 0.04) / 1000) * 1000;
-    const shipping = Math.round((gross * 0.0095) / 1000) * 1000;
-    const vita = Math.round((gross * 0.62) / 100) * 100;
+    const payout = payoutDateFor(start, contract.payoutDay);
+    const sales = [
+      ['gb-1a2b3c01', Math.round(11000 * f), 19800, 0.004],
+      ['gb-1a2b3c02', Math.round(12800 * f), 15900, 0.003],
+      ['gb-1a2b3c04', Math.round(6200 * f), 8900, i % 3 === 0 ? 0.006 : 0],
+    ];
+    const lines = sales.map(([code, quantity, price, retRate]) => {
+      const g = byCode[code];
+      const returnedQuantity = Math.round(quantity * retRate);
+      const sale = { quantity, amount: quantity * price, returnedQuantity, refundAmount: returnedQuantity * price };
+      return { code, title: g.product.name, terms: g.settlement, ...sale, ...computeLine(g.settlement, sale) };
+    });
     return {
       id: `stl-${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}`,
       periodStart: start.toISOString(),
@@ -177,17 +192,10 @@ export function seed(now = Date.now()) {
       payoutDate: payout.toISOString(),
       // 지급일 당일까지는 '지급 예정' — 지급 처리는 그날 영업시간 중
       state: payout.getTime() + DAY <= now ? 'PAID' : 'PLANNED',
-      gross,
-      refunds,
-      hostIncentive,
-      fees,
-      shipping,
-      payout: gross - refunds - hostIncentive - fees - shipping,
+      ...summarize(lines),
+      shipping: 0,
       currency: 'KRW',
-      lines: [
-        { code: 'gb-1a2b3c01', title: '비타 C 브라이트 앰플 30ml', amount: vita },
-        { code: 'gb-1a2b3c02', title: '히알루론 수분 크림 50ml', amount: gross - vita },
-      ],
+      lines,
     };
   });
 
@@ -196,7 +204,7 @@ export function seed(now = Date.now()) {
     { id: 'pr-0002', name: '수분 크림 미니 15ml', spec: '15ml', quantity: 6000, expiresOn: '2026-11-30', supplyPrice: 2400, goal: 'CLEARANCE', state: 'REVIEW', note: '', createdAt: new Date(now - 1 * DAY).toISOString() },
   ];
 
-  return { groupBuys, orders, failed, settlements, productRequests };
+  return { groupBuys, orders, failed, settlements, contract, productRequests };
 }
 
 let db = null;
@@ -296,7 +304,8 @@ export async function setShipment(orderId, { courier, trackingNumber }) {
 
 export async function settlements() {
   await wait();
-  return { settlements: clone(load().settlements) };
+  const d = load();
+  return { contract: clone(d.contract || DEFAULT_CONTRACT), settlements: clone(d.settlements) };
 }
 
 export async function productRequests() {

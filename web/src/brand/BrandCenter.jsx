@@ -2,6 +2,7 @@
 // 명단(개인정보)은 결제 완료 후에만 서버가 내려준다(released). 화면은 그 값을 그대로 따른다.
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as api from './api.js';
+import { termsLabel } from './settlement.js';
 import './brand.css';
 
 const VIEWS = [
@@ -263,11 +264,11 @@ const Swatch = ({ i, name }) => (
 function Fall({ s, dark }) {
   const parts = [
     ['지급액', s.payout, 'var(--accent)'],
-    ['호스트 인센티브', s.hostIncentive, dark ? 'var(--on-ink2)' : 'var(--fg2)'],
-    ['수수료', s.fees, dark ? 'color-mix(in srgb,var(--on-ink2) 60%,var(--ink))' : 'var(--fg3)'],
+    ['인플루언서 수수료', s.hostIncentive, dark ? 'var(--on-ink2)' : 'var(--fg2)'],
+    ['운영 수수료', s.fees, dark ? 'color-mix(in srgb,var(--on-ink2) 60%,var(--ink))' : 'var(--fg3)'],
     ['배송비', s.shipping, dark ? 'color-mix(in srgb,var(--on-ink2) 35%,var(--ink))' : 'var(--line2)'],
-    ['취소·환불', s.refunds, dark ? 'var(--ink-line)' : 'var(--line)'],
-  ];
+    ['반품·환불', s.refunds, dark ? 'var(--ink-line)' : 'var(--line)'],
+  ].filter(([, v], i) => i === 0 || v > 0);
   return (
     <div className="fall">
       <div className="fbar">
@@ -277,7 +278,7 @@ function Fall({ s, dark }) {
       </div>
       <div className="leg">
         <span>
-          결제 완료 <em className="num">{api.int(s.gross)}</em>
+          정산 대상 <em className="num">{api.int(s.gross)}</em>
         </span>
         {parts.map(([n, v, c]) => (
           <span key={n}>
@@ -408,6 +409,11 @@ function GroupBuys({ gbs, code, go, onCancel }) {
             <dt>예약 수량</dt>
             <dd className="num">
               {api.int(sel.reservedQuantity)}개 · {api.int(sel.orderCount)}건
+            </dd>
+            <dt>정산 조건</dt>
+            <dd>
+              {termsLabel(sel.settlement)}
+              <div className="addr">반품은 환불 후 정산에서 차감 · 조건은 공동구매마다 담당자와 협의해 정합니다</div>
             </dd>
           </dl>
           {sel.state === 'FAILED' ? <p className="note">최소 수량에 못 미쳐 결제 없이 종료됐어요. 구매자 카드는 청구되지 않았습니다.</p> : null}
@@ -919,7 +925,9 @@ function Settle({ settlements }) {
               </button>
             ))}
           </div>
-          <p className="note">아르바임이 판매 주체로 결제를 받고, 결제 완료 주문 기준으로 월 1회 정산합니다. 진행 중인 달은 오늘까지 집계한 금액입니다.</p>
+          <p className="note">
+            매월 1일~말일 {settlements.contract?.basis === 'SHIPPED' ? '발송 완료' : '결제 완료'}분을 익월 {settlements.contract?.payoutDay ?? 10}일에 지급합니다. 창고형은 공급가 × 판매 수량, 인스타 공구는 판매 금액에서 인플루언서 · 운영 수수료를 뺀 금액이며, 반품은 환불 후 차감합니다. 진행 중인 달은 오늘까지 집계한 금액입니다.
+          </p>
         </div>
         <Receipt s={s} />
       </div>
@@ -927,7 +935,7 @@ function Settle({ settlements }) {
         <div className="ch">
           <div>
             <h2>정산 내역</h2>
-            <div className="s">차감 항목·요율은 계약 조건을 따릅니다</div>
+            <div className="s">조건은 공동구매마다 다르며, 정산서에서 공동구매별 계산을 볼 수 있어요</div>
           </div>
         </div>
         <div className="tw">
@@ -935,7 +943,7 @@ function Settle({ settlements }) {
             <thead>
               <tr>
                 <th>정산 월</th>
-                <th className="r">결제 금액</th>
+                <th className="r">정산 대상</th>
                 <th className="r">차감 합계</th>
                 <th className="r">지급액</th>
                 <th>지급일</th>
@@ -993,11 +1001,11 @@ function Receipt({ s }) {
         <div className="rc-meta num">
           판매 기간 {api.fmtDate(s.periodStart)}–{running(s) ? '오늘(집계 중)' : api.fmtDate(s.periodEnd)} · 지급일 {api.fmtDate(s.payoutDate)}
         </div>
-        {row('결제 완료 금액', s.gross)}
-        {row('취소 · 환불', s.refunds, true)}
-        {row('호스트 인센티브', s.hostIncentive, true)}
-        {row('결제 · 운영 수수료', s.fees, true)}
-        {row('배송비 정산', s.shipping, true)}
+        {row('정산 대상 금액', s.gross)}
+        {s.refunds ? row('반품 · 환불', s.refunds, true) : null}
+        {s.hostIncentive ? row('인플루언서 수수료', s.hostIncentive, true) : null}
+        {s.fees ? row('운영 수수료', s.fees, true) : null}
+        {s.shipping ? row('배송비 정산', s.shipping, true) : null}
         <div className="rc-sep" />
         <div className="rc-tot">
           <span>지급액</span>
@@ -1006,15 +1014,27 @@ function Receipt({ s }) {
         {s.lines.length ? (
           <>
             <div className="rc-sep" />
-            <div className="eyebrow" style={{ margin: '6px 0 2px' }}>
-              공동구매별 결제 금액
+            <div className="eyebrow" style={{ margin: '6px 0 4px' }}>
+              공동구매별 정산
             </div>
             {s.lines.map((l) => (
-              <div className="rc-row small" key={l.code + l.title}>
-                <span>{l.title}</span>
-                <b className="num">{api.int(l.amount)}</b>
+              <div className="rc-line" key={l.code + l.title}>
+                <div className="rc-row small">
+                  <span>
+                    <b className="t">{l.title}</b>
+                    <span className="addr">{termsLabel(l.terms)}</span>
+                  </span>
+                  <b className="num">{l.unset ? '조건 확인 중' : api.int(l.payout)}</b>
+                </div>
+                <div className="rc-sub num">
+                  {l.terms.type === 'SUPPLY'
+                    ? `판매 ${api.int(l.quantity)}개 × ${api.int(l.terms.supplyPrice)} = ${api.int(l.base)}`
+                    : `판매 ${api.int(l.quantity)}개 · ${api.int(l.base)}${l.hostFee ? ` − 인플 ${api.int(l.hostFee)}` : ''}${l.platformFee ? ` − 운영 ${api.int(l.platformFee)}` : ''}`}
+                  {l.refunds ? ` · 반품 ${api.int(l.returnedQuantity)}개 −${api.int(l.refunds)}` : ''}
+                </div>
               </div>
             ))}
+            {s.unset ? <p className="note">정산 조건이 아직 세팅되지 않은 공동구매가 있어요. 담당자가 확정하면 지급액에 반영됩니다.</p> : null}
           </>
         ) : null}
       </div>
@@ -1260,7 +1280,7 @@ const TITLES = {
   home: ['SUMMARY', '요약', null],
   groupbuys: ['GROUP BUYS', '공동구매', '모집 상황과 조건을 확인하고, 시작 전이면 취소할 수 있어요.'],
   orders: ['ORDERS', '주문 · 배송', '결제가 끝난 주문만 명단이 열립니다. 발송 후 송장을 입력해주세요.'],
-  settle: ['SETTLEMENT · MONTHLY', '정산', '한 달 결제 완료분을 월 1회 정산해 지급합니다.'],
+  settle: ['SETTLEMENT · MONTHLY', '정산', '공동구매마다 정한 조건(창고형 공급가 · 인스타 수수료율)으로 월 1회 정산해 지급합니다.'],
   products: ['PRODUCTS', '상품 진행 요청', '리스트를 보내면 담당자가 진행 가능 여부를 안내합니다.'],
 };
 

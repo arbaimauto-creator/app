@@ -31,18 +31,28 @@ CSV 내보내기는 UTF-8 BOM + 수식 주입 방지(`= + - @` 앞 작은따옴�
    ops가 브랜드(`SellerAppAccess`)용 단기 토큰을 발급하고, `/api/mobile/brand/*`가 이 토큰을 받아야 한다. 401이면 화면이 토큰을 지운다.
 2. **CORS** — 웹 오리진에서 `/api/mobile/brand/*` 호출 허용(Authorization 헤더 포함).
 3. **명단 조회·CSV 감사 로그** — 스펙 §5 그대로. 웹은 CSV를 브라우저에서 만들므로, 서버는 `GET …/orders` 조회를 기록한다.
-4. **정산 (제안)** — `GET /brand/settlements`
-   ```jsonc
-   { "settlements": [{
-       "id": "...", "periodStart": "ISO", "periodEnd": "ISO", "payoutDate": "ISO",
-       "state": "PLANNED" | "PAID", "currency": "KRW",
-       "gross": 0, "refunds": 0, "hostIncentive": 0, "fees": 0, "shipping": 0, "payout": 0,
-       "lines": [{ "code": "gb-…", "title": "…", "amount": 0 }]   // 공동구매별 결제 금액
-   }] }   // 오래된 달 → 최근 달 순서
-   ```
-   브랜드 정산은 **월 1회**(2026-10-14 확정). 진행 중인 달도 `PLANNED`로 내려주면 화면이 "집계 중"으로 보여준다(`periodEnd`가 미래).
-   **결정 필요:** 정산 기준일(결제 완료 시각 vs 발송 완료 시각), 지급일(익월 며칠), 호스트 인센티브율(`GroupBuy.incentiveBps`), 수수료율, 배송비 정산 방식, 지급 후 환불 처리(다음 달 차감), 세금계산서 발행 흐름.
-   모의 서버는 1일~말일 결제 완료분을 다음 달 10일 지급, 인센티브 6%, 수수료 4%의 **예시 값**을 쓴다.
+4. **정산 — 케이스마다 세팅** (2026-10-14 대표 협의 사항)
+   - **브랜드 계약(브랜드 1건당)** `BrandContract { payoutDay = 10, basis = PAID|SHIPPED }` — 1일~말일분을 **익월 `payoutDay`일** 지급(그 달에 없는 날이면 말일).
+   - **공동구매 정산 조건(공동구매 1건당, 운영 콘솔에서 개설 때 세팅)** `GroupBuy.settlement`
+     - `type: "SUPPLY"` 창고형 공구 — `supplyPrice`(개당 확정 공급가, VAT 포함) × 판매 수량. 판매가·호스트 몫과 무관.
+     - `type: "COMMISSION"` 인스타 공구 — 판매 금액 − 인플루언서 수수료(`hostRateBps`, **인플마다 다름**) − 운영 수수료(`platformRateBps`).
+     - 조건이 비어 있으면 그 공동구매는 지급액을 만들지 않고 `unset: true` → 화면에 "조건 확인 중".
+   - **반품** — 환불 후 정산에서 뺀다. SUPPLY는 공급가 × 반품 수량, COMMISSION은 환불 금액을 뺀 뒤 수수료를 계산. 지급 뒤 반품은 다음 달에서 차감.
+   - **계산 규칙 정본**: `web/src/brand/settlement.js` (`computeLine`·`summarize`·`payoutDateFor`) — ops가 같은 규칙으로 계산해 내려준다.
+   - `GET /brand/settlements`
+     ```jsonc
+     { "contract": { "payoutDay": 10, "basis": "PAID" },
+       "settlements": [{
+         "id": "...", "periodStart": "ISO", "periodEnd": "ISO", "payoutDate": "ISO", "state": "PLANNED" | "PAID", "currency": "KRW",
+         "gross": 0, "refunds": 0, "hostIncentive": 0, "fees": 0, "shipping": 0, "payout": 0, "unset": false,
+         "lines": [{ "code": "gb-…", "title": "…", "terms": { "type": "SUPPLY", "supplyPrice": 9500 },
+                     "quantity": 0, "amount": 0, "returnedQuantity": 0, "refundAmount": 0,
+                     "base": 0, "refunds": 0, "hostFee": 0, "platformFee": 0, "payout": 0 }]
+       }] }   // 오래된 달 → 최근 달 순서, 진행 중인 달도 PLANNED로(periodEnd 미래 → "집계 중")
+     ```
+   - `GET /brand/groupbuys`의 각 공동구매에 `settlement` 조건을 같이 내려 준다(브랜드가 상세에서 조건 확인).
+   - **아직 정할 것**: 정산 기준(결제 완료 vs 발송 완료), 세금계산서 발행 흐름, 배송비 처리(브랜드 직접 발송이면 0).
+   모의 서버 예시: 비타 C 앰플 = 인스타(인플 15% · 운영 5%), 히알루론 크림 = 창고형(공급가 9,500원), 마스크팩 = 창고형(5,200원).
 5. **상품 진행 요청 (제안)** — `GET /brand/product-requests` → `{ requests }`, `POST /brand/product-requests` `{ items: [{ name, spec, quantity, expiresOn, supplyPrice, goal: "CLEARANCE"|"TEST" }] }` → `{ requests }`.
    상태 `REVIEW | NEGOTIATING | APPROVED | REJECTED`, 담당자 메모 `note`. 운영 콘솔에서 상태를 바꾼다.
 
