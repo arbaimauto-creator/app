@@ -159,7 +159,7 @@ export function seed(now = Date.now()) {
   // 월 정산 — 한 달(1일~말일) 결제 완료분을 다음 달 10일에 지급(예시). 이번 달은 집계 중(지급 예정).
   // 지급일·차감률은 계약 전 예시 값.
   const cur = new Date(now);
-  const grossByMonth = [58200000, 61400000, 57900000, 66300000, 70500000, 41800000]; // 마지막 = 이번 달(진행 중)
+  const grossByMonth = [176400000, 184200000, 173700000, 198900000, 211500000, 125400000]; // 마지막 = 이번 달(진행 중)
   const settlements = grossByMonth.map((gross, i) => {
     const back = grossByMonth.length - 1 - i;
     const start = new Date(cur.getFullYear(), cur.getMonth() - back, 1);

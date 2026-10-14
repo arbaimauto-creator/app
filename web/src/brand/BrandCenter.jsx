@@ -182,8 +182,8 @@ function Home({ gbs, rosters, settlements, go }) {
             <div>
               <small>{recentPaid.length ? `최근 ${recentPaid.length}개월 정산` : '정산'}</small>
               <b className="num">
-                {recentPaid.length ? api.int(recentPaid.reduce((a, s) => a + s.payout, 0) / 10000) : '—'}
-                {recentPaid.length ? <em>만원</em> : null}
+                {recentPaid.length ? (recentPaid.reduce((a, s) => a + s.payout, 0) / 1e8).toFixed(2) : '—'}
+                {recentPaid.length ? <em>억원</em> : null}
               </b>
               <span>월 1회 지급</span>
             </div>
