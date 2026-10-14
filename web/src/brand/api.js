@@ -270,7 +270,7 @@ async function proposed(method, path, body) {
   }
 }
 
-// 주간 정산: { settlements: [{ id, periodStart, periodEnd, payoutDate, state: PLANNED|PAID,
+// 월 정산: { settlements: [{ id, periodStart, periodEnd, payoutDate, state: PLANNED|PAID,
 //   gross, refunds, hostIncentive, fees, shipping, payout, currency, lines:[{code,title,amount}] }] }
 export async function listSettlements() {
   const res = IS_MOCK ? await mock.settlements() : await proposed('GET', '/brand/settlements');
@@ -463,6 +463,10 @@ export const fmtDate = (iso) => {
   }
   const d = new Date(iso);
   return `${d.getMonth() + 1}/${d.getDate()}(${WD[d.getDay()]})`;
+};
+export const fmtMonth = (iso) => {
+  const d = new Date(iso);
+  return `${d.getFullYear()}년 ${d.getMonth() + 1}월`;
 };
 export const fmtDateTime = (iso) => {
   const d = new Date(iso);

@@ -13,10 +13,10 @@ cd web && npm install && npm run dev      # http://localhost:5173/#brand
 
 | 화면 | 하는 일 | 서버 |
 |---|---|---|
-| 요약 | 다음(또는 최근) 정산액과 차감 구성, 진행 중 공동구매의 단계(호스트 수락 → 모집 → 결제 확정 → 발송 → 완료), 지금 할 일(송장 입력·호스트 수락 대기·정산 예정) | 아래 API 조합 |
+| 요약 | 이번 달(집계 중)·다음 또는 최근 정산액과 차감 구성, 진행 중 공동구매의 단계(호스트 수락 → 모집 → 결제 확정 → 발송 → 완료), 지금 할 일(송장 입력·호스트 수락 대기·정산 예정) | 아래 API 조합 |
 | 공동구매 | 목록·필터, 조건 상세, 시작 전·모집 중 취소(확인 창) | `GET /brand/groupbuys`, `POST /brand/groupbuys/:code/cancel` ✅ 계약 있음 |
 | 주문·배송 | 명단 공개 전에는 예약 숫자만. 공개 후 명단, 한 건씩 송장 저장·수정, 여러 건 선택 후 택배사 일괄 지정·저장, 명단 CSV, 송장 양식 CSV(발송 대기 주문번호 미리 채움), 송장 CSV 일괄 업로드(저장 전 오류 미리보기), 옵션별 수량 합계 | `GET /brand/groupbuys/:code/orders`, `POST /brand/groupbuy-orders/:id/shipment` ✅ 계약 있음 |
-| 정산 | 주차별 지급액, 주간 정산서(결제 완료 − 취소·환불 − 호스트 인센티브 − 수수료 − 배송비 = 지급액, 공동구매별 결제 금액) | `GET /brand/settlements` ⬜ **제안** |
+| 정산 | 월별 지급액, 월 정산서(진행 중인 달은 오늘까지 집계, 결제 완료 − 취소·환불 − 호스트 인센티브 − 수수료 − 배송비 = 지급액, 공동구매별 결제 금액) | `GET /brand/settlements` ⬜ **제안** |
 | 상품 진행 요청 | CSV 끌어다 놓기 또는 한 개씩 등록, 요청 상태(검토 중·조건 협의·진행 확정·진행 어려움) | `GET/POST /brand/product-requests` ⬜ **제안** |
 
 제안 경로가 404면 그 화면은 "준비 중" 안내로 바뀐다(나머지 화면은 그대로 동작).
@@ -38,10 +38,11 @@ CSV 내보내기는 UTF-8 BOM + 수식 주입 방지(`= + - @` 앞 작은따옴�
        "state": "PLANNED" | "PAID", "currency": "KRW",
        "gross": 0, "refunds": 0, "hostIncentive": 0, "fees": 0, "shipping": 0, "payout": 0,
        "lines": [{ "code": "gb-…", "title": "…", "amount": 0 }]   // 공동구매별 결제 금액
-   }] }   // 오래된 주 → 최근 주 순서
+   }] }   // 오래된 달 → 최근 달 순서
    ```
-   **결정 필요:** 정산 기준일(결제 완료 시각 vs 발송 완료 시각), 주 경계(월~일), 지급 요일, 호스트 인센티브율(`GroupBuy.incentiveBps`), 수수료율, 배송비 정산 방식, 지급 후 환불 처리(다음 주 차감).
-   모의 서버는 월~일 결제 완료분을 다음 주 수요일 지급, 인센티브 6%, 수수료 4%의 **예시 값**을 쓴다.
+   브랜드 정산은 **월 1회**(2026-10-14 확정). 진행 중인 달도 `PLANNED`로 내려주면 화면이 "집계 중"으로 보여준다(`periodEnd`가 미래).
+   **결정 필요:** 정산 기준일(결제 완료 시각 vs 발송 완료 시각), 지급일(익월 며칠), 호스트 인센티브율(`GroupBuy.incentiveBps`), 수수료율, 배송비 정산 방식, 지급 후 환불 처리(다음 달 차감), 세금계산서 발행 흐름.
+   모의 서버는 1일~말일 결제 완료분을 다음 달 10일 지급, 인센티브 6%, 수수료 4%의 **예시 값**을 쓴다.
 5. **상품 진행 요청 (제안)** — `GET /brand/product-requests` → `{ requests }`, `POST /brand/product-requests` `{ items: [{ name, spec, quantity, expiresOn, supplyPrice, goal: "CLEARANCE"|"TEST" }] }` → `{ requests }`.
    상태 `REVIEW | NEGOTIATING | APPROVED | REJECTED`, 담당자 메모 `note`. 운영 콘솔에서 상태를 바꾼다.
 

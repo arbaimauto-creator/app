@@ -1,4 +1,4 @@
-// 브랜드 파트너센터 — #brand. 공동구매 현황 · 명단·송장 · 주간 정산 · 상품 진행 요청.
+// 브랜드 파트너센터 — #brand. 공동구매 현황 · 명단·송장 · 월 정산 · 상품 진행 요청.
 // 명단(개인정보)은 결제 완료 후에만 서버가 내려준다(released). 화면은 그 값을 그대로 따른다.
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as api from './api.js';
@@ -108,7 +108,7 @@ function Home({ gbs, rosters, settlements, go }) {
     .map((g) => ({ g, n: rosters[g.code].orders.filter((o) => o.state === 'PAID').length }))
     .filter((x) => x.n > 0);
   const toShipTotal = toShip.reduce((a, x) => a + x.n, 0);
-  // 지급 예정 주가 없으면(지급일 당일 이후) 가장 최근 정산서를 보여준다
+  // 지급 예정 정산이 없으면(지급일 당일 이후) 가장 최근 정산서를 보여준다
   const next = settlements?.find((s) => s.state === 'PLANNED') || settlements?.[settlements.length - 1];
   const recentPaid = (settlements || []).filter((s) => s.state === 'PAID').slice(-4);
 
@@ -132,13 +132,13 @@ function Home({ gbs, rosters, settlements, go }) {
         <div className="l">
           {next ? (
             <>
-              <div className="eyebrow">{next.state === 'PLANNED' ? '다음 정산 예정' : '최근 정산 · 지급 완료'}</div>
+              <div className="eyebrow">{running(next) ? '이번 달 정산 예정 · 집계 중' : next.state === 'PLANNED' ? '다음 정산 예정' : '최근 정산 · 지급 완료'}</div>
               <div className="amt num">
                 {api.int(next.payout)}
                 <small>원</small>
               </div>
               <div className="due">
-                <b>{api.fmtDate(next.payoutDate)}</b> 지급 · {api.fmtDate(next.periodStart)}–{api.fmtDate(next.periodEnd)} 결제 완료분
+                <b>{api.fmtDate(next.payoutDate)}</b> 지급 · {api.fmtMonth(next.periodStart)} 결제 완료분{running(next) ? ' (오늘까지 집계)' : ''}
               </div>
               <Fall s={next} dark />
             </>
@@ -180,12 +180,12 @@ function Home({ gbs, rosters, settlements, go }) {
               <span>{toShip[0] ? `${api.fmtDate(toShip[0].g.shipBy)}까지` : '대기 없음'}</span>
             </div>
             <div>
-              <small>{recentPaid.length ? `최근 ${recentPaid.length}주 정산` : '정산'}</small>
+              <small>{recentPaid.length ? `최근 ${recentPaid.length}개월 정산` : '정산'}</small>
               <b className="num">
                 {recentPaid.length ? api.int(recentPaid.reduce((a, s) => a + s.payout, 0) / 10000) : '—'}
                 {recentPaid.length ? <em>만원</em> : null}
               </b>
-              <span>주 1회 지급</span>
+              <span>월 1회 지급</span>
             </div>
           </div>
         </div>
@@ -868,6 +868,8 @@ function UploadPreview({ upload, busy, onClose, onApply }) {
 }
 
 // ── 정산 ────────────────────────────────────────────────────────────
+// 진행 중인 달 — 금액이 아직 늘어나는 중
+const running = (s) => new Date(s.periodEnd).getTime() > Date.now();
 function Settle({ settlements }) {
   const [cur, setCur] = useState(null);
   if (settlements === undefined) {
@@ -877,13 +879,13 @@ function Settle({ settlements }) {
     return (
       <div className="card locked">
         <div className="eyebrow">준비 중</div>
-        <h2>주간 정산서는 서버 연결 후 열립니다</h2>
-        <p>매주 결제 완료분 기준 정산 내역이 이 화면에 표시됩니다. 그 전까지 정산 내역은 담당자에게 문의해주세요.</p>
+        <h2>월 정산서는 서버 연결 후 열립니다</h2>
+        <p>매월 결제 완료분 기준 정산 내역이 이 화면에 표시됩니다. 그 전까지 정산 내역은 담당자에게 문의해주세요.</p>
       </div>
     );
   }
   if (!settlements.length) {
-    return <p className="empty card">아직 정산 내역이 없어요. 첫 결제 완료 주의 다음 정산일에 표시됩니다.</p>;
+    return <p className="empty card">아직 정산 내역이 없어요. 첫 결제 완료 달의 다음 정산일에 표시됩니다.</p>;
   }
   const idx = cur ?? settlements.length - 1;
   const s = settlements[idx];
@@ -894,7 +896,7 @@ function Settle({ settlements }) {
         <div className="card">
           <div className="ch">
             <div>
-              <h2>주차별 지급액</h2>
+              <h2>월별 지급액</h2>
               <div className="s">막대를 누르면 정산서가 바뀝니다</div>
             </div>
             <div className="legend">
@@ -913,11 +915,11 @@ function Settle({ settlements }) {
               <button key={x.id} className={`${x.state === 'PAID' ? 'paid' : ''} ${i === idx ? 'on' : ''}`} aria-pressed={i === idx} onClick={() => setCur(i)}>
                 <b className="num">{(x.payout / 1e6).toFixed(1)}M</b>
                 <i style={{ height: Math.max(6, Math.round((x.payout / max) * 110)) }} />
-                <span className="num">{api.fmtDate(x.periodStart).replace(/\(.\)/, '')}</span>
+                <span className="num">{new Date(x.periodStart).getMonth() + 1}월</span>
               </button>
             ))}
           </div>
-          <p className="note">아르바임이 판매 주체로 결제를 받고, 결제 완료 주문 기준으로 주 1회 정산합니다.</p>
+          <p className="note">아르바임이 판매 주체로 결제를 받고, 결제 완료 주문 기준으로 월 1회 정산합니다. 진행 중인 달은 오늘까지 집계한 금액입니다.</p>
         </div>
         <Receipt s={s} />
       </div>
@@ -932,7 +934,7 @@ function Settle({ settlements }) {
           <table>
             <thead>
               <tr>
-                <th>판매 기간</th>
+                <th>정산 월</th>
                 <th className="r">결제 금액</th>
                 <th className="r">차감 합계</th>
                 <th className="r">지급액</th>
@@ -943,8 +945,9 @@ function Settle({ settlements }) {
             <tbody>
               {[...settlements].reverse().map((x) => (
                 <tr key={x.id} className="click" onClick={() => setCur(settlements.indexOf(x))}>
-                  <td className="num nw">
-                    {api.fmtDate(x.periodStart)}–{api.fmtDate(x.periodEnd)}
+                  <td className="nw">
+                    <b>{api.fmtMonth(x.periodStart)}</b>
+                    {running(x) ? <span className="addr"> · 집계 중</span> : null}
                   </td>
                   <td className="r num">{api.int(x.gross)}</td>
                   <td className="r num" style={{ color: 'var(--fg2)' }}>
@@ -982,14 +985,14 @@ function Receipt({ s }) {
       <div className="receipt">
         <div className="rc-hd">
           <div>
-            <div className="eyebrow">주간 정산서</div>
-            <h3>
-              {api.fmtDate(s.periodStart)}–{api.fmtDate(s.periodEnd)}
-            </h3>
+            <div className="eyebrow">월 정산서</div>
+            <h3>{api.fmtMonth(s.periodStart)} 정산</h3>
           </div>
           <span className={`pill ${s.state === 'PAID' ? 'p-ok' : 'p-acc'}`}>{s.state === 'PAID' ? '지급 완료' : '지급 예정'}</span>
         </div>
-        <div className="rc-meta num">지급일 {api.fmtDate(s.payoutDate)}</div>
+        <div className="rc-meta num">
+          판매 기간 {api.fmtDate(s.periodStart)}–{running(s) ? '오늘(집계 중)' : api.fmtDate(s.periodEnd)} · 지급일 {api.fmtDate(s.payoutDate)}
+        </div>
         {row('결제 완료 금액', s.gross)}
         {row('취소 · 환불', s.refunds, true)}
         {row('호스트 인센티브', s.hostIncentive, true)}
@@ -1191,7 +1194,7 @@ function Products({ requests, onCreate, toast }) {
               ['진행 가능 검토', '카테고리 · 수량 · 유통기한 확인, 영업일 1일'],
               ['판매 조건 협의', '공급가 · 수량 · 판매 채널 확정'],
               ['공동구매 개설', '호스트 지정 후 모집 일정 안내'],
-              ['발송 · 정산', '송장 입력 후 주 1회 정산'],
+              ['발송 · 정산', '송장 입력 후 월 1회 정산'],
             ].map(([t, d], i) => (
               <div className="stp" key={t}>
                 <div className="dot num">{i + 1}</div>
@@ -1257,7 +1260,7 @@ const TITLES = {
   home: ['SUMMARY', '요약', null],
   groupbuys: ['GROUP BUYS', '공동구매', '모집 상황과 조건을 확인하고, 시작 전이면 취소할 수 있어요.'],
   orders: ['ORDERS', '주문 · 배송', '결제가 끝난 주문만 명단이 열립니다. 발송 후 송장을 입력해주세요.'],
-  settle: ['SETTLEMENT · WEEKLY', '정산', '결제 완료분을 주 1회 정산해 지급합니다.'],
+  settle: ['SETTLEMENT · MONTHLY', '정산', '한 달 결제 완료분을 월 1회 정산해 지급합니다.'],
   products: ['PRODUCTS', '상품 진행 요청', '리스트를 보내면 담당자가 진행 가능 여부를 안내합니다.'],
 };
 
@@ -1390,7 +1393,7 @@ export default function BrandCenter() {
           </nav>
           <div className="payday">
             <small>정산</small>
-            <b>주 1회 · 결제 완료분 기준</b>
+            <b>월 1회 · 결제 완료분 기준</b>
             {api.IS_MOCK ? (
               <button className="linkbtn" onClick={async () => (await api.resetMock(), window.location.reload())}>
                 예시 데이터 처음으로

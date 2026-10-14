@@ -2,7 +2,7 @@
 // 응답 모양은 ops 계약(docs/groupbuy-dev-spec-2026-09-30.md §4-6)과 같게 맞춘다.
 // 데이터는 이 브라우저의 localStorage에만 있고, 이름·연락처·주소는 전부 지어낸 예시 값이다.
 
-const KEY = 'gd-brand-mock-v1';
+const KEY = 'gd-brand-mock-v2'; // v2: 월 정산
 const DAY = 86400000;
 const wait = (ms = 160) => new Promise((r) => setTimeout(r, ms));
 const clone = (v) => JSON.parse(JSON.stringify(v));
@@ -156,22 +156,22 @@ export function seed(now = Date.now()) {
     }
   }
 
-  // 주간 정산 — 월~일 결제 완료분을 다음 주 수요일에 지급(예시). 차감률은 계약 전 예시 값.
-  const monday = new Date(now);
-  monday.setHours(0, 0, 0, 0);
-  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
-  const grossByWeek = [14760000, 15410000, 14480000, 15120000, 20950000];
-  const settlements = grossByWeek.map((gross, i) => {
-    const back = grossByWeek.length - i; // 마지막 = 지난주
-    const start = new Date(monday.getTime() - back * 7 * DAY);
-    const end = new Date(start.getTime() + 6 * DAY);
-    const payout = new Date(end.getTime() + 3 * DAY);
+  // 월 정산 — 한 달(1일~말일) 결제 완료분을 다음 달 10일에 지급(예시). 이번 달은 집계 중(지급 예정).
+  // 지급일·차감률은 계약 전 예시 값.
+  const cur = new Date(now);
+  const grossByMonth = [58200000, 61400000, 57900000, 66300000, 70500000, 41800000]; // 마지막 = 이번 달(진행 중)
+  const settlements = grossByMonth.map((gross, i) => {
+    const back = grossByMonth.length - 1 - i;
+    const start = new Date(cur.getFullYear(), cur.getMonth() - back, 1);
+    const end = new Date(cur.getFullYear(), cur.getMonth() - back + 1, 0, 23, 59);
+    const payout = new Date(cur.getFullYear(), cur.getMonth() - back + 1, 10);
     const refunds = Math.round((gross * (0.006 + (i % 3) * 0.003)) / 1000) * 1000;
     const hostIncentive = Math.round(((gross - refunds) * 0.06) / 1000) * 1000;
     const fees = Math.round(((gross - refunds) * 0.04) / 1000) * 1000;
     const shipping = Math.round((gross * 0.0095) / 1000) * 1000;
+    const vita = Math.round((gross * 0.62) / 100) * 100;
     return {
-      id: `stl-${start.toISOString().slice(0, 10)}`,
+      id: `stl-${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}`,
       periodStart: start.toISOString(),
       periodEnd: end.toISOString(),
       payoutDate: payout.toISOString(),
@@ -185,8 +185,8 @@ export function seed(now = Date.now()) {
       payout: gross - refunds - hostIncentive - fees - shipping,
       currency: 'KRW',
       lines: [
-        { code: 'gb-1a2b3c01', title: '비타 C 브라이트 앰플 30ml', amount: Math.round(gross * 0.62) },
-        { code: 'gb-1a2b3c02', title: '히알루론 수분 크림 50ml', amount: gross - Math.round(gross * 0.62) },
+        { code: 'gb-1a2b3c01', title: '비타 C 브라이트 앰플 30ml', amount: vita },
+        { code: 'gb-1a2b3c02', title: '히알루론 수분 크림 50ml', amount: gross - vita },
       ],
     };
   });
