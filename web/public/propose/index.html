@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>greyd 상품 제안</title>
+<title>greyd 공동구매 상품제안서</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
@@ -97,7 +97,7 @@ textarea{min-height:88px;resize:vertical}
 <body>
 <header class="top"><div class="in">
   <div class="brand"><svg viewBox="0 0 200 200" aria-hidden="true"><path d="M100 8 L180 54 Q186 58 186 65 L186 135 Q186 142 180 146 L100 192 L20 146 Q14 142 14 135 L14 65 Q14 58 20 54 Z" fill="#FD7C02"/><path d="M58 102 L88 130 L146 70" fill="none" stroke="#121212" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/></svg>greyd<small>by ARBAIM INC.</small></div>
-  <h1>상품 제안서</h1>
+  <h1>공동구매 상품제안서</h1>
   <p>인플루언서 공동구매와 창고형 공동구매에 함께 쓰는 양식입니다. 상품 정보를 남겨주시면 담당자가 진행 가능 여부를 안내드립니다.</p>
   <div class="chips"><span>인플루언서 공동구매</span><span>창고형 공동구매</span><span>비공개 판매</span></div>
 </div></header>
@@ -151,12 +151,13 @@ textarea{min-height:88px;resize:vertical}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-// 받는 곳 — ops 접수 API(multipart: data JSON + 파일). 서버가 아직 없거나 실패하면 엑셀 저장 + 메일 작성으로 넘어간다.
-const ENDPOINT = 'https://greyd-ops.vercel.app/api/public/product-proposals';
+// 받는 곳 — ops 접수 API(2026-10-14 대표: ops.greyd.app). 201(접수됨)이 아니면 엑셀 저장 + 담당자 메일 작성 창으로 넘어간다
+// (API 배포 전에는 로그인 화면으로 넘어가 실패 처리된다).
+const ENDPOINT = 'https://ops.greyd.app/api/public/product-proposals';
 const TO = 'jian@arbaim.com';
 const MAX = 10;
 // 자사몰 상품 링크 미리보기(ops) — 쿠팡·네이버는 받지 않는다(서버도 같은 규칙)
-const PREVIEW = 'https://greyd-ops.vercel.app/api/public/product-preview';
+const PREVIEW = 'https://ops.greyd.app/api/public/product-preview';
 const BLOCKED = [/(^|\.)coupang\.com$/i, /(^|\.)coupa\.ng$/i, /(^|\.)naver\.com$/i, /(^|\.)naver\.me$/i];
 
 const $ = (s, el = document) => el.querySelector(s);
@@ -311,7 +312,7 @@ function validate() {
 // 받은 양식과 같은 칸 순서의 엑셀
 function toXlsx(d) {
   const rows = [
-    ['greyd 상품 제안서'], [],
+    ['greyd 공동구매 상품제안서'], [],
     ['<업체정보>'], ['업체명', d.company, '담당자', d.contactName, '연락처', d.phone, '이메일', d.email, '주소', d.address],
     ['희망 판매 방식', d.channels.join(', '), '목적', d.goals.join(', ')], [],
     ['<상품정보>'],
@@ -346,10 +347,10 @@ function saveXlsx(d) {
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
-const fileName = (d) => `상품제안서_${(d.company || '업체').replace(/[\\/:*?"<>|]/g, '')}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+const fileName = (d) => `공동구매상품제안서_${(d.company || '업체').replace(/[\\/:*?"<>|]/g, '')}_${new Date().toISOString().slice(0, 10)}.xlsx`;
 
 function mailBody(d) {
-  const L = [`[greyd 상품 제안] ${d.company}`, '', `담당자: ${d.contactName} / ${d.phone} / ${d.email}`, d.address ? `주소: ${d.address}` : '',
+  const L = [`[greyd 공동구매 상품제안] ${d.company}`, '', `담당자: ${d.contactName} / ${d.phone} / ${d.email}`, d.address ? `주소: ${d.address}` : '',
     `판매 방식: ${d.channels.join(', ') || '-'} / 목적: ${d.goals.join(', ') || '-'}`, '', '상품'];
   d.products.forEach((p, i) => L.push(`${i + 1}. ${p.name}${p.spec ? ` (${p.spec})` : ''} — 공급가 ${won(p.supply)}원${p.lowest ? ` / 최저가 ${won(p.lowest)}원 (공급율 ${p.rate}%)` : ''}${p.stock ? ` / 재고 ${won(p.stock)}개` : ''}${p.expiry ? ` / 유통기한 ${p.expiry}` : ''}`));
   if (d.request) L.push('', `요청사항: ${d.request}`);
@@ -363,7 +364,7 @@ function showDone(d, mode) {
   const box = $('#done');
   box.classList.add('on');
   box.innerHTML = mode === 'sent'
-    ? `<h2>제안서를 보냈어요</h2><p>${d.company} · 상품 ${d.products.length}개. 담당자가 확인 후 ${d.email}로 연락드립니다.</p>`
+    ? `<h2>공동구매 상품제안서를 보냈어요</h2><p>${d.company} · 상품 ${d.products.length}개. 담당자가 확인 후 ${d.email}로 연락드립니다.</p>`
     : `<h2>메일 한 번만 보내면 끝나요</h2><p>엑셀 제안서를 저장했고, 담당자에게 보낼 메일 창을 열었어요.</p>
        <div class="steps"><div><b>1</b>저장된 <strong>${fileName(d)}</strong>을 메일에 첨부</div><div><b>2</b>${TO}로 보내기 — 서류는 진행이 정해지면 따로 요청드려요</div></div>
        <p style="margin-top:16px"><a class="btn" id="again-mail" href="#">메일 창 다시 열기</a> <button class="btn" id="again-x">엑셀 다시 저장</button></p>`;
@@ -373,7 +374,7 @@ function showDone(d, mode) {
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-const mailto = (d) => `mailto:${TO}?subject=${encodeURIComponent(`[greyd 상품 제안] ${d.company} · 상품 ${d.products.length}개`)}&body=${encodeURIComponent(mailBody(d))}`;
+const mailto = (d) => `mailto:${TO}?subject=${encodeURIComponent(`[greyd 공동구매 상품제안] ${d.company} · 상품 ${d.products.length}개`)}&body=${encodeURIComponent(mailBody(d))}`;
 
 $('#f').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -393,7 +394,7 @@ $('#f').addEventListener('submit', async (e) => {
       fd.append('xlsx', new Blob([xb]), fileName(d));
       fd.append('website', $('#hp').value); // 스팸 방지용 숨은 칸 — 사람은 비워둔다
       const res = await fetch(ENDPOINT, { method: 'POST', body: fd });
-      sent = res.ok;
+      sent = res.status === 201; // 접수 API만 201을 준다 — 로그인 화면·리다이렉트(200/3xx)를 성공으로 오인하지 않게
       } catch (err) {
         sent = false; // 서버 미연결·네트워크 오류 → 메일로 대신
       }

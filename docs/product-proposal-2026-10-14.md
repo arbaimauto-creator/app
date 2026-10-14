@@ -15,7 +15,7 @@
 ### 1. greyd.app/propose 에 올리기 (웹사이트 Next.js)
 `web/public/propose/index.html`을 그대로 `public/propose/index.html`로 두거나 `/propose` 라우트에서 이 HTML을 내려준다.
 
-### 2. ops 접수 API — `POST https://greyd-ops.vercel.app/api/public/product-proposals`
+### 2. ops 접수 API — `POST https://ops.greyd.app/api/public/product-proposals`
 - 인증 없음(공개). CORS: `https://greyd.app` 오리진 허용(`POST`, `OPTIONS`).
 - 본문 `multipart/form-data`
   - `data`: JSON 문자열
@@ -39,7 +39,7 @@
 - 콘솔: 운영 콘솔에 "상품 제안" 목록(상태 `RECEIVED → REVIEWING → ACCEPTED/DECLINED`, 담당자 메모).
   ACCEPTED는 브랜드 파트너센터의 상품 진행 요청(`/brand/product-requests`)과 이어 붙일 수 있게 브랜드 계정 연결 필드를 둔다.
 
-### 2-1. 자사몰 링크 미리보기 — `GET https://greyd-ops.vercel.app/api/public/product-preview?url=...`
+### 2-1. 자사몰 링크 미리보기 — `GET https://ops.greyd.app/api/public/product-preview?url=...`
 - 참고 구현: `docs/server-patches/product-preview-2026-10-14.js` → ops `app/api/public/product-preview/route.js`로 그대로 넣는다(의존성 없음).
 - 응답 `200 { product: { name, retailPrice, salePrice, currency, imageUrl, description, brand, sku, siteName, url } }`,
   실패 `{ error: unsupported_site | invalid_url | https_only | not_html | not_a_product | fetch_failed }`.
