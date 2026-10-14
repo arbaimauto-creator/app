@@ -54,6 +54,13 @@ textarea{min-height:88px;resize:vertical}
 .img{width:120px;height:120px;border:1.5px dashed var(--line2);border-radius:10px;display:grid;place-items:center;text-align:center;font-size:12px;color:var(--fg3);background:var(--surface);cursor:pointer;overflow:hidden;position:relative}
 .img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
 .img input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.fetch{margin-bottom:14px}
+.fetch label{font-size:12.5px;font-weight:600;color:var(--fg2)}
+.fetch label small{color:var(--fg3);font-weight:500}
+.fetchrow{display:flex;gap:8px;margin-top:5px}
+.fetchrow input{flex:1;min-width:0;border:1px solid var(--line2);border-radius:8px;background:var(--surface);padding:9px 11px}
+.fmsg{display:block;margin-top:6px;font-size:12px;color:var(--fg3)}
+.fmsg.ok{color:var(--ok)}.fmsg.no{color:var(--err)}
 .rate{font:600 15px var(--mono);padding:8px 0}
 .rate.hi{color:var(--accent-ink)}
 .btn{border:1px solid var(--line2);background:var(--surface);border-radius:8px;padding:9px 14px;font-weight:600;font-size:13.5px;display:inline-flex;gap:6px;align-items:center}
@@ -64,6 +71,10 @@ textarea{min-height:88px;resize:vertical}
 .notice b{display:block;margin-bottom:4px}
 .notice ol{margin:0;padding-left:18px}
 .docs{display:grid;gap:8px}
+.need{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:8px}
+.need li{display:grid;grid-template-columns:120px 1fr;gap:12px;border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-size:13.5px}
+.need span{color:var(--fg3);font-size:12.5px}
+@media (max-width:720px){.need li{grid-template-columns:1fr;gap:2px}}
 .doc{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
 .doc input[type=checkbox]{width:17px;height:17px;accent-color:var(--accent);grid-row:span 2}
 .doc b{font-size:13.5px}.doc span{font-size:12.5px;color:var(--fg3)}
@@ -122,12 +133,12 @@ textarea{min-height:88px;resize:vertical}
   </section>
 
   <section class="card" aria-labelledby="h4">
-    <div class="ch"><h2 id="h4"><span class="n">04</span>필수 준비자료</h2><span class="s">파일을 올리거나, 메일에 첨부해주세요</span></div>
-    <div class="docs">
-      <label class="doc"><input type="checkbox" data-doc="biz"><b>업체 서류</b><span>사업자등록증, 통장사본</span><div class="files"><input type="file" data-up="biz" multiple accept=".pdf,.jpg,.jpeg,.png"></div></label>
-      <label class="doc"><input type="checkbox" data-doc="ppt"><b>상품소개서</b><span>상품별 PPT 1부(3장 전후) — 특징과 효과, 관련 이미지, 사용법, 용량 등 필수 정보</span><div class="files"><input type="file" data-up="ppt" multiple accept=".ppt,.pptx,.pdf,.key"></div></label>
-      <label class="doc"><input type="checkbox" data-doc="media"><b>콘텐츠 (있을 시)</b><span>짧은 동영상, 이미지 등 어필할 수 있는 자료</span><div class="files"><input type="file" data-up="media" multiple accept="image/*,video/*"></div></label>
-    </div>
+    <div class="ch"><h2 id="h4"><span class="n">04</span>필요 서류 안내</h2><span class="s">지금 첨부하지 않아도 돼요 · 진행이 정해지면 담당자가 요청드립니다</span></div>
+    <ul class="need">
+      <li><b>업체 서류</b><span>사업자등록증, 통장사본</span></li>
+      <li><b>상품소개서</b><span>상품별 PPT 1부(3장 전후) — 특징과 효과, 관련 이미지, 사용법, 용량 등</span></li>
+      <li><b>콘텐츠 (있을 시)</b><span>짧은 동영상, 이미지 등 어필할 수 있는 자료</span></li>
+    </ul>
     <label class="agree"><input type="checkbox" id="agree"> 제안 검토와 연락을 위해 위 정보를 아르바임(greyd)에 제공하는 데 동의합니다. 검토 목적으로만 사용하며, 진행하지 않는 경우 요청 시 삭제합니다.</label>
     <div class="err" id="agree-err" style="margin-top:6px">동의가 필요해요</div>
   </section>
@@ -144,6 +155,9 @@ textarea{min-height:88px;resize:vertical}
 const ENDPOINT = 'https://greyd-ops.vercel.app/api/public/product-proposals';
 const TO = 'jian@arbaim.com';
 const MAX = 10;
+// 자사몰 상품 링크 미리보기(ops) — 쿠팡·네이버는 받지 않는다(서버도 같은 규칙)
+const PREVIEW = 'https://greyd-ops.vercel.app/api/public/product-preview';
+const BLOCKED = [/(^|\.)coupang\.com$/i, /(^|\.)coupa\.ng$/i, /(^|\.)naver\.com$/i, /(^|\.)naver\.me$/i];
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -172,6 +186,9 @@ function addProduct() {
   el.className = 'prod';
   el.dataset.id = id;
   el.innerHTML = `<div class="ph"><b>상품 <span class="idx"></span></b><button type="button" class="btn ghost rm">삭제</button></div>
+  <div class="fetch"><label for="p${id}-src">자사몰 상품 링크로 불러오기 <small>(선택)</small></label>
+    <div class="fetchrow"><input type="url" id="p${id}-src" data-src placeholder="https://자사몰.com/product/..." inputmode="url"><button type="button" class="btn" data-fetch>불러오기</button></div>
+    <small class="fmsg" data-msg>자사몰 상품 페이지 주소를 넣으면 상품명 · 가격 · 이미지를 채워드려요. 쿠팡 · 네이버(스마트스토어 · 브랜드스토어) 링크는 불러올 수 없어요.</small></div>
   <div class="pgrid">
     <label class="img"><span>이미지<br>선택</span><input type="file" accept="image/*" data-k="image" aria-label="상품 이미지"></label>
     <div class="grid">${PRODUCT_FIELDS.map(([k, label, type, cls, req, ph]) => {
@@ -224,14 +241,43 @@ $('#prods').addEventListener('change', (e) => {
   img.src = URL.createObjectURL(f);
   box.insertBefore(img, e.target);
 });
+async function importFrom(p) {
+  const input = $('[data-src]', p), msg = $('[data-msg]', p), btn = $('[data-fetch]', p);
+  const say = (t, cls) => { msg.textContent = t; msg.className = 'fmsg' + (cls ? ' ' + cls : ''); };
+  let u;
+  try { u = new URL(input.value.trim()); } catch (e) { say('상품 페이지 주소(https://…)를 넣어주세요.', 'no'); input.focus(); return; }
+  if (BLOCKED.some((re) => re.test(u.hostname))) { say('쿠팡 · 네이버 링크는 불러올 수 없어요. 아래 칸에 직접 입력해주세요.', 'no'); return; }
+  if (u.protocol !== 'https:') { say('https:// 로 시작하는 주소만 불러올 수 있어요.', 'no'); return; }
+  btn.disabled = true; say('불러오는 중…');
+  try {
+    const res = await fetch(`${PREVIEW}?url=${encodeURIComponent(u.toString())}`);
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok || !j.product) throw new Error(j.error || 'fail');
+    const pr = j.product, set = (k, v) => { const el = $(`[data-k=${k}]`, p); if (v && !el.value.trim()) { el.value = v; el.closest('.f')?.classList.remove('bad'); } };
+    set('name', pr.name);
+    set('retail', pr.retailPrice ? won(pr.retailPrice) : '');
+    set('url', pr.url || u.toString());
+    if (pr.imageUrl && !$('[data-k=image]', p).files.length) {
+      const box = $('.img', p); $('img', box)?.remove();
+      const img = document.createElement('img'); img.alt = ''; img.src = pr.imageUrl; img.referrerPolicy = 'no-referrer';
+      box.insertBefore(img, $('[data-k=image]', box)); p.dataset.imageUrl = pr.imageUrl;
+    }
+    rate(p);
+    say(`불러왔어요${pr.siteName ? ` · ${pr.siteName}` : ''}. 내용을 확인하고 공급가 · 재고 등 나머지를 채워주세요.`, 'ok');
+  } catch (e) {
+    const why = { unsupported_site: '쿠팡 · 네이버 링크는 불러올 수 없어요.', not_a_product: '상품 정보를 찾지 못했어요.', https_only: 'https:// 주소만 불러올 수 있어요.' }[e.message];
+    say(`${why || '지금은 불러올 수 없어요.'} 아래 칸에 직접 입력해주세요.`, 'no');
+  } finally { btn.disabled = false; }
+}
+$('#prods').addEventListener('keydown', (e) => { if (e.target.matches('[data-src]') && e.key === 'Enter') { e.preventDefault(); importFrom(e.target.closest('.prod')); } });
 $('#prods').addEventListener('click', (e) => {
+  if (e.target.matches('[data-fetch]')) { importFrom(e.target.closest('.prod')); return; }
   if (!e.target.classList.contains('rm')) return;
   e.target.closest('.prod').remove();
   renumber();
 });
 $('#add').addEventListener('click', () => { addProduct(); $$('.prod').at(-1).querySelector('[data-k=name]').focus(); });
 $('#f').addEventListener('input', (e) => e.target.closest('.f')?.classList.remove('bad'));
-$$('[data-up]').forEach((i) => i.addEventListener('change', () => { if (i.files.length) $(`[data-doc=${i.dataset.up}]`).checked = true; }));
 $('#reset').addEventListener('click', () => { if (confirm('입력한 내용을 모두 지울까요?')) location.reload(); });
 
 function collect() {
@@ -241,12 +287,11 @@ function collect() {
     channels: $$('[name=channel]:checked').map((c) => c.value),
     goals: $$('[name=goal]:checked').map((c) => c.value),
     request: v('req'),
-    docs: $$('[data-doc]').filter((c) => c.checked).map((c) => c.dataset.doc),
     products: $$('.prod').map((p) => {
       const g = (k) => $(`[data-k=${k}]`, p).value.trim();
       return { name: g('name'), spec: g('spec'), retail: num(g('retail')), lowest: num(g('lowest')), supply: num(g('supply')),
         rate: rate(p), stock: num(g('stock')), expiry: g('expiry'), weight: num(g('weight')), size: g('size'), url: g('url'),
-        image: $('[data-k=image]', p).files[0] || null };
+        image: $('[data-k=image]', p).files[0] || null, imageUrl: p.dataset.imageUrl || null, sourceUrl: $('[data-src]', p).value.trim() };
     }),
   };
 }
@@ -271,12 +316,12 @@ function toXlsx(d) {
     ['희망 판매 방식', d.channels.join(', '), '목적', d.goals.join(', ')], [],
     ['<상품정보>'],
     ['No', '품명', '규격', '소비자가', '온라인최저가', '공급가(VAT포함, 입고배송비 포함)', '공급율(최저가대비)', '재고량', '유통기한', '단품 중량(g)', '단품 사이즈(mm)', '상품소개 콘텐츠', '이미지 파일'],
-    ...d.products.map((p, i) => [i + 1, p.name, p.spec, p.retail || '', p.lowest || '', p.supply || '', p.rate === null ? '' : p.rate / 100, p.stock || '', p.expiry, p.weight || '', p.size, p.url, p.image ? p.image.name : '']),
+    ...d.products.map((p, i) => [i + 1, p.name, p.spec, p.retail || '', p.lowest || '', p.supply || '', p.rate === null ? '' : p.rate / 100, p.stock || '', p.expiry, p.weight || '', p.size, p.url, p.image ? p.image.name : (p.imageUrl || '')]),
     [], ['공급자 요청사항', d.request], [],
     ['<필수 준비자료>'],
-    ['업체서류', '사업자등록증, 통장사본', d.docs.includes('biz') ? '준비됨' : ''],
-    ['상품소개서', '상품별 PPT 1부(3장 전후)', d.docs.includes('ppt') ? '준비됨' : ''],
-    ['콘텐츠', '동영상·이미지(있을 시)', d.docs.includes('media') ? '준비됨' : ''],
+    ['업체서류', '사업자등록증, 통장사본', '진행 확정 후 요청'],
+    ['상품소개서', '상품별 PPT 1부(3장 전후)', '진행 확정 후 요청'],
+    ['콘텐츠', '동영상·이미지(있을 시)', '진행 확정 후 요청'],
   ];
   const ws = XLSX.utils.aoa_to_sheet(rows);
   ws['!cols'] = [{ wch: 14 }, { wch: 28 }, { wch: 12 }, { wch: 11 }, { wch: 12 }, { wch: 16 }, { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 10 }, { wch: 14 }, { wch: 30 }, { wch: 20 }];
@@ -308,7 +353,7 @@ function mailBody(d) {
     `판매 방식: ${d.channels.join(', ') || '-'} / 목적: ${d.goals.join(', ') || '-'}`, '', '상품'];
   d.products.forEach((p, i) => L.push(`${i + 1}. ${p.name}${p.spec ? ` (${p.spec})` : ''} — 공급가 ${won(p.supply)}원${p.lowest ? ` / 최저가 ${won(p.lowest)}원 (공급율 ${p.rate}%)` : ''}${p.stock ? ` / 재고 ${won(p.stock)}개` : ''}${p.expiry ? ` / 유통기한 ${p.expiry}` : ''}`));
   if (d.request) L.push('', `요청사항: ${d.request}`);
-  L.push('', '첨부: 상품제안서 엑셀, 사업자등록증·통장사본, 상품소개서 PPT, 상품 이미지');
+  L.push('', '첨부: 상품제안서 엑셀 (사업자등록증·통장사본·상품소개서는 진행 확정 후 보내드립니다)');
   return L.filter((x) => x !== null).join('\n');
 }
 
@@ -320,7 +365,7 @@ function showDone(d, mode) {
   box.innerHTML = mode === 'sent'
     ? `<h2>제안서를 보냈어요</h2><p>${d.company} · 상품 ${d.products.length}개. 담당자가 확인 후 ${d.email}로 연락드립니다.</p>`
     : `<h2>메일 한 번만 보내면 끝나요</h2><p>엑셀 제안서를 저장했고, 담당자에게 보낼 메일 창을 열었어요.</p>
-       <div class="steps"><div><b>1</b>저장된 <strong>${fileName(d)}</strong>을 메일에 첨부</div><div><b>2</b>사업자등록증 · 통장사본 · 상품소개서 PPT · 상품 이미지 첨부</div><div><b>3</b>${TO}로 보내기</div></div>
+       <div class="steps"><div><b>1</b>저장된 <strong>${fileName(d)}</strong>을 메일에 첨부</div><div><b>2</b>${TO}로 보내기 — 서류는 진행이 정해지면 따로 요청드려요</div></div>
        <p style="margin-top:16px"><a class="btn" id="again-mail" href="#">메일 창 다시 열기</a> <button class="btn" id="again-x">엑셀 다시 저장</button></p>`;
   if (mode !== 'sent') {
     $('#again-mail').href = mailto(d);
@@ -344,7 +389,6 @@ $('#f').addEventListener('submit', async (e) => {
       const fd = new FormData();
       fd.append('data', JSON.stringify({ ...d, products: d.products.map(({ image, ...p }) => ({ ...p, image: image ? image.name : null })) }));
       d.products.forEach((p, i) => p.image && fd.append(`image_${i + 1}`, p.image));
-      $$('[data-up]').forEach((inp) => [...inp.files].forEach((f) => fd.append(inp.dataset.up, f)));
       const xb = XLSX.write(toXlsx(d), { type: 'array', bookType: 'xlsx' });
       fd.append('xlsx', new Blob([xb]), fileName(d));
       fd.append('website', $('#hp').value); // 스팸 방지용 숨은 칸 — 사람은 비워둔다
