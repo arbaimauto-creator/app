@@ -1,10 +1,10 @@
-// 브랜드 파트너센터 (2026-10-14) — 공동구매를 진행하는 브랜드의 웹 화면.
+// 브랜드 대시보드 (2026-10-14) — 공동구매를 진행하는 브랜드의 웹 화면.
 //
 // 서버 정본은 ops(/api/mobile/*, Bearer). 경로·본문은 docs/groupbuy-dev-spec-2026-09-30.md §4-6과 같고,
 // 응답 정규화는 앱 api/groupBuys.js와 같은 규칙을 쓴다(웹은 RN 모듈을 가져올 수 없어 필요한 부분만 옮김).
 //
 // VITE_OPS_API_BASE가 없으면 브라우저 안의 모의 서버(mockServer.js)를 쓴다 — 화면 확인·시연용.
-// 정산·상품 등록 요청은 ops에 아직 계약이 없다 → docs/brand-partner-center-2026-10-14.md의 제안 경로를 쓰고,
+// 정산·상품 등록 요청은 ops에 아직 계약이 없다 → docs/brand-dashboard.md의 제안 경로를 쓰고,
 // 서버가 404를 주면 화면에 "준비 중"으로 보인다.
 import * as mock from './mockServer.js';
 import { normalizeTerms, DEFAULT_CONTRACT } from './settlement.js';

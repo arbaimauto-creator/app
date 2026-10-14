@@ -332,22 +332,15 @@ function Dashboard({ brand }) {
   );
 }
 
+// 브랜드 대시보드 하나로 — 공동구매(현황·명단·송장)·정산·상품 요청·캠페인 리포트(FGI)를 한 화면에서.
+// 예전 첫 화면(코드 입력 → FGI 리포트)은 대시보드의 "캠페인 리포트" 메뉴로 옮겼다. #admin 은 운영 전용 그대로.
 export default function App() {
-  const [brand, setBrand] = useState(() => {
-    const brandId = sessionStorage.getItem('brandId');
-    const brandName = sessionStorage.getItem('brandName');
-    return brandId ? { brandId, brandName } : null;
-  });
-  // #admin — ARBAIM 운영 전용 (TSK-009/010). 1단계는 해시 라우트로 분리.
   if (window.location.hash === '#admin') {
     return <Admin />;
   }
-  // #brand — 공동구매 브랜드 파트너센터 (명단·송장·주간 정산·상품 진행 요청)
-  if (/^#brand\b/.test(window.location.hash)) {
-    return <BrandCenter />;
-  }
-  if (!brand) {
-    return <Gate onEnter={setBrand} />;
-  }
-  return <Dashboard brand={brand} />;
+  const brandId = sessionStorage.getItem('brandId');
+  const reportBrand = brandId
+    ? { brandId, brandName: sessionStorage.getItem('brandName') }
+    : { brandId: INVITE_CODES[0].brandId, brandName: INVITE_CODES[0].brandName };
+  return <BrandCenter Report={Dashboard} reportBrand={reportBrand} />;
 }

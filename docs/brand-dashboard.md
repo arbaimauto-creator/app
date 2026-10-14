@@ -1,9 +1,51 @@
-# 브랜드 파트너센터 (웹) — 2026-10-14
+# greyd 브랜드 대시보드 — 정리 (2026-10-14)
 
-공동구매를 진행하는 브랜드가 쓰는 웹 화면. `web/` 앱의 `#brand` 경로.
+공동구매를 진행하는 브랜드가 쓰는 화면 **하나**. 예전에 따로 부르던 "브랜드 파트너센터"·"브랜드 대시보드"는 같은 것이고,
+`web/` 첫 화면이던 FGI 리포트(greyd for Brands)는 이 대시보드의 **캠페인 리포트** 메뉴로 합쳤다.
+최종 목표는 ops 브랜드 포털(`ops.greyd.app/portal/brand`) 안에 이 대시보드를 넣어 브랜드 입구를 하나로 만드는 것.
+
+## 1. 전체 구조 — 앱 · 웹 · ops
 
 ```
-cd web && npm install && npm run dev      # http://localhost:5173/#brand
+ [구매자 앱] [호스트 앱]              [greyd.app 웹]  /propose 상품제안서(자사몰 링크 불러오기)
+      └──────┬──────┘                       │
+             ▼                              ▼
+ ┌──────────── ops 서버 (ops.greyd.app) — 데이터·계산의 정본 ────────────┐
+ │ 공동구매·주문·결제(토스)·명단·송장·정산 조건/계산·상품 제안 접수·알림 메일 │
+ └────────────────────────────────────────────────────────────────────┘
+             ▲                              ▲
+   [브랜드 대시보드]                  [운영 콘솔(아르바임)]
+   ops /portal/brand 안으로            공동구매 개설 · 정산 조건 세팅 · 상품 제안 검토
+```
+
+## 2. 현황 (2026-10-14 실제 서버 확인)
+
+| 항목 | 상태 | 위치 |
+|---|---|---|
+| 상품제안서 greyd.app/propose | ✅ 운영 | 양식 `web/public/propose/index.html` → 서버 `site-live/public/propose.html` |
+| 제안서 접수 API `POST /api/public/product-proposals` | ✅ 운영 | ops (jian@arbaim.com 알림) |
+| 자사몰 링크 불러오기 `GET /api/public/product-preview` | ✅ 운영 (통화·이미지 수정 `164f4da`, 쿠팡·네이버 거절) | ops `lib/proposals/productPreview.ts` |
+| 구매자 공동구매 API `/api/mobile/groupbuys` | ✅ 있음(인증 필요) | ops |
+| 브랜드 대시보드 화면 | ✅ 완성 · 예시 데이터 | `web/src/brand/` (요약·공동구매·주문배송·정산·상품 요청·캠페인 리포트) |
+| 브랜드 API(목록·명단·송장·취소) | ❌ 없음(404) | ops — 규격은 `docs/groupbuy-dev-spec-2026-09-30.md` §4-6 |
+| 정산 조건 세팅·월 정산 API | ❌ 없음 | ops — 아래 §정산 |
+| 운영 콘솔 정산 조건 입력 화면 | ❌ 없음 | ops 콘솔 |
+| 대시보드 배포 | ❌ 안 함 | ops `/portal/brand` 안에 넣기(권장) |
+
+## 3. 남은 일 (순서대로)
+
+1. **ops 브랜드 API** — `/api/mobile/brand/groupbuys`, `…/:code/orders`, `/brand/groupbuy-orders/:id/shipment`, `…/:code/cancel` (규격 완료).
+2. **정산** — 공동구매마다 정산 조건(창고형 공급가 / 인스타 인플 수수료율) + 브랜드 계약 지급일(익월 10일) + 반품 차감.
+   계산 규칙 정본 `web/src/brand/settlement.js`를 ops로 옮겨 `GET /brand/settlements`로 내려준다. 운영 콘솔에 조건 입력 칸.
+3. **상품 진행 요청** — 이미 있는 상품 제안 접수(ProductProposal)를 브랜드 계정에 연결해 `/brand/product-requests`로.
+4. **ops 브랜드 포털에 대시보드 넣기** — `/portal/brand`의 로그인(접속 링크)을 그대로 쓰면 별도 토큰·CORS 불필요.
+   `web/src/brand/`의 화면과 `api.js` 호출 규격을 그대로 옮긴다. FGI 리포트도 같은 메뉴로.
+5. **결정 필요** — 정산 기준(결제 완료 vs 발송 완료), 세금계산서 발행 흐름, 배송비 처리.
+
+## 4. 실행 (예시 데이터)
+
+```
+cd web && npm install && npm run dev      # http://localhost:5173  (첫 화면 = 브랜드 대시보드, #admin = 운영)
 ```
 
 `VITE_OPS_API_BASE`가 없으면 브라우저 안 모의 서버(`web/src/brand/mockServer.js`)로 돈다.
@@ -16,7 +58,8 @@ cd web && npm install && npm run dev      # http://localhost:5173/#brand
 | 요약 | 이번 달(집계 중)·다음 또는 최근 정산액과 차감 구성, 진행 중 공동구매의 단계(호스트 수락 → 모집 → 결제 확정 → 발송 → 완료), 지금 할 일(송장 입력·호스트 수락 대기·정산 예정) | 아래 API 조합 |
 | 공동구매 | 목록·필터, 조건 상세, 시작 전·모집 중 취소(확인 창) | `GET /brand/groupbuys`, `POST /brand/groupbuys/:code/cancel` ✅ 계약 있음 |
 | 주문·배송 | 명단 공개 전에는 예약 숫자만. 공개 후 명단, 한 건씩 송장 저장·수정, 여러 건 선택 후 택배사 일괄 지정·저장, 명단 CSV, 송장 양식 CSV(발송 대기 주문번호 미리 채움), 송장 CSV 일괄 업로드(저장 전 오류 미리보기), 옵션별 수량 합계 | `GET /brand/groupbuys/:code/orders`, `POST /brand/groupbuy-orders/:id/shipment` ✅ 계약 있음 |
-| 정산 | 월별 지급액, 월 정산서(진행 중인 달은 오늘까지 집계, 결제 완료 − 취소·환불 − 호스트 인센티브 − 수수료 − 배송비 = 지급액, 공동구매별 결제 금액) | `GET /brand/settlements` ⬜ **제안** |
+| 정산 | 월별 지급액, 월 정산서(진행 중인 달은 오늘까지 집계, 공동구매별 계산: 창고형 공급가×수량 / 인스타 판매−인플−운영 수수료, 반품 차감) | `GET /brand/settlements` ⬜ **제안** |
+| 캠페인 리포트 | 캠페인별 FGI 설문 결과·국가별 이행·후기 콘텐츠(예전 greyd for Brands 화면) | 예시 데이터(서버 없음) |
 | 상품 진행 요청 | CSV 끌어다 놓기 또는 한 개씩 등록, 요청 상태(검토 중·조건 협의·진행 확정·진행 어려움) | `GET/POST /brand/product-requests` ⬜ **제안** |
 
 제안 경로가 404면 그 화면은 "준비 중" 안내로 바뀐다(나머지 화면은 그대로 동작).
@@ -27,7 +70,7 @@ CSV 내보내기는 UTF-8 BOM + 수식 주입 방지(`= + - @` 앞 작은따옴�
 
 ## ops에 필요한 것
 
-1. **웹 접속 토큰** — 화면은 `…/#brand?t=<토큰>` 링크로 들어오면 토큰을 세션에 두고 `Authorization: Bearer`로 보낸다.
+1. **웹 접속 토큰** — (대시보드를 ops 밖에 따로 둘 때만) 화면은 `…/#brand?t=<토큰>` 링크로 들어오면 토큰을 세션에 두고 `Authorization: Bearer`로 보낸다.
    ops가 브랜드(`SellerAppAccess`)용 단기 토큰을 발급하고, `/api/mobile/brand/*`가 이 토큰을 받아야 한다. 401이면 화면이 토큰을 지운다.
 2. **CORS** — 웹 오리진에서 `/api/mobile/brand/*` 호출 허용(Authorization 헤더 포함).
 3. **명단 조회·CSV 감사 로그** — 스펙 §5 그대로. 웹은 CSV를 브라우저에서 만들므로, 서버는 `GET …/orders` 조회를 기록한다.

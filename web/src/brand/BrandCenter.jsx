@@ -1,4 +1,4 @@
-// 브랜드 파트너센터 — #brand. 공동구매 현황 · 명단·송장 · 월 정산 · 상품 진행 요청.
+// greyd 브랜드 대시보드 — 공동구매 현황 · 명단·송장 · 월 정산 · 상품 진행 요청 · 캠페인 리포트(FGI)를 한 곳에.
 // 명단(개인정보)은 결제 완료 후에만 서버가 내려준다(released). 화면은 그 값을 그대로 따른다.
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as api from './api.js';
@@ -11,6 +11,7 @@ const VIEWS = [
   { id: 'orders', label: '주문·배송', group: '운영', icon: 'M2.5 6.5h11v10h-11zM13.5 9.5h4l3 3.5v3.5h-7M6.5 19a1.6 1.6 0 1 0 0-.01M16.5 19a1.6 1.6 0 1 0 0-.01' },
   { id: 'settle', label: '정산', group: '정산 · 상품', icon: 'M5 3h14v18l-2.3-1.5L14.3 21 12 19.5 9.7 21l-2.4-1.5L5 21zM9 8h6M9 12h6' },
   { id: 'products', label: '상품 진행 요청', group: '정산 · 상품', icon: 'M20.5 7.5 12 3 3.5 7.5 12 12zM3.5 7.5v9L12 21l8.5-4.5v-9M12 12v9' },
+  { id: 'report', label: '캠페인 리포트', group: '정산 · 상품', icon: 'M4 19 9.5 13l3.5 3.5L20 9M15 9h5v5' },
 ];
 
 function parseRoute() {
@@ -1282,9 +1283,10 @@ const TITLES = {
   orders: ['ORDERS', '주문 · 배송', '결제가 끝난 주문만 명단이 열립니다. 발송 후 송장을 입력해주세요.'],
   settle: ['SETTLEMENT · MONTHLY', '정산', '공동구매마다 정한 조건(창고형 공급가 · 인스타 수수료율)으로 월 1회 정산해 지급합니다.'],
   products: ['PRODUCTS', '상품 진행 요청', '리스트를 보내면 담당자가 진행 가능 여부를 안내합니다.'],
+  report: ['REPORT · FGI', '캠페인 리포트', '캠페인별 소비자 반응(FGI 설문) · 국가별 이행 · 후기 콘텐츠'],
 };
 
-export default function BrandCenter() {
+export default function BrandCenter({ Report, reportBrand }) {
   api.captureTokenFromHash();
   const [route, setRoute] = useState(parseRoute);
   const [gbs, setGbs] = useState(null);
@@ -1374,7 +1376,7 @@ export default function BrandCenter() {
       <div className="bc">
         <div className="gatebox card">
           <Mark />
-          <h1>브랜드 파트너센터</h1>
+          <h1>greyd 브랜드 대시보드</h1>
           <p>담당자에게 받은 접속 링크로 들어와주세요. 링크는 브랜드 담당자 본인만 사용해주세요.</p>
         </div>
       </div>
@@ -1393,7 +1395,7 @@ export default function BrandCenter() {
             <Mark />
             <div>
               <b>greyd</b>
-              <small>PARTNER CENTER</small>
+              <small>BRAND DASHBOARD</small>
             </div>
           </div>
           <nav className="nav" aria-label="메뉴">
@@ -1453,6 +1455,14 @@ export default function BrandCenter() {
               <GroupBuys gbs={gbs} code={route.code} go={go} onCancel={(g) => setConfirm(g)} />
             ) : route.view === 'orders' ? (
               <Orders gbs={gbs} code={route.code} go={go} roster={ordersGb ? rosters[ordersGb.code] : null} reload={reloadRoster} toast={toast} />
+            ) : route.view === 'report' ? (
+              Report ? (
+                <div className="report-embed">
+                  <Report brand={reportBrand} />
+                </div>
+              ) : (
+                <p className="empty card">리포트를 불러올 수 없어요.</p>
+              )
             ) : route.view === 'settle' ? (
               <Settle settlements={settlements} />
             ) : (
