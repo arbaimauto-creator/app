@@ -27,20 +27,27 @@
 | 자사몰 링크 불러오기 `GET /api/public/product-preview` | ✅ 운영 (통화·이미지 수정 `164f4da`, 쿠팡·네이버 거절) | ops `lib/proposals/productPreview.ts` |
 | 구매자 공동구매 API `/api/mobile/groupbuys` | ✅ 있음(인증 필요) | ops |
 | 브랜드 대시보드 화면 | ✅ 완성 · 예시 데이터 | `web/src/brand/` (요약·공동구매·주문배송·정산·상품 요청·캠페인 리포트) |
-| 브랜드 API(목록·명단·송장·취소) | ❌ 없음(404) | ops — 규격은 `docs/groupbuy-dev-spec-2026-09-30.md` §4-6 |
-| 정산 조건 세팅·월 정산 API | ❌ 없음 | ops — 아래 §정산 |
-| 운영 콘솔 정산 조건 입력 화면 | ❌ 없음 | ops 콘솔 |
-| 대시보드 배포 | ❌ 안 함 | ops `/portal/brand` 안에 넣기(권장) |
+| 브랜드 API(목록·명단·송장·취소) | ✅ 구현 (배포 대기) | ops `app/api/mobile/brand/{groupbuys, groupbuys/[code]/orders, groupbuys/[code]/cancel, groupbuy-orders/[id]/shipment}` · 공용 `lib/mobile/brandGroupBuys.ts` |
+| 정산 조건 세팅·월 정산 API | ✅ 구현 (배포 대기) | 공동구매별 조건(`GroupBuy.settleType·supplyPrice·feeBps…`) + 정산 기본 설정 `SettlementPolicy` · `GET /api/mobile/brand/settlements` |
+| 운영 콘솔 정산 조건 입력 화면 | ✅ 구현 (배포 대기) | ops 콘솔 「공동구매 운영」(`/groupbuys`) — 공동구매별 조건 + 「정산 기본 설정」 카드(전체 기본·브랜드별) |
+| 상품 진행 요청 API | ✅ 구현 (배포 대기) | `GET/POST /api/mobile/brand/product-requests` → `ProductProposal(brandId)`, 콘솔 「공동구매 상품제안」에서 상태·답 |
+| 대시보드 배포 | ✅ ops 안에 들어감 (배포 대기) | ops 브랜드 웹 `greyd.app/brand/app`(로그인 = 브랜드 코드 + 메일 링크) — 공동구매·주문·배송·월 정산서·상품 진행 요청·캠페인 리포트 메뉴. 별도 토큰·CORS 불필요 |
+
+ops 코드: `rueseo92-create/greyd-ops` 브랜치 `claude/brand-dashboard-remaining`(기준 `release/ops-launch`). DB는 추가만(`SettlementPolicy`) — 배포 때 `db push` 필요.
 
 ## 3. 남은 일 (순서대로)
 
-1. **ops 브랜드 API** — `/api/mobile/brand/groupbuys`, `…/:code/orders`, `/brand/groupbuy-orders/:id/shipment`, `…/:code/cancel` (규격 완료).
-2. **정산** — 공동구매마다 정산 조건(창고형 공급가 / 인스타 인플 수수료율) + 브랜드 계약 지급일(익월 10일) + 반품 차감.
-   계산 규칙 정본 `web/src/brand/settlement.js`를 ops로 옮겨 `GET /brand/settlements`로 내려준다. 운영 콘솔에 조건 입력 칸.
-3. **상품 진행 요청** — 이미 있는 상품 제안 접수(ProductProposal)를 브랜드 계정에 연결해 `/brand/product-requests`로.
-4. **ops 브랜드 포털에 대시보드 넣기** — `/portal/brand`의 로그인(접속 링크)을 그대로 쓰면 별도 토큰·CORS 불필요.
-   `web/src/brand/`의 화면과 `api.js` 호출 규격을 그대로 옮긴다. FGI 리포트도 같은 메뉴로.
+1. ~~**ops 브랜드 API**~~ ✅ (2026-10-14) — 목록·명단·송장·취소. ops 상태를 앱 계약 상태로 바꿔 내려 준다(아래 §ops 구현 메모).
+2. ~~**정산**~~ ✅ (2026-10-14) — 공동구매마다 정산 조건(창고형 공급가 / 인스타 인플·운영 수수료율), 지급일(익월 N일), 반품 차감.
+   `GET /brand/settlements`, 운영 콘솔 조건 입력 칸. 아직 정하지 않은 세 가지는 **설정값**으로 열어 둠(5번).
+3. ~~**상품 진행 요청**~~ ✅ (2026-10-14) — `ProductProposal(brandId)` ↔ `GET/POST /brand/product-requests`.
+4. ~~**ops 브랜드 포털에 대시보드 넣기**~~ ✅ — ops 브랜드 웹(`greyd.app/brand/app`)에 같은 화면(공동구매·주문 배송·월 정산서·상품 진행 요청)이 서버 화면으로 들어가 있고,
+   「전체 보기」 메뉴에서 캠페인 리포트(FGI)·월 정산서·상품 진행 요청까지 닿는다. 로그인은 브랜드 웹 세션이라 별도 토큰·CORS 불필요.
 5. **결정 필요** — 정산 기준(결제 완료 vs 발송 완료), 세금계산서 발행 흐름, 배송비 처리.
+   → 결정 전이라 ops 콘솔 「공동구매 운영 › 정산 기본 설정」에서 바꾸는 **설정값**으로 구현. 정하면 콘솔에서 값만 넣으면 된다(코드 수정 없음).
+   적용 순서: 공동구매별 조건 → 브랜드 설정(브랜드 계약) → 전체 기본 → 내장 값(결제 완료 · 익월 10일 · 세금계산서 미정 · 배송비 차감 없음).
+   끝까지 정하지 않은 항목은 브랜드 화면에 「미정」, API에 `undecided: ["basis"|"taxInvoice"|"shipping"]`.
+6. **남은 것** — ops 배포(브랜치 머지 + `db push`), 앱·`web/` 대시보드의 상태 이름 매핑 확인(아래), 지급 원장(실제 지급 기록 → `state: "PAID"`), 일본 택배사(앱 서버 배송 조회 목록에 추가 후 허용).
 
 ## 4. 실행 (예시 데이터)
 
@@ -95,9 +102,22 @@ CSV 내보내기는 UTF-8 BOM + 수식 주입 방지(`= + - @` 앞 작은따옴�
      ```
    - `GET /brand/groupbuys`의 각 공동구매에 `settlement` 조건을 같이 내려 준다(브랜드가 상세에서 조건 확인).
    - **아직 정할 것**: 정산 기준(결제 완료 vs 발송 완료), 세금계산서 발행 흐름, 배송비 처리(브랜드 직접 발송이면 0).
+     → ops에서 설정값(`SettlementPolicy`, 콘솔 「정산 기본 설정」)으로 열어 둠 — 남은 일 5번 참고.
    모의 서버 예시: 비타 C 앰플 = 인스타(인플 15% · 운영 5%), 히알루론 크림 = 창고형(공급가 9,500원), 마스크팩 = 창고형(5,200원).
 5. **상품 진행 요청 (제안)** — `GET /brand/product-requests` → `{ requests }`, `POST /brand/product-requests` `{ items: [{ name, spec, quantity, expiresOn, supplyPrice, goal: "CLEARANCE"|"TEST" }] }` → `{ requests }`.
    상태 `REVIEW | NEGOTIATING | APPROVED | REJECTED`, 담당자 메모 `note`. 운영 콘솔에서 상태를 바꾼다.
+
+## ops 구현 메모 (2026-10-14)
+
+- **권한**: Bearer 세션의 앱 계정 → `SellerAppAccess`(브랜드 코드 등록) → 캠페인 → 계약 → 브랜드. 연결이 없으면 403 `not_brand`. 여러 브랜드를 맡은 계정은 `?brandId=`.
+- **상태 매핑**(ops → 이 문서·앱 계약): `DRAFT`(개설 검토) → `PENDING_HOST`, 시작 전 `OPEN` → `SCHEDULED`, `REACHED` → `CONFIRMED`, 나머지 그대로. 원래 값은 `opsState`, 반려는 `rejected`·`reviewNote`.
+- **목록** 각 공동구매에 `settlement` = `{ type, supplyPrice, hostRateBps, platformRateBps, note, unset, example(협의 전 예시 값), basis, payoutDay, refundRule, shippingPerOrder, taxInvoice, undecided }`, `cancelable`.
+- **명단**: 공개 전(`released: false`)엔 `orders: []`·`summary.reserved`만. 공개 후 명단은 앱 서버가 정본(ops가 읽어 전달), 조회는 감사 로그. 주문 `id`는 앱 서버 주문 id, `orderNo` 같이 내려 줌.
+- **송장**: `courier`는 앱 코드(`CJ HANJIN LOTTE EPOST LOGEN CU GS OTHER`) 또는 ops 이름. 일본 택배사(`YAMATO SAGAWA JAPANPOST`)는 아직 422 `unsupported_courier`.
+- **취소**: 브랜드 웹과 같은 규칙 — 검토 중이거나, 시작 전이고 주문 0건일 때만. 아니면 409 `not_cancelable`.
+- **정산** 응답: `contract = { payoutDay, basis, taxInvoice, shipping: { mode, perOrder }, note, undecided }`, 달마다 `state: "PLANNED" | "DUE"`(지급 예정일 지남 — 지급 원장이 없어 `PAID`는 아직 없음) + `open`(진행 중인 달), `undecided`, 줄마다 `shipping`·`orders`·`unshipped`·`payoutDate`.
+  창고형은 `amount`·`base`가 공급가 × 수량(판매 금액이 아님). 결제 확인 전 주문 수는 `pending`.
+- **상품 진행 요청**: 상태 `RECEIVED→REVIEW · REVIEWING→NEGOTIATING · ACCEPTED→APPROVED · DECLINED→REJECTED`(원래 값 `opsStatus`), 담당자 답 `note`. 검증 실패는 422 `{ error: "bad_items", message }`.
 
 ## 배포
 
