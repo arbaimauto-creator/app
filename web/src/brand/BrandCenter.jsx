@@ -98,6 +98,10 @@ const errText = (e) =>
     not_released: '아직 명단이 열리지 않은 공동구매예요.',
     invalid_tracking: '송장번호 형식을 확인해주세요.',
     not_cancellable: '이미 마감된 공동구매는 취소할 수 없어요.',
+    not_cancelable: '시작했거나 주문이 있는 공동구매는 취소할 수 없어요. 담당자에게 말씀해주세요.',
+    bad_tracking: '송장번호 형식을 확인해주세요.',
+    bad_courier: '택배사를 확인해주세요.',
+    unsupported_courier: '일본 택배사는 아직 송장 저장을 지원하지 않아요. 담당자에게 말씀해주세요.',
     not_found: '찾을 수 없어요. 새로고침해주세요.',
   })[e?.code] || (e?.status === 401 ? '접속이 만료됐어요. 담당자에게 새 링크를 요청해주세요.' : '잠시 후 다시 시도해주세요.');
 
@@ -419,7 +423,7 @@ function GroupBuys({ gbs, code, go, onCancel }) {
           </dl>
           {sel.state === 'FAILED' ? <p className="note">최소 수량에 못 미쳐 결제 없이 종료됐어요. 구매자 카드는 청구되지 않았습니다.</p> : null}
           <div className="actions">
-            {api.CANCELLABLE_STATES.includes(sel.state) ? (
+            {(sel.cancelable ?? api.CANCELLABLE_STATES.includes(sel.state)) ? (
               <button className="btn danger" onClick={() => onCancel(sel)}>
                 공동구매 취소
               </button>
@@ -967,7 +971,7 @@ function Settle({ settlements }) {
                   </td>
                   <td className="num">{api.fmtDate(x.payoutDate)}</td>
                   <td>
-                    <span className={`pill ${x.state === 'PAID' ? 'p-ok' : 'p-acc'}`}>{x.state === 'PAID' ? '지급 완료' : '지급 예정'}</span>
+                    <span className={`pill ${x.state === 'PAID' ? 'p-ok' : 'p-acc'}`}>{x.state === 'PAID' ? '지급 완료' : x.open ? '집계 중' : '지급 예정'}</span>
                   </td>
                 </tr>
               ))}
@@ -997,7 +1001,7 @@ function Receipt({ s }) {
             <div className="eyebrow">월 정산서</div>
             <h3>{api.fmtMonth(s.periodStart)} 정산</h3>
           </div>
-          <span className={`pill ${s.state === 'PAID' ? 'p-ok' : 'p-acc'}`}>{s.state === 'PAID' ? '지급 완료' : '지급 예정'}</span>
+          <span className={`pill ${s.state === 'PAID' ? 'p-ok' : 'p-acc'}`}>{s.state === 'PAID' ? '지급 완료' : s.open ? '집계 중' : '지급 예정'}</span>
         </div>
         <div className="rc-meta num">
           판매 기간 {api.fmtDate(s.periodStart)}–{running(s) ? '오늘(집계 중)' : api.fmtDate(s.periodEnd)} · 지급일 {api.fmtDate(s.payoutDate)}

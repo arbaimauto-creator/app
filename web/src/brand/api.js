@@ -85,6 +85,8 @@ async function request(method, path, body) {
 
 // ── 상태 ────────────────────────────────────────────────────────────
 export const GB_STATE_LABEL = {
+  REVIEW: ['검토 중', 'p-info'], // ops 개설 검토(opsState DRAFT) — 운영자가 승인하면 앱에 열린다
+  REJECTED: ['반려', 'p-warn'], // 개설 반려(reviewNote에 사유)
   PENDING_HOST: ['호스트 수락 대기', 'p-info'],
   SCHEDULED: ['오픈 예정', 'p-info'],
   OPEN: ['모집 중', 'p-ok'],
@@ -104,11 +106,11 @@ export const ORDER_STATE_LABEL = {
 // 명단(개인정보)이 열리는 상태 — 결제가 끝난 뒤만
 export const RELEASED_STATES = ['CONFIRMED', 'SHIPPING', 'DONE'];
 export const ENDED_STATES = ['DONE', 'FAILED', 'CANCELLED'];
-export const CANCELLABLE_STATES = ['PENDING_HOST', 'SCHEDULED', 'OPEN'];
+export const CANCELLABLE_STATES = ['REVIEW', 'REJECTED', 'PENDING_HOST', 'SCHEDULED', 'OPEN'];
 
 // 수명주기 레일: 호스트 수락 → 모집 → 결제 확정 → 발송 → 완료. 값 = 지금 단계(그 앞은 끝남)
 export const LIFE_STEPS = ['호스트 수락', '모집', '결제 확정', '발송', '완료'];
-const LIFE_INDEX = { PENDING_HOST: 0, SCHEDULED: 1, OPEN: 1, CLOSED: 2, CONFIRMED: 3, SHIPPING: 3, DONE: 5 };
+const LIFE_INDEX = { REVIEW: 0, REJECTED: 0, PENDING_HOST: 0, SCHEDULED: 1, OPEN: 1, CLOSED: 2, CONFIRMED: 3, SHIPPING: 3, DONE: 5 };
 export const lifeIndex = (state) => (state in LIFE_INDEX ? LIFE_INDEX[state] : null);
 
 // ── 택배사 (앱 Components/utils/couriers.js와 같은 코드) ─────────────
@@ -169,6 +171,7 @@ export function normalizeOrder(raw) {
   const r = raw.recipient || {};
   return {
     id: String(raw.id),
+    orderNo: raw.orderNo || String(raw.id), // ops: 고객에게 보이는 짧은 주문번호(GB-…)
     state: raw.state === 'SHIPPED' ? 'SHIPPED' : 'PAID',
     quantity: num(raw.quantity, 1),
     option: raw.option || '',
@@ -195,14 +198,19 @@ export function normalizeOrder(raw) {
 
 export function normalizeGroupBuy(raw) {
   const gb = raw?.groupBuy || raw;
-  if (!gb || !/^gb-[0-9a-f]{8}$/.test(gb.code || '')) {
+  // ops 코드: gb- + 영숫자(새 것은 hex 8자리, 옛·테스트 공동구매는 다를 수 있다)
+  if (!gb || !/^gb-[a-z0-9]{4,32}$/.test(gb.code || '')) {
     return null;
   }
   const p = gb.product || {};
+  // ops는 호스트 수락 대신 개설 검토(opsState DRAFT)를 거친다 — 검토 중·반려로 보여 준다
+  const state = gb.opsState === 'DRAFT' ? (gb.rejected ? 'REJECTED' : 'REVIEW') : gb.state;
   return {
     code: gb.code,
     title: gb.title || p.name || '',
-    state: GB_STATE_LABEL[gb.state] ? gb.state : 'CLOSED',
+    state: GB_STATE_LABEL[state] ? state : 'CLOSED',
+    reviewNote: gb.reviewNote || '',
+    cancelable: typeof gb.cancelable === 'boolean' ? gb.cancelable : null, // 서버 판정(주문 유무까지 본 값). null이면 상태로 판단
     openedBy: gb.openedBy === 'ARBAIM' ? 'ARBAIM' : 'BRAND',
     host: { handle: gb.host?.handle || '', name: gb.host?.name || '' },
     product: { name: p.name || '', imageUrl: absUrl(p.imageUrl), listPrice: num(p.listPrice) },
@@ -288,6 +296,12 @@ export async function listSettlements() {
     periodEnd: s.periodEnd,
     payoutDate: s.payoutDate,
     state: s.state === 'PAID' ? 'PAID' : 'PLANNED',
+    due: s.state === 'DUE', // 지급 예정일이 지났는데 지급 기록이 아직 없음
+    open: !!s.open, // 진행 중인 달(오늘까지 집계)
+    paidAt: s.paidAt || null,
+    paidAmount: s.paidAmount == null ? null : num(s.paidAmount),
+    undecided: arr(s.undecided),
+    example: !!s.example,
     gross: num(s.gross),
     refunds: num(s.refunds),
     hostIncentive: num(s.hostIncentive),
@@ -316,10 +330,30 @@ export async function listSettlements() {
   return list;
 }
 
-// 상품 진행 요청: { requests: [{ id, name, spec, quantity, expiresOn, supplyPrice, goal, state, note, createdAt }] }
+// 상품 진행 요청: 화면은 상품 한 줄씩 { id, name, spec, quantity, expiresOn, supplyPrice, goal, state, note, createdAt }.
+// ops는 요청 한 건에 상품 여러 개({ id, status, note, goals, createdAt, items: [...] }) — 상품마다 한 줄로 편다
+export function flattenRequests(list) {
+  return arr(list).flatMap((r) =>
+    Array.isArray(r.items)
+      ? r.items.map((it, i) => ({
+          id: `${r.id}-${i}`,
+          name: it.name || '',
+          spec: it.spec || '',
+          quantity: num(it.quantity),
+          expiresOn: it.expiresOn || '',
+          supplyPrice: num(it.supplyPrice),
+          goal: arr(r.goals)[0] || 'CLEARANCE',
+          state: r.status || 'REVIEW',
+          note: r.note || '',
+          createdAt: r.createdAt,
+        }))
+      : [r],
+  );
+}
+
 export async function listProductRequests() {
   const res = IS_MOCK ? await mock.productRequests() : await proposed('GET', '/brand/product-requests');
-  return res ? arr(res.requests) : null;
+  return res ? flattenRequests(res.requests) : null;
 }
 
 export async function createProductRequests(items) {
