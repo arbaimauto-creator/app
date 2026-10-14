@@ -18,6 +18,7 @@ import {
   QUALITATIVE,
 } from './mock.js';
 import Admin from './Admin.jsx';
+import BrandCenter from './brand/BrandCenter.jsx';
 
 ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip);
 
@@ -340,6 +341,10 @@ export default function App() {
   // #admin — ARBAIM 운영 전용 (TSK-009/010). 1단계는 해시 라우트로 분리.
   if (window.location.hash === '#admin') {
     return <Admin />;
+  }
+  // #brand — 공동구매 브랜드 파트너센터 (명단·송장·주간 정산·상품 진행 요청)
+  if (/^#brand\b/.test(window.location.hash)) {
+    return <BrandCenter />;
   }
   if (!brand) {
     return <Gate onEnter={setBrand} />;
