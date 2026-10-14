@@ -25,6 +25,12 @@ if [ -z "$BRANCH" ]; then
     git -C "$BASE" merge-base --is-ancestor "$PREVIEW_SHA" "origin/$b" 2>/dev/null && echo "$b"; done)
   EXACT=$(for b in $CANDS; do [ "$(git -C "$BASE" rev-parse --short=7 "origin/$b")" = "${LIVE_SHA:0:7}" ] && echo "$b"; done)
   N=$(printf '%s\n' $EXACT | grep -c .)
+  if [ "$N" -gt 1 ]; then
+    # 여러 브랜치가 같은 커밋이면 서버 저장소(~/greyd-ops)가 지금 체크아웃한 브랜치를 쓴다 — deploy.sh가 그 브랜치를 당겨 빌드하므로
+    SRV=$(ssh -i "$KEY" -o ConnectTimeout=15 "$HOST" 'git -C ~/greyd-ops branch --show-current' 2>/dev/null)
+    echo "  서버 저장소 현재 브랜치: ${SRV:-알 수 없음}"
+    for b in $EXACT; do [ "$b" = "$SRV" ] && EXACT="$b" && N=1; done
+  fi
   if [ "$N" = 1 ]; then BRANCH="$EXACT"; else
     echo "  운영 $LIVE 를 포함하는 브랜치: $(echo $CANDS)"; echo "  그중 끝이 운영 커밋인 브랜치: $(echo $EXACT)"
     stop "배포 브랜치를 하나로 못 정함 — 위 두 줄을 Claude에 붙여주세요 (또는 BRANCH=브랜치명 bash <(curl …) 로 지정)"
