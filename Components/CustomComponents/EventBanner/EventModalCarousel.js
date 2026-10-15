@@ -15,11 +15,38 @@ import Carousel from 'react-native-snap-carousel';
 import Constants from '../../Constants';
 import Strings, { getLanguage } from '../../Strings';
 import { CommonButtonModal } from '../../Views/CommonButtonModal';
+import { POPUP_PRIORITY, requestPopupSlot } from '../../services/popupGate';
 
 const width = Dimensions.get('window').width;
 
 const EventModalCarousel = ({ navigation, eventBanner }) => {
-  const [isOpen, setIsOpen] = React.useState(true);
+  // 업데이트 안내·인앱 공지가 먼저 떠 있으면 닫힌 뒤에 연다(popupGate).
+  const [isOpen, setIsOpen] = React.useState(false);
+  const releaseRef = useRef(null);
+
+  useEffect(() => {
+    let alive = true;
+    const request = requestPopupSlot(POPUP_PRIORITY.EVENT);
+    request.then((release) => {
+      if (!alive) {
+        release();
+        return;
+      }
+      releaseRef.current = release;
+      setIsOpen(true);
+    });
+    return () => {
+      alive = false;
+      request.cancel();
+      releaseRef.current?.();
+    };
+  }, []);
+
+  const close = () => {
+    setIsOpen(false);
+    releaseRef.current?.();
+    releaseRef.current = null;
+  };
   const [bannerIndex, setBannerIndex] = useState(0);
   const carouselRef = useRef({});
 
@@ -40,7 +67,7 @@ const EventModalCarousel = ({ navigation, eventBanner }) => {
       type={'full'}
       mode={'full-screen'}
       onCancel={() => {
-        setIsOpen(false);
+        close();
       }}
       // buttonArray={[
       //   {
@@ -118,7 +145,7 @@ const EventModalCarousel = ({ navigation, eventBanner }) => {
                         eventUrl: item.eventUrl,
                         imageRatio: item.imageRatio,
                       });
-                      setIsOpen(false);
+                      close();
                     }
                   }}
                 >

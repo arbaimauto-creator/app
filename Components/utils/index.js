@@ -25,6 +25,7 @@ import Constants from '../Constants';
 import Codes from '../Constants/Codes';
 import Strings, { getLanguage } from '../Strings';
 import SHA256 from './SHA256';
+import { POPUP_PRIORITY, requestPopupSlot } from '../services/popupGate';
 
 import { AppEventsLogger, Settings } from 'react-native-fbsdk-next';
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
@@ -766,6 +767,8 @@ async function checkUpdateAndAlert() {
   const needsUpdate_ = isFirstVersionLarger(storeVersion, currentVersion);
 
   if (needsUpdate_) {
+    // 인앱 공지·이벤트 팝업과 겹치지 않게 화면 차례를 받아 띄운다(동시 대기 시 업데이트 안내가 먼저).
+    const release = await requestPopupSlot(POPUP_PRIORITY.UPDATE);
     Alert.alert(
       Strings.UPDATE_NOTICE,
       Strings.UPDATE_NOTICE_BODY,
@@ -773,11 +776,12 @@ async function checkUpdateAndAlert() {
         {
           text: Strings.UPDATE,
           onPress: () => {
+            release();
             Linking.openURL(Constants.DOWNLOAD_URL);
           },
         },
       ],
-      { cancelable: true },
+      { cancelable: true, onDismiss: release },
     );
   }
 }

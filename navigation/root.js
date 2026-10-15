@@ -1,9 +1,10 @@
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
 import { ActivityIndicator, PermissionsAndroid, Platform, View } from 'react-native';
 import SplashScreen from 'react-native-splash-screen';
 import T from '../Components/Constants/DesignTokens';
+import InAppNoticeHost from '../Components/CustomComponents/Notice/InAppNoticeHost';
 import { trace } from '../Components/bootTrace';
 import { horizontalAnimation } from '../Components/CustomComponents/horizontalAnimation';
 import { initializeFBPixel, setCountryFromLocation } from '../Components/utils';
@@ -13,6 +14,8 @@ import MainDrawerNavigator from './stacks/MainDrawerNavigator';
 import CameraNavigator from './stacks/navigator/CameraNavigator';
 
 const Stack = createStackNavigator();
+// 인앱 공지 CTA(greyd://)의 앱 내 이동용 — 화면 컴포넌트 밖에서 내비게이션을 다룬다.
+const navigationRef = createNavigationContainerRef();
 
 // linking 해석 대기 중 표시할 최소 화면 (빈 화면 금지)
 function BootFallback() {
@@ -63,6 +66,7 @@ const Root = () => {
 
   return (
     <NavigationContainer
+      ref={navigationRef}
       theme={navigationTheme}
       linking={linking}
       // linking 해석(getInitialURL) 동안 NavigationContainer는 자식을 렌더하지 않는다.
@@ -107,6 +111,8 @@ const Root = () => {
           }}
         />
       </Stack.Navigator>
+      {/* 인앱 공지 팝업: 로그인 전 화면 포함 모든 화면 위에서 실행·복귀 시 동작 */}
+      <InAppNoticeHost navigationRef={navigationRef} />
     </NavigationContainer>
   );
 };

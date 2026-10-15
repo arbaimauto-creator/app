@@ -285,4 +285,7 @@ const linking = {
   },
 };
 
+// 인앱 공지 CTA(greyd://)가 딥링크와 같은 화이트리스트·라우트 해석을 쓰도록 공개한다.
+export { config as linkingConfig, extractDeepLinkPath, isAllowedLinkPath };
+
 export default linking;
